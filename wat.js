@@ -25,9 +25,12 @@ var wat = (function() {
     Vau.prototype.operate = function(opd, k, e) { return enter(k, new Fun(elt(opd, 1), elt(opd, 2), elt(opd, 3))) }
     Eval.prototype.operate = function(opd, k, e) { return perform(elt(opd, 1), new KEval1(k, elt(opd, 2)), e) }
     function koperate(opd, k, e) { return enter(k, e, elt(opd, 1)) }
-    KDone.prototype.operate = koperate; KApp.prototype.operate = koperate;
+    KDone.prototype.operate = koperate; KApp.prototype.operate = koperate; KDef.prototype.operate = koperate;
     KEval1.prototype.operate = koperate; KEval2.prototype.operate = koperate;
-    var VOID = "void";
+    function mkenv(parent) { return Object.create(parent) }
+    function lookup(e, name) { return e[name] }
+    function bind(e, name, value) { if (name !== IGN) e[name] = value }
+    var VOID = ["void"]; var IGN = ["ign"];
     function evaluate(expr, e) {
 	var res = perform(expr, new KDone(), e); while(typeof(res) === "function") res = res(); return res }
     return { "eval": evaluate };

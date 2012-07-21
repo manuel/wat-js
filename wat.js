@@ -4,6 +4,10 @@ var wat = (function() {
     var symtab = Object.create(null)
     function intern(name) { if (!symtab.name) symtab.name = new Sym(name); return symtab.name }
     var VOID = Sym("void"); var IGN = Sym("_")
+    ///// Extensible Compound Forms
+    function Xons(entries) { if (!this instanceof Xons) return new Xons(entries); this.entries = entries }
+    function car(xons) { return xons.car }; function cdr(xons) { return xons.cdr }
+    function elt(xons, i) { return (i === 0) car(xons) : elt(cdr(xons), i - 1) }
     ///// Environments
     function mkenv(parent) { return Object.create(parent ? parent : null) }
     function lookup(e, sym) { return e[sym.name] }
@@ -24,7 +28,7 @@ var wat = (function() {
     function go(k, e, val) { return k.go(k, e, val) }
     KDone.prototype.go = function(k, e, val) { return val }
     KApp.prototype.go = function(k, e, opr) { return function() { return operate(opr, k.opd, k.next, e) } }
-    KDef.prototype.go = function(k, e, val) { return function() { bind(e, k.name, val); return go(k.next, VOID) } }
+    KDef.prototype.go = function(k, e, val) { return function() { bind(e, k.name, val); return go(k.next, e, VOID) } }
     KEval1.prototype.go = function(k, e, form) { return function() { return perform(k.eform, new KEval2(k.next, form), e) } }
     KEval2.prototype.go = function(k, e, newe) { return function() { return perform(k.form, k.next, newe) } }
     KK.prototype.go = function(k, e, val) { return function() { return go(k.k, e, val) } }
@@ -36,11 +40,11 @@ var wat = (function() {
 	var xe = extend(e); bind(xe, opr.opd, opd); bind(xe, opr.eopd, e); return perform(opr.body, k, xe) }
     Def.prototype.operate = function(opr, opd, k, e) { return perform(elt(opd, 2), new KDef(k, elt(opd, 1))) }
     CCC.prototype.operate = function(opr, opd, k, e) { return perform(elt(opd, 1), new KApp(k, k), e) }
-    Vau.prototype.operate = function(opr, opd, k, e) { return go(k, new Fun(elt(opd, 1), elt(opd, 2), elt(opd, 3))) }
+    Vau.prototype.operate = function(opr, opd, k, e) { return go(k, e, new Fun(elt(opd, 1), elt(opd, 2), elt(opd, 3))) }
     Eval.prototype.operate = function(opr, opd, k, e) { return perform(elt(opd, 1), new KEval1(k, elt(opd, 2)), e) }
     function koperate(opr, opd, k, e) { return perform(elt(opd, 1), new KK(opr), e) }
-    KDone.prototype.operate = koperate; KApp.prototype.operate = koperate; KDef.prototype.operate = koperate;
-    KEval1.prototype.operate = koperate; KEval2.prototype.operate = koperate
+    KDone.prototype.operate = koperate; KApp.prototype.operate = koperate; KDef.prototype.operate = koperate
+    KEval1.prototype.operate = koperate; KEval2.prototype.operate = koperate; KK.prototype.operate = koperate
     ///// Kernel Environment
     var E = mkenv()
     bind(E, Sym("def"), new Def())
@@ -48,5 +52,5 @@ var wat = (function() {
     bind(E, Sym("vau"), new Vau())
     bind(E, Sym("eval"), new Eval())
     ///// API
-    return { "eval": evaluate, "std-env": E }
+    return { "eval": evaluate, "e": E }
 }());

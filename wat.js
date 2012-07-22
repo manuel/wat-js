@@ -1,3 +1,39 @@
+// -*- fill-column: 120 -*-
+
+// This is an interpreter for a language with fexpr-based syntax and first-class lexical environments based on the vau
+// calculus, and higher-order control flow with tail-call elimination and first-class continuations.
+//
+// The language supports the following expressions:
+//
+//    `<x>` --- Variable reference: returns the value of the binding it names in the current environment.
+// 
+//    `(<opr> ...)` --- Operator application: evaluates the operator expression and returns the value of passing the
+//    whole form unevaluated to the operator.
+//
+//    `(def <name> <value>)` --- Evaluates the value expression and binds the name to it in the current environment.
+//
+//    `(vau <param> <eparam> <body>*)` --- Constructs a compound operator (called "fun" in the code), that remembers the
+//    current lexical environment, with the given parameter (which receives the whole form the operator appears in), an
+//    environment parameter (which receives the lexical environment the operator is applied in), and a body expression.
+//    `_` may be used as parameter or environment parameter to ignore that parameter.
+//
+//    `(<fun> ...)` --- Compound operator application, i.e. an operator application where the evaluated operator is a
+//    compound operator created by `vau`: extends the environment it was created in with bindings for the whole form and
+//    the environment it is called in (unless they're ignored), and evaluates the compound operator's body expression in
+//    this extended environment, returning the result.
+//
+//    `(ccc <opr>*)` --- Evaluates the operator expression, and calls it with the current continuation as argument
+//
+//    `(<continuation> <value>)` --- A continuation invocation, i.e. an operator application where the evaluated
+//    operator is a continuation: evaluates the value expression, and passes it the continuation, aborting the current
+//    computation.
+//
+//    `(eval <expr>* <env>)` --- Usual doubly-evaluating `eval`: evaluates the expression and environment forms in the
+//    current environment, and then evaluates the result of evaluating the expression form in the environment that's the
+//    result of evaluating the environment form.
+//
+// Expressions marked with an asterisk (*) are evaluated or called in tail position when the enclosing form is evaluated
+// in tail position, as in Scheme.
 
 var wat = (function() {
 
@@ -15,7 +51,7 @@ var wat = (function() {
     function KDef(next, name) { this.next = next; this.name = name }
     function KEval1(next, eform) { this.next = next; this.eform = eform }
     function KEval2(next, form) { this.next = next; this.form = form }
-    function KJump(k) { this.k = k }
+    function KJump(next) { this.k = k }
     function go(k, e, val) { return k.wat_go(k, e, val) }
     KDone.prototype.wat_go = function(k, e, val) { return val }
     KApp.prototype.wat_go = function(k, e, opr) { return function() { return operate(opr, k.opd, k.next, e) } }
@@ -37,6 +73,60 @@ var wat = (function() {
     function koperate(opr, opd, k, e) { return perform(elt(opd, 1), new KJump(opr), e) }
     KDone.prototype.wat_operate = koperate; KApp.prototype.wat_operate = koperate; KDef.prototype.wat_operate = koperate
     KEval1.prototype.wat_operate = koperate; KEval2.prototype.wat_operate = koperate; KK.prototype.wat_operate = koperate
+
+    // `evaluate` is the main interface for evaluation: it takes a form and computes its value in a specified
+    // environment.  Every evaluation step returns either a function or a value.  If it returns a function, this
+    // function is again applied as a new evaluation step.  This trampoline enables tail-call elimination and
+    // first-class continuations.  `evaluate` ends computation with the `KDone` continuation (discussed below), which is
+    // appended to the continuation chain and halts evaluation by returning the value with which it is invoked.
+    //
+    // `perform` is the main function for evaluating a single form: it takes a form, a continuation, and an environment
+    // and invokes the continuation with the value computed from the form in the environment.  Symbols and xonses
+    // (compound forms, discussed below) have special evaluation behavior (symbols evaluate to the value of the binding
+    // they name, xonses evaluate to the result of the combination of their operator (`car`) with themselves), all other
+    // forms (e.g. literals) evaluate to themselves.
+    // 
+    // Continuations (or rather, continuation frames) start with the letter K.  `go' jumps to a continuation with a
+    // specified value and environment.  This is called invoking a continuation.  Every continuation has a `wat_go`
+    // method with its specific invocation behavior.  `wat_go` should return a function if there are more computation
+    // steps to be performed, or a value, which indicates the end of evaluation.
+    //
+    //   `KDone` is always appended to the continuation chain as the final step.  It halts evaluation and returns the
+    //   value passed to it.
+    //
+    //   `KApp` is the second part of evaluating an operator combination: it receives the operator, and applies it to
+    //   its operand (which is the whole compound form in which the operator appears as `car`), returning the result.
+    // 
+    //   `KDef is the second part of evaluating a name definition: it receives the value, and binds the name to that
+    //   value in the current environment.  It returns `VOID`.
+    //
+    //   `KEval1` and `KEval2` are the second and third step of evaluating an arbitrary form in an arbitrary environment
+    //   i.e. `(eval form eform)`.  First, the argument for the form to be evaluated, `form`, is evaluated, and passed
+    //   to `KEval1` which temporarily remembers the argument for the environment to be evaluated in, `eform`.  When
+    //   `KEval1` receives the value of `form`, it evaluates the argument for the environment `eform`, and passes that
+    //   to `KEval2` which temporarily remembers the value of `form`.  Then, `KEval2` receives the value of `eform`, and
+    //   we can now evaluate the value of `form` in the environment that's the value of `eform`, returning the result.
+    //   
+    //   `KJump` is used when a user invokes a continuation by applying a continuation as an operator.  It receives a
+    //   value and passes that to a specified continuation, aborting the current computation.
+    // 
+    // Operators are analogous to functions in lambda calculus, but instead of an already evaluated argument, they
+    // receive the whole form they appear in (i.e. in `(foo 12)`, `foo` receives the whole form `(foo 12)`), and the
+    // lexical environment they are called in.  Operators correspond to operative combiners in vau calculus (which do
+    // not receive the whole form they appear in, but only its `cdr`).
+    // 
+    // `operate` takes an operator, and operand (always the whole form the operator appears in), a continuation, and an
+    // environment.  It passes the result of combining the operator with the operand in the environment to the
+    // continuation (combining is the vau calculus term for applying an operator).  Every operator defines a
+    // `wat_operate` function with its specific behavior.
+
+    // Abbreviations
+    //
+    // ccc: call with current continuation
+    // e: environment
+    // fun: compound operator
+    // opd: operand
+    // opr: operator
 
     // Data
 

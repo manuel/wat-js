@@ -62,7 +62,7 @@ var wat = (function() {
     function KDef(next, name) { this.next = next; this.name = name }
     function KEval1(next, eform) { this.next = next; this.eform = eform }
     function KEval2(next, form) { this.next = next; this.form = form }
-    function KJump(next) { this.k = k }
+    function KJump(k) { this.k = k }
     function go(k, e, val) { return k.wat_go(k, e, val) }
     KDone.prototype.wat_go = function(k, e, val) { return val }
     KApp.prototype.wat_go = function(k, e, opr) { return function() { return operate(opr, k.opd, k.next, e) } }

@@ -38,7 +38,7 @@
 
 var wat = (function() {
 
-    // Evaluation
+    /***** Evaluation *****/
 
     function evaluate(form, e) {
 	var res = perform(form, new KDone(), e); while(typeof(res) === "function") res = res(); return res }
@@ -52,7 +52,7 @@ var wat = (function() {
     function operate(opr, opd, k, e) { return opr.wat_operate(opr, opd, k, e) }
     Fun.prototype.wat_operate = function(opr, opd, k, e) {
 	var xe = extend(opr.e); bind(xe, opr.param, opd); bind(xe, opr.eparam, e); return perform(opr.body, k, xe) }
-    Def.prototype.wat_operate = function(opr, opd, k, e) { return perform(elt(opd, 2), new KDef(k, elt(opd, 1))) }
+    Def.prototype.wat_operate = function(opr, opd, k, e) { return perform(elt(opd, 2), new KDef(k, elt(opd, 1)), e) }
     CCC.prototype.wat_operate = function(opr, opd, k, e) { return perform(elt(opd, 1), new KApp(k, k), e) }
     Vau.prototype.wat_operate = function(opr, opd, k, e) { return go(k, e, new Fun(elt(opd, 1), elt(opd, 2), elt(opd, 3), e)) }
     Eval.prototype.wat_operate = function(opr, opd, k, e) { return perform(elt(opd, 1), new KEval1(k, elt(opd, 2)), e) }
@@ -73,7 +73,7 @@ var wat = (function() {
 
     function koperate(opr, opd, k, e) { return perform(elt(opd, 1), new KJump(opr), e) }
     KDone.prototype.wat_operate = koperate; KApp.prototype.wat_operate = koperate; KDef.prototype.wat_operate = koperate
-    KEval1.prototype.wat_operate = koperate; KEval2.prototype.wat_operate = koperate; KK.prototype.wat_operate = koperate
+    KEval1.prototype.wat_operate = koperate; KEval2.prototype.wat_operate = koperate; KJump.prototype.wat_operate = koperate
 
     // `evaluate` is the main interface for evaluation: it takes a form and computes its value in a specified
     // environment.  Every evaluation step returns either a function or a value.  If it returns a function, this
@@ -117,48 +117,92 @@ var wat = (function() {
     //   value and passes that to a specified continuation, aborting the current computation.
     //
     // `koperate` makes continuations usable as operators, allowing callers of `ccc` to jump to the continuation.
-
-    // Abbreviations
     //
-    // ccc: call with current continuation
-    // e: environment
-    // fun: compound operator
-    // opd: operand
-    // opr: operator
+    // `JSFunUnary` is a bridge for using ordinary JavaScript functions as operators that require a single evaluated
+    // argument.  `KJSAppUnary` is called with an evaluated argument, and passes the current environment and the
+    // argument to a JavaScript function.
 
-    // Data
+    function JSFunNullary(jsfun) { this.jsfun = jsfun }
+    JSFunNullary.prototype.wat_operate = function(opr, opd, k, e) { return go(k.next, e, opr.jsfun.call(null, e)) }
+    function JSFunUnary(jsfun) { this.jsfun = jsfun }
+    JSFunUnary.prototype.wat_operate = function(opr, opd, k, e) { return perform(elt(opd, 1), new KJSAppUnary(k, opr.jsfun), e) }
+    function KJSAppUnary(next, jsfun) { this.next = next; this.jsfun = jsfun }
+    KJSAppUnary.prototype.wat_go = function(k, e, val) { return function() { return go(k.next, e, k.jsfun.call(null, e, val)) } }
+    KJSAppUnary.prototype.wat_operate = koperate
 
-    var symtab = Object.create(null)
-    function Sym(name) { if (!this instanceof Sym) return intern(name); this.name = name }
-    function intern(name) { if (!symtab.name) symtab.name = new Sym(name); return symtab.name }
+    /***** Data *****/
 
-    function Xons(entries) { if (!this instanceof Xons) return new Xons(entries); this.entries = entries }
-    function car(xons) { return xons.car }; function cdr(xons) { return xons.cdr }
-    function cons(car, cdr) { return Xons({ car: car, cdr: cdr }) }
-    function elt(xons, i) { return (i === 0) car(xons) : elt(cdr(xons), i - 1) }
+    function Sym(name) { this.name = name }
 
-    function mkenv(parent) { return Object.create(parent ? parent : null) }
-    function lookup(e, sym) { return e[sym.name] }
-    function bind(e, sym, val) { if (sym !== IGN) e[sym.name] = val }
+    function Xons(entries) { this.entries = entries }
+    function car(xons) { return xons.entries.car }; function cdr(xons) { return xons.entries.cdr }
+    function cons(car, cdr) { return new Xons({ car: car, cdr: cdr }) }
+    function elt(xons, i) { return (i === 0) ? car(xons) : elt(cdr(xons), i - 1) }
 
-    var VOID = ["void"]; var IGN = ["ign"]; var NIL = ["nil"]
+    function Env(parent) { this.bindings = Object.create(parent ? parent.bindings : null) }
+    function lookup(e, sym) { return e.bindings[sym.name] }
+    function bind(e, sym, val) { if (sym !== IGN) e.bindings[sym.name] = val }
 
-    function error(err) { throw err }
+    function Str(jsstr) { this.jsstr = jsstr }
+    function Num(jsnum) { this.jsnum = jsnum }
+
+    function Void() {}; function Ign() {}; function Nil() {}
+    var VOID = new Void(); var IGN = new Ign(); var NIL = new Nil()
+
+    function Tag() { this.e = new Env() }
+    function Tagged(tag, val) { this.wat_tag = tag; this.val = val }
+    
+    Tag.prototype.wat_tag = new Tag()
+    Sym.prototype.wat_tag = new Tag()
+    Xons.prototype.wat_tag = new Tag()
+    Env.prototype.wat_tag = new Tag()
+    Str.prototype.wat_tag = new Tag()
+    Num.prototype.wat_tag = new Tag()
+    Void.prototype.wat_tag = new Tag()
+    Ign.prototype.wat_tag = new Tag()
+    Nil.prototype.wat_tag = new Tag()
+    Fun.prototype.wat_tag = new Tag()
+    Def.prototype.wat_tag = new Tag()
+    CCC.prototype.wat_tag = new Tag()
+    Vau.prototype.wat_tag = new Tag()
+    Eval.prototype.wat_tag = new Tag()
+    KDone.prototype.wat_tag = new Tag()
+    KApp.prototype.wat_tag = new Tag()
+    KDef.prototype.wat_tag = new Tag()
+    KEval1.prototype.wat_tag = new Tag()
+    KEval2.prototype.wat_tag = new Tag()
+    KJump.prototype.wat_tag = new Tag()
+    JSFunNullary.prototype.wat_tag = new Tag()
+    JSFunUnary.prototype.wat_tag = new Tag()
+    KJSAppUnary.prototype.wat_tag = new Tag()
+
+    // Core Environment
+
+    var lib_mkenv = new JSFunUnary(function (e, parent) { return new Env(parent !== VOID ? parent : null) })
+    var lib_mktag = new JSFunNullary(function (e) { return new Tag() })
+    var lib_tag = new JSFunUnary(function (e, obj) { return obj.wat_tag })
+    var lib_tagger = new JSFunUnary(function (e, tag) { return new JSFunUnary(function (e, val) { return new Tagged(tag, val) }) })
+
+    function mkenvcore() {
+	var e = new Env()
+	bind(e, new Sym("def"), new Def())
+	bind(e, new Sym("ccc"), new CCC())
+	bind(e, new Sym("vau"), new Vau())
+	bind(e, new Sym("eval"), new Eval())
+	bind(e, new Sym("mkenv"), lib_mkenv)
+	bind(e, new Sym("mktag"), lib_mktag)
+	bind(e, new Sym("tag"), lib_tag)
+	bind(e, new Sym("tagger"), lib_tagger)
+	return e
+    }
 
     // API
 
-    var E = mkenv()
-    bind(E, Sym("def"), new Def())
-    bind(E, Sym("ccc"), new CCC())
-    bind(E, Sym("vau"), new Vau())
-    bind(E, Sym("eval"), new Eval())
-
     return {
-	"eval": evaluate, "e": E,
+	"eval": evaluate, "mkenvcore": mkenvcore,
 	"car": car, "cdr": cdr, "cons": cons,
-	"intern": intern,
-	"NIL": NIL, "IGN": IGN, "VOID": VOID,
-	"error": error 
+	"Sym": Sym, "Xons": Xons, "Str": Str, "Num": Num,
+	"VOID": VOID, "IGN": IGN, "NIL": NIL,
     }
 
 }())

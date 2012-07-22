@@ -33,7 +33,7 @@ var wat_identifier_syntax =
            wat_identifier_syntax_action);
 
 function wat_identifier_syntax_action(ast) {
-    return wat.intern(ast);
+    return new wat.Sym(ast);
 }
 
 var wat_escape_char =
@@ -57,7 +57,7 @@ function wat_escape_sequence_action(ast) {
 }
 
 function wat_string_syntax_action(ast) {
-    return ast[1];
+    return new wat.Str(ast[1]);
 }
 
 var wat_digits =
@@ -73,21 +73,21 @@ function wat_number_syntax_action(ast) {
     var sign = ast[0] ? ast[0] : "+";
     var integral_digits = ast[1];
     var fractional_digits = ast[2] || "";
-    return Number(sign + integral_digits + fractional_digits);
+    return new wat.Num(Number(sign + integral_digits + fractional_digits));
 }
 
 function wat_make_constant_syntax(string, constant) {
     return action(string, function(ast) { return constant; });
 }
 
-var wat_nil_syntax =
-    wat_make_constant_syntax("()", wat.NIL);
+var wat_void_syntax =
+    wat_make_constant_syntax("#void", wat.VOID);
 
 var wat_ign_syntax =
     wat_make_constant_syntax("_", wat.IGN);
 
-var wat_void_syntax =
-    wat_make_constant_syntax("void", wat.VOID);
+var wat_nil_syntax =
+    wat_make_constant_syntax("()", wat.NIL);
 
 var wat_dot_syntax =
     action(wsequence(".", wat_expression_syntax),
@@ -104,10 +104,45 @@ var wat_compound_syntax =
                      ")"),
            wat_compound_syntax_action);
 
+function wat_is_xons_name(sym) {
+    if (sym.wat_tag === wat.Sym.prototype.wat_tag) {
+        if (sym.name.indexOf(":") === 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function wat_xons_name_to_name(sym) {
+    return sym.name.substr(1);
+}
+
 function wat_compound_syntax_action(ast) {
     var exprs = ast[1];
     var end = ast[2] ? ast[2] : wat.NIL;
-    return wat_array_to_cons_list(exprs, end);
+    /* Process xons name/value pairs. */
+    var positional = [];
+    var named = {};
+    for (var i = 0; i < exprs.length; i++) {
+        if (wat_is_xons_name(exprs[i])) {
+            //lisp_assert(exprs.length >= i + 1);
+            named[wat_xons_name_to_name(exprs[i])] = exprs[i + 1];
+            i++;
+        } else {
+            positional.push(exprs[i]);
+        }
+    }
+    if (positional.length > 0) {
+	var result = wat_array_to_cons_list(positional, end);
+    } else {
+	var result = wat.xons();
+    }
+    for (var k in named) {
+        if (named.hasOwnProperty(k)) {
+            result.entries[k] = named[k];
+        }
+    }
+    return result;
 }
 
 var wat_line_terminator = choice(ch("\r"), ch("\n"));

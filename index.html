@@ -62,7 +62,7 @@
 var wat_env;
 
 function wat_onload() {
-    wat_env = wat.e;
+    wat_env = wat.mkenvcore();
     wat_load_file("crust.wat");
 }
 
@@ -78,6 +78,7 @@ function wat_load_file(path) {
             var start = new Date().getTime();
             for (var i = 0; i < forms.length; i++) {
                 var result = wat.eval(forms[i], wat_env);
+	        wat_console_log(JSON.stringify(result));
             }
             var elapsed = new Date().getTime() - start;
             wat_console_log("Evaluation time " + elapsed + "ms");
@@ -85,7 +86,7 @@ function wat_load_file(path) {
 //            wat_console_log("ERROR: " + e);
 //        }
     } else {
-        wat_simple_error("XHR error: " + req.status);
+        throw("XHR error: " + req.status);
     }
 }
 

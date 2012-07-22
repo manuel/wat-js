@@ -22,7 +22,8 @@
 //    the environment it is called in (unless they're ignored), and evaluates the compound operator's body expression in
 //    this extended environment, returning the result.
 //
-//    `(ccc <opr>*)` --- Evaluates the operator expression, and calls it with the current continuation as argument
+//    `(ccc <opr>*)` --- Evaluates the operator expression which must evaluate to an operator, and calls it with the
+//    current continuation as argument.
 //
 //    `(<continuation> <value>)` --- A continuation invocation, i.e. an operator application where the evaluated
 //    operator is a continuation: evaluates the value expression, and passes it the continuation, aborting the current
@@ -46,6 +47,16 @@ var wat = (function() {
     Sym.prototype.wat_perform = function(sym, k, e) { return go(k, e, lookup(e, sym)) }
     Xons.prototype.wat_perform = function(xons, k, e) { return perform(car(xons), new KApp(k, xons), e) }
 
+    function Fun(param, eparam, body, e) { this.param = param; this.eparam = eparam; this.body = body; this.e = e }
+    function Def() {}; function CCC() {}; function Vau() {}; function Eval() {};
+    function operate(opr, opd, k, e) { return opr.wat_operate(opr, opd, k, e) }
+    Fun.prototype.wat_operate = function(opr, opd, k, e) {
+	var xe = extend(opr.e); bind(xe, opr.param, opd); bind(xe, opr.eparam, e); return perform(opr.body, k, xe) }
+    Def.prototype.wat_operate = function(opr, opd, k, e) { return perform(elt(opd, 2), new KDef(k, elt(opd, 1))) }
+    CCC.prototype.wat_operate = function(opr, opd, k, e) { return perform(elt(opd, 1), new KApp(k, k), e) }
+    Vau.prototype.wat_operate = function(opr, opd, k, e) { return go(k, e, new Fun(elt(opd, 1), elt(opd, 2), elt(opd, 3), e)) }
+    Eval.prototype.wat_operate = function(opr, opd, k, e) { return perform(elt(opd, 1), new KEval1(k, elt(opd, 2)), e) }
+
     function KDone() {}
     function KApp(next, opd) { this.next = next; this.opd = opd }
     function KDef(next, name) { this.next = next; this.name = name }
@@ -59,16 +70,6 @@ var wat = (function() {
     KEval1.prototype.wat_go = function(k, e, form) { return function() { return perform(k.eform, new KEval2(k.next, form), e) } }
     KEval2.prototype.wat_go = function(k, e, newe) { return function() { return perform(k.form, k.next, newe) } }
     KJump.prototype.wat_go = function(k, e, val) { return function() { return go(k.k, e, val) } }
-
-    function Fun(param, eparam, body, e) { this.param = param; this.eparam = eparam; this.body = body; this.e = e }
-    function Def() {}; function CCC() {}; function Vau() {}; function Eval() {};
-    function operate(opr, opd, k, e) { return opr.wat_operate(opr, opd, k, e) }
-    Fun.prototype.wat_operate = function(opr, opd, k, e) {
-	var xe = extend(opr.e); bind(xe, opr.param, opd); bind(xe, opr.eparam, e); return perform(opr.body, k, xe) }
-    Def.prototype.wat_operate = function(opr, opd, k, e) { return perform(elt(opd, 2), new KDef(k, elt(opd, 1))) }
-    CCC.prototype.wat_operate = function(opr, opd, k, e) { return perform(elt(opd, 1), new KApp(k, k), e) }
-    Vau.prototype.wat_operate = function(opr, opd, k, e) { return go(k, e, new Fun(elt(opd, 1), elt(opd, 2), elt(opd, 3), e)) }
-    Eval.prototype.wat_operate = function(opr, opd, k, e) { return perform(elt(opd, 1), new KEval1(k, elt(opd, 2)), e) }
 
     function koperate(opr, opd, k, e) { return perform(elt(opd, 1), new KJump(opr), e) }
     KDone.prototype.wat_operate = koperate; KApp.prototype.wat_operate = koperate; KDef.prototype.wat_operate = koperate
@@ -86,13 +87,18 @@ var wat = (function() {
     // they name, xonses evaluate to the result of the combination of their operator (`car`) with themselves), all other
     // forms (e.g. literals) evaluate to themselves.
     // 
-    // Continuations (or rather, continuation frames) start with the letter K.  `go' jumps to a continuation with a
+    // `operate` takes an operator, and operand (always the whole form the operator appears in), a continuation, and an
+    // environment.  It passes the result of combining the operator with the operand in the environment to the
+    // continuation (combining is the vau calculus term for applying an operator).  Every operator defines a
+    // `wat_operate` function with its specific behavior.
+    // 
+    // Continuations (or rather, continuation frames) start with the letter "K".  `go' jumps to a continuation with a
     // specified value and environment.  This is called invoking a continuation.  Every continuation has a `wat_go`
     // method with its specific invocation behavior.  `wat_go` should return a function if there are more computation
     // steps to be performed, or a value, which indicates the end of evaluation.
     //
-    //   `KDone` is always appended to the continuation chain as the final step.  It halts evaluation and returns the
-    //   value passed to it.
+    //   `KDone` is always appended to the continuation chain as the final step.  It halts evaluation with the value it
+    //   receives.
     //
     //   `KApp` is the second part of evaluating an operator combination: it receives the operator, and applies it to
     //   its operand (which is the whole compound form in which the operator appears as `car`), returning the result.
@@ -109,16 +115,8 @@ var wat = (function() {
     //   
     //   `KJump` is used when a user invokes a continuation by applying a continuation as an operator.  It receives a
     //   value and passes that to a specified continuation, aborting the current computation.
-    // 
-    // Operators are analogous to functions in lambda calculus, but instead of an already evaluated argument, they
-    // receive the whole form they appear in (i.e. in `(foo 12)`, `foo` receives the whole form `(foo 12)`), and the
-    // lexical environment they are called in.  Operators correspond to operative combiners in vau calculus (which do
-    // not receive the whole form they appear in, but only its `cdr`).
-    // 
-    // `operate` takes an operator, and operand (always the whole form the operator appears in), a continuation, and an
-    // environment.  It passes the result of combining the operator with the operand in the environment to the
-    // continuation (combining is the vau calculus term for applying an operator).  Every operator defines a
-    // `wat_operate` function with its specific behavior.
+    //
+    // `koperate` makes continuations usable as operators, allowing callers of `ccc` to jump to the continuation.
 
     // Abbreviations
     //

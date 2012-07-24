@@ -1,3 +1,23 @@
+(def first (vau lst e (car (eval lst e))))
+(def second (vau lst e (car (cdr (eval lst e)))))
+(def third (vau lst e (car (cdr (cdr (eval lst e))))))
+(def fourth (vau lst e (car (cdr (cdr (cdr (eval lst e)))))))
+
+(def quote (vau form _ (second form)))
+
+(def assert (vau form e (if (eval (second form) e) #void (fail (second form)))))
+
+;; if
+(eval (cons def (cons (quote method-if) (cons (vau form e (eval (first form) e)) ())))
+      (tagenv (tag-of #t)))
+(eval (cons def (cons (quote method-if) (cons (vau form e (eval (second form) e)) ())))
+      (tagenv (tag-of #f)))
+(def if (vau form e ((eval (quote method-if) (tagenv (tag-of (eval (second form) e))))
+		     (cdr (cdr form)))))
+
+(assert (eq (if T T F) T))
+(assert (eq (if F T F) F))
+
 // This is an interpreter for a language with fexpr-based syntax and first-class lexical environments based on the vau
 // calculus, and higher-order control flow with tail-call elimination and first-class continuations.
 //
@@ -33,7 +53,6 @@
 //
 // Expressions marked with an asterisk (*) are evaluated or called in tail position when the enclosing form is evaluated
 // in tail position, as in Scheme.
-
 
     // `evaluate` is the main interface for evaluation: it takes a form and computes its value in a specified
     // environment.  Every evaluation step returns either a function or a value.  If it returns a function, this

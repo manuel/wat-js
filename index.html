@@ -77,7 +77,7 @@ function wat_load_file(path) {
             var forms = wat_parse(req.responseText);
             var start = new Date().getTime();
             for (var i = 0; i < forms.length; i++) {
-                var result = wat.eval(forms[i], wat_env);
+                var result = wat.run(forms[i], wat_env);
 	        wat_console_log(JSON.stringify(result));
             }
             var elapsed = new Date().getTime() - start;

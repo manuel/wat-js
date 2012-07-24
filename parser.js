@@ -103,7 +103,7 @@ var wat_compound_syntax =
 
 function wat_compound_syntax_action(ast) {
     var exprs = ast[1];
-    var end = ast[2] ? ast[2] : lisp_nil;
+    var end = ast[2] ? ast[2] : wat.NIL;
     return wat_array_to_cons_list(exprs, end);
 }
 

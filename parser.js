@@ -80,14 +80,11 @@ function wat_make_constant_syntax(string, constant) {
     return action(string, function(ast) { return constant; });
 }
 
-var wat_void_syntax =
-    wat_make_constant_syntax("#void", wat.VOID);
-
-var wat_ign_syntax =
-    wat_make_constant_syntax("_", wat.IGN);
-
-var wat_nil_syntax =
-    wat_make_constant_syntax("()", wat.NIL);
+var wat_void_syntax = wat_make_constant_syntax("#void", wat.VOID);
+var wat_ign_syntax = wat_make_constant_syntax("_", wat.IGN);
+var wat_nil_syntax = wat_make_constant_syntax("()", wat.NIL);
+var wat_t_syntax = wat_make_constant_syntax("#t", wat.T);
+var wat_f_syntax = wat_make_constant_syntax("#f", wat.F);
 
 var wat_dot_syntax =
     action(wsequence(".", wat_expression_syntax),
@@ -104,45 +101,10 @@ var wat_compound_syntax =
                      ")"),
            wat_compound_syntax_action);
 
-function wat_is_xons_name(sym) {
-    if (sym.wat_tag === wat.Sym.prototype.wat_tag) {
-        if (sym.name.indexOf(":") === 0) {
-            return true;
-        }
-    }
-    return false;
-}
-
-function wat_xons_name_to_name(sym) {
-    return sym.name.substr(1);
-}
-
 function wat_compound_syntax_action(ast) {
     var exprs = ast[1];
-    var end = ast[2] ? ast[2] : wat.NIL;
-    /* Process xons name/value pairs. */
-    var positional = [];
-    var named = {};
-    for (var i = 0; i < exprs.length; i++) {
-        if (wat_is_xons_name(exprs[i])) {
-            //lisp_assert(exprs.length >= i + 1);
-            named[wat_xons_name_to_name(exprs[i])] = exprs[i + 1];
-            i++;
-        } else {
-            positional.push(exprs[i]);
-        }
-    }
-    if (positional.length > 0) {
-	var result = wat_array_to_cons_list(positional, end);
-    } else {
-	var result = wat.xons();
-    }
-    for (var k in named) {
-        if (named.hasOwnProperty(k)) {
-            result.entries[k] = named[k];
-        }
-    }
-    return result;
+    var end = ast[2] ? ast[2] : lisp_nil;
+    return wat_array_to_cons_list(exprs, end);
 }
 
 var wat_line_terminator = choice(ch("\r"), ch("\n"));
@@ -161,10 +123,12 @@ function wat_nothing_action(ast) { // HACK!
 }
 
 var wat_expression_syntax =
-    whitespace(choice(wat_number_syntax,
-                      wat_nil_syntax,
+    whitespace(choice(wat_void_syntax,
                       wat_ign_syntax,
-                      wat_void_syntax,
+                      wat_nil_syntax,
+                      wat_t_syntax,
+                      wat_f_syntax,
+		      wat_number_syntax,
                       wat_compound_syntax,
                       wat_identifier_syntax,
                       wat_string_syntax,
@@ -175,18 +139,3 @@ var wat_program_syntax =
                               wat_whitespace_syntax))); // HACK!
 
 
-function wat_array_to_cons_list(array, end) {
-    var c = end ? end : wat.NIL;
-    for (var i = array.length; i > 0; i--)
-        c = wat.cons(array[i - 1], c);
-    return c;
-}
-
-function wat_cons_list_to_array(c) {
-    var res = [];
-    while(c !== wat.NIL) {
-        res.push(wat.car(c));
-        c = wat.cdr(c);
-    }
-    return res;
-}

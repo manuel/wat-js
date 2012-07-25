@@ -13,31 +13,31 @@ var wat = (function() {
     function op(cmb, opd, k, e) { return cmb.op(cmb, opd, k, e) }
     Cmb.prototype.op = function(cmb, opd, k, e) {
 	var xe = new Env(cmb.e); bind(xe, cmb.p, opd); bind(xe, cmb.ep, e);
-	return function() { return ev(cmb.body, k, xe) } }
+	return ev(cmb.body, k, xe) }
     Apl.prototype.op = function(cmb, opd, k, e) {
-	if (opd === NIL) return function() { return op(cmb.cmb, NIL, k, e) }
+	if (opd === NIL) return op(cmb.cmb, NIL, k, e)
 	else return ev(car(opd), new KArg(k, cmb.cmb, cdr(opd), NIL), e) }
     Def.prototype.op = function(cmb, opd, k, e) { return ev(elt(opd, 1), new KDef(k, elt(opd, 0)), e) }
-    CCC.prototype.op = function(cmb, opd, k, e) { return function() { return op(elt(opd, 0), new Apl(k), k, e) } }
+    CCC.prototype.op = function(cmb, opd, k, e) { return op(elt(opd, 0), new Apl(k), k, e) }
     Vau.prototype.op = function(cmb, opd, k, e) { return go(k, e, new Cmb(elt(opd, 0), elt(opd, 1), elt(opd, 2), e)) }
-    Eval.prototype.op = function(cmb, opd, k, e) { return function() { return ev(elt(opd, 0), k, elt(opd, 1)) } }
+    Eval.prototype.op = function(cmb, opd, k, e) { return ev(elt(opd, 0), k, elt(opd, 1)) }
     function KDone() {}
     function KOp(k, opd) { this.k = k; this.opd = opd }
     function KArg(k, cmb, todo, done) { this.k = k; this.cmb = cmb; this.todo = todo; this.done = done }
     function KDef(k, name) { this.k = k; this.name = name }
     function go(k, e, val) { return k.go(k, e, val) }
     KDone.prototype.go = function(k, e, val) { return val }
-    KOp.prototype.go = function(k, e, cmb) { return function() { return op(cmb, k.opd, k.k, e) } }
+    KOp.prototype.go = function(k, e, cmb) { return op(cmb, k.opd, k.k, e) }
     KArg.prototype.go = function(k, e, arg) {
 	if (k.todo === NIL) return function() { return op(k.cmb, wat_reverse(cons(arg, k.done)), k.k, e) }
 	else return ev(car(k.todo), new KArg(k.k, k.cmb, cdr(k.todo), cons(arg, k.done)), e) }
     KDef.prototype.go = function(k, e, val) { bind(e, k.name, val); return go(k.k, e, VOID) }
-    function kop(cmb, opd, k, e) { return function() { return go(cmb, e, elt(opd, 0)) } }
+    function kop(cmb, opd, k, e) { return go(cmb, e, elt(opd, 0)) }
     KDone.prototype.op = kop; KOp.prototype.op = kop; KArg.prototype.op = kop; KDef.prototype.op = kop
 
     function JSFun(jsfun) { this.jsfun = jsfun }
     JSFun.prototype.op = function(cmb, opd, k, e) {
-	return go(k, e, cmb.jsfun.apply(null, wat_cons_list_to_array(opd).reverse())) }
+	return go(k, e, cmb.jsfun.apply(null, wat_cons_list_to_array(opd))) }
 
     /***** Data *****/
 
@@ -49,7 +49,7 @@ var wat = (function() {
     function elt(cons, i) { return (i === 0) ? car(cons) : elt(cdr(cons), i - 1) }
 
     function Env(parent) { this.bindings = Object.create(parent ? parent.bindings : null) }
-    function lookup(e, sym) { return e.bindings[sym.name] }
+    function lookup(e, sym) { var val = e.bindings[sym.name]; return val ? val : fail("unbound: "+sym.name) }
     function bind(e, sym, val) { if (sym !== IGN) e.bindings[sym.name] = val }
 
     function Str(jsstr) { this.jsstr = jsstr }
@@ -57,6 +57,8 @@ var wat = (function() {
 
     function Void() {}; function Ign() {}; function Nil() {}; function True() {}; function False() {}
     var VOID = new Void(); var IGN = new Ign(); var NIL = new Nil(); var T = new True(); var F = new False()
+
+    function fail(err) { throw err }
 
     function Tag() { this.e = new Env() }
     function Tagged(tag, val) { this.wat_tag = tag; this.val = val }
@@ -97,7 +99,7 @@ var wat = (function() {
     var lib_tagenv = new Apl(new JSFun(function (tag) { return tag.e }))
     var lib_tag_of = new Apl(new JSFun(function (obj) { return obj.wat_tag }))
     var lib_tag = new Apl(new JSFun(function (tag, val) { return new Tagged(tag, val) }))
-    var lib_fail = new Apl(new JSFun(function (err) { throw err }))
+    var lib_fail = new Apl(new JSFun(function (err) { fail(err) }))
 
     function mkenvcore() {
 	var e = new Env()
@@ -125,11 +127,11 @@ var wat = (function() {
     return {
 	"run": run, "mkenvcore": mkenvcore,
 	"car": car, "cdr": cdr, "cons": cons,
-	"Sym": Sym, "Cons": cons, "Str": Str, "Num": Num,
+	"Sym": Sym, "Cons": Cons, "Str": Str, "Num": Num,
 	"VOID": VOID, "IGN": IGN, "NIL": NIL, "T": T, "F": F
     }
 
-}())
+}());
 
 function wat_array_to_cons_list(array, end) {
     var c = end ? end : wat.NIL;

@@ -1,4 +1,4 @@
-;; -*- mode: scheme -*-
+;; -*- mode: lisp -*-
 ;; This is the hard crust of Wat code around the JS core defined in `wat.js`.
 
 (def first (vau lst e (car (eval lst e))))
@@ -6,7 +6,7 @@
 (def third (vau lst e (car (cdr (cdr (eval lst e))))))
 (def fourth (vau lst e (car (cdr (cdr (cdr (eval lst e)))))))
 
-(def quote (vau x _ (car x)))
+(def quote (vau y _ (car y)))
 (def list (wrap (vau x _ x)))
 
 (eval (list def (quote method-if) (vau form e (eval (first form) e)))
@@ -16,7 +16,7 @@
 (def if (vau form e ((eval (quote method-if) (tagenv (tag-of (eval (car form) e))))
 		     (cdr form))))
 
-(def assert (vau op e (if (eval (first op) e) #void (fail (first op)))))
+(def assert (vau op e (if (eval op e) #void (fail op))))
 
-(assert (eq T T))
+(assert (eq #t #t))
 

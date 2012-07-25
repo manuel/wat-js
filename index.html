@@ -58,6 +58,7 @@
   </style>
 </head>
 <body onload="wat_onload()">
+<h1>Wat</h1>
 <script type="text/javascript">
 var wat_env;
 
@@ -78,7 +79,7 @@ function wat_load_file(path) {
             var start = new Date().getTime();
             for (var i = 0; i < forms.length; i++) {
                 var result = wat.run(forms[i], wat_env);
-	        wat_console_log(JSON.stringify(result));
+	        wat_console_log(result);
             }
             var elapsed = new Date().getTime() - start;
             wat_console_log("Evaluation time " + elapsed + "ms");

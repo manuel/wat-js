@@ -1,4 +1,5 @@
 var wat = (function() {
+    /***** Evaluation *****/
     function Fbr() { this.a = null; this.k = null; }
     Fbr.prototype.run = function() { while(this.k) this.k.invoke(this); return this.a; };
     Fbr.prototype.prime = function(x, e) { this.a = x; this.k = new KEval(this.k, e); };
@@ -34,7 +35,7 @@ var wat = (function() {
     function JSFun(jsfun) { this.jsfun = jsfun }
     JSFun.prototype.combine = function(fbr, e, o) { fbr.a = this.jsfun.apply(null, list_to_array(o)); };
     function jsapv(jsfun) { return new Apv(new JSFun(jsfun)); }
-
+    /***** Data *****/
     function Sym(name) { this.name = name; }
     function Cons(car, cdr) { this.car = car; this.cdr = cdr; }
     function cons(car, cdr) { return new Cons(car, cdr); }
@@ -61,12 +62,53 @@ var wat = (function() {
     function tag_of(obj) { return obj.wat_tag; }
     function fail(err) { throw err; }
     function array_to_list(array, end) {
-	var c = end ? end : wat.NIL; for (var i = array.length; i > 0; i--) c = wat.cons(array[i - 1], c); return c; }
+	var c = end ? end : NIL; for (var i = array.length; i > 0; i--) c = cons(array[i - 1], c); return c; }
     function list_to_array(c) {
-	var res = []; while(c !== wat.NIL) { res.push(wat.car(c)); c = wat.cdr(c); } return res; }
+	var res = []; while(c !== NIL) { res.push(car(c)); c = cdr(c); } return res; }
     function reverse_list(list) {
-	var res = wat.NIL; while(list !== wat.NIL) { res = wat.cons(wat.car(list), res); list = wat.cdr(list); } return res; }
-    
+	var res = NIL; while(list !== NIL) { res = cons(car(list), res); list = cdr(list); } return res; }
+    /***** Parser *****/
+    function read_from_string(s) { return array_to_list(parse(s)); }
+    function parse(s) {
+	var res = program_stx(ps(s));
+	if (res.remaining.index === s.length) return res.ast; else fail("parse error: " + res.remaining.index); }
+    var x_stx = function(input) { return x_stx(input); }; // forward decl.
+    var id_special_char = choice("-", "&", "!", ":", "=", ">", "<", "%", "+", "?", "/", "*", "#", "$", "_", "'", ".");
+    var id_char = choice(range("a", "z"), range("A", "Z"), range("0", "9"), id_special_char);
+    // Kludge: don't allow single dot as id, so as not to conflict with dotted pair stx.
+    var id_stx = action(join_action(butnot(repeat1(id_char), "."), ""), function (ast) { return new Sym(ast); });
+    var escape_char = choice("\"", "\\");
+    var escape_sequence = action(sequence("\\", escape_char), function (ast) { return ast[1]; });
+    var string_char = choice(negate(escape_char), escape_sequence);
+    var string_stx = action(sequence("\"", join_action(repeat0(string_char), ""), "\""),
+			    function (ast) { return new Str(ast[1]); });
+    var digits = join_action(repeat1(range("0", "9")), "");
+    var number_stx = action(sequence(optional(choice("+", "-")), digits, optional(join_action(sequence(".", digits), ""))),
+			    function number_act() {
+				var sign = ast[0] ? ast[0] : "";
+				var integral_digits = ast[1]; 
+				var fractional_digits = ast[2] || "";
+				return new Num(Number(sign + integral_digits + fractional_digits)); });
+    function make_constant_stx(string, constant) { return action(string, function(ast) { return constant; }); }
+    var void_stx = make_constant_stx("#void", VOID);
+    var ign_stx = make_constant_stx("#ign", IGN);
+    var nil_stx = make_constant_stx("()", NIL);
+    var t_stx = make_constant_stx("#t", T);
+    var f_stx = make_constant_stx("#f", F);
+    var dot_stx = action(wsequence(".", x_stx), function (ast) { return ast[1]; });
+    var compound_stx = action(wsequence("(", repeat1(x_stx), optional(dot_stx), ")"),
+			      function (ast) {
+				  var exprs = ast[1];
+				  var end = ast[2] ? ast[2] : NIL;
+				  return array_to_list(exprs, end); });
+    var line_terminator = choice(ch("\r"), ch("\n"));
+    var cmt_stx = action(sequence(";", repeat0(negate(line_terminator)), optional(line_terminator)), nothing_action);
+    var whitespace_stx = action(choice(" ", "\n", "\r", "\t"), nothing_action);
+    function nothing_action(ast) { return VOID; } // HACK!
+    var x_stx =
+	whitespace(choice(void_stx, ign_stx, nil_stx, t_stx, f_stx, number_stx, compound_stx, id_stx, string_stx, cmt_stx));
+    var program_stx = whitespace(repeat0(choice(x_stx, whitespace_stx))); // HACK!
+    /* Core Environment */
     function mkenvcore() {
 	var e = new Env();
 	bind(e, new Sym("def"), new Def());
@@ -89,15 +131,9 @@ var wat = (function() {
 	bind(e, new Sym("fail"), jsapv(fail));
 	return e;
     }
-
-    // API
-
+    /* API */
     return {
 	"eval": function(x, e) { var fbr = new Fbr(); fbr.prime(x, e); return fbr.run(); },
-	"mkenvcore": mkenvcore,
-	"car": car, "cdr": cdr, "cons": cons,
-	"Sym": Sym, "Cons": Cons, "Str": Str, "Num": Num,
-	"VOID": VOID, "IGN": IGN, "NIL": NIL, "T": T, "F": F,
-	"array_to_list": array_to_list,
+	"mkenvcore": mkenvcore, "parse": parse,
     };
 }());

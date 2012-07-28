@@ -1,14 +1,56 @@
-;; -*- mode: lisp -*-
+;; -*- mode: scheme -*-
 ;; This is the hard crust of Wat code around the JS core defined in `wat.js`.
 
-(def first (vau lst e (car (eval lst e))))
-(def second (vau lst e (car (cdr (eval lst e)))))
-(def third (vau lst e (car (cdr (cdr (eval lst e))))))
-(def fourth (vau lst e (car (cdr (cdr (cdr (eval lst e)))))))
+(def null? (wrap (vau (val) #ign (eq () val))))
 
-(def quote (vau y _ (car y)))
-(def list (wrap (vau x _ x)))
+(def begin
+  ((wrap (vau (seq2) #ign
+	   (seq2
+             (def aux
+               (vau (head . tail) env
+		 (if (null? tail)
+		     (eval head env)
+		     (seq2 (eval head env) (eval (cons aux tail) env)))))
+             (vau body env
+               (if (null? body)
+                   #void
+                   (eval (cons aux body) env))))))
+   (vau (first second) env
+     ((wrap (vau #ign #ign (eval second env)))
+      (eval first env)))))
+
+(def list (wrap (vau x #ign x)))
+
+(def list*
+  (wrap (vau args #ign
+          (begin
+            (def aux
+              (wrap (vau ((head . tail)) #ign
+                      (if (null? tail)
+			  head
+			  (cons head (aux tail))))))
+	    (aux args)))))
+
+(def vau
+  ((wrap (vau (vau) #ign
+           (vau (formals eformal . body) env
+             (eval (list vau formals eformal (cons begin body)) env))))
+   vau))
+
+(def lambda
+  (vau (formals . body) env
+    (wrap (eval (list* vau formals #ign body) env))))
+
+(def map (lambda (f l) (if (null? l) () (cons (f (car l)) (map f (cdr l))))))
+
+(def let
+  (vau (bindings . body) env
+    (eval (cons (list* lambda (map car bindings) body)
+		(map cadr bindings))
+	  env)))
+
+(def call/cc (lambda (f) (ccc (lambda (k) (f (lambda (val) (jump k val)))))))
 
 (def assert (vau (expr) e (if (eval expr e) #void (fail expr))))
 
-(def not (wrap (vau (expr) _ (if expr #f #t))))
+(def not (lambda (val) (if val #f #t)))

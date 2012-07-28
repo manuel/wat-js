@@ -5,7 +5,6 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/> 
   <script src="jsparse.js" type="text/javascript"></script>
   <script src="wat.js" type="text/javascript"></script>
-  <script src="parser.js" type="text/javascript"></script>
   <style type="text/css">
     html {
       padding: .3em;
@@ -76,7 +75,7 @@ function wat_load_file(path) {
     req.send(null);
     if(req.status == 200) {
 //        try {
-            var forms = wat_parse(req.responseText);
+            var forms = wat.parse(req.responseText);
             var start = new Date().getTime();
             for (var i = 0; i < forms.length; i++) {
                 var result = wat.eval(forms[i], wat_env);

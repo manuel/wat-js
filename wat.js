@@ -68,7 +68,6 @@ var wat = (function() {
     function reverse_list(list) {
 	var res = NIL; while(list !== NIL) { res = cons(car(list), res); list = cdr(list); } return res; }
     /***** Parser *****/
-    function read_from_string(s) { return array_to_list(parse(s)); }
     function parse(s) {
 	var res = program_stx(ps(s));
 	if (res.remaining.index === s.length) return res.ast; else fail("parse error: " + res.remaining.index); }

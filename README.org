@@ -1,13 +1,13 @@
-* The Wat Programming Language
+* Wat Programming Language
 
 /Wat/ is an ultra-lightweight dialect of Lisp, specifically Kernel, in
-which everything is first-class: expression, control, and data.
-Expression is based on lexically-scoped fexprs and first-class
-environments, subsuming ordinary procedures and hygienic macros.
-Control is based on first-class continuations and tail-call
-elimination, subsuming all known control structures.  Data uses a
-dynamic type-tagging system that allows generic programming over
-built-in as well as user-defined data types.
+which everything is first-class: syntax, control, and data.  Syntax is
+based on lexically-scoped fexprs and first-class environments,
+subsuming ordinary procedures and hygienic macros.  Control is based
+on first-class continuations and tail-call elimination, subsuming all
+known control structures.  Data uses a dynamic type-tagging system
+that allows generic programming over built-in as well as user-defined
+data types.
 
 #+AUTHOR: Manuel Simoni
 #+EMAIL: msimoni@gmail.com

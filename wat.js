@@ -1,159 +1,103 @@
-// -*- fill-column: 100 -*-
-
 var wat = (function() {
-
-    function run(form, e) {
-	var res = ev(form, new KDone(), e); while(typeof(res) === "function") res = res(); return res }
-    function ev(form, k, e) { return form.ev ? form.ev(form, k, e) : form }
-    Sym.prototype.ev = function(form, k, e) { return go(k, e, lookup(e, form)) }
-    Cons.prototype.ev = function(form, k, e) { return ev(car(form), new KOp(k, cdr(form)), e) }
-    function Cmb(p, ep, body, e) { this.p = p; this.ep = ep; this.body = body; this.e = e }
-    function Apl(cmb) { this.cmb = cmb };
-    function Def() {}; function CCC() {}; function Vau() {}; function Eval() {}
-    function op(cmb, opd, k, e) { return cmb.op(cmb, opd, k, e) }
-    Cmb.prototype.op = function(cmb, opd, k, e) {
-	var xe = new Env(cmb.e); bind(xe, cmb.p, opd); bind(xe, cmb.ep, e);
-	return ev(cmb.body, k, xe) }
-    Apl.prototype.op = function(cmb, opd, k, e) {
-	if (opd === NIL) return op(cmb.cmb, NIL, k, e)
-	else return ev(car(opd), new KArg(k, cmb.cmb, cdr(opd), NIL), e) }
-    Def.prototype.op = function(cmb, opd, k, e) { return ev(elt(opd, 1), new KDef(k, elt(opd, 0)), e) }
-    CCC.prototype.op = function(cmb, opd, k, e) { return op(elt(opd, 0), new Apl(k), k, e) }
-    Vau.prototype.op = function(cmb, opd, k, e) { return go(k, e, new Cmb(elt(opd, 0), elt(opd, 1), elt(opd, 2), e)) }
-    Eval.prototype.op = function(cmb, opd, k, e) { return ev(elt(opd, 0), k, elt(opd, 1)) }
-    function KDone() {}
-    function KOp(k, opd) { this.k = k; this.opd = opd }
-    function KArg(k, cmb, todo, done) { this.k = k; this.cmb = cmb; this.todo = todo; this.done = done }
-    function KDef(k, name) { this.k = k; this.name = name }
-    function go(k, e, val) { return k.go(k, e, val) }
-    KDone.prototype.go = function(k, e, val) { return val }
-    KOp.prototype.go = function(k, e, cmb) { return op(cmb, k.opd, k.k, e) }
-    KArg.prototype.go = function(k, e, arg) {
-	if (k.todo === NIL) return function() { return op(k.cmb, wat_reverse(cons(arg, k.done)), k.k, e) }
-	else return ev(car(k.todo), new KArg(k.k, k.cmb, cdr(k.todo), cons(arg, k.done)), e) }
-    KDef.prototype.go = function(k, e, val) { bind(e, k.name, val); return go(k.k, e, VOID) }
-    function kop(cmb, opd, k, e) { return go(cmb, e, elt(opd, 0)) }
-    KDone.prototype.op = kop; KOp.prototype.op = kop; KArg.prototype.op = kop; KDef.prototype.op = kop
-
+    function Fbr() { this.a = null; this.k = null; }
+    Fbr.prototype.run = function() { while(this.k) this.k.invoke(this); return this.a; };
+    Fbr.prototype.prime = function(x, e) { this.a = x; this.k = new KEval(this.k, e); };
+    function KEval(k, e) { this.k = k; this.e = e; }
+    KEval.prototype.invoke = function(fbr) { fbr.a.evaluate ? fbr.a.evaluate(fbr, this.k, this.e) : fbr.k = this.k; };
+    Sym.prototype.evaluate = function(fbr, k, e) { fbr.k = k; fbr.a = lookup(e, this); };
+    Cons.prototype.evaluate = function(fbr, k, e) { fbr.k = new KCombine(k, e, cdr(this)); fbr.prime(car(this), e); };
+    function KCombine(k, e, o) { this.k = k; this.e = e; this.o = o; }
+    KCombine.prototype.invoke = function(fbr) { fbr.k = this.k; fbr.a.combine(fbr, this.e, this.o); };
+    function Opv(p, ep, x, e) { this.p = p; this.ep = ep; this.x = x; this.e = e; }
+    function Apv(cmb) { this.cmb = cmb; }; function wrap(cmb) { return new Apv(cmb); }; function unwrap(apv) { return apv.cmb; }
+    function Def() {}; function Vau() {}; function If() {}; function Eval() {}; function CCC() {}; function Jump() {}
+    Opv.prototype.combine = function(fbr, e, o) {
+	var xe = new Env(this.e); bind(xe, this.p, o); bind(xe, this.ep, e); fbr.prime(this.x, xe); };
+    Apv.prototype.combine = function(fbr, e, o) { evalArgs(fbr, new KApply(fbr.k, e, this.cmb), e, o, NIL); };
+    function KApply(k, e, cmb) { this.k = k; this.e = e; this.cmb = cmb; }
+    KApply.prototype.invoke = function(fbr) { fbr.k = this.k; fbr.prime(cons(this.cmb, fbr.a), this.e); };
+    function evalArgs(fbr, k, e, todo, done) {
+	if (todo === NIL) { fbr.a = reverse_list(done); fbr.k = k; }
+	else { fbr.k = new KEvalArg(k, e, cdr(todo), done); fbr.prime(car(todo), e); } }
+    function KEvalArg(k, e, todo, done) { this.k = k; this.e = e; this.todo = todo; this.done = done; }
+    KEvalArg.prototype.invoke = function(fbr) { evalArgs(fbr, this.k, this.e, this.todo, cons(fbr.a, this.done)); };
+    Def.prototype.combine = function(fbr, e, o) { fbr.k = new KDef(fbr.k, e, elt(o, 0)); fbr.prime(elt(o, 1), e); };
+    function KDef(k, e, name) { this.k = k; this.e = e; this.name = name; }
+    KDef.prototype.invoke = function(fbr) { fbr.k = this.k; bind(this.e, this.name, fbr.a); }
+    Vau.prototype.combine = function(fbr, e, o) { fbr.a = new Opv(elt(o, 0), elt(o, 1), elt(o, 2), e); };
+    If.prototype.combine = function(fbr, e, o) { fbr.k = new KIf(fbr.k, e, elt(o, 1), elt(o, 2)); fbr.prime(elt(o, 0), e); };
+    function KIf(k, e, xthen, xelse) { this.k = k; this.e = e; this.xthen = xthen; this.xelse = xelse; }
+    KIf.prototype.invoke = function(fbr) { fbr.k = this.k; fbr.prime(fbr.a === F ? this.xelse : this.xthen, this.e); };
+    Eval.prototype.combine = function(fbr, e, o) { fbr.prime(elt(o, 0), elt(o, 1)); };
+    CCC.prototype.combine = function(fbr, e, o) { fbr.a = cons(fbr.k, NIL); fbr.k = new KApply(fbr.k, e, elt(o, 0)); };
+    Jump.prototype.combine = function(fbr, e, o) { fbr.k = elt(o, 0); fbr.a = elt(o, 1); };
     function JSFun(jsfun) { this.jsfun = jsfun }
-    JSFun.prototype.op = function(cmb, opd, k, e) {
-	return go(k, e, cmb.jsfun.apply(null, wat_cons_list_to_array(opd))) }
+    JSFun.prototype.combine = function(fbr, e, o) { fbr.a = this.jsfun.apply(null, list_to_array(o)); };
+    function jsapv(jsfun) { return new Apv(new JSFun(jsfun)); }
 
-    /***** Data *****/
-
-    function Sym(name) { this.name = name }
-
-    function Cons(car, cdr) { this.car = car; this.cdr = cdr }
-    function cons(car, cdr) { return new Cons(car, cdr) }
-    function car(cons) { return cons.car }; function cdr(cons) { return cons.cdr }
-    function elt(cons, i) { return (i === 0) ? car(cons) : elt(cdr(cons), i - 1) }
-
-    function Env(parent) { this.bindings = Object.create(parent ? parent.bindings : null) }
-    function lookup(e, sym) { var val = e.bindings[sym.name]; return val ? val : fail("unbound: "+sym.name) }
-    function bind(e, sym, val) { if (sym !== IGN) e.bindings[sym.name] = val }
-
-    function Str(jsstr) { this.jsstr = jsstr }
-    function Num(jsnum) { this.jsnum = jsnum }
-
-    function Void() {}; function Ign() {}; function Nil() {}; function True() {}; function False() {}
-    var VOID = new Void(); var IGN = new Ign(); var NIL = new Nil(); var T = new True(); var F = new False()
-
-    function fail(err) { throw err }
-
-    function Tag() { this.e = new Env() }
-    function Tagged(tag, val) { this.wat_tag = tag; this.val = val }
+    function Sym(name) { this.name = name; }
+    function Cons(car, cdr) { this.car = car; this.cdr = cdr; }
+    function cons(car, cdr) { return new Cons(car, cdr); }
+    function car(cons) { return cons.car; };
+    function cdr(cons) { return cons.cdr; }
+    function elt(cons, i) { return (i === 0) ? car(cons) : elt(cdr(cons), i - 1); }
+    function Env(parent) { this.bindings = Object.create(parent ? parent.bindings : null); }
+    function mkenv(parent) { return new Env(parent); }
+    function lookup(e, sym) { var val = e.bindings[sym.name]; return val ? val : fail("unbound: " + sym.name); }
+    function bind(e, lhs, rhs) { lhs.match(e, rhs); }
+    Sym.prototype.match = function(e, rhs) { e.bindings[this.name] = rhs; }
+    Cons.prototype.match = function(e, rhs) { car(this).match(e, car(rhs)); cdr(this).match(e, cdr(rhs)); }
+    Nil.prototype.match = function(e, rhs) { if (rhs !== NIL) fail("NIL expected"); }
+    Ign.prototype.match = function(e, rhs) {}
+    function Str(jsstr) { this.jsstr = jsstr };
+    function Num(jsnum) { this.jsnum = jsnum };
+    function Void() {}; function Ign() {}; function Nil() {}; function True() {}; function False() {};
+    var VOID = new Void(); var IGN = new Ign(); var NIL = new Nil(); var T = new True(); var F = new False();
+    function Tag() { this.e = new Env() };
+    function mktag() { return new Tag(); };
+    function tag_env(tag) { return tag.e; };
+    function Tagged(tag, val) { this.wat_tag = tag; this.val = val };
+    function tag(tag, val) { return new Tagged(tag, val); };
+    function tag_of(obj) { return obj.wat_tag; }
+    function fail(err) { throw err; }
+    function array_to_list(array, end) {
+	var c = end ? end : wat.NIL; for (var i = array.length; i > 0; i--) c = wat.cons(array[i - 1], c); return c; }
+    function list_to_array(c) {
+	var res = []; while(c !== wat.NIL) { res.push(wat.car(c)); c = wat.cdr(c); } return res; }
+    function reverse_list(list) {
+	var res = wat.NIL; while(list !== wat.NIL) { res = wat.cons(wat.car(list), res); list = wat.cdr(list); } return res; }
     
-    Tag.prototype.wat_tag = new Tag()
-    Sym.prototype.wat_tag = new Tag()
-    Cons.prototype.wat_tag = new Tag()
-    Env.prototype.wat_tag = new Tag()
-    Str.prototype.wat_tag = new Tag()
-    Num.prototype.wat_tag = new Tag()
-    Void.prototype.wat_tag = new Tag()
-    Ign.prototype.wat_tag = new Tag()
-    Nil.prototype.wat_tag = new Tag()
-    True.prototype.wat_tag = new Tag()
-    False.prototype.wat_tag = new Tag()
-    Cmb.prototype.wat_tag = new Tag()
-    Apl.prototype.wat_tag = new Tag()
-    Def.prototype.wat_tag = new Tag()
-    CCC.prototype.wat_tag = new Tag()
-    Vau.prototype.wat_tag = new Tag()
-    Eval.prototype.wat_tag = new Tag()
-    KDone.prototype.wat_tag = new Tag()
-    KOp.prototype.wat_tag = new Tag()
-    KArg.prototype.wat_tag = new Tag()
-    KDef.prototype.wat_tag = new Tag()
-
-    // Core Environment
-
-    var lib_eq = new Apl(new JSFun(function (a, b) { return (a === b) ? T : F }))
-    var lib_cons = new Apl(new JSFun(function (a, b) { return cons(a, b) }))
-    var lib_car = new Apl(new JSFun(function (cons) { return car(cons) }))
-    var lib_cdr = new Apl(new JSFun(function (cons) { return cdr(cons) }))
-    var lib_wrap = new Apl(new JSFun(function (cmb) { return new Apl(cmb) }))
-    var lib_unwrap = new Apl(new JSFun(function (cmb) { return cmb.cmb }))
-    var lib_mkenv = new Apl(new JSFun(function (parent) {
-	return new Env((parent !== undefined) && (parent !== VOID) ? parent : null) }))
-    var lib_mktag = new Apl(new JSFun(function () { return new Tag() }))
-    var lib_tagenv = new Apl(new JSFun(function (tag) { return tag.e }))
-    var lib_tag_of = new Apl(new JSFun(function (obj) { return obj.wat_tag }))
-    var lib_tag = new Apl(new JSFun(function (tag, val) { return new Tagged(tag, val) }))
-    var lib_fail = new Apl(new JSFun(function (err) { fail(err) }))
-
     function mkenvcore() {
-	var e = new Env()
-	bind(e, new Sym("def"), new Def())
-	bind(e, new Sym("ccc"), new Apl(new CCC()))
-	bind(e, new Sym("vau"), new Vau())
-	bind(e, new Sym("eval"), new Apl(new Eval()))
-	bind(e, new Sym("eq"), lib_eq)
-	bind(e, new Sym("cons"), lib_cons)
-	bind(e, new Sym("car"), lib_car)
-	bind(e, new Sym("cdr"), lib_cdr)
-	bind(e, new Sym("wrap"), lib_wrap)
-	bind(e, new Sym("unwrap"), lib_unwrap)
-	bind(e, new Sym("mkenv"), lib_mkenv)
-	bind(e, new Sym("mktag"), lib_mktag)
-	bind(e, new Sym("tagenv"), lib_tagenv)
-	bind(e, new Sym("tag-of"), lib_tag_of)
-	bind(e, new Sym("tag"), lib_tag)
-	bind(e, new Sym("fail"), lib_fail)
-	return e
+	var e = new Env();
+	bind(e, new Sym("def"), new Def());
+	bind(e, new Sym("if"), new If());
+	bind(e, new Sym("ccc"), new Apv(new CCC()));
+	bind(e, new Sym("jump"), new Apv(new Jump()));
+	bind(e, new Sym("vau"), new Vau());
+	bind(e, new Sym("eval"), new Apv(new Eval()));
+	bind(e, new Sym("eq"), jsapv(function (a, b) { return (a === b) ? T : F }));
+	bind(e, new Sym("cons"), jsapv(cons));
+	bind(e, new Sym("car"), jsapv(car));
+	bind(e, new Sym("cdr"), jsapv(cdr));
+	bind(e, new Sym("wrap"), jsapv(wrap));
+	bind(e, new Sym("unwrap"), jsapv(unwrap));
+	bind(e, new Sym("mkenv"), jsapv(mkenv));
+	bind(e, new Sym("mktag"), jsapv(mktag));
+	bind(e, new Sym("tag-env"), jsapv(tag_env));
+	bind(e, new Sym("tag-of"), jsapv(tag_of));
+	bind(e, new Sym("tag"), jsapv(tag));
+	bind(e, new Sym("fail"), jsapv(fail));
+	return e;
     }
 
     // API
 
     return {
-	"run": run, "mkenvcore": mkenvcore,
+	"eval": function(x, e) { var fbr = new Fbr(); fbr.prime(x, e); return fbr.run(); },
+	"mkenvcore": mkenvcore,
 	"car": car, "cdr": cdr, "cons": cons,
 	"Sym": Sym, "Cons": Cons, "Str": Str, "Num": Num,
-	"VOID": VOID, "IGN": IGN, "NIL": NIL, "T": T, "F": F
-    }
-
+	"VOID": VOID, "IGN": IGN, "NIL": NIL, "T": T, "F": F,
+	"array_to_list": array_to_list,
+    };
 }());
-
-function wat_array_to_cons_list(array, end) {
-    var c = end ? end : wat.NIL;
-    for (var i = array.length; i > 0; i--)
-        c = wat.cons(array[i - 1], c);
-    return c;
-}
-
-function wat_cons_list_to_array(c) {
-    var res = [];
-    while(c !== wat.NIL) {
-        res.push(wat.car(c));
-        c = wat.cdr(c);
-    }
-    return res;
-}
-
-function wat_reverse(list) {
-    var res = wat.NIL;
-    while(list !== wat.NIL) {
-	res = wat.cons(wat.car(list), res);
-	list = wat.cdr(list);
-    }
-    return res;
-}

@@ -9,14 +9,6 @@
 (def quote (vau y _ (car y)))
 (def list (wrap (vau x _ x)))
 
-(eval (list def (quote method-if) (vau form e (eval (first form) e)))
-      (tagenv (tag-of #t)))
-(eval (list def (quote method-if) (vau form e (eval (second form) e)))
-      (tagenv (tag-of #f)))
-(def if (vau form e ((eval (quote method-if) (tagenv (tag-of (eval (car form) e))))
-		     (cdr form))))
+(def assert (vau (expr) e (if (eval expr e) #void (fail expr))))
 
-(def assert (vau op e (if (eval op e) #void (fail op))))
-
-(assert (eq #t #t))
-
+(def not (wrap (vau (expr) _ (if expr #f #t))))

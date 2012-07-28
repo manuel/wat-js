@@ -65,6 +65,7 @@ var wat_env;
 function wat_onload() {
     wat_env = wat.mkenvcore();
     wat_load_file("crust.wat");
+    wat_load_file("test.wat");
 }
 
 function wat_load_file(path) {
@@ -78,7 +79,7 @@ function wat_load_file(path) {
             var forms = wat_parse(req.responseText);
             var start = new Date().getTime();
             for (var i = 0; i < forms.length; i++) {
-                var result = wat.run(forms[i], wat_env);
+                var result = wat.eval(forms[i], wat_env);
 	        wat_console_log(result);
             }
             var elapsed = new Date().getTime() - start;

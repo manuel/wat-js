@@ -100,6 +100,26 @@ Examples:
 | (a b c)        | (1 (2) 3)       | a -> 1, b -> (2), c -> 3 |
 | (a (b) . #ign) | (1 (2) 3)       | a -> 1, b -> 2           |
 
+* Combiners
+
+All computations in Wat are carried out by combiners, of which there
+are two different kinds: operative and applicative.  An operative
+combiner or just operative is a fexpr that receives the current
+lexical environment and acts on its operand tree unevaluated.  An
+applicative combiner or just applicative is a procedure that first
+evaluates its operand tree and then passes the obtained arguments list
+to an underlying combiner.  =vau= is the constructor of user-defined
+operatives, called compound operatives.  =wrap= creates an applicative
+around an underlying combiner.
+
+Examples:
+
+| Combiner                | Operand Tree  | Result                      |
+|-------------------------+---------------+-----------------------------|
+| =(vau x #ign x)=        | (1 (+ 2 3) 4) | (1 (+ 2 3) 4)               |
+| =(vau #ign e e)=        | (1 (+ 2 3) 4) | /<the current environment>/ |
+| =(wrap (vau x #ign x))= | (1 (+ 2 3) 4) | (1 5 4)                     |
+
 * Core Language
 
 ** =(def <lhs> <rhs>) -> rhs= [operative]

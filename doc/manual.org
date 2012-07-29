@@ -73,6 +73,8 @@ Wat identifiers are case-sensitive.
  * Type (tag) :: A first-class type tag or just type is associated
    with every object, discussed in the next section.
 
+ * Vector :: An array of objects.
+
 * Type Tags
 
 Every object in Wat has a type tag or just type.  A type is a
@@ -199,3 +201,6 @@ Halts evaluation with an object describing the reason (typically an error).
 #+EMAIL: msimoni@gmail.com
 #+OPTIONS: toc:t num:nil creator:nil
 #+STYLE: <link rel="stylesheet" type="text/css" href="stylesheet.css" />
+* Vectors
+** =(vector . <elements>) -> vector= [applicative]
+Creates a new vector with the given elements.

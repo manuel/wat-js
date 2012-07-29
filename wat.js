@@ -51,6 +51,7 @@ var wat = (function() {
     Ign.prototype.match = function(e, rhs) {}
     function Str(jsstr) { this.jsstr = jsstr };
     function Num(jsnum) { this.jsnum = jsnum };
+    function Vector(elements) { this.elements = []; }
     function Void() {}; function Ign() {}; function Nil() {}; function True() {}; function False() {};
     var VOID = new Void(); var IGN = new Ign(); var NIL = new Nil(); var T = new True(); var F = new False();
     function Type() { this.e = new Env() };
@@ -60,7 +61,8 @@ var wat = (function() {
     function tag(type, val) { return new Tagged(type, val); };
     function untag(obj) { return obj.val; }
     function init_types(types) { types.map(function (type) { type.prototype.wat_type = new Type(); }); }
-    init_types([Opv, Apv, Def, Vau, If, Eval, CCC, Jump, JSFun, Sym, Cons, Env, Str, Num, Void, Ign, Nil, True, False, Type]);
+    init_types([Opv, Apv, Def, Vau, If, Eval, CCC, Jump, JSFun, Sym, Cons,
+		Env, Str, Num, Vector, Void, Ign, Nil, True, False, Type]);
     function fail(err) { throw err; }
     function array_to_list(array, end) {
 	var c = end ? end : NIL; for (var i = array.length; i > 0; i--) c = cons(array[i - 1], c); return c; }
@@ -128,6 +130,8 @@ var wat = (function() {
 	bind(e, new Sym("tag"), jswrap(tag));
 	bind(e, new Sym("untag"), jswrap(untag));
 	bind(e, new Sym("fail"), jswrap(fail));
+	bind(e, new Sym("vector"), jswrap(function() {
+	    return new Vector(array_to_list(Array.prototype.slice.call(arguments))); }));
 	return e;
     }
     /* API */

@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Technical Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-07-29 03:20:59 CEST"/>
+<meta name="generated" content="2012-07-29 03:23:11 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -156,11 +156,14 @@ by the following table:
 <tr><td>( &hellip; )</td><td><i>list</i></td></tr>
 <tr><td>( a b . c )</td><td><i>dotted list</i></td></tr>
 <tr><td>()</td><td><i>nil</i></td></tr>
-<tr><td>- &amp; ! : = &gt; &lt; % + ? / * # $ _ ' .</td><td><i>allowed symbol characters</i></td></tr>
+<tr><td>a-z A-Z 0-9 - &amp; ! : = &gt; &lt; % + ? / * # $ _ ' .</td><td><i>symbol characters</i></td></tr>
 </tbody>
 </table>
 
 
+<p>
+Wat identifiers are case-sensitive.
+</p>
 </div>
 
 </div>
@@ -262,7 +265,7 @@ with the built-in types.
 <p>
 As in Kernel, parameters and left-hand sides of definitions may not
 only be symbols, but parameter trees: a parameter tree is either a
-symbol, a cons, nil, or <code>#ign</code>.  A symbol binds the right hand to its
+symbol, a cons, nil, or ignore.  A symbol binds the right hand to its
 name, a cons recursively matches its car and cdr, nil matches only
 nil, and ignore simply ignores the right-hand side.
 </p>
@@ -513,7 +516,7 @@ Halts evaluation with an object describing the reason (typically an error).
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-07-29 03:20:59 CEST</p>
+<p class="date"> Date: 2012-07-29 03:23:11 CEST</p>
 </div>
 </div>
 </body>

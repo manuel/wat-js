@@ -20,16 +20,18 @@ This manual assumes familiarity with Kernel and Scheme.
 Wat has a mostly Scheme-like lexical structure, incompletely described
 by the following table:
 
-| ; ...                             | /line comment/               |
-| . + - [0-9]+                      | /number/                     |
-| #t #f                             | /logical constants/          |
-| #void #ign                        | /void and ignore constants/  |
-| " ... "                           | /string/                     |
-| \\ \" \n \r \t                    | /escape character in string/ |
-| ( ... )                           | /list/                       |
-| ( a b . c )                       | /dotted list/                |
-| ()                                | /nil/                        |
-| - & ! : = > < % + ? / * # $ _ ' . | /allowed symbol characters/  |
+| ; ...                                         | /line comment/               |
+| . + - [0-9]+                                  | /number/                     |
+| #t #f                                         | /logical constants/          |
+| #void #ign                                    | /void and ignore constants/  |
+| " ... "                                       | /string/                     |
+| \\ \" \n \r \t                                | /escape character in string/ |
+| ( ... )                                       | /list/                       |
+| ( a b . c )                                   | /dotted list/                |
+| ()                                            | /nil/                        |
+| a-z A-Z 0-9 - & ! : = > < % + ? / * # $ _ ' . | /symbol characters/          |
+
+Wat identifiers are case-sensitive.
 
 * Built-in Types
 
@@ -85,7 +87,7 @@ with the built-in types.
 
 As in Kernel, parameters and left-hand sides of definitions may not
 only be symbols, but parameter trees: a parameter tree is either a
-symbol, a cons, nil, or =#ign=.  A symbol binds the right hand to its
+symbol, a cons, nil, or ignore.  A symbol binds the right hand to its
 name, a cons recursively matches its car and cdr, nil matches only
 nil, and ignore simply ignores the right-hand side.
 

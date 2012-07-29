@@ -11,6 +11,8 @@ known control structures.  Data uses a dynamic type-tagging system
 that allows generic programming over built-in as well as user-defined
 data types.
 
+Wat is hosted at <https://github.com/manuel/wat-js>.
+
 This manual assumes familiarity with Kernel and Scheme.
 
 * Lexical Structure

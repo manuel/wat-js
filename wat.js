@@ -122,7 +122,7 @@ var wat = (function() {
 	bind(e, new Sym("eval"), wrap(new Eval()));
 	bind(e, new Sym("wrap"), jswrap(wrap));
 	bind(e, new Sym("unwrap"), jswrap(unwrap));
-	bind(e, new Sym("eq"), jswrap(function (a, b) { return (a === b) ? T : F }));
+	bind(e, new Sym("eq?"), jswrap(function (a, b) { return (a === b) ? T : F }));
 	bind(e, new Sym("cons"), jswrap(cons));
 	bind(e, new Sym("make-environment"), jswrap(function (parent) { return new Env(parent); }));
 	bind(e, new Sym("make-type"), jswrap(function () { return new Type(); }));

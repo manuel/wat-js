@@ -1,7 +1,7 @@
 ;; -*- mode: scheme -*-
 ;; This is the hard crust of Wat code around the JS core defined in `wat.js`.
 
-(def null? (wrap (vau (val) #ign (eq () val))))
+(def null? (wrap (vau (val) #ign (eq? () val))))
 
 (def begin
   ((wrap (vau (seq2) #ign
@@ -48,6 +48,8 @@
 
 (def map (lambda (f l) (if (null? l) () (cons (f (car l)) (map f (cdr l))))))
 
+(def for-each (lambda (f l) (if (null? l) #void (begin (f (car l)) (for-each f (cdr l))))))
+
 (def let
   (vau (bindings . body) env
     (eval (cons (list* lambda (map car bindings) body)
@@ -89,51 +91,7 @@
 
 (def quote (vau (x) #ign x))
 
-;;;;; DELIMITED CONTROL
+(def assq
+  (lambda (obj alist)
+    (if (null? alist) () (if (eq? obj (caar alist)) (car alist) (assq obj (cdr alist))))))
 
-(scope ()
-
-  (def env (current-environment))
-  (def pstack ())
-  (def go #f)
-
-  (let ((v (call/cc (lambda (k) (set! env go k) (k #f)))))
-    (when v
-      (let* ((r (v))
-	     (h (car pstack))
-	     (_ (set! env pstack (cdr pstack))))
-	((cdr h) (lambda () r)))))
-
-  (def new-prompt (lambda () (list #f)))
-
-  (def push-prompt*
-    (lambda (p th)
-      ((call/cc
-	(lambda (k)
-	  (set! env pstack (cons (cons p k) pstack))
-	  (go th))))))
-
-  (def unwind
-     (lambda (acc p pstack)
-       (if (null? pstack) (fail "No prompt was set")
-	   (if (eq p (caar pstack))
-	       (cons pstack acc)
-	       (unwind (cons (car pstack) acc) p (cdr pstack))))))
-  
-  (def unwind-abort
-    (lambda (p pstack)
-      (if (null? pstack) (fail "No prompt was set")
-	  (if (eq? p (caar pstack))
-	      pstack
-	      (unwind-abort p (cdr pstack))))))
-
-  (def take-SC
-    (lambda (p f)
-      ((call/cc
-	(lambda (k)
-	  (let* ((subchain-pstack (unwind '() p pstack))
-		 (_ (set! pstack (car subchain-pstack)))
-		 (subchain (cdr subchain-pstack)))
-	    (go (f (vector k p subchain)))))))))
-    
-  

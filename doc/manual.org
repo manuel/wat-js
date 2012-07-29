@@ -43,9 +43,7 @@ Wat identifiers are case-sensitive.
    combiner's environment.
 
  * Boolean :: The =#t= constant represents logical truth and the =#f=
-   constant represents logical falsity.  In conditionals, only =#t=
-   and =#f= are allowed, no other values count as either true or
-   false.
+   constant represents logical falsity.
 
  * Number :: Wat currently only supports IEEE 754 floating-point
    numbers.
@@ -131,9 +129,9 @@ in the current environment, and returns it.
 
 ** =(if <test> <then> <else>) -> result= [operative]
 
-Evaluates the test, and if it is true evaluates the then branch, if it
-is false evaluates the else branch, otherwise signals an error.  The
-branches are evaluated in tail position.
+Evaluates the test, and if it is false evaluates the else branch,
+otherwise evaluates the then branch.  The branches are evaluated in
+tail position.
 
 ** =(call/cc <cmb>) -> result= [applicative]
 
@@ -160,7 +158,7 @@ Returns an applicative around an underlying combiner.
 
 Returns the underlying combiner of an applicative.
 
-** =(eq <a> <b>) -> boolean= [applicative]
+** =(eq? <a> <b>) -> boolean= [applicative]
 
 Returns true if the two values are pointer identical, false otherwise.
 

@@ -83,6 +83,21 @@ with the built-in types.
 
 * Pattern Matching
 
+As in Kernel, parameters and left-hand sides of definitions may not
+only be symbols, but parameter trees: a parameter tree is either a
+symbol, a cons, nil, or =#ign=.  A symbol binds the right hand to its
+name, a cons recursively matches its car and cdr, nil matches only
+nil, and ignore simply ignores the right-hand side.
+
+Examples:
+
+| Left-hand side | Right-hand side | Match results          |
+|----------------+-----------------+------------------------|
+| a              | (1 2 3)         | a -> (1 2 3)           |
+| (a . b)        | (1 2 3)         | a -> 1, b -> (2 3)     |
+| (a b c)        | (1 2 3)         | a -> 1, b -> 2, c -> 3 |
+| #ign           | (1 2 3)         |                        |
+
 * Core Language
 
 ** =(def <lhs> <rhs>) -> rhs= [operative]

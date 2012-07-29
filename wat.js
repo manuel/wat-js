@@ -45,10 +45,10 @@ var wat = (function() {
     function Env(parent) { this.bindings = Object.create(parent ? parent.bindings : null); }
     function lookup(e, sym) { var val = e.bindings[sym.name]; return val ? val : fail("unbound: " + sym.name); }
     function bind(e, lhs, rhs) { lhs.match(e, rhs); }
-    Sym.prototype.match = function(e, rhs) { assert(type_of(rhs)); e.bindings[this.name] = rhs; }
-    Cons.prototype.match = function(e, rhs) { car(this).match(e, car(rhs)); cdr(this).match(e, cdr(rhs)); }
-    Nil.prototype.match = function(e, rhs) { if (rhs !== NIL) fail("NIL expected"); }
-    Ign.prototype.match = function(e, rhs) {}
+    Sym.prototype.match = function(e, rhs) { assert(type_of(rhs)); e.bindings[this.name] = rhs; };
+    Cons.prototype.match = function(e, rhs) { car(this).match(e, car(rhs)); cdr(this).match(e, cdr(rhs)); };
+    Nil.prototype.match = function(e, rhs) { if (rhs !== NIL) fail("NIL expected"); };
+    Ign.prototype.match = function(e, rhs) {};
     function Str(jsstr) { this.jsstr = jsstr };
     function Num(jsnum) { this.jsnum = jsnum };
     function Vector(elements) { this.elements = elements; }

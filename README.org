@@ -9,6 +9,4 @@ known control structures.  Data uses a dynamic type-tagging system
 that allows generic programming over built-in as well as user-defined
 data types.
 
-#+AUTHOR: Manuel Simoni
-#+EMAIL: msimoni@gmail.com
-#+OPTIONS: toc:nil num:nil creator:nil
+The /Wat Technical Manual/ is online at http://manuel.github.com/wat-js/doc/manual.html

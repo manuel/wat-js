@@ -1,0 +1,493 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+lang="en" xml:lang="en">
+<head>
+<title>Wat Technical Manual</title>
+<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2012-07-29 02:24:33 CEST"/>
+<meta name="author" content="Manuel Simoni"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="stylesheet.css" />
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+
+<h1 class="title">Wat Technical Manual</h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">Description </a></li>
+<li><a href="#sec-2">Lexical Structure </a></li>
+<li><a href="#sec-3">Built-in Types </a></li>
+<li><a href="#sec-4">Type Tags </a></li>
+<li><a href="#sec-5">Pattern Matching </a></li>
+<li><a href="#sec-6">Core Language </a>
+<ul>
+<li><a href="#sec-6.1"><code>(def &lt;lhs&gt; &lt;rhs&gt;) -&gt; rhs</code> [operative] </a></li>
+<li><a href="#sec-6.2"><code>(if &lt;test&gt; &lt;then&gt; &lt;else&gt;) -&gt; result</code> [operative] </a></li>
+<li><a href="#sec-6.3"><code>(ccc &lt;cmb&gt;) -&gt; result</code> [applicative] </a></li>
+<li><a href="#sec-6.4"><code>(jump &lt;k&gt; &lt;val&gt;) -&gt; |</code> [applicative] </a></li>
+<li><a href="#sec-6.5"><code>(vau &lt;ptree&gt; &lt;envp&gt; &lt;body&gt;) -&gt; operative</code> [operative] </a></li>
+<li><a href="#sec-6.6"><code>(eval &lt;expr&gt; &lt;env&gt;) -&gt; result</code> [applicative] </a></li>
+<li><a href="#sec-6.7"><code>(wrap &lt;cmb&gt;) -&gt; applicative</code> [applicative] </a></li>
+<li><a href="#sec-6.8"><code>(unwrap &lt;cmb&gt;) -&gt; combiner</code> [applicative] </a></li>
+<li><a href="#sec-6.9"><code>(eq &lt;a&gt; &lt;b&gt;) -&gt; boolean</code> [applicative] </a></li>
+<li><a href="#sec-6.10"><code>(cons &lt;car&gt; &lt;cdr&gt;) -&gt; cons</code> [applicative] </a></li>
+<li><a href="#sec-6.11"><code>(make-environment [&lt;parent&gt;]) -&gt; environment</code> [applicative] </a></li>
+<li><a href="#sec-6.12"><code>(make-type) -&gt; type</code> [applicative] </a></li>
+<li><a href="#sec-6.13"><code>(type-environment &lt;type&gt;) -&gt; environment</code> [applicative] </a></li>
+<li><a href="#sec-6.14"><code>(type-of &lt;val&gt;) -&gt; type</code> [applicative] </a></li>
+<li><a href="#sec-6.15"><code>(tag &lt;type&gt; &lt;val&gt;) -&gt; tagged</code> [applicative] </a></li>
+<li><a href="#sec-6.16"><code>(tagged-value &lt;tagged&gt;) -&gt; value</code> [applicative] </a></li>
+<li><a href="#sec-6.17"><code>(fail &lt;reason&gt;) -&gt; |</code> [applicative] </a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1">Description </h2>
+<div class="outline-text-2" id="text-1">
+
+
+<p>
+<i>Wat</i> is an ultra-lightweight dialect of Lisp, specifically <a href="http://web.cs.wpi.edu/~jshutt/kernel.html">Kernel</a>, in
+which everything is first-class: syntax, control, and data.  Syntax is
+based on lexically-scoped fexprs and first-class environments,
+subsuming ordinary procedures and hygienic macros.  Control is based
+on first-class continuations and tail-call elimination, subsuming all
+known control structures.  Data uses a dynamic type-tagging system
+that allows generic programming over built-in as well as user-defined
+data types.
+</p>
+<p>
+This manual assumes familiarity with Kernel and Scheme.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2">Lexical Structure </h2>
+<div class="outline-text-2" id="text-2">
+
+
+<p>
+Wat has a mostly Scheme-like lexical structure, incompletely described
+by the following table:
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<caption></caption>
+<colgroup><col align="left" /><col align="left" />
+</colgroup>
+<tbody>
+<tr><td>; &hellip;</td><td><i>line comment</i></td></tr>
+<tr><td>. + - [0-9]+</td><td><i>number</i></td></tr>
+<tr><td>#t #f</td><td><i>logical constants</i></td></tr>
+<tr><td>#void #ign</td><td><i>void and ignore constants</i></td></tr>
+<tr><td>" &hellip; "</td><td><i>string</i></td></tr>
+<tr><td>\\ \" \n \r \t</td><td><i>escape character in string</i></td></tr>
+<tr><td>( &hellip; )</td><td><i>list</i></td></tr>
+<tr><td>( a b . c )</td><td><i>dotted list</i></td></tr>
+<tr><td>()</td><td><i>nil</i></td></tr>
+<tr><td>- &amp; ! : = &gt; &lt; % + ? / * # $ _ ' .</td><td><i>allowed symbol characters</i></td></tr>
+</tbody>
+</table>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3">Built-in Types </h2>
+<div class="outline-text-2" id="text-3">
+
+
+<dl>
+<dt>Void</dt><dd>
+The constant <code>#void</code> is used when there is no interesting
+value to return, or when a value is unspecified.
+
+</dd>
+<dt>Ignore</dt><dd>
+The constant <code>#ign</code> is used in parameter lists to indicate
+that an argument is ignored and should not be bound in the
+combiner's environment.
+
+</dd>
+<dt>Boolean</dt><dd>
+The <code>#t</code> constant represents logical truth and the <code>#f</code>
+constant represents logical falsity.  In conditionals, only <code>#t</code>
+and <code>#f</code> are allowed, no other values count as either true or
+false.
+
+</dd>
+<dt>Number</dt><dd>
+Wat currently only supports IEEE 754 floating-point
+numbers.
+
+</dd>
+<dt>String</dt><dd>
+Wat currently only supports UTF-16 encoded Unicode
+strings.
+
+</dd>
+<dt>Symbol</dt><dd>
+Symbols are used as identifiers for variable bindings.
+It is not guaranteed that symbols with the same name are pointer
+identical.
+
+</dd>
+<dt>List</dt><dd>
+Lists are built from immutable conses and nil.  Notably,
+lists often contain not only symbols and literals (as is usual in
+Lisp) but also first-class objects such as combiners.
+
+</dd>
+<dt>Environment</dt><dd>
+An environment maps symbols to values.  It may have
+a parent environment in which symbols are looked up if they are not
+found in this environment.
+
+</dd>
+<dt>Operative (combiner)</dt><dd>
+A combiner that operates directly on its operands.
+
+</dd>
+<dt>Applicative (combiner)</dt><dd>
+A combiner that evaluates its operands, yielding an
+arguments list, which it passes to an underlying combiner.
+
+</dd>
+<dt>Type (tag)</dt><dd>
+A first-class type tag or just type is associated
+with every object, discussed in the next section.
+
+</dd>
+</dl>
+</div>
+
+</div>
+
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4">Type Tags </h2>
+<div class="outline-text-2" id="text-4">
+
+
+<p>
+Every object in Wat has a type tag or just type.  A type is a
+first-class object that contains an (initially empty) environment into
+which programmers may store metadata.  Type tags are provided for all
+built-in types, and there are routines for creating new types, and
+tagging values with types.  Type tags allow the definition of type
+systems in userland that interoperate with the built-in types.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-5" class="outline-2">
+<h2 id="sec-5">Pattern Matching </h2>
+<div class="outline-text-2" id="text-5">
+
+
+</div>
+
+</div>
+
+<div id="outline-container-6" class="outline-2">
+<h2 id="sec-6">Core Language </h2>
+<div class="outline-text-2" id="text-6">
+
+
+
+</div>
+
+<div id="outline-container-6.1" class="outline-3">
+<h3 id="sec-6.1"><code>(def &lt;lhs&gt; &lt;rhs&gt;) -&gt; rhs</code> [operative] </h3>
+<div class="outline-text-3" id="text-6.1">
+
+
+<p>
+Evaluates the right-hand side, matches the left-hand side against it
+in the current environment, and returns it.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-6.2" class="outline-3">
+<h3 id="sec-6.2"><code>(if &lt;test&gt; &lt;then&gt; &lt;else&gt;) -&gt; result</code> [operative] </h3>
+<div class="outline-text-3" id="text-6.2">
+
+
+<p>
+Evaluates the test, and if it is true evaluates the then branch, if it
+is false evaluates the else branch, otherwise signals an error.  The
+branches are evaluated in tail position.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-6.3" class="outline-3">
+<h3 id="sec-6.3"><code>(ccc &lt;cmb&gt;) -&gt; result</code> [applicative] </h3>
+<div class="outline-text-3" id="text-6.3">
+
+
+<p>
+Calls the combiner with the current continuation as argument.  The
+combiner is called in tail position.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-6.4" class="outline-3">
+<h3 id="sec-6.4"><code>(jump &lt;k&gt; &lt;val&gt;) -&gt; |</code> [applicative] </h3>
+<div class="outline-text-3" id="text-6.4">
+
+
+<p>
+Aborts the current continuation and jumps to the given continuation
+with the given value.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-6.5" class="outline-3">
+<h3 id="sec-6.5"><code>(vau &lt;ptree&gt; &lt;envp&gt; &lt;body&gt;) -&gt; operative</code> [operative] </h3>
+<div class="outline-text-3" id="text-6.5">
+
+
+<p>
+Constructs a new compound operative that closes over the current
+environment with the given parameter tree, environment parameter, and
+body expression.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-6.6" class="outline-3">
+<h3 id="sec-6.6"><code>(eval &lt;expr&gt; &lt;env&gt;) -&gt; result</code> [applicative] </h3>
+<div class="outline-text-3" id="text-6.6">
+
+
+<p>
+Evaluates the expression in the given environment.  The expression is
+evaluated in tail-position.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-6.7" class="outline-3">
+<h3 id="sec-6.7"><code>(wrap &lt;cmb&gt;) -&gt; applicative</code> [applicative] </h3>
+<div class="outline-text-3" id="text-6.7">
+
+
+<p>
+Returns an applicative around an underlying combiner.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-6.8" class="outline-3">
+<h3 id="sec-6.8"><code>(unwrap &lt;cmb&gt;) -&gt; combiner</code> [applicative] </h3>
+<div class="outline-text-3" id="text-6.8">
+
+
+<p>
+Returns the underlying combiner of an applicative.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-6.9" class="outline-3">
+<h3 id="sec-6.9"><code>(eq &lt;a&gt; &lt;b&gt;) -&gt; boolean</code> [applicative] </h3>
+<div class="outline-text-3" id="text-6.9">
+
+
+<p>
+Returns true if the two values are pointer identical, false otherwise.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-6.10" class="outline-3">
+<h3 id="sec-6.10"><code>(cons &lt;car&gt; &lt;cdr&gt;) -&gt; cons</code> [applicative] </h3>
+<div class="outline-text-3" id="text-6.10">
+
+
+<p>
+Creates a new cons with the given car and cdr.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-6.11" class="outline-3">
+<h3 id="sec-6.11"><code>(make-environment [&lt;parent&gt;]) -&gt; environment</code> [applicative] </h3>
+<div class="outline-text-3" id="text-6.11">
+
+
+<p>
+Creates a new empty environment with the given optional parent.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-6.12" class="outline-3">
+<h3 id="sec-6.12"><code>(make-type) -&gt; type</code> [applicative] </h3>
+<div class="outline-text-3" id="text-6.12">
+
+
+<p>
+Creates a new type with an empty environment.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-6.13" class="outline-3">
+<h3 id="sec-6.13"><code>(type-environment &lt;type&gt;) -&gt; environment</code> [applicative] </h3>
+<div class="outline-text-3" id="text-6.13">
+
+
+<p>
+Returns the type's environment for storing metadata.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-6.14" class="outline-3">
+<h3 id="sec-6.14"><code>(type-of &lt;val&gt;) -&gt; type</code> [applicative] </h3>
+<div class="outline-text-3" id="text-6.14">
+
+
+<p>
+Returns an object's type.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-6.15" class="outline-3">
+<h3 id="sec-6.15"><code>(tag &lt;type&gt; &lt;val&gt;) -&gt; tagged</code> [applicative] </h3>
+<div class="outline-text-3" id="text-6.15">
+
+
+<p>
+Creates a new tagged object with a type and holding an arbitrary
+value.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-6.16" class="outline-3">
+<h3 id="sec-6.16"><code>(tagged-value &lt;tagged&gt;) -&gt; value</code> [applicative] </h3>
+<div class="outline-text-3" id="text-6.16">
+
+
+<p>
+Returns the value held by a tagged object.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-6.17" class="outline-3">
+<h3 id="sec-6.17"><code>(fail &lt;reason&gt;) -&gt; |</code> [applicative] </h3>
+<div class="outline-text-3" id="text-6.17">
+
+
+<p>
+Halts evaluation with an object describing the reason (typically an error).
+</p>
+
+<hr/>
+
+</div>
+</div>
+</div>
+<div id="postamble">
+<p class="author"> Author: Manuel Simoni
+<a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
+</p>
+<p class="date"> Date: 2012-07-29 02:24:33 CEST</p>
+</div>
+</div>
+</body>
+</html>

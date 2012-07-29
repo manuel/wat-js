@@ -54,10 +54,11 @@ var wat = (function() {
     function Void() {}; function Ign() {}; function Nil() {}; function True() {}; function False() {};
     var VOID = new Void(); var IGN = new Ign(); var NIL = new Nil(); var T = new True(); var F = new False();
     function Type() { this.e = new Env() };
+    function type_of(obj) { return obj.wat_type; }
     function type_env(type) { return type.e; };
     function Tagged(type, val) { this.wat_type = type; this.val = val };
     function tag(type, val) { return new Tagged(type, val); };
-    function type_of(obj) { return obj.wat_type; }
+    function tagged_value(obj) { return obj.val; }
     function init_types(types) { types.map(function (type) { type.prototype.wat_type = new Type(); }); }
     init_types([Opv, Apv, Def, Vau, If, Eval, CCC, Jump, JSFun, Sym, Cons, Env, Str, Num, Void, Ign, Nil, True, False, Type]);
     function fail(err) { throw err; }
@@ -116,17 +117,16 @@ var wat = (function() {
 	bind(e, new Sym("jump"), wrap(new Jump()));
 	bind(e, new Sym("vau"), new Vau());
 	bind(e, new Sym("eval"), wrap(new Eval()));
-	bind(e, new Sym("eq"), jswrap(function (a, b) { return (a === b) ? T : F }));
-	bind(e, new Sym("cons"), jswrap(cons));
-	bind(e, new Sym("car"), jswrap(car));
-	bind(e, new Sym("cdr"), jswrap(cdr));
 	bind(e, new Sym("wrap"), jswrap(wrap));
 	bind(e, new Sym("unwrap"), jswrap(unwrap));
+	bind(e, new Sym("eq"), jswrap(function (a, b) { return (a === b) ? T : F }));
+	bind(e, new Sym("cons"), jswrap(cons));
 	bind(e, new Sym("make-environment"), jswrap(function (parent) { return new Env(parent); }));
 	bind(e, new Sym("make-type"), jswrap(function () { return new Type(); }));
 	bind(e, new Sym("type-environment"), jswrap(type_env));
 	bind(e, new Sym("type-of"), jswrap(type_of));
 	bind(e, new Sym("tag"), jswrap(tag));
+	bind(e, new Sym("tagged-value"), jswrap(tagged_value));
 	bind(e, new Sym("fail"), jswrap(fail));
 	return e;
     }

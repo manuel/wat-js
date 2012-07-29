@@ -1,0 +1,167 @@
+#+TITLE: Wat Technical Manual
+
+* Description
+
+/Wat/ is an ultra-lightweight dialect of Lisp, specifically [[http://web.cs.wpi.edu/~jshutt/kernel.html][Kernel]], in
+which everything is first-class: syntax, control, and data.  Syntax is
+based on lexically-scoped fexprs and first-class environments,
+subsuming ordinary procedures and hygienic macros.  Control is based
+on first-class continuations and tail-call elimination, subsuming all
+known control structures.  Data uses a dynamic type-tagging system
+that allows generic programming over built-in as well as user-defined
+data types.
+
+This manual assumes familiarity with Kernel and Scheme.
+
+* Lexical Structure
+
+Wat has a mostly Scheme-like lexical structure, incompletely described
+by the following table:
+
+| ; ...                             | /line comment/               |
+| . + - [0-9]+                      | /number/                     |
+| #t #f                             | /logical constants/          |
+| #void #ign                        | /void and ignore constants/  |
+| " ... "                           | /string/                     |
+| \\ \" \n \r \t                    | /escape character in string/ |
+| ( ... )                           | /list/                       |
+| ( a b . c )                       | /dotted list/                |
+| ()                                | /nil/                        |
+| - & ! : = > < % + ? / * # $ _ ' . | /allowed symbol characters/  |
+
+* Built-in Types
+
+ * Void :: The constant =#void= is used when there is no interesting
+   value to return, or when a value is unspecified.
+
+ * Ignore :: The constant =#ign= is used in parameter lists to indicate
+   that an argument is ignored and should not be bound in the
+   combiner's environment.
+
+ * Boolean :: The =#t= constant represents logical truth and the =#f=
+   constant represents logical falsity.  In conditionals, only =#t=
+   and =#f= are allowed, no other values count as either true or
+   false.
+
+ * Number :: Wat currently only supports IEEE 754 floating-point
+   numbers.
+
+ * String :: Wat currently only supports UTF-16 encoded Unicode
+   strings.
+
+ * Symbol :: Symbols are used as identifiers for variable bindings.
+   It is not guaranteed that symbols with the same name are pointer
+   identical.
+
+ * List :: Lists are built from immutable conses and nil.  Notably,
+   lists often contain not only symbols and literals (as is usual in
+   Lisp) but also first-class objects such as combiners.
+
+ * Environment :: An environment maps symbols to values.  It may have
+   a parent environment in which symbols are looked up if they are not
+   found in this environment.
+
+ * Operative (combiner) :: A combiner that operates directly on its operands.
+
+ * Applicative (combiner) :: A combiner that evaluates its operands, yielding an
+   arguments list, which it passes to an underlying combiner.
+
+ * Type (tag) :: A first-class type tag or just type is associated
+   with every object, discussed in the next section.
+
+* Type Tags
+
+Every object in Wat has a type tag or just type.  A type is a
+first-class object that contains an (initially empty) environment into
+which programmers may store metadata.  Type tags are provided for all
+built-in types, and there are routines for creating new types, and
+tagging values with types.  Type tags allow the definition of type
+systems in userland that interoperate with the built-in types.
+
+* Pattern Matching
+
+* Core Language
+
+** =(def <lhs> <rhs>) -> rhs= [operative]
+
+Evaluates the right-hand side, matches the left-hand side against it
+in the current environment, and returns it.
+
+** =(if <test> <then> <else>) -> result= [operative]
+
+Evaluates the test, and if it is true evaluates the then branch, if it
+is false evaluates the else branch, otherwise signals an error.  The
+branches are evaluated in tail position.
+
+** =(ccc <cmb>) -> result= [applicative]
+
+Calls the combiner with the current continuation as argument.  The
+combiner is called in tail position.
+
+** =(jump <k> <val>) -> |= [applicative]
+
+Aborts the current continuation and jumps to the given continuation
+with the given value.
+
+** =(vau <ptree> <envp> <body>) -> operative= [operative]
+
+Constructs a new compound operative that closes over the current
+environment with the given parameter tree, environment parameter, and
+body expression.
+
+** =(eval <expr> <env>) -> result= [applicative]
+
+Evaluates the expression in the given environment.  The expression is
+evaluated in tail-position.
+
+** =(wrap <cmb>) -> applicative= [applicative]
+
+Returns an applicative around an underlying combiner.
+
+** =(unwrap <cmb>) -> combiner= [applicative]
+
+Returns the underlying combiner of an applicative.
+
+** =(eq <a> <b>) -> boolean= [applicative]
+
+Returns true if the two values are pointer identical, false otherwise.
+
+** =(cons <car> <cdr>) -> cons= [applicative]
+
+Creates a new cons with the given car and cdr.
+
+** =(make-environment [<parent>]) -> environment= [applicative]
+
+Creates a new empty environment with the given optional parent.
+
+** =(make-type) -> type= [applicative]
+
+Creates a new type with an empty environment.
+
+** =(type-environment <type>) -> environment= [applicative]
+
+Returns the type's environment for storing metadata.
+
+** =(type-of <val>) -> type= [applicative]
+
+Returns an object's type.
+
+** =(tag <type> <val>) -> tagged= [applicative]
+
+Creates a new tagged object with a type and holding an arbitrary
+value.
+
+** =(tagged-value <tagged>) -> value= [applicative]
+
+Returns the value held by a tagged object.
+
+** =(fail <reason>) -> |= [applicative]
+
+Halts evaluation with an object describing the reason (typically an error).
+
+---------------------
+
+#+AUTHOR: Manuel Simoni
+#+EMAIL: msimoni@gmail.com
+#+OPTIONS: toc:t num:nil creator:nil
+#+STYLE: <link rel="stylesheet" type="text/css" href="stylesheet.css" />

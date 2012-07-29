@@ -41,6 +41,9 @@
   (vau (formals . body) env
     (wrap (eval (list* vau formals #ign body) env))))
 
+(def car (lambda ((car . _)) car))
+(def cdr (lambda ((_ . cdr)) cdr))
+
 (def map (lambda (f l) (if (null? l) () (cons (f (car l)) (map f (cdr l))))))
 
 (def let

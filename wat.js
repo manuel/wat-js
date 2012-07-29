@@ -39,13 +39,13 @@ var wat = (function() {
     function Sym(name) { this.name = name; }
     function Cons(car, cdr) { this.car = car; this.cdr = cdr; }
     function cons(car, cdr) { return new Cons(car, cdr); }
-    function car(cons) { return cons.car; }
-    function cdr(cons) { return cons.cdr; }
+    function car(cons) { assert(type_of(cons) === Cons.prototype.wat_type); return cons.car; }
+    function cdr(cons) { assert(type_of(cons) === Cons.prototype.wat_type); return cons.cdr; }
     function elt(cons, i) { return (i === 0) ? car(cons) : elt(cdr(cons), i - 1); }
     function Env(parent) { this.bindings = Object.create(parent ? parent.bindings : null); }
     function lookup(e, sym) { var val = e.bindings[sym.name]; return val ? val : fail("unbound: " + sym.name); }
     function bind(e, lhs, rhs) { lhs.match(e, rhs); }
-    Sym.prototype.match = function(e, rhs) { e.bindings[this.name] = rhs; }
+    Sym.prototype.match = function(e, rhs) { assert(type_of(rhs)); e.bindings[this.name] = rhs; }
     Cons.prototype.match = function(e, rhs) { car(this).match(e, car(rhs)); cdr(this).match(e, cdr(rhs)); }
     Nil.prototype.match = function(e, rhs) { if (rhs !== NIL) fail("NIL expected"); }
     Ign.prototype.match = function(e, rhs) {}
@@ -64,6 +64,7 @@ var wat = (function() {
     function init_types(types) { types.map(function (type) { type.prototype.wat_type = new Type(); }); }
     init_types([Opv, Apv, Def, Vau, If, Eval, CCC, Jump, JSFun, Sym, Cons,
 		Env, Str, Num, Vector, Void, Ign, Nil, True, False, Type]);
+    function assert(b) { if (!b) fail("assertion failed"); }
     function fail(err) { throw err; }
     function array_to_list(array, end) {
 	var c = end ? end : NIL; for (var i = array.length; i > 0; i--) c = cons(array[i - 1], c); return c; }

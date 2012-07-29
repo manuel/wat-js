@@ -113,15 +113,11 @@ Evaluates the test, and if it is true evaluates the then branch, if it
 is false evaluates the else branch, otherwise signals an error.  The
 branches are evaluated in tail position.
 
-** =(ccc <cmb>) -> result= [applicative]
+** =(call/cc <cmb>) -> result= [applicative]
 
-Calls the combiner with the current continuation as argument.  The
-combiner is called in tail position.
-
-** =(jump <k> <val>) -> |= [applicative]
-
-Aborts the current continuation and jumps to the given continuation
-with the given value.
+Calls the combiner with an applicative as argument that, when called
+with an argument will return from the current continuation with that
+argument as value.  The combiner is called in tail position.
 
 ** =(vau <ptree> <envp> <body>) -> operative= [operative]
 

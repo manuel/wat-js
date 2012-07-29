@@ -106,4 +106,13 @@
     (assert (eq (type-of tagged) type))
     (assert (eq (untag tagged) #t)))
 
+  ;; VECTOR, VECTOR-REF
+
+  (scope ()
+    (def (a b c) (list 1 2 3))
+    (def v (vector a b c))
+    (assert (eq (vector-ref v 0) a))
+    (assert (eq (vector-ref v 1) b))
+    (assert (eq (vector-ref v 2) c)))
+
 )

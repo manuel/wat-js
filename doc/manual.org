@@ -201,8 +201,8 @@ Halts evaluation with an object describing the reason (typically an error).
 #+EMAIL: msimoni@gmail.com
 #+OPTIONS: toc:t num:nil creator:nil
 #+STYLE: <link rel="stylesheet" type="text/css" href="stylesheet.css" />
-* Vectors
-** =(vector . <elements>) -> vector= [applicative]
+** Vectors
+*** =(vector . <elements>) -> vector= [applicative]
 Creates a new vector with the given elements.
-** =(vector-ref <vector> <index>) -> element= [applicative]
+*** =(vector-ref <vector> <index>) -> element= [applicative]
 Returns the vector's element at the given index.

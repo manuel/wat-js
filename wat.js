@@ -52,6 +52,7 @@ var wat = (function() {
     function Str(jsstr) { this.jsstr = jsstr };
     function Num(jsnum) { this.jsnum = jsnum };
     function Vector(elements) { this.elements = []; }
+    function vector_ref(vector, i) { return this.elements[elt]; }
     function Void() {}; function Ign() {}; function Nil() {}; function True() {}; function False() {};
     var VOID = new Void(); var IGN = new Ign(); var NIL = new Nil(); var T = new True(); var F = new False();
     function Type() { this.e = new Env() };
@@ -132,6 +133,7 @@ var wat = (function() {
 	bind(e, new Sym("fail"), jswrap(fail));
 	bind(e, new Sym("vector"), jswrap(function() {
 	    return new Vector(array_to_list(Array.prototype.slice.call(arguments))); }));
+	bind(e, new Sym("vector-ref"), jswrap(function(vector, i) { return vector_ref(vector, i.jsnum); }));
 	return e;
     }
     /* API */

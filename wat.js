@@ -30,7 +30,7 @@ var wat = (function() {
     function KIf(k, e, xthen, xelse) { this.k = k; this.e = e; this.xthen = xthen; this.xelse = xelse; }
     KIf.prototype.invoke = function(fbr) { fbr.k = this.k; fbr.prime(fbr.a === F ? this.xelse : this.xthen, this.e); };
     Eval.prototype.combine = function(fbr, e, o) { fbr.prime(elt(o, 0), elt(o, 1)); };
-    CCC.prototype.combine = function(fbr, e, o) { fbr.a = cons(fbr.k, NIL); fbr.k = new KApply(fbr.k, e, elt(o, 0)); };
+    CCC.prototype.combine = function(fbr, e, o) { fbr.prime(cons(elt(o, 0), cons(fbr.k, NIL)), e); };
     Jump.prototype.combine = function(fbr, e, o) { fbr.k = elt(o, 0); fbr.a = elt(o, 1); };
     function JSFun(jsfun) { this.jsfun = jsfun }
     JSFun.prototype.combine = function(fbr, e, o) { fbr.a = this.jsfun.apply(null, list_to_array(o)); };

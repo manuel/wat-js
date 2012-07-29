@@ -68,3 +68,6 @@
 		      (list* list symbols)))
 	  env)))
 
+(def current-environment (vau #ign e e))
+
+(def quote (vau (x) #ign x))

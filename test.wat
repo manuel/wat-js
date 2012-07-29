@@ -1,3 +1,4 @@
+;; -*- mode: scheme -*-
 (scope ()
 
   ;;;;; Test Core Language
@@ -114,5 +115,13 @@
     (assert (eq? (vector-ref v 0) a))
     (assert (eq? (vector-ref v 1) b))
     (assert (eq? (vector-ref v 2) c)))
+
+  ;;;;; Test Crust Language
+
+  ;; NULL?
+
+  (scope ()
+    (assert (null? ()))
+    (assert (not (null? 12))))
 
 )

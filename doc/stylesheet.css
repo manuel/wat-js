@@ -2,4 +2,4 @@
 html { font-size: 18pt; }
 h2, h3, h4, h5, h6, h7 { font-family: sans; }
 h1 { font-family: London; font-size: 60pt; }
-
+a:link, a:visited, a:hover { text-decoration: none; }

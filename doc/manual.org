@@ -120,7 +120,7 @@ Examples:
 | =(vau #ign e e)=        | (1 (+ 2 3) 4) | /<the current environment>/ |
 | =(wrap (vau x #ign x))= | (1 (+ 2 3) 4) | (1 5 4)                     |
 
-* Core Language
+* Core
 
 ** =(def <lhs> <rhs>) -> rhs= [operative]
 
@@ -195,12 +195,23 @@ Returns the underlying value of a user-tagged object.
 
 Halts evaluation with an object describing the reason (typically an error).
 
+* Vectors
+
+** =(vector . <elements>) -> vector= [applicative]
+
+Creates a new vector with the given elements.
+
+** =(vector-ref <vector> <index>) -> element= [applicative]
+
+Returns the vector's element at the given index.
+
+* Library
+
+** =(null? <obj>) -> boolean= [applicative]
+
+Returns true if the object is nil, false otherwise.
+
 #+AUTHOR: Manuel Simoni
 #+EMAIL: msimoni@gmail.com
 #+OPTIONS: toc:t num:nil creator:nil
 #+STYLE: <link rel="stylesheet" type="text/css" href="stylesheet.css" />
-** Vectors
-*** =(vector . <elements>) -> vector= [applicative]
-Creates a new vector with the given elements.
-*** =(vector-ref <vector> <index>) -> element= [applicative]
-Returns the vector's element at the given index.

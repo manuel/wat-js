@@ -41,8 +41,10 @@
   (vau (formals . body) env
     (wrap (eval (list* vau formals #ign body) env))))
 
-(def car (lambda ((car . _)) car))
-(def cdr (lambda ((_ . cdr)) cdr))
+(def car (lambda ((x . #ign)) x))
+(def cdr (lambda ((#ign . x)) x))
+(def caar (lambda (((x . #ign) . #ign)) x))
+(def cadr (lambda (#ign . (x . #ign)) x))
 
 (def map (lambda (f l) (if (null? l) () (cons (f (car l)) (map f (cdr l))))))
 
@@ -57,3 +59,12 @@
 (def assert (vau (expr) e (if (eval expr e) #void (fail expr))))
 
 (def not (lambda (val) (if val #f #t)))
+
+(def scope
+  (vau (symbols . body) env
+    (eval (list def symbols
+		(list let ()
+		      (list* begin body)
+		      (list* list symbols)))
+	  env)))
+

@@ -44,7 +44,7 @@
 (def car (lambda ((x . #ign)) x))
 (def cdr (lambda ((#ign . x)) x))
 (def caar (lambda (((x . #ign) . #ign)) x))
-(def cadr (lambda (#ign . (x . #ign)) x))
+(def cadr (lambda ((#ign . (x . #ign))) x))
 
 (def map (lambda (f l) (if (null? l) () (cons (f (car l)) (map f (cdr l))))))
 

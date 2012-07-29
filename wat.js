@@ -84,7 +84,7 @@ var wat = (function() {
 			    function (ast) { return new Str(ast[1]); });
     var digits = join_action(repeat1(range("0", "9")), "");
     var number_stx = action(sequence(optional(choice("+", "-")), digits, optional(join_action(sequence(".", digits), ""))),
-			    function number_act() {
+			    function (ast) {
 				var sign = ast[0] ? ast[0] : "";
 				var integral_digits = ast[1]; 
 				var fractional_digits = ast[2] || "";
@@ -97,7 +97,7 @@ var wat = (function() {
     var f_stx = make_constant_stx("#f", F);
     var dot_stx = action(wsequence(".", x_stx), function (ast) { return ast[1]; });
     var compound_stx = action(wsequence("(", repeat1(x_stx), optional(dot_stx), ")"),
-			      function (ast) {
+			      function(ast) {
 				  var exprs = ast[1];
 				  var end = ast[2] ? ast[2] : NIL;
 				  return array_to_list(exprs, end); });

@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Technical Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-07-29 03:23:11 CEST"/>
+<meta name="generated" content="2012-07-29 03:30:49 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -280,10 +280,10 @@ Examples:
 <tr><th scope="col">Left-hand side</th><th scope="col">Right-hand side</th><th scope="col">Match results</th></tr>
 </thead>
 <tbody>
-<tr><td>a</td><td>(1 2 3)</td><td>a -&gt; (1 2 3)</td></tr>
-<tr><td>(a . b)</td><td>(1 2 3)</td><td>a -&gt; 1, b -&gt; (2 3)</td></tr>
-<tr><td>(a b c)</td><td>(1 2 3)</td><td>a -&gt; 1, b -&gt; 2, c -&gt; 3</td></tr>
-<tr><td>#ign</td><td>(1 2 3)</td><td></td></tr>
+<tr><td>a</td><td>(1 (2) 3)</td><td>a -&gt; (1 (2) 3)</td></tr>
+<tr><td>(a . b)</td><td>(1 (2) 3)</td><td>a -&gt; 1, b -&gt; ((2) 3)</td></tr>
+<tr><td>(a b c)</td><td>(1 (2) 3)</td><td>a -&gt; 1, b -&gt; (2), c -&gt; 3</td></tr>
+<tr><td>(a (b) . #ign)</td><td>(1 (2) 3)</td><td>a -&gt; 1, b -&gt; 2</td></tr>
 </tbody>
 </table>
 
@@ -516,7 +516,7 @@ Halts evaluation with an object describing the reason (typically an error).
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-07-29 03:23:11 CEST</p>
+<p class="date"> Date: 2012-07-29 03:30:49 CEST</p>
 </div>
 </div>
 </body>

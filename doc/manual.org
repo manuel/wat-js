@@ -93,12 +93,12 @@ nil, and ignore simply ignores the right-hand side.
 
 Examples:
 
-| Left-hand side | Right-hand side | Match results          |
-|----------------+-----------------+------------------------|
-| a              | (1 2 3)         | a -> (1 2 3)           |
-| (a . b)        | (1 2 3)         | a -> 1, b -> (2 3)     |
-| (a b c)        | (1 2 3)         | a -> 1, b -> 2, c -> 3 |
-| #ign           | (1 2 3)         |                        |
+| Left-hand side | Right-hand side | Match results            |
+|----------------+-----------------+--------------------------|
+| a              | (1 (2) 3)       | a -> (1 (2) 3)           |
+| (a . b)        | (1 (2) 3)       | a -> 1, b -> ((2) 3)     |
+| (a b c)        | (1 (2) 3)       | a -> 1, b -> (2), c -> 3 |
+| (a (b) . #ign) | (1 (2) 3)       | a -> 1, b -> 2           |
 
 * Core Language
 

@@ -159,8 +159,6 @@ Returns the value held by a tagged object.
 
 Halts evaluation with an object describing the reason (typically an error).
 
----------------------
-
 #+AUTHOR: Manuel Simoni
 #+EMAIL: msimoni@gmail.com
 #+OPTIONS: toc:t num:nil creator:nil

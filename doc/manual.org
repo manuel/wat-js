@@ -76,9 +76,10 @@ by the following table:
 Every object in Wat has a type tag or just type.  A type is a
 first-class object that contains an (initially empty) environment into
 which programmers may store metadata.  Type tags are provided for all
-built-in types, and there are routines for creating new types, and
-tagging values with types.  Type tags allow the definition of type
-systems in userland that interoperate with the built-in types.
+built-in types, and there are routines for creating new types and
+tagged objects that wrap an underlying value with a type.  Type tags
+allow the definition of type systems in userland that interoperate
+with the built-in types.
 
 * Pattern Matching
 
@@ -150,12 +151,12 @@ Returns an object's type.
 
 ** =(tag <type> <val>) -> tagged= [applicative]
 
-Creates a new tagged object with a type and holding an arbitrary
-value.
+Creates a new user-tagged object with a type and wrapping an
+underlying value.
 
-** =(tagged-value <tagged>) -> value= [applicative]
+** =(untag <tagged>) -> value= [applicative]
 
-Returns the value held by a tagged object.
+Returns the underlying value of a user-tagged object.
 
 ** =(fail <reason>) -> |= [applicative]
 

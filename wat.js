@@ -62,8 +62,9 @@ var wat = (function() {
     function tag(type, val) { return new Tagged(type, val); };
     function untag(obj) { return obj.val; }
     function init_types(types) { types.map(function (type) { type.prototype.wat_type = new Type(); }); }
-    init_types([Opv, Apv, Def, Vau, If, Eval, CCC, Jump, JSFun, Sym, Cons,
-		Env, Str, Num, Vector, Void, Ign, Nil, True, False, Type]);
+    init_types([KEval, KCombine, KApply, KEvalArg, KDef, KIf,
+		Opv, Apv, Def, Vau, If, Eval, CCC, Jump, JSFun,
+		Sym, Cons, Env, Str, Num, Vector, Void, Ign, Nil, True, False, Type]);
     function assert(b) { if (!b) fail("assertion failed"); }
     function fail(err) { throw err; }
     function array_to_list(array, end) {

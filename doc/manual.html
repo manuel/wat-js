@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-07-29 18:41:06 CEST"/>
+<meta name="generated" content="2012-07-29 18:50:26 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -113,6 +113,7 @@ lang="en" xml:lang="en">
 <li><a href="#sec-9">Library </a>
 <ul>
 <li><a href="#sec-9.1"><code>(null? &lt;obj&gt;) -&gt; boolean</code> [applicative] </a></li>
+<li><a href="#sec-9.2"><code>(begin . &lt;exprs&gt;) -&gt; result</code> [operative] </a></li>
 </ul>
 </li>
 </ul>
@@ -603,13 +604,26 @@ Returns the vector's element at the given index.
 Returns true if the object is nil, false otherwise.
 </p>
 </div>
+
+</div>
+
+<div id="outline-container-9.2" class="outline-3">
+<h3 id="sec-9.2"><code>(begin . &lt;exprs&gt;) -&gt; result</code> [operative] </h3>
+<div class="outline-text-3" id="text-9.2">
+
+
+<p>
+Evaluates the expressions in sequence, returning the value of the
+last.  <code>(begin)</code> returns void.
+</p>
+</div>
 </div>
 </div>
 <div id="postamble">
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-07-29 18:41:06 CEST</p>
+<p class="date"> Date: 2012-07-29 18:50:26 CEST</p>
 </div>
 </div>
 </body>

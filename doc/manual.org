@@ -211,6 +211,11 @@ Returns the vector's element at the given index.
 
 Returns true if the object is nil, false otherwise.
 
+** =(begin . <exprs>) -> result= [operative]
+
+Evaluates the expressions in sequence, returning the value of the
+last.  =(begin)= returns void.
+
 #+AUTHOR: Manuel Simoni
 #+EMAIL: msimoni@gmail.com
 #+OPTIONS: toc:t num:nil creator:nil

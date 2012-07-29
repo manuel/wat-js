@@ -124,4 +124,11 @@
     (assert (null? ()))
     (assert (not (null? 12))))
 
+  ;; BEGIN
+
+  (scope ()
+    (assert (eq? #void (begin)))
+    (assert (eq? #t (begin (eq? #t #t))))
+    (assert (eq? #t (begin #f (eq? #t #t)))))
+
 )

@@ -137,4 +137,8 @@
     (assert (eq? #t (begin (eq? #t #t))))
     (assert (eq? #t (begin #f (eq? #t #t)))))
 
+  ;; TO-STRING
+
+  (display (to-string "foo"))
+
 )

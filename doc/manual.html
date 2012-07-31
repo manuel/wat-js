@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-07-31 18:56:55 CEST"/>
+<meta name="generated" content="2012-07-31 19:54:07 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -125,7 +125,7 @@ lang="en" xml:lang="en">
 <li><a href="#sec-8.1.2"><code>apply &lt;apv&gt; &lt;args&gt; → result</code> [applicative] </a></li>
 <li><a href="#sec-8.1.3"><code>set! &lt;env&gt; &lt;lhs&gt; &lt;rhs&gt; → rhs</code> [operative] </a></li>
 <li><a href="#sec-8.1.4"><code>quote &lt;form&gt; → form</code> [operative] </a></li>
-<li><a href="#sec-8.1.5"><code>define lhs rhs</code> [operative] </a></li>
+<li><a href="#sec-8.1.5"><code>define lhs rhs → result</code> [operative] </a></li>
 </ul>
 </li>
 <li><a href="#sec-8.2">Pairs and Lists </a>
@@ -144,6 +144,13 @@ lang="en" xml:lang="en">
 <li><a href="#sec-8.3.1"><code>begin . &lt;exprs&gt; → result</code> [operative] </a></li>
 <li><a href="#sec-8.3.2"><code>call/cc &lt;cmb&gt; → result</code> [applicative] </a></li>
 <li><a href="#sec-8.3.3"><code>dynamic-wind &lt;pre-thunk&gt; &lt;value-thunk&gt; &lt;post-thunk&gt; → result</code> [applicative] </a></li>
+</ul>
+</li>
+<li><a href="#sec-8.4">Generic Programming </a>
+<ul>
+<li><a href="#sec-8.4.1"><code>define-generic (&lt;name&gt; . &lt;args&gt;) → generic</code> [operative] </a></li>
+<li><a href="#sec-8.4.2"><code>define-method (&lt;name&gt; (&lt;self&gt; &lt;type&gt;) . &lt;args&gt;) → method</code> [operative] </a></li>
+<li><a href="#sec-8.4.3"><code>send &lt;obj&gt; &lt;msg&gt; &lt;arg&gt; → result</code> [applicative] </a></li>
 </ul>
 </li>
 </ul>
@@ -765,7 +772,7 @@ Returns form unevaluated.
 </div>
 
 <div id="outline-container-8.1.5" class="outline-4">
-<h4 id="sec-8.1.5"><code>define lhs rhs</code> [operative] </h4>
+<h4 id="sec-8.1.5"><code>define lhs rhs → result</code> [operative] </h4>
 <div class="outline-text-4" id="text-8.1.5">
 
 
@@ -774,12 +781,12 @@ Scheme-like <code>define</code> with two cases:
 </p>
 <ul>
 <li>
-<code>(define name value)</code> simply binds name to value.
+<code>(define name value)</code> simply binds name to value, returning value.
 
 </li>
 <li>
 <code>(define (name . args) . body)</code> binds name to an applicative with
-the given arguments and body expressions.
+the given arguments and body expressions, returning the applicative.
 
 </li>
 </ul>
@@ -928,13 +935,58 @@ i.e. they collaborate with <code>dynamic-wind</code>.
 
 </div>
 </div>
+
+</div>
+
+<div id="outline-container-8.4" class="outline-3">
+<h3 id="sec-8.4">Generic Programming </h3>
+<div class="outline-text-3" id="text-8.4">
+
+
+
+</div>
+
+<div id="outline-container-8.4.1" class="outline-4">
+<h4 id="sec-8.4.1"><code>define-generic (&lt;name&gt; . &lt;args&gt;) → generic</code> [operative] </h4>
+<div class="outline-text-4" id="text-8.4.1">
+
+
+<p>
+Defines a new generic function with the given name.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-8.4.2" class="outline-4">
+<h4 id="sec-8.4.2"><code>define-method (&lt;name&gt; (&lt;self&gt; &lt;type&gt;) . &lt;args&gt;) → method</code> [operative] </h4>
+<div class="outline-text-4" id="text-8.4.2">
+
+
+<p>
+Defines a new method for a generic function.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-8.4.3" class="outline-4">
+<h4 id="sec-8.4.3"><code>send &lt;obj&gt; &lt;msg&gt; &lt;arg&gt; → result</code> [applicative] </h4>
+<div class="outline-text-4" id="text-8.4.3">
+
+
+<p>
+Sends object a message with an argument.
+</p>
+</div>
+</div>
 </div>
 </div>
 <div id="postamble">
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-07-31 18:56:55 CEST</p>
+<p class="date"> Date: 2012-07-31 19:54:07 CEST</p>
 </div>
 </div>
 </body>

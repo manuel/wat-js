@@ -266,14 +266,14 @@ right-hand side in the given environment.
 
 Returns form unevaluated.
 
-*** =define lhs rhs= [operative]
+*** =define <lhs> <rhs> → result= [operative]
 
 Scheme-like =define= with two cases:
 
- * =(define name value)= simply binds name to value.
+ * =(define <name> <value>)= simply binds name to value, returning value.
 
- * =(define (name . args) . body)= binds name to an applicative with
-   the given arguments and body expressions.
+ * =(define (<name> . <args>) . <body>)= binds name to an applicative with
+   the given arguments and body expressions, returning the applicative.
 
 ** Pairs and Lists
 
@@ -323,4 +323,18 @@ As opposed to =ccc=, continuations created by =call/cc= are winding,
 i.e. they collaborate with =dynamic-wind=.
 
 *** =dynamic-wind <pre-thunk> <value-thunk> <post-thunk> → result= [applicative]
+
+** Generic Programming
+
+*** =define-generic (<name> . <args>) → generic= [operative]
+
+Defines a new generic function with the given name.
+
+*** =define-method (<name> (<self> <type>) . <args>) → method= [operative]
+
+Defines a new method for a generic function.
+
+*** =send <obj> <msg> <arg> → result= [applicative]
+
+Sends object a message with an argument.
 

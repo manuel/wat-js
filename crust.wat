@@ -123,6 +123,8 @@
 	  (eval (list def name (list* lambda args rhs)) env))
 	(eval (list* def lhs rhs) env))))
 
+(def define-syntax def)
+
 (define (assq obj alist)
   (if (null? alist) () (if (eq? obj (caar alist)) (car alist) (assq obj (cdr alist)))))
 
@@ -130,7 +132,7 @@
 
   (define *env* (current-environment))
 
-  (define *winds* ())
+  (define *winds* '())
 
   (define (dynamic-wind <thunk1> <thunk2> <thunk3>)
     (<thunk1>)
@@ -170,6 +172,28 @@
     (set! *env* *winds* to))
 
 )
+
+(scope (define-method define-generic send)
+  (define (put-method type name method)
+    (eval (list def name method) (type-environment type)))
+  (define (find-method type name)
+    (eval name (type-environment type)))
+  (define (send obj message arg)
+    (apply (find-method (type-of obj) message) (list* obj arg)))
+  (define-syntax define-generic
+    (vau ((name . #ign)) env
+      (eval (list def name (lambda (self . arg) (send self name arg))) env)))
+  (define-syntax define-method
+    (vau ((name (self type) . args) . body) env
+      (put-method (eval type env) name
+		  (eval (list* lambda (list* self args) body) env))))
+)
+
+(define-generic (to-string obj -> string))
+
+(def String (type-of "foo"))
+(define (string? s) (eq? (type-of s) String))
+(define-method (to-string (self String)) self)
 
 (define (newline) (display "newline")) ; huh?
 

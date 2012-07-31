@@ -104,10 +104,10 @@ Examples:
 
 | Left-hand side | Right-hand side | Match results            |
 |----------------+-----------------+--------------------------|
-| a              | (1 (2) 3)       | a -> (1 (2) 3)           |
-| (a . b)        | (1 (2) 3)       | a -> 1, b -> ((2) 3)     |
-| (a b c)        | (1 (2) 3)       | a -> 1, b -> (2), c -> 3 |
-| (a (b) . #ign) | (1 (2) 3)       | a -> 1, b -> 2           |
+| a              | (1 (2) 3)       | a → (1 (2) 3)           |
+| (a . b)        | (1 (2) 3)       | a → 1, b → ((2) 3)     |
+| (a b c)        | (1 (2) 3)       | a → 1, b → (2), c → 3 |
+| (a (b) . #ign) | (1 (2) 3)       | a → 1, b → 2           |
 
 * Combiners
 
@@ -125,9 +125,9 @@ Examples:
 
 | Combiner                | Operand Tree  | Result                      |
 |-------------------------+---------------+-----------------------------|
-| =(vau x #ign x)=        | (1 (+ 2 3) 4) | (1 (+ 2 3) 4)               |
-| =(vau #ign e e)=        | (1 (+ 2 3) 4) | /<the current environment>/ |
-| =(wrap (vau x #ign x))= | (1 (+ 2 3) 4) | (1 5 4)                     |
+| =vau x #ign x)=        | (1 (+ 2 3) 4) | (1 (+ 2 3) 4)               |
+| =vau #ign e e)=        | (1 (+ 2 3) 4) | /<the current environment>/ |
+| =wrap (vau x #ign x))= | (1 (+ 2 3) 4) | (1 5 4)                     |
 
 * Core
 
@@ -136,18 +136,18 @@ implemented in Wat itself (or it would be cumbersome to do so).
 
 ** Primitives
 
-*** =(def <lhs> <rhs>) -> rhs= [operative]
+*** =def <lhs> <rhs> → rhs= [operative]
 
 Evaluates the right-hand side, matches the left-hand side against it
 in the current environment, and returns it.
 
-*** =(if <test> <then> <else>) -> result= [operative]
+*** =if <test> <then> <else> → result= [operative]
 
 Evaluates the test, and if it is false evaluates the else branch,
 otherwise evaluates the then branch.  The branches are evaluated in
 tail position.
 
-*** =(ccc <cmb>) -> result= [applicative]
+*** =ccc <cmb> → result= [applicative]
 
 Calls the combiner with the current continuation as argument.  The
 combiner is called in tail position.
@@ -155,7 +155,7 @@ combiner is called in tail position.
 =ccc= is the lowlevel facility for non-winding continuations; users
 should almost certainly use the higher-level =call/cc= instead.
 
-*** =(jump <cont> <val>) -> |= [applicative]
+*** =jump <cont> <val> → |= [applicative]
 
 Invokes the given continuation with the given value.
 
@@ -164,73 +164,73 @@ make continuations created by it appear as applicatives.  Instead,
 they are exposed directly, and therefore need a jump primitive for
 invoking them.
 
-*** =(vau <ptree> <envp> <body>) -> operative= [operative]
+*** =vau <ptree> <envp> <body> → operative= [operative]
 
 Constructs a new compound operative that closes over the current
 environment with the given parameter tree, environment parameter, and
 body expression.
 
-*** =(eval <expr> <env>) -> result= [applicative]
+*** =eval <expr> <env> → result= [applicative]
 
 Evaluates the expression in the given environment.  The expression is
 evaluated in tail-position.
 
-*** =(wrap <cmb>) -> applicative= [applicative]
+*** =wrap <cmb> → applicative= [applicative]
 
 Returns an applicative around an underlying combiner.
 
-*** =(unwrap <cmb>) -> combiner= [applicative]
+*** =unwrap <cmb> → combiner= [applicative]
 
 Returns the underlying combiner of an applicative.
 
-*** =(eq? <a> <b>) -> boolean= [applicative]
+*** =eq? <a> <b> → boolean= [applicative]
 
 Returns true if the two values are pointer identical, false otherwise.
 
-*** =(cons <car> <cdr>) -> cons= [applicative]
+*** =cons <car> <cdr> → cons= [applicative]
 
 Creates a new cons with the given car and cdr.
 
-*** =(make-environment [<parent>]) -> environment= [applicative]
+*** =make-environment [<parent>] → environment= [applicative]
 
 Creates a new empty environment with the given optional parent.
 
-*** =(make-type) -> type= [applicative]
+*** =make-type → type= [applicative]
 
 Creates a new type with an empty environment.
 
-*** =(type-environment <type>) -> environment= [applicative]
+*** =type-environment <type> → environment= [applicative]
 
 Returns the type's environment for storing metadata.
 
-*** =(type-of <val>) -> type= [applicative]
+*** =type-of <val> → type= [applicative]
 
 Returns an object's type.
 
-*** =(tag <type> <val>) -> tagged= [applicative]
+*** =tag <type> <val> → tagged= [applicative]
 
 Creates a new user-tagged object with a type and wrapping an
 underlying value.
 
-*** =(untag <tagged>) -> value= [applicative]
+*** =untag <tagged> → value= [applicative]
 
 Returns the underlying value of a user-tagged object.
 
-*** =(display <msg>) -> void= [applicative]
+*** =display <msg> → void= [applicative]
 
 Prints a message string to the console.
 
-*** =(fail <reason>) -> |= [applicative]
+*** =fail <reason> → |= [applicative]
 
 Halts evaluation with an object describing the reason (typically an error).
 
 ** Vectors
 
-*** =(vector . <elements>) -> vector= [applicative]
+*** =vector . <elements> → vector= [applicative]
 
 Creates a new vector with the given elements.
 
-*** =(vector-ref <vector> <index>) -> element= [applicative]
+*** =vector-ref <vector> <index> → element= [applicative]
 
 Returns the vector's element at the given index.
 
@@ -240,27 +240,27 @@ The library consists of definitions written in Wat itself.
 
 ** Common
 
-*** =(lambda <ptree> . <exprs>) -> applicative= [operative]
+*** =lambda <ptree> . <exprs> → applicative= [operative]
 
 Creates an applicative combiner, as in Scheme.
 
-*** =(apply <apv> <args>) -> result= [applicative]
+*** =apply <apv> <args> → result= [applicative]
 
 Applies an applicative to an arguments list.
 
-*** =(set! <env> <lhs> <rhs>) -> rhs= [operative]
+*** =set! <env> <lhs> <rhs> → rhs= [operative]
 
 Updates the left-hand side bindings by matching it against the
 right-hand side in the given environment.
 
 ** Control Flow
 
-*** =(begin . <exprs>) -> result= [operative]
+*** =begin . <exprs> → result= [operative]
 
 Evaluates expressions from left to right, returning the value of the
-last.  As a special case, =(begin)= returns void.
+last.  As a special case, =begin)= returns void.
 
-*** =(call/cc <cmb>) -> result= [applicative]
+*** =call/cc <cmb> → result= [applicative]
 
 Calls the combiner with an applicative as argument, that when called
 will pass its single argument to the current continuation.  The
@@ -269,5 +269,5 @@ combiner is called in tail position.
 As opposed to =ccc=, continuations created by =call/cc= are winding,
 i.e. they collaborate with =dynamic-wind=.
 
-*** =(dynamic-wind <pre-thunk> <value-thunk> <post-thunk>) -> result= [applicative]
+*** =dynamic-wind <pre-thunk> <value-thunk> <post-thunk> → result= [applicative]
 

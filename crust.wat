@@ -130,6 +130,9 @@
 
 (scope (call/cc dynamic-wind call-with-current-continuation)
 
+  ;; Adapted from
+  ;; http://groups.csail.mit.edu/mac/ftpdir/scheme-mail/HTML/rrrs-1992/msg00194.html
+
   (define *env* (current-environment))
 
   (define *winds* '())

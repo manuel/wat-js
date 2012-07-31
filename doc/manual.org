@@ -217,9 +217,9 @@ underlying value.
 
 Returns the underlying value of a user-tagged object.
 
-*** =display <msg> → void= [applicative]
+*** =display <msg> → msg= [applicative]
 
-Prints a message string to the console.
+Prints a message string to the console and returns it.
 
 *** =fail <reason> → |= [applicative]
 
@@ -234,6 +234,14 @@ Creates a new vector with the given elements.
 *** =vector-ref <vector> <index> → element= [applicative]
 
 Returns the vector's element at the given index.
+
+*** =vector-set! <vector> <index> <element> → element= [applicative]
+
+Updates the vector's element at the given index and returns it.
+
+*** =vector-length <vector> → number= [applicative]
+
+Returns the number of elements in the vector.
 
 * Library
 
@@ -254,9 +262,41 @@ Applies an applicative to an arguments list.
 Updates the left-hand side bindings by matching it against the
 right-hand side in the given environment.
 
-*** =quote <form> -> form= [operative]
+*** =quote <form> → form= [operative]
 
 Returns form unevaluated.
+
+
+** Pairs and Lists
+
+*** =car <pair> → value= [applicative]
+
+
+Contents of the Address part of Register.
+
+*** =cdr <pair> → value= [applicative]
+
+Contents of the Decrement part of Register.
+
+*** =caar=, =cadr=, =cdar=, =cddr= [applicatives]
+
+Combinations of =car= and =cdr=, e.g. =(cadr x)= === =(car (cdr x))=.
+
+*** =null? <val> → boolean= [applicative]
+
+Returns true if a value is nil, the empty list, false otherwise.
+
+*** =pair? <val> → boolean= [applicative]
+
+Returns true if a value is a pair (cons), false otherwise.
+
+*** =list . <vals> → list= [applicative]
+
+Constructs a nil-terminated list containing the values.
+
+*** =list* . <vals> → list= [applicative]
+
+Constructs a list of the values, terminated by the last value.
 
 ** Control Flow
 

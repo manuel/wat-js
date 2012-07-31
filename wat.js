@@ -53,6 +53,8 @@ var wat = (function() {
     function Num(jsnum) { this.jsnum = jsnum };
     function Vector(elements) { this.elements = elements; }
     function vector_ref(vector, i) { return vector.elements[i]; }
+    function vector_set(vector, i, val) { vector.elements[i] = val; return val; }
+    function vector_length(vector) { return vector.length; }
     function Void() {}; function Ign() {}; function Nil() {}; function True() {}; function False() {};
     var VOID = new Void(); var IGN = new Ign(); var NIL = new Nil(); var T = new True(); var F = new False();
     function Type() { this.e = new Env() };
@@ -134,11 +136,12 @@ var wat = (function() {
 	bind(e, new Sym("type-of"), jswrap(type_of));
 	bind(e, new Sym("tag"), jswrap(tag));
 	bind(e, new Sym("untag"), jswrap(untag));
-	bind(e, new Sym("display"), jswrap(function(str) { console.log(str.jsstr); return VOID; }));
+	bind(e, new Sym("display"), jswrap(function(str) { console.log(str.jsstr); return str; }));
 	bind(e, new Sym("fail"), jswrap(fail));
-	bind(e, new Sym("vector"), jswrap(function() {
-	    return new Vector(Array.prototype.slice.call(arguments)); }));
+	bind(e, new Sym("vector"), jswrap(function() { return new Vector(Array.prototype.slice.call(arguments)); }));
 	bind(e, new Sym("vector-ref"), jswrap(function(vector, i) { return vector_ref(vector, i.jsnum); }));
+	bind(e, new Sym("vector-set!"), jswrap(function(vector, i, val) { return vector_set(vector, i.jsnum, val); }));
+	bind(e, new Sym("vector-length"), jswrap(function(vector) { return new Num(vector_length(vector)); }));
 	return e;
     }
     /* API */

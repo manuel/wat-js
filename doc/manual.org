@@ -91,7 +91,8 @@ with the built-in types.
 By principle, Wat does not support fully encapsulated data, i.e. data
 that cannot be inspected from the outside.  Total visibility into the
 running program for debugging and introspection is valued over the
-ability to create total abstraction.
+ability to create total abstraction.  A better design based on
+mirror-based reflection is probably possible.
 
 * Pattern Matching
 

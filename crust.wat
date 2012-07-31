@@ -200,3 +200,7 @@
 
 (define (newline) (display "newline")) ; huh?
 
+(define-syntax with-mark
+  (vau (key val . body) env
+    (eval (list call-with-mark key val (list* lambda () body)) env)))
+

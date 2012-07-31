@@ -136,13 +136,36 @@ Examples:
 The core contains primitive functionality that could not be
 implemented in Wat itself (or it would be cumbersome to do so).
 
-** Primitives
-
+** Vau Calculus
 *** =def <lhs> <rhs> → rhs= [operative]
 
 Evaluates the right-hand side, matches the left-hand side against it
 in the current environment, and returns it.
 
+*** =vau <ptree> <envp> <body> → operative= [operative]
+
+Constructs a new compound operative that closes over the current
+environment with the given parameter tree, environment parameter, and
+body expression.
+
+*** =eval <expr> <env> → result= [applicative]
+
+Evaluates the expression in the given environment.  The expression is
+evaluated in tail-position.
+
+*** =wrap <cmb> → applicative= [applicative]
+
+Returns an applicative around an underlying combiner.
+
+*** =unwrap <cmb> → combiner= [applicative]
+
+Returns the underlying combiner of an applicative.
+
+*** =make-environment [<parent>] → environment= [applicative]
+
+Creates a new empty environment with the given optional parent.
+
+** Control Flow
 *** =if <test> <then> <else> → result= [operative]
 
 Evaluates the test, and if it is false evaluates the else branch,
@@ -166,37 +189,18 @@ make continuations created by it appear as applicatives.  Instead,
 they are exposed directly, and therefore need a jump primitive for
 invoking them.
 
-*** =vau <ptree> <envp> <body> → operative= [operative]
+*** =call-with-mark <key> <val> <thunk> → result= [operative]
 
-Constructs a new compound operative that closes over the current
-environment with the given parameter tree, environment parameter, and
-body expression.
+Calls thunk in a continuation with a continuation mark mapping key to
+value.  If the current continuation already has a mark with that key,
+it is overwritten.  Thunk is evaluated in tail position.
 
-*** =eval <expr> <env> → result= [applicative]
+*** =current-marks <key> → list= [applicative]
 
-Evaluates the expression in the given environment.  The expression is
-evaluated in tail-position.
+Returns a list of the current continuation marks with the given key,
+from innermost to outermost continuation.
 
-*** =wrap <cmb> → applicative= [applicative]
-
-Returns an applicative around an underlying combiner.
-
-*** =unwrap <cmb> → combiner= [applicative]
-
-Returns the underlying combiner of an applicative.
-
-*** =eq? <a> <b> → boolean= [applicative]
-
-Returns true if the two values are pointer identical, false otherwise.
-
-*** =cons <car> <cdr> → cons= [applicative]
-
-Creates a new cons with the given car and cdr.
-
-*** =make-environment [<parent>] → environment= [applicative]
-
-Creates a new empty environment with the given optional parent.
-
+** Types
 *** =make-type → type= [applicative]
 
 Creates a new type with an empty environment.
@@ -217,6 +221,15 @@ underlying value.
 *** =untag <tagged> → value= [applicative]
 
 Returns the underlying value of a user-tagged object.
+
+** Common
+*** =eq? <a> <b> → boolean= [applicative]
+
+Returns true if the two values are pointer identical, false otherwise.
+
+*** =cons <car> <cdr> → cons= [applicative]
+
+Creates a new cons with the given car and cdr.
 
 *** =display <msg> → msg= [applicative]
 
@@ -346,6 +359,11 @@ As opposed to =ccc=, continuations created by =call/cc= are winding,
 i.e. they collaborate with =dynamic-wind=.
 
 *** =dynamic-wind <pre-thunk> <value-thunk> <post-thunk> → result= [applicative]
+
+
+*** =with-mark <key> <val> . <exprs> → result= [operative]
+
+Shorthand for =call-with-mark= that doesn't need a thunk.
 
 ** Generic Programming
 

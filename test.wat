@@ -137,8 +137,16 @@
     (assert (eq? #t (begin (eq? #t #t))))
     (assert (eq? #t (begin #f (eq? #t #t)))))
 
-  ;; TO-STRING
+  ;; Continuation Marks
 
-  (display (to-string "foo"))
+  (provide ()
+    (eq? () (current-marks 'foo))
+    (eq? #t (with-mark 'foo #t (car (current-marks 'foo))))
+    (eq? #f (with-mark 'foo #t (with-mark 'foo #f (car (current-marks 'foo)))))
+    (eq? () (with-mark 'foo #t (with-mark 'foo #f (cdr (current-marks 'foo)))))
+    (define (id x) x)
+    (eq? #f (with-mark 'foo #t (id (with-mark 'foo #f (car (current-marks 'foo))))))
+    (eq? #t (with-mark 'foo #t (id (with-mark 'foo #f (car (cdr (current-marks 'foo)))))))
+    (eq? () (with-mark 'foo #t (id (with-mark 'foo #f (cdr (cdr (current-marks 'foo))))))))
 
 )

@@ -32,6 +32,14 @@ var wat = (function() {
     Eval.prototype.combine = function(fbr, e, o) { fbr.prime(elt(o, 0), elt(o, 1)); };
     CCC.prototype.combine = function(fbr, e, o) { fbr.prime(cons(elt(o, 0), cons(fbr.k, NIL)), e); };
     Jump.prototype.combine = function(fbr, e, o) { fbr.k = elt(o, 0); fbr.a = elt(o, 1); };
+    function CallWithMark() {}; function CurrentMarks() {}
+    CallWithMark.prototype.combine = function(fbr, e, o) {
+	var key = elt(o, 0); var val = elt(o, 1); var th = elt(o, 2);
+	fbr.k = clone(fbr.k); fbr.k["m_" + key.name] = val; fbr.prime(cons(th, NIL), e); };
+    CurrentMarks.prototype.combine = function(fbr, e, o) {
+	var key = elt(o, 0); var k = fbr.k; var res = [];
+	while(k) { var val = k["m_" + key.name]; if (val !== undefined) res.push(val); k = k.k; }
+	fbr.a = array_to_list(res); };
     function JSFun(jsfun) { this.jsfun = jsfun }
     JSFun.prototype.combine = function(fbr, e, o) { fbr.a = this.jsfun.apply(null, list_to_array(o)); };
     function jswrap(jsfun) { return wrap(new JSFun(jsfun)); }
@@ -65,7 +73,7 @@ var wat = (function() {
     function untag(obj) { return obj.val; }
     function init_types(types) { types.map(function (type) { type.prototype.wat_type = new Type(); }); }
     init_types([KEval, KCombine, KApply, KEvalArg, KDef, KIf,
-		Opv, Apv, Def, Vau, If, Eval, CCC, Jump, JSFun,
+		Opv, Apv, Def, Vau, If, Eval, CCC, Jump, CallWithMark, CurrentMarks, JSFun,
 		Sym, Cons, Env, Str, Num, Vector, Void, Ign, Nil, True, False, Type]);
     function assert(b) { if (!b) fail("assertion failed"); }
     function fail(err) { throw err; }
@@ -75,6 +83,9 @@ var wat = (function() {
 	var res = []; while(c !== NIL) { res.push(car(c)); c = cdr(c); } return res; }
     function reverse_list(list) {
 	var res = NIL; while(list !== NIL) { res = cons(car(list), res); list = cdr(list); } return res; }
+    function clone(obj) {
+        var cl = Object.create(obj.constructor.prototype);
+	for (var k in obj) if (obj.hasOwnProperty(k)) cl[k] = obj[k]; return cl; };
     /***** Parser *****/
     function parse(s) {
 	var res = program_stx(ps(s));
@@ -124,6 +135,8 @@ var wat = (function() {
 	bind(e, new Sym("if"), new If());
 	bind(e, new Sym("ccc"), wrap(new CCC()));
 	bind(e, new Sym("jump"), wrap(new Jump()));
+	bind(e, new Sym("call-with-mark"), wrap(new CallWithMark()));
+	bind(e, new Sym("current-marks"), wrap(new CurrentMarks()));
 	bind(e, new Sym("vau"), new Vau());
 	bind(e, new Sym("eval"), wrap(new Eval()));
 	bind(e, new Sym("wrap"), jswrap(wrap));
@@ -136,7 +149,7 @@ var wat = (function() {
 	bind(e, new Sym("type-of"), jswrap(type_of));
 	bind(e, new Sym("tag"), jswrap(tag));
 	bind(e, new Sym("untag"), jswrap(untag));
-	bind(e, new Sym("display"), jswrap(function(str) { console.log(str.jsstr); return str; }));
+	bind(e, new Sym("display"), jswrap(function(str) { console.log(str); return str; }));
 	bind(e, new Sym("fail"), jswrap(fail));
 	bind(e, new Sym("vector"), jswrap(function() { return new Vector(Array.prototype.slice.call(arguments)); }));
 	bind(e, new Sym("vector-ref"), jswrap(function(vector, i) { return vector_ref(vector, i.jsnum); }));

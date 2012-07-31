@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-07-31 21:11:23 CEST"/>
+<meta name="generated" content="2012-07-31 21:14:15 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -126,7 +126,8 @@ lang="en" xml:lang="en">
 <li><a href="#sec-8.1.3"><code>set! &lt;env&gt; &lt;lhs&gt; &lt;rhs&gt; → rhs</code> [operative] </a></li>
 <li><a href="#sec-8.1.4"><code>quote &lt;form&gt; → form</code> [operative] </a></li>
 <li><a href="#sec-8.1.5"><code>define &lt;lhs&gt; &lt;rhs&gt; → result</code> [operative] </a></li>
-<li><a href="#sec-8.1.6"><code>provide &lt;names&gt; . &lt;exprs&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-8.1.6"><code>define-syntax &lt;name&gt; &lt;expr&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-8.1.7"><code>provide &lt;names&gt; . &lt;exprs&gt; → result</code> [operative] </a></li>
 </ul>
 </li>
 <li><a href="#sec-8.2">Pairs and Lists </a>
@@ -797,8 +798,22 @@ the given arguments and body expressions, returning the applicative.
 </div>
 
 <div id="outline-container-8.1.6" class="outline-4">
-<h4 id="sec-8.1.6"><code>provide &lt;names&gt; . &lt;exprs&gt; → result</code> [operative] </h4>
+<h4 id="sec-8.1.6"><code>define-syntax &lt;name&gt; &lt;expr&gt; → result</code> [operative] </h4>
 <div class="outline-text-4" id="text-8.1.6">
+
+
+<p>
+Has simply the same effect as <code>def</code>, but is used for defining
+operatives in code that uses Scheme-style <code>define</code> for defining
+applicatives.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-8.1.7" class="outline-4">
+<h4 id="sec-8.1.7"><code>provide &lt;names&gt; . &lt;exprs&gt; → result</code> [operative] </h4>
+<div class="outline-text-4" id="text-8.1.7">
 
 
 <p>
@@ -1017,7 +1032,7 @@ Sends object a message with an argument.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-07-31 21:11:23 CEST</p>
+<p class="date"> Date: 2012-07-31 21:14:15 CEST</p>
 </div>
 </div>
 </body>

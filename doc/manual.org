@@ -104,12 +104,12 @@ nil, and ignore simply ignores the right-hand side.
 
 Examples:
 
-| Left-hand side | Right-hand side | Match results            |
-|----------------+-----------------+--------------------------|
-| a              | (1 (2) 3)       | a → (1 (2) 3)           |
-| (a . b)        | (1 (2) 3)       | a → 1, b → ((2) 3)     |
+| Left-hand side | Right-hand side | Match results         |
+|----------------+-----------------+-----------------------|
+| a              | (1 (2) 3)       | a → (1 (2) 3)         |
+| (a . b)        | (1 (2) 3)       | a → 1, b → ((2) 3)    |
 | (a b c)        | (1 (2) 3)       | a → 1, b → (2), c → 3 |
-| (a (b) . #ign) | (1 (2) 3)       | a → 1, b → 2           |
+| (a (b) . #ign) | (1 (2) 3)       | a → 1, b → 2          |
 
 * Combiners
 
@@ -275,6 +275,12 @@ Scheme-like =define= with two cases:
 
  * =(define (<name> . <args>) . <body>)= binds name to an applicative with
    the given arguments and body expressions, returning the applicative.
+
+*** =define-syntax <name> <expr> → result= [operative]
+
+Has simply the same effect as =def=, but is used for defining
+operatives in code that uses Scheme-style =define= for defining
+applicatives.
 
 *** =provide <names> . <exprs> → result= [operative]
 

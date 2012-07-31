@@ -106,12 +106,14 @@ var wat = (function() {
 				  var exprs = ast[1];
 				  var end = ast[2] ? ast[2] : NIL;
 				  return array_to_list(exprs, end); });
+    var quote_stx = action(sequence("'", x_stx), function(ast) { return array_to_list([new Sym("quote"), ast[1]]); });
     var line_terminator = choice(ch("\r"), ch("\n"));
     var cmt_stx = action(sequence(";", repeat0(negate(line_terminator)), optional(line_terminator)), nothing_action);
     var whitespace_stx = action(choice(" ", "\n", "\r", "\t"), nothing_action);
     function nothing_action(ast) { return VOID; } // HACK!
     var x_stx =
-	whitespace(choice(void_stx, ign_stx, nil_stx, t_stx, f_stx, number_stx, compound_stx, id_stx, string_stx, cmt_stx));
+	whitespace(choice(void_stx, ign_stx, nil_stx, t_stx, f_stx, number_stx,
+			  quote_stx, compound_stx, id_stx, string_stx, cmt_stx));
     var program_stx = whitespace(repeat0(choice(x_stx, whitespace_stx))); // HACK!
     /* Core Environment */
     function mkenvcore() {

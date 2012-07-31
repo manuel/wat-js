@@ -5,6 +5,8 @@
 
 (def pair? (wrap (vau (val) #ign (eq? (type-of val) (type-of (cons #void #void))))))
 
+(def symbol? (wrap (vau (val) #ign (eq? (type-of val) (type-of 'foo)))))
+
 (def procedure? (wrap (vau (val) #ign (eq? (type-of val) (type-of (wrap (vau #ign #ign #void)))))))
 
 (def begin

@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-07-31 17:48:59 CEST"/>
+<meta name="generated" content="2012-07-31 18:10:20 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -122,6 +122,7 @@ lang="en" xml:lang="en">
 <li><a href="#sec-8.1.1"><code>lambda &lt;ptree&gt; . &lt;exprs&gt; → applicative</code> [operative] </a></li>
 <li><a href="#sec-8.1.2"><code>apply &lt;apv&gt; &lt;args&gt; → result</code> [applicative] </a></li>
 <li><a href="#sec-8.1.3"><code>set! &lt;env&gt; &lt;lhs&gt; &lt;rhs&gt; → rhs</code> [operative] </a></li>
+<li><a href="#sec-8.1.4"><code>quote &lt;form&gt; -&gt; form</code> [operative] </a></li>
 </ul>
 </li>
 <li><a href="#sec-8.2">Control Flow </a>
@@ -186,6 +187,7 @@ by the following table:
 <tr><td>( a b . c )</td><td><i>dotted list</i></td></tr>
 <tr><td>()</td><td><i>nil</i></td></tr>
 <tr><td>a-z A-Z 0-9 - &amp; ! : = &gt; &lt; % + ? / * # $ _ ' .</td><td><i>symbol characters</i></td></tr>
+<tr><td>'&lt;expr&gt;</td><td><i>short for</i> <code>(quote &lt;expr&gt;)</code></td></tr>
 </tbody>
 </table>
 
@@ -709,6 +711,18 @@ Updates the left-hand side bindings by matching it against the
 right-hand side in the given environment.
 </p>
 </div>
+
+</div>
+
+<div id="outline-container-8.1.4" class="outline-4">
+<h4 id="sec-8.1.4"><code>quote &lt;form&gt; -&gt; form</code> [operative] </h4>
+<div class="outline-text-4" id="text-8.1.4">
+
+
+<p>
+Returns form unevaluated.
+</p>
+</div>
 </div>
 
 </div>
@@ -765,7 +779,7 @@ i.e. they collaborate with <code>dynamic-wind</code>.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-07-31 17:48:59 CEST</p>
+<p class="date"> Date: 2012-07-31 18:10:20 CEST</p>
 </div>
 </div>
 </body>

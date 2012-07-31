@@ -34,6 +34,7 @@ by the following table:
 | ( a b . c )                                   | /dotted list/                |
 | ()                                            | /nil/                        |
 | a-z A-Z 0-9 - & ! : = > < % + ? / * # $ _ ' . | /symbol characters/          |
+| '<expr>                                       | /short for/ =(quote <expr>)= |
 
 Wat identifiers are case-sensitive.
 
@@ -252,6 +253,10 @@ Applies an applicative to an arguments list.
 
 Updates the left-hand side bindings by matching it against the
 right-hand side in the given environment.
+
+*** =quote <form> -> form= [operative]
+
+Returns form unevaluated.
 
 ** Control Flow
 

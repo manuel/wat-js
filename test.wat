@@ -116,6 +116,12 @@
     (assert (eq? (vector-ref v 1) b))
     (assert (eq? (vector-ref v 2) c)))
 
+  ;; Quotation
+
+  (scope ()
+    (assert (symbol? 'x))
+    (assert (pair? '(a . b))))
+
   ;;;;; Test Crust Language
 
   ;; NULL?

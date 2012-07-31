@@ -104,7 +104,7 @@
                   (list (unwrap eval) rhs denv))
             (eval env denv))))
 
-(def scope
+(def provide
   (vau (symbols . body) env
     (eval (list def symbols
 		(list let ()
@@ -128,7 +128,7 @@
 (define (assq obj alist)
   (if (null? alist) () (if (eq? obj (caar alist)) (car alist) (assq obj (cdr alist)))))
 
-(scope (call/cc dynamic-wind call-with-current-continuation)
+(provide (call/cc dynamic-wind call-with-current-continuation)
 
   ;; Adapted from
   ;; http://groups.csail.mit.edu/mac/ftpdir/scheme-mail/HTML/rrrs-1992/msg00194.html
@@ -176,7 +176,7 @@
 
 )
 
-(scope (define-method define-generic send)
+(provide (define-method define-generic send)
   (define (put-method type name method)
     (eval (list def name method) (type-environment type)))
   (define (find-method type name)

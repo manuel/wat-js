@@ -275,6 +275,22 @@ Scheme-like =define= with two cases:
  * =(define (<name> . <args>) . <body>)= binds name to an applicative with
    the given arguments and body expressions, returning the applicative.
 
+*** =provide <names> . <exprs> → result= [operative]
+
+Performs expressions in a new lexical scope and exports only listed
+names to the outer scope.
+
+#+begin_example
+(provide (foo bar)
+  (def foo 1)
+  (def bar 2)
+  (def quux 3)
+)
+foo → 1
+bar → 2
+quux → error: unbound variable
+#+end_example
+
 ** Pairs and Lists
 
 *** =car <pair> → value= [applicative]

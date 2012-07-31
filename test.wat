@@ -1,11 +1,11 @@
 ;; -*- mode: scheme -*-
-(scope ()
+(provide ()
 
   ;;;;; Test Core Language
 
   ;; DEF
 
-  (scope ()
+  (provide ()
     (def (x y) (list #t #f))
     (assert (eq? x #t))
     (assert (eq? y #f))
@@ -14,19 +14,19 @@
 
   ;; IF
 
-  (scope ()
+  (provide ()
     (assert (eq? #t (if #t #t #f)))
     (assert (eq? #f (if #f #t #f))))
 
   ;; CALL/CC
 
-  (scope ()
+  (provide ()
     (assert (eq? #t (call/cc (lambda (k) (k #t) #f))))
     (assert (eq? #f (call/cc (lambda #ign #f)))))
 
   ;; VAU
 
-  (scope ()
+  (provide ()
     (def env (current-environment))
     (eq? #t ((vau x #ign x) #t))
     (eq? #t ((vau (x . #ign) #ign x) (list #t)))
@@ -34,7 +34,7 @@
 
   ;; EVAL
 
-  (scope ()
+  (provide ()
     (def env (current-environment))
     (eval (list def (quote x) #t) env)
     (assert (eq? x #t))
@@ -43,30 +43,30 @@
 
   ;; WRAP
 
-  (scope ()
+  (provide ()
     (assert (eq? #t ((wrap (vau (x) #ign x)) (not #f)))))
 
   ;; UNWRAP
 
-  (scope ()
+  (provide ()
     (assert (eq? list (unwrap (wrap list)))))
 
   ;; EQ?
 
-  (scope ()
+  (provide ()
     (assert (eq? #t #t))
     (assert (not (eq? #t #f)))
     (assert (not (eq? (list 1) (list 1)))))
 
   ;; CONS
 
-  (scope ()
+  (provide ()
     (assert (eq? #t (car (cons #t #f))))
     (assert (eq? #f (cdr (cons #t #f)))))
 
   ;; MAKE-ENVIRONMENT
 
-  (scope ()
+  (provide ()
     (def e1 (make-environment))
     (eval (list def (quote x) #t) e1)
     (eval (list def (quote y) #t) e1)
@@ -82,26 +82,26 @@
 
   ;; MAKE-TYPE
  
-  (scope ()
+  (provide ()
     (def type (make-type))
     (assert (eq? (type-of type) (type-of (type-of #t)))))
 
   ;; TYPE-ENVIRONMENT
 
-  (scope ()
+  (provide ()
     (def type (make-type))
     (def tenv (type-environment type))
     (assert (eq? (type-of tenv) (type-of (current-environment)))))
 
   ;; TYPE-OF
 
-  (scope ()
+  (provide ()
     (assert (not (eq? (type-of () #void))))
     (assert (eq? (type-of 0) (type-of 1))))
 
   ;; TAG, UNTAG
 
-  (scope ()
+  (provide ()
     (def type (make-type))
     (def tagged (tag type #t))
     (assert (eq? (type-of tagged) type))
@@ -109,7 +109,7 @@
 
   ;; VECTOR, VECTOR-REF
 
-  (scope ()
+  (provide ()
     (def (a b c) (list 1 2 3))
     (def v (vector a b c))
     (assert (eq? (vector-ref v 0) a))
@@ -118,7 +118,7 @@
 
   ;; Quotation
 
-  (scope ()
+  (provide ()
     (assert (symbol? 'x))
     (assert (pair? '(a . b))))
 
@@ -126,13 +126,13 @@
 
   ;; NULL?
 
-  (scope ()
+  (provide ()
     (assert (null? ()))
     (assert (not (null? 12))))
 
   ;; BEGIN
 
-  (scope ()
+  (provide ()
     (assert (eq? #void (begin)))
     (assert (eq? #t (begin (eq? #t #t))))
     (assert (eq? #t (begin #f (eq? #t #t)))))

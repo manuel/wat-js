@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-07-31 17:41:04 CEST"/>
+<meta name="generated" content="2012-07-31 17:48:59 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -356,9 +356,9 @@ Examples:
 <tr><th scope="col">Combiner</th><th scope="col">Operand Tree</th><th scope="col">Result</th></tr>
 </thead>
 <tbody>
-<tr><td><code>vau x #ign x)</code></td><td>(1 (+ 2 3) 4)</td><td>(1 (+ 2 3) 4)</td></tr>
-<tr><td><code>vau #ign e e)</code></td><td>(1 (+ 2 3) 4)</td><td><i>&lt;the current environment&gt;</i></td></tr>
-<tr><td><code>wrap (vau x #ign x))</code></td><td>(1 (+ 2 3) 4)</td><td>(1 5 4)</td></tr>
+<tr><td><code>(vau x #ign x)</code></td><td>(1 (+ 2 3) 4)</td><td>(1 (+ 2 3) 4)</td></tr>
+<tr><td><code>(vau #ign e e)</code></td><td>(1 (+ 2 3) 4)</td><td><i>&lt;the current environment&gt;</i></td></tr>
+<tr><td><code>(wrap (vau x #ign x))</code></td><td>(1 (+ 2 3) 4)</td><td>(1 5 4)</td></tr>
 </tbody>
 </table>
 
@@ -728,7 +728,7 @@ right-hand side in the given environment.
 
 <p>
 Evaluates expressions from left to right, returning the value of the
-last.  As a special case, <code>begin)</code> returns void.
+last.  As a special case, <code>(begin)</code> returns void.
 </p>
 </div>
 
@@ -765,7 +765,7 @@ i.e. they collaborate with <code>dynamic-wind</code>.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-07-31 17:41:04 CEST</p>
+<p class="date"> Date: 2012-07-31 17:48:59 CEST</p>
 </div>
 </div>
 </body>

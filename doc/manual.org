@@ -125,9 +125,9 @@ Examples:
 
 | Combiner                | Operand Tree  | Result                      |
 |-------------------------+---------------+-----------------------------|
-| =vau x #ign x)=        | (1 (+ 2 3) 4) | (1 (+ 2 3) 4)               |
-| =vau #ign e e)=        | (1 (+ 2 3) 4) | /<the current environment>/ |
-| =wrap (vau x #ign x))= | (1 (+ 2 3) 4) | (1 5 4)                     |
+| =(vau x #ign x)=       | (1 (+ 2 3) 4) | (1 (+ 2 3) 4)               |
+| =(vau #ign e e)=       | (1 (+ 2 3) 4) | /<the current environment>/ |
+| =(wrap (vau x #ign x))= | (1 (+ 2 3) 4) | (1 5 4)                     |
 
 * Core
 
@@ -258,7 +258,7 @@ right-hand side in the given environment.
 *** =begin . <exprs> → result= [operative]
 
 Evaluates expressions from left to right, returning the value of the
-last.  As a special case, =begin)= returns void.
+last.  As a special case, =(begin)= returns void.
 
 *** =call/cc <cmb> → result= [applicative]
 

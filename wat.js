@@ -132,6 +132,7 @@ var wat = (function() {
 	bind(e, new Sym("type-of"), jswrap(type_of));
 	bind(e, new Sym("tag"), jswrap(tag));
 	bind(e, new Sym("untag"), jswrap(untag));
+	bind(e, new Sym("display"), jswrap(function(str) { console.log(str.jsstr); return VOID; }));
 	bind(e, new Sym("fail"), jswrap(fail));
 	bind(e, new Sym("vector"), jswrap(function() {
 	    return new Vector(Array.prototype.slice.call(arguments)); }));

@@ -1,4 +1,8 @@
 #+TITLE: Wat Language Manual
+#+AUTHOR: Manuel Simoni
+#+EMAIL: msimoni@gmail.com
+#+OPTIONS: toc:t num:nil creator:nil
+#+STYLE: <link rel="stylesheet" type="text/css" href="stylesheet.css"/>
 
 * Description
 
@@ -83,6 +87,11 @@ tagged objects that wrap an underlying value with a type.  Type tags
 allow the definition of type systems in userland that interoperate
 with the built-in types.
 
+By principle, Wat does not support fully encapsulated data, i.e. data
+that cannot be inspected from the outside.  Total visibility into the
+running program for debugging and introspection is valued over the
+ability to create total abstraction.
+
 * Pattern Matching
 
 As in Kernel, parameters and left-hand sides of definitions may not
@@ -122,101 +131,143 @@ Examples:
 
 * Core
 
-** =(def <lhs> <rhs>) -> rhs= [operative]
+The core contains primitive functionality that could not be
+implemented in Wat itself (or it would be cumbersome to do so).
+
+** Primitives
+
+*** =(def <lhs> <rhs>) -> rhs= [operative]
 
 Evaluates the right-hand side, matches the left-hand side against it
 in the current environment, and returns it.
 
-** =(if <test> <then> <else>) -> result= [operative]
+*** =(if <test> <then> <else>) -> result= [operative]
 
 Evaluates the test, and if it is false evaluates the else branch,
 otherwise evaluates the then branch.  The branches are evaluated in
 tail position.
 
-** =(call/cc <cmb>) -> result= [applicative]
+*** =(ccc <cmb>) -> result= [applicative]
 
-Calls the combiner with an applicative as argument that, when called
-with an argument will return from the current continuation with that
-argument as value.  The combiner is called in tail position.
+Calls the combiner with the current continuation as argument.  The
+combiner is called in tail position.
 
-** =(vau <ptree> <envp> <body>) -> operative= [operative]
+=ccc= is the lowlevel facility for non-winding continuations; users
+should almost certainly use the higher-level =call/cc= instead.
+
+*** =(jump <cont> <val>) -> |= [applicative]
+
+Invokes the given continuation with the given value.
+
+Because =ccc= is not to be used by users anyway, no effort is made to
+make continuations created by it appear as applicatives.  Instead,
+they are exposed directly, and therefore need a jump primitive for
+invoking them.
+
+*** =(vau <ptree> <envp> <body>) -> operative= [operative]
 
 Constructs a new compound operative that closes over the current
 environment with the given parameter tree, environment parameter, and
 body expression.
 
-** =(eval <expr> <env>) -> result= [applicative]
+*** =(eval <expr> <env>) -> result= [applicative]
 
 Evaluates the expression in the given environment.  The expression is
 evaluated in tail-position.
 
-** =(wrap <cmb>) -> applicative= [applicative]
+*** =(wrap <cmb>) -> applicative= [applicative]
 
 Returns an applicative around an underlying combiner.
 
-** =(unwrap <cmb>) -> combiner= [applicative]
+*** =(unwrap <cmb>) -> combiner= [applicative]
 
 Returns the underlying combiner of an applicative.
 
-** =(eq? <a> <b>) -> boolean= [applicative]
+*** =(eq? <a> <b>) -> boolean= [applicative]
 
 Returns true if the two values are pointer identical, false otherwise.
 
-** =(cons <car> <cdr>) -> cons= [applicative]
+*** =(cons <car> <cdr>) -> cons= [applicative]
 
 Creates a new cons with the given car and cdr.
 
-** =(make-environment [<parent>]) -> environment= [applicative]
+*** =(make-environment [<parent>]) -> environment= [applicative]
 
 Creates a new empty environment with the given optional parent.
 
-** =(make-type) -> type= [applicative]
+*** =(make-type) -> type= [applicative]
 
 Creates a new type with an empty environment.
 
-** =(type-environment <type>) -> environment= [applicative]
+*** =(type-environment <type>) -> environment= [applicative]
 
 Returns the type's environment for storing metadata.
 
-** =(type-of <val>) -> type= [applicative]
+*** =(type-of <val>) -> type= [applicative]
 
 Returns an object's type.
 
-** =(tag <type> <val>) -> tagged= [applicative]
+*** =(tag <type> <val>) -> tagged= [applicative]
 
 Creates a new user-tagged object with a type and wrapping an
 underlying value.
 
-** =(untag <tagged>) -> value= [applicative]
+*** =(untag <tagged>) -> value= [applicative]
 
 Returns the underlying value of a user-tagged object.
 
-** =(fail <reason>) -> |= [applicative]
+*** =(display <msg>) -> void= [applicative]
+
+Prints a message string to the console.
+
+*** =(fail <reason>) -> |= [applicative]
 
 Halts evaluation with an object describing the reason (typically an error).
 
-* Vectors
+** Vectors
 
-** =(vector . <elements>) -> vector= [applicative]
+*** =(vector . <elements>) -> vector= [applicative]
 
 Creates a new vector with the given elements.
 
-** =(vector-ref <vector> <index>) -> element= [applicative]
+*** =(vector-ref <vector> <index>) -> element= [applicative]
 
 Returns the vector's element at the given index.
 
 * Library
 
-** =(null? <obj>) -> boolean= [applicative]
+The library consists of definitions written in Wat itself.
 
-Returns true if the object is nil, false otherwise.
+** Common
 
-** =(begin . <exprs>) -> result= [operative]
+*** =(lambda <ptree> . <exprs>) -> applicative= [operative]
 
-Evaluates the expressions in sequence, returning the value of the
-last.  =(begin)= returns void.
+Creates an applicative combiner, as in Scheme.
 
-#+AUTHOR: Manuel Simoni
-#+EMAIL: msimoni@gmail.com
-#+OPTIONS: toc:t num:nil creator:nil
-#+STYLE: <link rel="stylesheet" type="text/css" href="stylesheet.css" />
+*** =(apply <apv> <args>) -> result= [applicative]
+
+Applies an applicative to an arguments list.
+
+*** =(set! <env> <lhs> <rhs>) -> rhs= [operative]
+
+Updates the left-hand side bindings by matching it against the
+right-hand side in the given environment.
+
+** Control Flow
+
+*** =(begin . <exprs>) -> result= [operative]
+
+Evaluates expressions from left to right, returning the value of the
+last.  As a special case, =(begin)= returns void.
+
+*** =(call/cc <cmb>) -> result= [applicative]
+
+Calls the combiner with an applicative as argument, that when called
+will pass its single argument to the current continuation.  The
+combiner is called in tail position.
+
+As opposed to =ccc=, continuations created by =call/cc= are winding,
+i.e. they collaborate with =dynamic-wind=.
+
+*** =(dynamic-wind <pre-thunk> <value-thunk> <post-thunk>) -> result= [applicative]
+

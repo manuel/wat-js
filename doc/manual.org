@@ -266,6 +266,14 @@ right-hand side in the given environment.
 
 Returns form unevaluated.
 
+*** =define lhs rhs= [operative]
+
+Scheme-like =define= with two cases:
+
+ * =(define name value)= simply binds name to value.
+
+ * =(define (name . args) . body)= binds name to an applicative with
+   the given arguments and body expressions.
 
 ** Pairs and Lists
 

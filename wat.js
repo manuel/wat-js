@@ -59,6 +59,8 @@ var wat = (function() {
     Ign.prototype.match = function(e, rhs) {};
     function Str(jsstr) { this.jsstr = jsstr };
     function Num(jsnum) { this.jsnum = jsnum };
+    function num_eql(num1, num2) { return num1.jsnum === num2.jsnum; }
+    function num_add(num1, num2) { return new Num(num1.jsnum + num2.jsnum); };
     function Vector(elements) { this.elements = elements; }
     function vector_ref(vector, i) { return vector.elements[i]; }
     function vector_set(vector, i, val) { vector.elements[i] = val; return val; }
@@ -151,6 +153,8 @@ var wat = (function() {
 	bind(e, new Sym("untag"), jswrap(untag));
 	bind(e, new Sym("display"), jswrap(function(str) { console.log(str); return str; }));
 	bind(e, new Sym("fail"), jswrap(fail));
+	bind(e, new Sym("="), jswrap(function(num1, num2) { return num_eql(num1, num2) ? T : F }));
+	bind(e, new Sym("+"), jswrap(num_add));
 	bind(e, new Sym("vector"), jswrap(function() { return new Vector(Array.prototype.slice.call(arguments)); }));
 	bind(e, new Sym("vector-ref"), jswrap(function(vector, i) { return vector_ref(vector, i.jsnum); }));
 	bind(e, new Sym("vector-set!"), jswrap(function(vector, i, val) { return vector_set(vector, i.jsnum, val); }));

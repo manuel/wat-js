@@ -147,6 +147,21 @@
     (define (id x) x)
     (eq? #f (with-mark 'foo #t (id (with-mark 'foo #f (car (current-marks 'foo))))))
     (eq? #t (with-mark 'foo #t (id (with-mark 'foo #f (car (cdr (current-marks 'foo)))))))
-    (eq? () (with-mark 'foo #t (id (with-mark 'foo #f (cdr (cdr (current-marks 'foo))))))))
+    (eq? () (with-mark 'foo #t (id (with-mark 'foo #f (cdr (cdr (current-marks 'foo)))))))
+    (eq? () (current-marks 'foo)))
+
+  ;; Delimited Control
+
+  (assert (= 9
+	     (run-cc
+	      (lambda ()
+		(let ((p (make-prompt)))
+		  (+ 2 (push-prompt p
+				    (if (with-sub-cont p
+						       (lambda (k)
+							 (+ (push-sub-cont k #f)
+							    (push-sub-cont k #t))))
+					3
+					4))))))))
 
 )

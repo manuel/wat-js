@@ -9,7 +9,7 @@ var wat = (function() {
     function MKSeg(mk, k) { assert(type_of(mk)); assert(type_of(k)); this.mk = mk; this.k = k; }
     MKSeg.prototype.underflow = function(fbr) { fbr.mk = this.mk; fbr.k = this.k; };
     function MKPrompt(mk, p) { assert(type_of(mk)); assert(type_of(p)); this.mk = mk; this.p = p; }
-    MKPrompt.prototype.underflow = function(fbr) { fbr.mk = this.mk; fbr.mk.underflow(fbr); }
+    MKPrompt.prototype.underflow = function(fbr) { fbr.mk = this.mk; fbr.mk.underflow(fbr); };
     function PushPrompt() {}; function TakeSubCont() {}; function PushSubCont() {}
     PushPrompt.prototype.combine = function(fbr, e, o) {
 	var p = elt(o, 0); var th = elt(o, 1);
@@ -20,10 +20,9 @@ var wat = (function() {
     TakeSubCont.prototype.combine = function(fbr, e, o) {
 	var p = elt(o, 0); var f = elt(o, 1);
 	var split = fbr.mk.split_mk(p);
-	var sk = split.sk; var mk = split.mk;
-	fbr.mk = mk;
+	fbr.mk = split.mk;
 	fbr.k = new KDone();
-	fbr.prime(cons(f, cons(new MKSeg(sk, fbr.k), NIL)), e);
+	fbr.prime(cons(f, cons(new MKSeg(split.sk, fbr.k), NIL)), e);
     };
     PushSubCont.prototype.combine = function(fbr, e, o) {
 	var sk = elt(o, 0); var th = elt(o, 1);

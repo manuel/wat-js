@@ -1,7 +1,36 @@
 var wat = (function() {
     /***** Evaluation *****/
-    function Fbr() { this.a = null; this.k = null; }
-    Fbr.prototype.run = function() { while(this.k) this.k.invoke(this); return this.a; };
+    function Fbr() { this.a = null; this.k = new KDone(); this.mk = new MKDone(); }
+    Fbr.prototype.run = function() { while(this.k !== null) this.k.invoke(this); return this.a; };
+    function KDone() {};
+    KDone.prototype.invoke = function(fbr) { fbr.mk.underflow(fbr); };
+    function MKDone() {};
+    MKDone.prototype.underflow = function(fbr) { fbr.k = null; };
+    function MKSeg(mk, k) { assert(type_of(mk)); assert(type_of(k)); this.mk = mk; this.k = k; }
+    MKSeg.prototype.underflow = function(fbr) { fbr.mk = this.mk; fbr.k = this.k; };
+    function MKPrompt(mk, p) { assert(type_of(mk)); assert(type_of(p)); this.mk = mk; this.p = p; }
+    MKPrompt.prototype.underflow = function(fbr) { fbr.mk = this.mk; fbr.mk.underflow(fbr); }
+    function PushPrompt() {}; function TakeSubCont() {}; function PushSubCont() {}
+    PushPrompt.prototype.combine = function(fbr, e, o) {
+	var p = elt(o, 0); var th = elt(o, 1);
+	fbr.mk = new MKPrompt(new MKSeg(fbr.mk, fbr.k), p);
+	fbr.k = new KDone();
+	fbr.prime(cons(th, NIL), e);
+    };
+    TakeSubCont.prototype.combine = function(fbr, e, o) {
+	var p = elt(o, 0); var f = elt(o, 1);
+	var split = fbr.mk.split_mk(p);
+	var sk = split.sk; var mk = split.mk;
+	fbr.mk = mk;
+	fbr.k = new KDone();
+	fbr.prime(cons(f, cons(new MKSeg(sk, fbr.k), NIL)), e);
+    };
+    PushSubCont.prototype.combine = function(fbr, e, o) {
+	var sk = elt(o, 0); var th = elt(o, 1);
+	fbr.mk = sk.append_mk(new MKSeg(fbr.mk, fbr.k));
+	fbr.k = new KDone();
+	fbr.prime(cons(th, NIL), e);
+    };
     Fbr.prototype.prime = function(x, e) { this.a = x; this.k = new KEval(this.k, e); };
     function KEval(k, e) { this.k = k; this.e = e; }
     KEval.prototype.invoke = function(fbr) { fbr.a.evaluate ? fbr.a.evaluate(fbr, this.k, this.e) : fbr.k = this.k; };
@@ -43,6 +72,17 @@ var wat = (function() {
     function JSFun(jsfun) { this.jsfun = jsfun }
     JSFun.prototype.combine = function(fbr, e, o) { fbr.a = this.jsfun.apply(null, list_to_array(o)); };
     function jswrap(jsfun) { return wrap(new JSFun(jsfun)); }
+    /* Metacontinuation Utilities */
+    MKDone.prototype.split_mk = function(p) { fail("prompt not found"); };
+    MKPrompt.prototype.split_mk = function(p) {
+	if (p === this.p) { return { sk: new MKDone(), mk: this.mk }; }
+	else { var split = this.mk.split_mk(p); return { sk: new MKPrompt(split.sk, this.p), mk: split.mk }; } };
+    MKSeg.prototype.split_mk = function(p) {
+	var split = this.mk.split_mk(p);
+	return { sk: new MKSeg(split.sk, this.k), mk: split.mk }; };
+    MKDone.prototype.append_mk = function(mk) { return mk; };
+    MKPrompt.prototype.append_mk = function(mk) { return new MKPrompt(this.mk.append_mk(mk), this.p); };
+    MKSeg.prototype.append_mk = function(mk) { return new MKSeg(this.mk.append_mk(mk), this.k); };
     /***** Data *****/
     function Sym(name) { this.name = name; }
     function Cons(car, cdr) { this.car = car; this.cdr = cdr; }
@@ -74,7 +114,7 @@ var wat = (function() {
     function tag(type, val) { return new Tagged(type, val); };
     function untag(obj) { return obj.val; }
     function init_types(types) { types.map(function (type) { type.prototype.wat_type = new Type(); }); }
-    init_types([KEval, KCombine, KApply, KEvalArg, KDef, KIf,
+    init_types([KDone, KEval, KCombine, KApply, KEvalArg, KDef, KIf, MKDone, MKPrompt, MKSeg,
 		Opv, Apv, Def, Vau, If, Eval, CCC, Jump, CallWithMark, CurrentMarks, JSFun,
 		Sym, Cons, Env, Str, Num, Vector, Void, Ign, Nil, True, False, Type]);
     function assert(b) { if (!b) fail("assertion failed"); }
@@ -135,8 +175,9 @@ var wat = (function() {
 	var e = new Env();
 	bind(e, new Sym("def"), new Def());
 	bind(e, new Sym("if"), new If());
-	bind(e, new Sym("ccc"), wrap(new CCC()));
-	bind(e, new Sym("jump"), wrap(new Jump()));
+	bind(e, new Sym("push-prompt*"), wrap(new PushPrompt()));
+	bind(e, new Sym("take-sub-cont"), wrap(new TakeSubCont()));
+	bind(e, new Sym("push-sub-cont*"), wrap(new PushSubCont()));
 	bind(e, new Sym("call-with-mark"), wrap(new CallWithMark()));
 	bind(e, new Sym("current-marks"), wrap(new CurrentMarks()));
 	bind(e, new Sym("vau"), new Vau());

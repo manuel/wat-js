@@ -1,5 +1,4 @@
 ;; -*- mode: scheme -*-
-(provide ()
 
   ;;;;; Test Core Language
 
@@ -17,12 +16,6 @@
   (provide ()
     (assert (eq? #t (if #t #t #f)))
     (assert (eq? #f (if #f #t #f))))
-
-  ;; CALL/CC
-
-  (provide ()
-    (assert (eq? #t (call/cc (lambda (k) (k #t) #f))))
-    (assert (eq? #f (call/cc (lambda #ign #f)))))
 
   ;; VAU
 
@@ -152,16 +145,45 @@
 
   ;; Delimited Control
 
-  (assert (= 9
-	     (run-cc
-	      (lambda ()
-		(let ((p (make-prompt)))
-		  (+ 2 (push-prompt p
-				    (if (with-sub-cont p
-						       (lambda (k)
-							 (+ (push-sub-cont k #f)
-							    (push-sub-cont k #t))))
-					3
-					4))))))))
+  
+  ;; (let ((p (make-prompt)))
+  ;; 		  (+ 2 (push-prompt p
+  ;; 				    (if (take-sub-cont p
+  ;; 						       (lambda (k)
+  ;; 							 (+ (push-sub-cont k #f)
+  ;; 							    (push-sub-cont k #t))))
+  ;; 					3
+  ;; 					4))))
 
-)
+(define-syntax test-check
+  (vau (#ign expr res) env
+    (assert (= (eval expr env) (eval res env)))))
+
+(define new-prompt make-prompt)
+
+(test-check 'test2
+  (let ((p (new-prompt)))
+    (+ (push-prompt p (push-prompt p 5))
+       4))
+  9)
+
+(test-check 'test3
+  (let ((p (new-prompt)))
+    (+ (push-prompt p (+ (take-sub-cont p (lambda #ign 5)) 6))
+       4))
+  9)
+
+(test-check 'test3-1
+  (let ((p (new-prompt)))
+    (+ (push-prompt p (push-prompt p (+ (take-sub-cont p (lambda #ign 5)) 6)))
+       4))
+  9)
+
+(test-check 'test3-2
+  (let ((p (new-prompt)))
+    (let ((v (push-prompt p
+	       (let* ((v1 (push-prompt p (+ (take-sub-cont p (lambda #ign 5)) 6)))
+		      (v1 (take-sub-cont p (lambda #ign 7))))
+		 (+ v1 10)))))
+      (+ v 20)))
+  27)

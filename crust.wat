@@ -128,54 +128,6 @@
 (define (assq obj alist)
   (if (null? alist) () (if (eq? obj (caar alist)) (car alist) (assq obj (cdr alist)))))
 
-(provide (call/cc dynamic-wind call-with-current-continuation)
-
-  ;; Adapted from
-  ;; http://groups.csail.mit.edu/mac/ftpdir/scheme-mail/HTML/rrrs-1992/msg00194.html
-
-  (define *env* (current-environment))
-
-  (define *winds* '())
-
-  (define (dynamic-wind <thunk1> <thunk2> <thunk3>)
-    (<thunk1>)
-    (set! *env* *winds* (cons (cons <thunk1> <thunk3>) *winds*))
-    (let ((ans (<thunk2>)))
-      (set! *env* *winds* (cdr *winds*))
-      (<thunk3>)
-      ans))
- 
-  (define (non-winding-call/cc f)
-    (ccc (lambda (k) (f (lambda (val) (jump k val))))))
-
-  (define (call-with-current-continuation proc)
-    (let ((winds *winds*))
-      (non-winding-call/cc
-       (lambda (cont)
-	 (proc (lambda (c2)
-		 (dynamic:do-winds *winds* winds)
-		 (cont c2)))))))
-
-  (define call/cc call-with-current-continuation)
-
-  (define (dynamic:do-winds from to)
-    (set! *env* *winds* from)
-    (cond ((eq? from to)
-	   #void)
-	  ((null? from)
-	   (dynamic:do-winds from (cdr to))
-	   ((caar to)))
-	  ((null? to)
-	   ((cdar from))
-	   (dynamic:do-winds (cdr from) to))
-	  (#t
-	   ((cdar from))
-	   (dynamic:do-winds (cdr from) (cdr to))
-	   ((caar to))))
-    (set! *env* *winds* to))
-
-)
-
 (provide (define-method define-generic send)
   (define (put-method type name method)
     (eval (list def name method) (type-environment type)))
@@ -203,3 +155,6 @@
 (define-syntax with-mark
   (vau (key val . body) env
     (eval (list call-with-mark key val (list* lambda () body)) env)))
+
+(define prompt-type (make-type))
+(define (make-prompt) (tag prompt-type #void))

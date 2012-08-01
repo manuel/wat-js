@@ -177,9 +177,9 @@ tail position.
 Pushes the continuation-delimiting prompt and executes thunk in the
 new continuation.
 
-*** =take-sub-cont <prompt> <f> → result= [operative]
+*** =take-sub-cont <prompt> <cmb> → result= [operative]
 
-Aborts up to and including the prompt, and calls the function f with a
+Aborts up to and including the prompt, and calls the combiner with a
 single argument representing the delimited continuation from the call
 to =take-sub-cont= up to but not including the prompt.
 
@@ -350,18 +350,6 @@ Constructs a list of the values, terminated by the last value.
 
 Evaluates expressions from left to right, returning the value of the
 last.  As a special case, =(begin)= returns void.
-
-*** =call/cc <cmb> → result= [applicative]
-
-Calls the combiner with an applicative as argument, that when called
-will pass its single argument to the current continuation.  The
-combiner is called in tail position.
-
-As opposed to =ccc=, continuations created by =call/cc= are winding,
-i.e. they collaborate with =dynamic-wind=.
-
-*** =dynamic-wind <pre-thunk> <value-thunk> <post-thunk> → result= [applicative]
-
 
 *** =with-mark <key> <val> . <exprs> → result= [operative]
 

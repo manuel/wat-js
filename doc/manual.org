@@ -172,22 +172,21 @@ Evaluates the test, and if it is false evaluates the else branch,
 otherwise evaluates the then branch.  The branches are evaluated in
 tail position.
 
-*** =ccc <cmb> → result= [applicative]
+*** =push-prompt* <prompt> <thunk> → result= [operative]
 
-Calls the combiner with the current continuation as argument.  The
-combiner is called in tail position.
+Pushes the continuation-delimiting prompt and executes thunk in the
+new continuation.
 
-=ccc= is the lowlevel facility for non-winding continuations; users
-should almost certainly use the higher-level =call/cc= instead.
+*** =take-sub-cont <prompt> <f> → result= [operative]
 
-*** =jump <cont> <val> → |= [applicative]
+Aborts up to and including the prompt, and calls the function f with a
+single argument representing the delimited continuation from the call
+to =take-sub-cont= up to but not including the prompt.
 
-Invokes the given continuation with the given value.
+*** =push-sub-cont* <cont> <thunk> → result= [operative]
 
-Because =ccc= is not to be used by users anyway, no effort is made to
-make continuations created by it appear as applicatives.  Instead,
-they are exposed directly, and therefore need a jump primitive for
-invoking them.
+Prepends the delimited continuation to the current continuation, and
+executes thunk in the new continuation.
 
 *** =call-with-mark <key> <val> <thunk> → result= [operative]
 
@@ -196,6 +195,9 @@ value.  If the current continuation already has a mark with that key,
 it is overwritten.  Thunk is evaluated in tail position.
 
 *** =current-marks <key> → list= [applicative]
+
+NOTE: Currently broken; returns only marks up to next prompt.  Will be
+fixed.
 
 Returns a list of the current continuation marks with the given key,
 from innermost to outermost continuation.

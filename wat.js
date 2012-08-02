@@ -1,17 +1,19 @@
 var wat = (function() {
     /***** Evaluation *****/
+    /* Fibers */
     function Fbr() { this.a = null; this.k = new KDone(); this.mk = new MKDone(); }
     Fbr.prototype.run = function() { while(this.k !== null) this.k.invoke(this); return this.a; };
     Fbr.prototype.prime = function(x, e) { this.a = x; this.k = new KEval(this.k, e); };
+    /* Form Evaluation */
     function KEval(k, e) { this.k = k; this.e = e; }
     KEval.prototype.invoke = function(fbr) { fbr.a.evaluate ? fbr.a.evaluate(fbr, this.k, this.e) : fbr.k = this.k; };
     Sym.prototype.evaluate = function(fbr, k, e) { fbr.k = k; fbr.a = lookup(e, this); };
     Cons.prototype.evaluate = function(fbr, k, e) { fbr.k = new KCombine(k, e, cdr(this)); fbr.prime(car(this), e); };
+    /* Operative & Applicative Combiners */
     function KCombine(k, e, o) { this.k = k; this.e = e; this.o = o; }
     KCombine.prototype.invoke = function(fbr) { fbr.k = this.k; fbr.a.combine(fbr, this.e, this.o); };
     function Opv(p, ep, x, e) { this.p = p; this.ep = ep; this.x = x; this.e = e; }
     function Apv(cmb) { this.cmb = cmb; }; function wrap(cmb) { return new Apv(cmb); }; function unwrap(apv) { return apv.cmb; }
-    function Def() {}; function Vau() {}; function If() {}; function Eval() {}; function Begin() {}
     Opv.prototype.combine = function(fbr, e, o) {
 	var xe = new Env(this.e); bind(xe, this.p, o); bind(xe, this.ep, e); fbr.prime(this.x, xe); };
     Apv.prototype.combine = function(fbr, e, o) { evalArgs(fbr, new KApply(fbr.k, e, this.cmb), e, o, NIL); };
@@ -22,6 +24,8 @@ var wat = (function() {
 	else { fbr.k = new KEvalArg(k, e, cdr(todo), done); fbr.prime(car(todo), e); } }
     function KEvalArg(k, e, todo, done) { this.k = k; this.e = e; this.todo = todo; this.done = done; }
     KEvalArg.prototype.invoke = function(fbr) { evalArgs(fbr, this.k, this.e, this.todo, cons(fbr.a, this.done)); };
+    /* Built-in Combiners */
+    function Def() {}; function Vau() {}; function If() {}; function Eval() {}; function Begin() {}
     Def.prototype.combine = function(fbr, e, o) { fbr.k = new KDef(fbr.k, e, elt(o, 0)); fbr.prime(elt(o, 1), e); };
     function KDef(k, e, name) { this.k = k; this.e = e; this.name = name; }
     KDef.prototype.invoke = function(fbr) { fbr.k = this.k; bind(this.e, this.name, fbr.a); }
@@ -30,14 +34,15 @@ var wat = (function() {
     function KIf(k, e, xthen, xelse) { this.k = k; this.e = e; this.xthen = xthen; this.xelse = xelse; }
     KIf.prototype.invoke = function(fbr) { fbr.k = this.k; fbr.prime(fbr.a === F ? this.xelse : this.xthen, this.e); };
     Eval.prototype.combine = function(fbr, e, o) { fbr.prime(elt(o, 0), elt(o, 1)); };
-    function JSFun(jsfun) { this.jsfun = jsfun }
     Begin.prototype.combine = function(fbr, e, o) { if (o === NIL) fbr.a = VOID; else begin1(fbr, e, o); };
     function begin1(fbr, e, xs) { if (cdr(xs) !== NIL) { fbr.k = new KBegin(fbr.k, e, cdr(xs)); } fbr.prime(car(xs), e); }
     function KBegin(k, e, xs) { this.k = k; this.e = e; this.xs = xs; }
     KBegin.prototype.invoke = function(fbr) { fbr.k = this.k; begin1(fbr, this.e, this.xs); }
+    /* JS Combiners */
+    function JSFun(jsfun) { this.jsfun = jsfun }
     JSFun.prototype.combine = function(fbr, e, o) { fbr.a = this.jsfun.apply(null, list_to_array(o)); };
     function jswrap(jsfun) { return wrap(new JSFun(jsfun)); }
-    /* Delimited Control */
+    /* Delimited Control and Metacontinuations */
     function KDone() {};
     KDone.prototype.invoke = function(fbr) { fbr.mk.underflow(fbr); };
     function MKDone() {};
@@ -88,7 +93,8 @@ var wat = (function() {
     MKDone.prototype.mk_marks = function(key, res) {};
     MKPrompt.prototype.mk_marks = function(key, res) { this.mk.mk_marks(key, res); };
     MKSeg.prototype.mk_marks = function(key, res) { k_marks(this.k, key, res); this.mk.mk_marks(key, res); };
-    /***** Data *****/
+    /***** Objects *****/
+    /* Core */
     function Sym(name) { this.name = name; }
     function Cons(car, cdr) { this.car = car; this.cdr = cdr; }
     function cons(car, cdr) { return new Cons(car, cdr); }
@@ -102,6 +108,7 @@ var wat = (function() {
     Cons.prototype.match = function(e, rhs) { car(this).match(e, car(rhs)); cdr(this).match(e, cdr(rhs)); };
     Nil.prototype.match = function(e, rhs) { if (rhs !== NIL) fail("NIL expected"); };
     Ign.prototype.match = function(e, rhs) {};
+    /* Data */
     function Str(jsstr) { this.jsstr = jsstr };
     function Num(jsnum) { this.jsnum = jsnum };
     function num_eql(num1, num2) { return num1.jsnum === num2.jsnum; }
@@ -112,6 +119,7 @@ var wat = (function() {
     function vector_length(vector) { return vector.length; }
     function Void() {}; function Ign() {}; function Nil() {}; function True() {}; function False() {};
     var VOID = new Void(); var IGN = new Ign(); var NIL = new Nil(); var T = new True(); var F = new False();
+    /* Types */
     function Type() { this.e = new Env() };
     function type_of(obj) { return obj.wat_type; }
     function type_env(type) { return type.e; };
@@ -122,6 +130,7 @@ var wat = (function() {
     init_types([KDone, KEval, KCombine, KApply, KEvalArg, KDef, KIf, KBegin, MKDone, MKPrompt, MKSeg,
 		Opv, Apv, Def, Vau, If, Eval, Begin, CallWithMark, CurrentMarks, JSFun,
 		Sym, Cons, Env, Str, Num, Vector, Void, Ign, Nil, True, False, Type]);
+    /* Utilities */
     function assert(b) { if (!b) fail("assertion failed"); }
     function fail(err) { throw err; }
     function array_to_list(array, end) {

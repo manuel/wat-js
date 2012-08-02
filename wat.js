@@ -79,20 +79,6 @@ var wat = (function() {
     MKDone.prototype.append_mk = function(mk) { return mk; };
     MKPrompt.prototype.append_mk = function(mk) { return new MKPrompt(this.mk.append_mk(mk), this.p); };
     MKSeg.prototype.append_mk = function(mk) { return new MKSeg(this.mk.append_mk(mk), this.k); };
-    /* Continuation Marks */
-    function CallWithMark() {}; function CurrentMarks() {}
-    CallWithMark.prototype.combine = function(fbr, e, o) {
-	var key = elt(o, 0); var val = elt(o, 1); var th = elt(o, 2);
-	fbr.k = clone(fbr.k); fbr.k["m_" + key.name] = val; fbr.prime(cons(th, NIL), e); };
-    CurrentMarks.prototype.combine = function(fbr, e, o) {
-	var key = elt(o, 0); var res = [];
-	k_marks(fbr.k, key, res); fbr.mk.mk_marks(key, res); fbr.a = array_to_list(res); };
-    function k_marks(k, key, res) { while(true) { var val = k["m_" + key.name];
-						  if (val !== undefined) res.push(val);
-						  if (k instanceof KDone) break; else k = k.k; } }
-    MKDone.prototype.mk_marks = function(key, res) {};
-    MKPrompt.prototype.mk_marks = function(key, res) { this.mk.mk_marks(key, res); };
-    MKSeg.prototype.mk_marks = function(key, res) { k_marks(this.k, key, res); this.mk.mk_marks(key, res); };
     /***** Objects *****/
     /* Core */
     function Sym(name) { this.name = name; }
@@ -128,7 +114,7 @@ var wat = (function() {
     function untag(obj) { return obj.val; }
     function init_types(types) { types.map(function (type) { type.prototype.wat_type = new Type(); }); }
     init_types([KDone, KEval, KCombine, KApply, KEvalArg, KDef, KIf, KBegin, MKDone, MKPrompt, MKSeg,
-		Opv, Apv, Def, Vau, If, Eval, Begin, CallWithMark, CurrentMarks, JSFun,
+		Opv, Apv, Def, Vau, If, Eval, Begin, JSFun,
 		Sym, Cons, Env, Str, Num, Vector, Void, Ign, Nil, True, False, Type]);
     /* Utilities */
     function assert(b) { if (!b) fail("assertion failed"); }
@@ -191,8 +177,6 @@ var wat = (function() {
 	bind(e, new Sym("push-prompt*"), wrap(new PushPrompt()));
 	bind(e, new Sym("take-sub-cont*"), wrap(new TakeSubCont()));
 	bind(e, new Sym("push-sub-cont*"), wrap(new PushSubCont()));
-	bind(e, new Sym("call-with-mark"), wrap(new CallWithMark()));
-	bind(e, new Sym("current-marks"), wrap(new CurrentMarks()));
 	bind(e, new Sym("vau"), new Vau());
 	bind(e, new Sym("eval"), wrap(new Eval()));
 	bind(e, new Sym("begin"), new Begin());

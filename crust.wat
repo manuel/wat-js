@@ -152,11 +152,7 @@
 
 (define (newline) (display "newline")) ; huh?
 
-(define-syntax with-mark
-  (vau (key val . body) env
-    (eval (list call-with-mark key val (list* lambda () body)) env)))
-
-(provide (make-prompt push-prompt take-sub-cont push-sub-cont)
+(provide (make-prompt push-prompt take-sub-cont push-sub-cont shift*)
   (define prompt-type (make-type))
   (define (make-prompt) (tag prompt-type #void))
   (define-syntax push-prompt
@@ -170,13 +166,21 @@
     (vau (k . es) env
       (push-sub-cont* (eval k env)
         (lambda () (eval (list* begin es) env)))))
+  (define (shift* p f)
+    (take-sub-cont p sk (push-prompt p (f (reifyP p sk)))))
+  (define (reifyP p sk)
+    (lambda (v) (push-prompt p (push-sub-cont sk v))))
 )
 
 (provide (dnew dref dlet dlet*)
   (define parameter-type (make-type))
   (define (dnew) (tag parameter-type #void))
-  (define (dref p) (car (current-marks p)))
-  (define (dlet* p v th) (call-with-mark p v th))
+  (define (dref p) (shift* p (lambda (f) (lambda (y) ((f y) y)))))
+  (define (dlet* p val thunk)
+    ((push-prompt p
+       (let ((r (thunk)))
+          (lambda (y) r)))
+     val))
   (define-syntax dlet
     (vau (key val . body) env
       (eval (list dlet* key val (list* lambda () body)) env)))

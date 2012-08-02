@@ -130,19 +130,6 @@
     (assert (eq? #t (begin (eq? #t #t))))
     (assert (eq? #t (begin #f (eq? #t #t)))))
 
-  ;; Continuation Marks
-
-  (provide ()
-    (eq? () (current-marks 'foo))
-    (eq? #t (with-mark 'foo #t (car (current-marks 'foo))))
-    (eq? #f (with-mark 'foo #t (with-mark 'foo #f (car (current-marks 'foo)))))
-    (eq? () (with-mark 'foo #t (with-mark 'foo #f (cdr (current-marks 'foo)))))
-    (define (id x) x)
-    (eq? #f (with-mark 'foo #t (id (with-mark 'foo #f (car (current-marks 'foo))))))
-    (eq? #t (with-mark 'foo #t (id (with-mark 'foo #f (car (cdr (current-marks 'foo)))))))
-    (eq? () (with-mark 'foo #t (id (with-mark 'foo #f (cdr (cdr (current-marks 'foo)))))))
-    (eq? () (current-marks 'foo)))
-
 ;; Delimited Control
 
 (define-syntax test-check
@@ -226,6 +213,9 @@
 
 ;; Delimited Dynamic Binding
 
+(let ((p (make-prompt)))
+  (assert (= 117 (+ 10 (push-prompt p (+ 2 (shift* p (lambda (k) (+ 100 (k (k 3)))))))))))
+
 (test-check 'ddb-1
   (let ((dv (dnew)))
     (dlet dv 12 (dref dv)))
@@ -253,3 +243,4 @@
 	    (push-sub-cont k
 	       (dref dv)))))))
   3)
+

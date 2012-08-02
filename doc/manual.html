@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-02 13:39:45 CEST"/>
+<meta name="generated" content="2012-08-02 23:03:22 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -103,8 +103,6 @@ lang="en" xml:lang="en">
 <li><a href="#sec-7.2.3"><code>push-prompt* &lt;prompt&gt; &lt;thunk&gt; → result</code> [applicative] </a></li>
 <li><a href="#sec-7.2.4"><code>take-sub-cont* &lt;prompt&gt; &lt;cmb&gt; → result</code> [applicative] </a></li>
 <li><a href="#sec-7.2.5"><code>push-sub-cont* &lt;cont&gt; &lt;thunk&gt; → result</code> [applicative] </a></li>
-<li><a href="#sec-7.2.6"><code>call-with-mark &lt;key&gt; &lt;val&gt; &lt;thunk&gt; → result</code> [applicative] </a></li>
-<li><a href="#sec-7.2.7"><code>current-marks &lt;key&gt; → list</code> [applicative] </a></li>
 </ul>
 </li>
 <li><a href="#sec-7.3">Types </a>
@@ -575,33 +573,6 @@ to <code>take-sub-cont*</code> up to but not including the prompt.
 <p>
 Prepends the delimited continuation to the current continuation, and
 executes thunk in the new continuation.
-</p>
-</div>
-
-</div>
-
-<div id="outline-container-7.2.6" class="outline-4">
-<h4 id="sec-7.2.6"><code>call-with-mark &lt;key&gt; &lt;val&gt; &lt;thunk&gt; → result</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.2.6">
-
-
-<p>
-Calls thunk in a continuation with a continuation mark mapping key to
-value.  If the current continuation already has a mark with that key,
-it is overwritten.  Thunk is evaluated in tail position.
-</p>
-</div>
-
-</div>
-
-<div id="outline-container-7.2.7" class="outline-4">
-<h4 id="sec-7.2.7"><code>current-marks &lt;key&gt; → list</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.2.7">
-
-
-<p>
-Returns a list of the current continuation marks with the given key,
-from innermost to outermost continuation.
 </p>
 </div>
 </div>
@@ -1113,7 +1084,7 @@ Sends object a message with an argument.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-02 13:39:45 CEST</p>
+<p class="date"> Date: 2012-08-02 23:03:22 CEST</p>
 </div>
 </div>
 </body>

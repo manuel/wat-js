@@ -172,23 +172,23 @@ Evaluates the test, and if it is false evaluates the else branch,
 otherwise evaluates the then branch.  The branches are evaluated in
 tail position.
 
-*** =push-prompt* <prompt> <thunk> → result= [operative]
+*** =push-prompt* <prompt> <thunk> → result= [applicative]
 
 Pushes the continuation-delimiting prompt and executes thunk in the
 new continuation.
 
-*** =take-sub-cont* <prompt> <cmb> → result= [operative]
+*** =take-sub-cont* <prompt> <cmb> → result= [applicative]
 
 Aborts up to and including the prompt, and calls the combiner with a
 single argument representing the delimited continuation from the call
 to =take-sub-cont*= up to but not including the prompt.
 
-*** =push-sub-cont* <cont> <thunk> → result= [operative]
+*** =push-sub-cont* <cont> <thunk> → result= [applicative]
 
 Prepends the delimited continuation to the current continuation, and
 executes thunk in the new continuation.
 
-*** =call-with-mark <key> <val> <thunk> → result= [operative]
+*** =call-with-mark <key> <val> <thunk> → result= [applicative]
 
 Calls thunk in a continuation with a continuation mark mapping key to
 value.  If the current continuation already has a mark with that key,

@@ -40,7 +40,7 @@ var wat = (function() {
     KCombine.prototype.invoke = function(fbr) { fbr.k = this.k; fbr.a.combine(fbr, this.e, this.o); };
     function Opv(p, ep, x, e) { this.p = p; this.ep = ep; this.x = x; this.e = e; }
     function Apv(cmb) { this.cmb = cmb; }; function wrap(cmb) { return new Apv(cmb); }; function unwrap(apv) { return apv.cmb; }
-    function Def() {}; function Vau() {}; function If() {}; function Eval() {}; function CCC() {}; function Jump() {}
+    function Def() {}; function Vau() {}; function If() {}; function Eval() {}
     Opv.prototype.combine = function(fbr, e, o) {
 	var xe = new Env(this.e); bind(xe, this.p, o); bind(xe, this.ep, e); fbr.prime(this.x, xe); };
     Apv.prototype.combine = function(fbr, e, o) { evalArgs(fbr, new KApply(fbr.k, e, this.cmb), e, o, NIL); };
@@ -59,8 +59,6 @@ var wat = (function() {
     function KIf(k, e, xthen, xelse) { this.k = k; this.e = e; this.xthen = xthen; this.xelse = xelse; }
     KIf.prototype.invoke = function(fbr) { fbr.k = this.k; fbr.prime(fbr.a === F ? this.xelse : this.xthen, this.e); };
     Eval.prototype.combine = function(fbr, e, o) { fbr.prime(elt(o, 0), elt(o, 1)); };
-    CCC.prototype.combine = function(fbr, e, o) { fbr.prime(cons(elt(o, 0), cons(fbr.k, NIL)), e); };
-    Jump.prototype.combine = function(fbr, e, o) { fbr.k = elt(o, 0); fbr.a = elt(o, 1); };
     function CallWithMark() {}; function CurrentMarks() {}
     CallWithMark.prototype.combine = function(fbr, e, o) {
 	var key = elt(o, 0); var val = elt(o, 1); var th = elt(o, 2);
@@ -115,7 +113,7 @@ var wat = (function() {
     function untag(obj) { return obj.val; }
     function init_types(types) { types.map(function (type) { type.prototype.wat_type = new Type(); }); }
     init_types([KDone, KEval, KCombine, KApply, KEvalArg, KDef, KIf, MKDone, MKPrompt, MKSeg,
-		Opv, Apv, Def, Vau, If, Eval, CCC, Jump, CallWithMark, CurrentMarks, JSFun,
+		Opv, Apv, Def, Vau, If, Eval, CallWithMark, CurrentMarks, JSFun,
 		Sym, Cons, Env, Str, Num, Vector, Void, Ign, Nil, True, False, Type]);
     function assert(b) { if (!b) fail("assertion failed"); }
     function fail(err) { throw err; }

@@ -177,11 +177,11 @@ tail position.
 Pushes the continuation-delimiting prompt and executes thunk in the
 new continuation.
 
-*** =take-sub-cont <prompt> <cmb> → result= [operative]
+*** =take-sub-cont* <prompt> <cmb> → result= [operative]
 
 Aborts up to and including the prompt, and calls the combiner with a
 single argument representing the delimited continuation from the call
-to =take-sub-cont= up to but not including the prompt.
+to =take-sub-cont*= up to but not including the prompt.
 
 *** =push-sub-cont* <cont> <thunk> → result= [operative]
 

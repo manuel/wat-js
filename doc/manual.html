@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-02 01:01:54 CEST"/>
+<meta name="generated" content="2012-08-02 04:06:58 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -100,7 +100,7 @@ lang="en" xml:lang="en">
 <ul>
 <li><a href="#sec-7.2.1"><code>if &lt;test&gt; &lt;then&gt; &lt;else&gt; → result</code> [operative] </a></li>
 <li><a href="#sec-7.2.2"><code>push-prompt* &lt;prompt&gt; &lt;thunk&gt; → result</code> [operative] </a></li>
-<li><a href="#sec-7.2.3"><code>take-sub-cont &lt;prompt&gt; &lt;cmb&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-7.2.3"><code>take-sub-cont* &lt;prompt&gt; &lt;cmb&gt; → result</code> [operative] </a></li>
 <li><a href="#sec-7.2.4"><code>push-sub-cont* &lt;cont&gt; &lt;thunk&gt; → result</code> [operative] </a></li>
 <li><a href="#sec-7.2.5"><code>call-with-mark &lt;key&gt; &lt;val&gt; &lt;thunk&gt; → result</code> [operative] </a></li>
 <li><a href="#sec-7.2.6"><code>current-marks &lt;key&gt; → list</code> [applicative] </a></li>
@@ -538,14 +538,14 @@ new continuation.
 </div>
 
 <div id="outline-container-7.2.3" class="outline-4">
-<h4 id="sec-7.2.3"><code>take-sub-cont &lt;prompt&gt; &lt;cmb&gt; → result</code> [operative] </h4>
+<h4 id="sec-7.2.3"><code>take-sub-cont* &lt;prompt&gt; &lt;cmb&gt; → result</code> [operative] </h4>
 <div class="outline-text-4" id="text-7.2.3">
 
 
 <p>
 Aborts up to and including the prompt, and calls the combiner with a
 single argument representing the delimited continuation from the call
-to <code>take-sub-cont</code> up to but not including the prompt.
+to <code>take-sub-cont*</code> up to but not including the prompt.
 </p>
 </div>
 
@@ -1090,7 +1090,7 @@ Sends object a message with an argument.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-02 01:01:54 CEST</p>
+<p class="date"> Date: 2012-08-02 04:06:58 CEST</p>
 </div>
 </div>
 </body>

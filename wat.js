@@ -173,7 +173,7 @@ var wat = (function() {
 	bind(e, new Sym("def"), new Def());
 	bind(e, new Sym("if"), new If());
 	bind(e, new Sym("push-prompt*"), wrap(new PushPrompt()));
-	bind(e, new Sym("take-sub-cont"), wrap(new TakeSubCont()));
+	bind(e, new Sym("take-sub-cont*"), wrap(new TakeSubCont()));
 	bind(e, new Sym("push-sub-cont*"), wrap(new PushSubCont()));
 	bind(e, new Sym("call-with-mark"), wrap(new CallWithMark()));
 	bind(e, new Sym("current-marks"), wrap(new CurrentMarks()));

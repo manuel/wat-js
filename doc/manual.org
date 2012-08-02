@@ -172,6 +172,11 @@ Evaluates the test, and if it is false evaluates the else branch,
 otherwise evaluates the then branch.  The branches are evaluated in
 tail position.
 
+*** =begin . <exprs> → result= [operative]
+
+Evaluates expressions from left to right, returning the value of the
+last.  As a special case, =(begin)= returns void.
+
 *** =push-prompt* <prompt> <thunk> → result= [applicative]
 
 Pushes the continuation-delimiting prompt and executes thunk in the
@@ -342,11 +347,6 @@ Constructs a nil-terminated list containing the values.
 Constructs a list of the values, terminated by the last value.
 
 ** Control Flow
-
-*** =begin . <exprs> → result= [operative]
-
-Evaluates expressions from left to right, returning the value of the
-last.  As a special case, =(begin)= returns void.
 
 *** =with-mark <key> <val> . <exprs> → result= [operative]
 

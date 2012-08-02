@@ -40,7 +40,7 @@ var wat = (function() {
     KCombine.prototype.invoke = function(fbr) { fbr.k = this.k; fbr.a.combine(fbr, this.e, this.o); };
     function Opv(p, ep, x, e) { this.p = p; this.ep = ep; this.x = x; this.e = e; }
     function Apv(cmb) { this.cmb = cmb; }; function wrap(cmb) { return new Apv(cmb); }; function unwrap(apv) { return apv.cmb; }
-    function Def() {}; function Vau() {}; function If() {}; function Eval() {}
+    function Def() {}; function Vau() {}; function If() {}; function Eval() {}; function Begin() {}
     Opv.prototype.combine = function(fbr, e, o) {
 	var xe = new Env(this.e); bind(xe, this.p, o); bind(xe, this.ep, e); fbr.prime(this.x, xe); };
     Apv.prototype.combine = function(fbr, e, o) { evalArgs(fbr, new KApply(fbr.k, e, this.cmb), e, o, NIL); };
@@ -59,6 +59,14 @@ var wat = (function() {
     function KIf(k, e, xthen, xelse) { this.k = k; this.e = e; this.xthen = xthen; this.xelse = xelse; }
     KIf.prototype.invoke = function(fbr) { fbr.k = this.k; fbr.prime(fbr.a === F ? this.xelse : this.xthen, this.e); };
     Eval.prototype.combine = function(fbr, e, o) { fbr.prime(elt(o, 0), elt(o, 1)); };
+    function JSFun(jsfun) { this.jsfun = jsfun }
+    Begin.prototype.combine = function(fbr, e, o) { if (o === NIL) fbr.a = VOID; else begin1(fbr, e, o); };
+    function begin1(fbr, e, xs) { if (cdr(xs) !== NIL) { fbr.k = new KBegin(fbr.k, e, cdr(xs)); } fbr.prime(car(xs), e); }
+    function KBegin(k, e, xs) { this.k = k; this.e = e; this.xs = xs; }
+    KBegin.prototype.invoke = function(fbr) { fbr.k = this.k; begin1(fbr, this.e, this.xs); }
+    JSFun.prototype.combine = function(fbr, e, o) { fbr.a = this.jsfun.apply(null, list_to_array(o)); };
+    function jswrap(jsfun) { return wrap(new JSFun(jsfun)); }
+    /* Continuation Marks */
     function CallWithMark() {}; function CurrentMarks() {}
     CallWithMark.prototype.combine = function(fbr, e, o) {
 	var key = elt(o, 0); var val = elt(o, 1); var th = elt(o, 2);
@@ -71,9 +79,6 @@ var wat = (function() {
     MKDone.prototype.mk_marks = function(key, res) {};
     MKPrompt.prototype.mk_marks = function(key, res) { this.mk.mk_marks(key, res); };
     MKSeg.prototype.mk_marks = function(key, res) { k_marks(this.k, key, res); this.mk.mk_marks(key, res); };
-    function JSFun(jsfun) { this.jsfun = jsfun }
-    JSFun.prototype.combine = function(fbr, e, o) { fbr.a = this.jsfun.apply(null, list_to_array(o)); };
-    function jswrap(jsfun) { return wrap(new JSFun(jsfun)); }
     /* Metacontinuation Utilities */
     MKDone.prototype.split_mk = function(p) { fail("prompt not found"); };
     MKPrompt.prototype.split_mk = function(p) {
@@ -116,8 +121,8 @@ var wat = (function() {
     function tag(type, val) { return new Tagged(type, val); };
     function untag(obj) { return obj.val; }
     function init_types(types) { types.map(function (type) { type.prototype.wat_type = new Type(); }); }
-    init_types([KDone, KEval, KCombine, KApply, KEvalArg, KDef, KIf, MKDone, MKPrompt, MKSeg,
-		Opv, Apv, Def, Vau, If, Eval, CallWithMark, CurrentMarks, JSFun,
+    init_types([KDone, KEval, KCombine, KApply, KEvalArg, KDef, KIf, KBegin, MKDone, MKPrompt, MKSeg,
+		Opv, Apv, Def, Vau, If, Eval, Begin, CallWithMark, CurrentMarks, JSFun,
 		Sym, Cons, Env, Str, Num, Vector, Void, Ign, Nil, True, False, Type]);
     function assert(b) { if (!b) fail("assertion failed"); }
     function fail(err) { throw err; }
@@ -183,6 +188,7 @@ var wat = (function() {
 	bind(e, new Sym("current-marks"), wrap(new CurrentMarks()));
 	bind(e, new Sym("vau"), new Vau());
 	bind(e, new Sym("eval"), wrap(new Eval()));
+	bind(e, new Sym("begin"), new Begin());
 	bind(e, new Sym("wrap"), jswrap(wrap));
 	bind(e, new Sym("unwrap"), jswrap(unwrap));
 	bind(e, new Sym("eq?"), jswrap(function (a, b) { return (a === b) ? T : F }));

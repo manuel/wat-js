@@ -9,21 +9,21 @@
 
 (def procedure? (wrap (vau (val) #ign (eq? (type-of val) (type-of (wrap (vau #ign #ign #void)))))))
 
-(def begin
-  ((wrap (vau (seq2) #ign
-	   (seq2
-             (def aux
-               (vau (head . tail) env
-		 (if (null? tail)
-		     (eval head env)
-		     (seq2 (eval head env) (eval (cons aux tail) env)))))
-             (vau body env
-               (if (null? body)
-                   #void
-                   (eval (cons aux body) env))))))
-   (vau (first second) env
-     ((wrap (vau #ign #ign (eval second env)))
-      (eval first env)))))
+;; (def begin
+;;   ((wrap (vau (seq2) #ign
+;; 	   (seq2
+;;              (def aux
+;;                (vau (head . tail) env
+;; 		 (if (null? tail)
+;; 		     (eval head env)
+;; 		     (seq2 (eval head env) (eval (cons aux tail) env)))))
+;;              (vau body env
+;;                (if (null? body)
+;;                    #void
+;;                    (eval (cons aux body) env))))))
+;;    (vau (first second) env
+;;      ((wrap (vau #ign #ign (eval second env)))
+;;       (eval first env)))))
 
 (def list (wrap (vau x #ign x)))
 

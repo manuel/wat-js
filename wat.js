@@ -138,8 +138,8 @@ var wat = (function() {
     var escape_char = choice("\"", "\\");
     var escape_sequence = action(sequence("\\", escape_char), function (ast) { return ast[1]; });
     var string_char = choice(negate(escape_char), escape_sequence);
-    var string_stx = action(sequence("\"", join_action(repeat0(string_char), ""), "\""),
-			    function (ast) { return new Str(ast[1]); });
+    var string_stx =
+	action(sequence("\"", join_action(repeat0(string_char), ""), "\""), function (ast) { return new Str(ast[1]); });
     var digits = join_action(repeat1(range("0", "9")), "");
     var number_stx = action(sequence(optional(choice("+", "-")), digits, optional(join_action(sequence(".", digits), ""))),
 			    function (ast) {
@@ -164,9 +164,8 @@ var wat = (function() {
     var cmt_stx = action(sequence(";", repeat0(negate(line_terminator)), optional(line_terminator)), nothing_action);
     var whitespace_stx = action(choice(" ", "\n", "\r", "\t"), nothing_action);
     function nothing_action(ast) { return VOID; } // HACK!
-    var x_stx =
-	whitespace(choice(void_stx, ign_stx, nil_stx, t_stx, f_stx, number_stx,
-			  quote_stx, compound_stx, id_stx, string_stx, cmt_stx));
+    var x_stx = whitespace(choice(void_stx, ign_stx, nil_stx, t_stx, f_stx, number_stx,
+				  quote_stx, compound_stx, id_stx, string_stx, cmt_stx));
     var program_stx = whitespace(repeat0(choice(x_stx, whitespace_stx))); // HACK!
     /* Core Environment */
     function mkenvcore() {

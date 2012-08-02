@@ -39,7 +39,7 @@ var wat = (function() {
     function KBegin(k, e, xs) { this.k = k; this.e = e; this.xs = xs; }
     KBegin.prototype.invoke = function(fbr) { fbr.k = this.k; begin1(fbr, this.e, this.xs); }
     /* JS Combiners */
-    function JSFun(jsfun) { this.jsfun = jsfun }
+    function JSFun(jsfun) { this.jsfun = jsfun; }
     JSFun.prototype.combine = function(fbr, e, o) { fbr.a = this.jsfun.apply(null, list_to_array(o)); };
     function jswrap(jsfun) { return wrap(new JSFun(jsfun)); }
     /* Delimited Control and Metacontinuations */
@@ -109,8 +109,8 @@ var wat = (function() {
     Nil.prototype.match = function(e, rhs) { if (rhs !== NIL) fail("NIL expected"); };
     Ign.prototype.match = function(e, rhs) {};
     /* Data */
-    function Str(jsstr) { this.jsstr = jsstr };
-    function Num(jsnum) { this.jsnum = jsnum };
+    function Str(jsstr) { this.jsstr = jsstr; };
+    function Num(jsnum) { this.jsnum = jsnum; };
     function num_eql(num1, num2) { return num1.jsnum === num2.jsnum; }
     function num_add(num1, num2) { return new Num(num1.jsnum + num2.jsnum); };
     function Vector(elements) { this.elements = elements; }

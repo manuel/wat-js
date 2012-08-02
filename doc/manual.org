@@ -346,12 +346,6 @@ Constructs a nil-terminated list containing the values.
 
 Constructs a list of the values, terminated by the last value.
 
-** Control Flow
-
-*** =with-mark <key> <val> . <exprs> → result= [operative]
-
-Shorthand for =call-with-mark= that doesn't need a thunk.
-
 ** Delimited Dynamic Binding
 
 *** =dnew → dynamic= [applicative]

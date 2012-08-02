@@ -146,15 +146,6 @@
   ;; Delimited Control
 
   
-  ;; (let ((p (make-prompt)))
-  ;; 		  (+ 2 (push-prompt p
-  ;; 				    (if (take-sub-cont p
-  ;; 						       (lambda (k)
-  ;; 							 (+ (push-sub-cont k #f)
-  ;; 							    (push-sub-cont k #t))))
-  ;; 					3
-  ;; 					4))))
-
 (define-syntax test-check
   (vau (#ign expr res) env
     (assert (= (display (eval expr env)) (eval res env)))))
@@ -225,3 +216,13 @@
 	      (push-prompt* p3  (lambda () (take-sub-cont p1 (lambda (sk) (push-twice sk)))))))))))))
   135)
 
+(test-check 'monadic-paper
+  (let ((p (make-prompt)))
+    (+ 2 (push-prompt* p (lambda ()
+		      (if (take-sub-cont p
+					 (lambda (k)
+					   (+ (push-sub-cont* k (lambda () #f))
+					      (push-sub-cont* k (lambda () #t)))))
+			  3
+			  4)))))
+  9)

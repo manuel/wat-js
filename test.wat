@@ -196,3 +196,32 @@
 	      7)))
        20))
   32)
+
+(test-check 'test6
+  (let ((p1 (new-prompt))
+	(p2 (new-prompt))
+	(push-twice (lambda (sk)
+		      (push-sub-cont* sk (lambda () (push-sub-cont* sk (lambda () 3)))))))
+    (+ 10
+      (push-prompt* p1 (lambda () (+ 1
+             			(push-prompt* p2 (lambda () (take-sub-cont p1 (lambda (sk) (push-twice sk))))))))))
+  15)
+
+(test-check 'test7
+  (let* ((p1 (new-prompt))
+	 (p2 (new-prompt))
+	 (p3 (new-prompt))
+	 (push-twice
+	    (lambda (sk)
+	      (push-sub-cont* sk (lambda () (push-sub-cont* sk (lambda ()
+		(take-sub-cont p2 (lambda (sk2)
+		  (push-sub-cont* sk2 (lambda ()
+		    (push-sub-cont* sk2 (lambda () 3)))))))))))))
+    (+ 100
+      (push-prompt* p1 (lambda ()
+	(+ 1
+	  (push-prompt* p2 (lambda ()
+	    (+ 10
+	      (push-prompt* p3  (lambda () (take-sub-cont p1 (lambda (sk) (push-twice sk)))))))))))))
+  135)
+

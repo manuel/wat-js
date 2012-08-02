@@ -64,9 +64,13 @@ var wat = (function() {
 	var key = elt(o, 0); var val = elt(o, 1); var th = elt(o, 2);
 	fbr.k = clone(fbr.k); fbr.k["m_" + key.name] = val; fbr.prime(cons(th, NIL), e); };
     CurrentMarks.prototype.combine = function(fbr, e, o) {
-	var key = elt(o, 0); var k = fbr.k; var res = [];
-	while(k) { var val = k["m_" + key.name]; if (val !== undefined) res.push(val); k = k.k; }
-	fbr.a = array_to_list(res); };
+	var key = elt(o, 0); var res = [];
+	k_marks(fbr.k, key, res); fbr.mk.mk_marks(key, res); fbr.a = array_to_list(res); };
+    function k_marks(k, key, res) {
+	while(k) { var val = k["m_" + key.name]; if (val !== undefined) res.push(val); k = k.k; } }
+    MKDone.prototype.mk_marks = function(key, res) {};
+    MKPrompt.prototype.mk_marks = function(key, res) { this.mk.mk_marks(key, res); };
+    MKSeg.prototype.mk_marks = function(key, res) { k_marks(this.k, key, res); this.mk.mk_marks(key, res); };
     function JSFun(jsfun) { this.jsfun = jsfun }
     JSFun.prototype.combine = function(fbr, e, o) { fbr.a = this.jsfun.apply(null, list_to_array(o)); };
     function jswrap(jsfun) { return wrap(new JSFun(jsfun)); }

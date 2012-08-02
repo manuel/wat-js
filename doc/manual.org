@@ -196,9 +196,6 @@ it is overwritten.  Thunk is evaluated in tail position.
 
 *** =current-marks <key> → list= [applicative]
 
-NOTE: Currently broken; returns only marks up to next prompt.  Will be
-fixed.
-
 Returns a list of the current continuation marks with the given key,
 from innermost to outermost continuation.
 
@@ -354,6 +351,20 @@ last.  As a special case, =(begin)= returns void.
 *** =with-mark <key> <val> . <exprs> → result= [operative]
 
 Shorthand for =call-with-mark= that doesn't need a thunk.
+
+** Delimited Dynamic Binding
+
+*** =dnew → dynamic= [applicative]
+
+Creates a new dynamically-bound variable.
+
+*** =dlet <dynamic> <value> . <exprs> → result= [operative]
+
+Performs expressions with the dynamic variable bound to the value.
+
+*** =dref <dynamic> → value= [operative]
+
+Retrieves the dynamically-bound value of a dynamic variable.
 
 ** Generic Programming
 

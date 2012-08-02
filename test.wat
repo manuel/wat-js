@@ -143,9 +143,8 @@
     (eq? () (with-mark 'foo #t (id (with-mark 'foo #f (cdr (cdr (current-marks 'foo)))))))
     (eq? () (current-marks 'foo)))
 
-  ;; Delimited Control
+;; Delimited Control
 
-  
 (define-syntax test-check
   (vau (#ign expr res) env
     (assert (= (display (eval expr env)) (eval res env)))))
@@ -224,3 +223,33 @@
 		3
 		4))))
   9)
+
+;; Delimited Dynamic Binding
+
+(test-check 'ddb-1
+  (let ((dv (dnew)))
+    (dlet dv 12 (dref dv)))
+  12)
+
+(test-check 'ddb-2
+  (let ((dv (dnew)))
+    (dlet dv 12 (dlet dv 14 (dref dv))))
+  14)
+
+(test-check 'ddb-3
+  (let ((dv (dnew)) (p (make-prompt)))
+    (dlet dv 1
+      (push-prompt p
+        (dlet dv 3
+          (take-sub-cont p k (dref dv))))))
+  1)
+
+(test-check 'ddb-4
+  (let ((dv (dnew)) (p (make-prompt)))
+    (dlet dv 1
+      (push-prompt p
+        (dlet dv 3
+          (take-sub-cont p k
+	    (push-sub-cont k
+	       (dref dv)))))))
+  3)

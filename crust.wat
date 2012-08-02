@@ -171,3 +171,13 @@
       (push-sub-cont* (eval k env)
         (lambda () (eval (list* begin es) env)))))
 )
+
+(provide (dnew dref dlet dlet*)
+  (define parameter-type (make-type))
+  (define (dnew) (tag parameter-type #void))
+  (define (dref p) (car (current-marks p)))
+  (define (dlet* p v th) (call-with-mark p v th))
+  (define-syntax dlet
+    (vau (key val . body) env
+      (eval (list dlet* key val (list* lambda () body)) env)))
+)

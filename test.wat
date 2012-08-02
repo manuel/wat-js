@@ -157,7 +157,7 @@
 
 (define-syntax test-check
   (vau (#ign expr res) env
-    (assert (= (eval expr env) (eval res env)))))
+    (assert (= (display (eval expr env)) (eval res env)))))
 
 (define new-prompt make-prompt)
 
@@ -187,3 +187,12 @@
 		 (+ v1 10)))))
       (+ v 20)))
   27)
+
+(test-check 'test4
+  (let ((p (make-prompt)))
+    (+ (push-prompt* p
+         (lambda ()
+	   (+ (take-sub-cont p (lambda (sk) (push-sub-cont* sk (lambda () 5))))
+	      7)))
+       20))
+  32)

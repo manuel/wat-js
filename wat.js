@@ -20,9 +20,10 @@ var wat = (function() {
     TakeSubCont.prototype.combine = function(fbr, e, o) {
 	var p = elt(o, 0); var f = elt(o, 1);
 	var split = fbr.mk.split_mk(p);
+	var sk = new MKSeg(split.sk, fbr.k);
 	fbr.mk = split.mk;
 	fbr.k = new KDone();
-	fbr.prime(cons(f, cons(new MKSeg(split.sk, fbr.k), NIL)), e);
+	fbr.prime(cons(f, cons(sk, NIL)), e);
     };
     PushSubCont.prototype.combine = function(fbr, e, o) {
 	var sk = elt(o, 0); var th = elt(o, 1);

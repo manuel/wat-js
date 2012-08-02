@@ -5,8 +5,9 @@ which everything is first-class: syntax, control, and data.  Syntax is
 based on lexically-scoped fexprs and first-class environments,
 subsuming ordinary procedures and hygienic macros.  Control is based
 on delimited continuations and tail-call elimination, subsuming all
-known computational effects.  Data uses a dynamic type-tagging system
-that allows generic programming over built-in as well as user-defined
-data types.
+computational effects.  Data uses a dynamic type-tagging system that
+allows generic programming over built-in as well as user-defined data
+types.
 
-The Wat Language Manual is online at <http://manuel.github.com/wat-js/doc/manual.html>.
+The Wat Language Manual is online at
+<http://manuel.github.com/wat-js/doc/manual.html>.

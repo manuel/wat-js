@@ -181,10 +181,9 @@
 
 (test-check 'test4
   (let ((p (make-prompt)))
-    (+ (push-prompt* p
-         (lambda ()
-	   (+ (take-sub-cont p (lambda (sk) (push-sub-cont* sk (lambda () 5))))
-	      7)))
+    (+ (push-prompt p
+         (+ (take-sub-cont p (lambda (sk) (push-sub-cont sk 5)))
+	    7))
        20))
   32)
 
@@ -192,10 +191,10 @@
   (let ((p1 (new-prompt))
 	(p2 (new-prompt))
 	(push-twice (lambda (sk)
-		      (push-sub-cont* sk (lambda () (push-sub-cont* sk (lambda () 3)))))))
+		      (push-sub-cont sk (push-sub-cont sk 3)))))
     (+ 10
-      (push-prompt* p1 (lambda () (+ 1
-             			(push-prompt* p2 (lambda () (take-sub-cont p1 (lambda (sk) (push-twice sk))))))))))
+      (push-prompt p1 (+ 1
+        (push-prompt p2 (take-sub-cont p1 (lambda (sk) (push-twice sk))))))))
   15)
 
 (test-check 'test7
@@ -204,25 +203,25 @@
 	 (p3 (new-prompt))
 	 (push-twice
 	    (lambda (sk)
-	      (push-sub-cont* sk (lambda () (push-sub-cont* sk (lambda ()
+	      (push-sub-cont sk (push-sub-cont sk
 		(take-sub-cont p2 (lambda (sk2)
-		  (push-sub-cont* sk2 (lambda ()
-		    (push-sub-cont* sk2 (lambda () 3)))))))))))))
+		  (push-sub-cont sk2
+		    (push-sub-cont sk2 3)))))))))
     (+ 100
-      (push-prompt* p1 (lambda ()
+      (push-prompt p1
 	(+ 1
-	  (push-prompt* p2 (lambda ()
+	  (push-prompt p2
 	    (+ 10
-	      (push-prompt* p3  (lambda () (take-sub-cont p1 (lambda (sk) (push-twice sk)))))))))))))
+	      (push-prompt p3 (take-sub-cont p1 (lambda (sk) (push-twice sk))))))))))
   135)
 
 (test-check 'monadic-paper
   (let ((p (make-prompt)))
-    (+ 2 (push-prompt* p (lambda ()
-		      (if (take-sub-cont p
-					 (lambda (k)
-					   (+ (push-sub-cont* k (lambda () #f))
-					      (push-sub-cont* k (lambda () #t)))))
-			  3
-			  4)))))
+    (+ 2 (push-prompt p
+            (if (take-sub-cont p
+                  (lambda (k)
+		    (+ (push-sub-cont k #f)
+		       (push-sub-cont k #t))))
+		3
+		4))))
   9)

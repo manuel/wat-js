@@ -6,11 +6,12 @@
 
 * Description
 
-/Wat/ is an ultra-lightweight dialect of Lisp, specifically Kernel, in
-which everything is first-class: syntax, control, and data.  Syntax is
-based on lexically-scoped fexprs and first-class environments,
-subsuming ordinary procedures and hygienic macros.  Control is based
-on delimited continuations and tail-call elimination, subsuming all
+/Wat/ is an ultra-lightweight dialect of Lisp, specifically
+[[http://web.cs.wpi.edu/~jshutt/kernel.html][Kernel]], in which
+everything is first-class: syntax, control, and data.  Syntax is based
+on lexically-scoped fexprs and first-class environments, subsuming
+ordinary procedures and hygienic macros.  Control is based on
+delimited continuations and tail-call elimination, subsuming all
 computational effects.  Data uses a dynamic type-tagging system that
 allows generic programming over built-in as well as user-defined data
 types.

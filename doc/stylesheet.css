@@ -1,5 +1,5 @@
 @font-face { font-family: London; src: url('london.ttf'); }
-h2, h3, h4, h5, h6, h7 { font-family: sans; }
+h2, h3, h4, h5, h6, h7, th { font-family: sans; }
 h1 { font-family: London; font-size: 60pt; }
 h2 { border-bottom: 2px solid black; }
 h3 { border-bottom: 1px dotted black; }

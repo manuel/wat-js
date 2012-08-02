@@ -156,5 +156,15 @@
   (vau (key val . body) env
     (eval (list call-with-mark key val (list* lambda () body)) env)))
 
-(define prompt-type (make-type))
-(define (make-prompt) (tag prompt-type #void))
+(provide (make-prompt push-prompt push-sub-cont)
+  (define prompt-type (make-type))
+  (define (make-prompt) (tag prompt-type #void))
+  (define-syntax push-prompt
+    (vau (p . es) env
+      (push-prompt* (eval p env)
+        (lambda () (eval (list* begin es) env)))))
+  (define-syntax push-sub-cont
+    (vau (k . es) env
+      (push-sub-cont* (eval k env)
+        (lambda () (eval (list* begin es) env)))))
+)

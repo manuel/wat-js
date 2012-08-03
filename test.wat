@@ -214,7 +214,7 @@
 ;; Delimited Dynamic Binding
 
 (let ((p (make-prompt)))
-  (assert (= 117 (+ 10 (push-prompt p (+ 2 (shift* p (lambda (k) (+ 100 (k (k 3)))))))))))
+  (assert (= 117 (+ 10 (push-prompt p (+ 2 (shift p k (+ 100 (k (k 3))))))))))
 
 (test-check 'ddb-1
   (let ((dv (dnew)))

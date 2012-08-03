@@ -152,7 +152,7 @@
 
 (define (newline) (display "newline")) ; huh?
 
-(provide (make-prompt push-prompt take-sub-cont push-sub-cont shift*)
+(provide (make-prompt push-prompt take-sub-cont push-sub-cont shift)
   (define prompt-type (make-type))
   (define (make-prompt) (tag prompt-type #void))
   (define-syntax push-prompt
@@ -170,12 +170,15 @@
     (take-sub-cont p sk (push-prompt p (f (reifyP p sk)))))
   (define (reifyP p sk)
     (lambda (v) (push-prompt p (push-sub-cont sk v))))
+  (define-syntax shift
+    (vau (p sk . es) env
+      (eval (list shift* p (list* lambda (list sk) es)) env)))
 )
 
 (provide (dnew dref dlet dlet*)
   (define parameter-type (make-type))
   (define (dnew) (tag parameter-type #void))
-  (define (dref p) (shift* p (lambda (f) (lambda (y) ((f y) y)))))
+  (define (dref p) (shift p sk (lambda (y) ((sk y) y))))
   (define (dlet* p val thunk)
     ((push-prompt p
        (let ((r (thunk)))

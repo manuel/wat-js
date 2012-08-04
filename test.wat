@@ -252,3 +252,9 @@
 ;;          (push-sub-cont sk (tailtest))))))
 ;; (tailtest)
 
+;; Generators
+
+(test-check 'generator-1
+  (let ((gen (lambda () (yield 1) (yield 2))))
+    (for* gen display))
+  #void)

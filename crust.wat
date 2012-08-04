@@ -73,6 +73,15 @@
 		    (list* let* (cdr bindings) body)))
 	  env)))
 
+(def letrec
+  (vau (bindings . body) env
+    (eval (list* let ()
+		 (list def
+		       (map car bindings)
+		       (list* list (map cadr bindings)))
+		 body)
+	  env)))
+
 (def apply
   (lambda (appv arg . opt)
     (eval (cons (unwrap appv) arg)

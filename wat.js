@@ -48,25 +48,26 @@ var wat = (function() {
     function MKDone() {};
     MKDone.prototype.underflow = function(fbr) { fbr.k = null; };
     function MKSeg(mk, k) { assert(type_of(mk)); assert(type_of(k)); this.mk = mk; this.k = k; }
+    function mkseg(mk, k) { if (k instanceof KDone) return mk; else return new MKSeg(mk, k); } // TCO
     MKSeg.prototype.underflow = function(fbr) { fbr.mk = this.mk; fbr.k = this.k; };
     function MKPrompt(mk, p) { assert(type_of(mk)); assert(type_of(p)); this.mk = mk; this.p = p; }
     MKPrompt.prototype.underflow = function(fbr) { fbr.mk = this.mk; fbr.mk.underflow(fbr); };
     function PushPrompt() {}; function TakeSubCont() {}; function PushSubCont() {}
     PushPrompt.prototype.combine = function(fbr, e, o) {
 	var p = elt(o, 0); var th = elt(o, 1);
-	fbr.mk = new MKPrompt(new MKSeg(fbr.mk, fbr.k), p);
+	fbr.mk = new MKPrompt(mkseg(fbr.mk, fbr.k), p);
 	fbr.k = new KDone();
 	fbr.prime(cons(th, NIL), e); };
     TakeSubCont.prototype.combine = function(fbr, e, o) {
 	var p = elt(o, 0); var f = elt(o, 1);
 	var split = fbr.mk.split_mk(p);
-	var sk = new MKSeg(split.sk, fbr.k);
+	var sk = mkseg(split.sk, fbr.k);
 	fbr.mk = split.mk;
 	fbr.k = new KDone();
 	fbr.prime(cons(f, cons(sk, NIL)), e); };
     PushSubCont.prototype.combine = function(fbr, e, o) {
 	var sk = elt(o, 0); var th = elt(o, 1);
-	fbr.mk = sk.append_mk(new MKSeg(fbr.mk, fbr.k));
+	fbr.mk = sk.append_mk(mkseg(fbr.mk, fbr.k));
 	fbr.k = new KDone();
 	fbr.prime(cons(th, NIL), e); };
     MKDone.prototype.split_mk = function(p) { fail("prompt not found"); };
@@ -75,10 +76,10 @@ var wat = (function() {
 	else { var split = this.mk.split_mk(p); return { sk: new MKPrompt(split.sk, this.p), mk: split.mk }; } };
     MKSeg.prototype.split_mk = function(p) {
 	var split = this.mk.split_mk(p);
-	return { sk: new MKSeg(split.sk, this.k), mk: split.mk }; };
+	return { sk: mkseg(split.sk, this.k), mk: split.mk }; };
     MKDone.prototype.append_mk = function(mk) { return mk; };
     MKPrompt.prototype.append_mk = function(mk) { return new MKPrompt(this.mk.append_mk(mk), this.p); };
-    MKSeg.prototype.append_mk = function(mk) { return new MKSeg(this.mk.append_mk(mk), this.k); };
+    MKSeg.prototype.append_mk = function(mk) { return mkseg(this.mk.append_mk(mk), this.k); };
     /***** Objects *****/
     /* Core */
     function Sym(name) { this.name = name; }

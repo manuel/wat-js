@@ -244,3 +244,11 @@
 	       (dref dv)))))))
   3)
 
+;; Test to see whether continuations are properly tail-recursive.
+;; (define (tailtest)
+;;   (let ((p (make-prompt)))
+;;     (push-prompt p
+;;       (take-sub-cont p sk
+;;          (push-sub-cont sk (tailtest))))))
+;; (tailtest)
+

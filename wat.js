@@ -104,8 +104,8 @@ var wat = (function() {
     function vector_ref(vector, i) { return vector.elements[i]; }
     function vector_set(vector, i, val) { vector.elements[i] = val; return val; }
     function vector_length(vector) { return vector.length; }
-    function Void() {}; function Ign() {}; function Nil() {}; function True() {}; function False() {};
-    var VOID = new Void(); var IGN = new Ign(); var NIL = new Nil(); var T = new True(); var F = new False();
+    function Void() {}; function Ign() {}; function Nil() {}; function Bool() {}
+    var VOID = new Void(); var IGN = new Ign(); var NIL = new Nil(); var T = new Bool(); var F = new Bool()
     /* Types */
     function Type() { this.e = new Env() };
     function type_of(obj) { return obj.wat_type; }
@@ -116,7 +116,7 @@ var wat = (function() {
     function init_types(types) { types.map(function (type) { type.prototype.wat_type = new Type(); }); }
     init_types([KDone, KEval, KCombine, KApply, KEvalArg, KDef, KIf, KBegin, MKDone, MKPrompt, MKSeg,
 		Opv, Apv, Def, Vau, If, Eval, Begin, JSFun,
-		Sym, Cons, Env, Str, Num, Vector, Void, Ign, Nil, True, False, Type]);
+		Sym, Cons, Env, Str, Num, Vector, Void, Ign, Nil, Bool, Type]);
     /* Utilities */
     function assert(b) { if (!b) fail("assertion failed"); }
     function fail(err) { throw err; }

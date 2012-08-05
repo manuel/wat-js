@@ -204,3 +204,27 @@ var wat = (function() {
 	"mkenvcore": mkenvcore, "parse": parse,
     };
 }());
+// Abbreviations:
+// a: accumulator
+// apv: applicative combiner
+// arg: argument
+// cmb: combiner
+// cmt: comment
+// e: environment
+// ep: environment parameter
+// fbr: fiber
+// id: identifier
+// k: continuation
+// mk: metacontinuation
+// num: number
+// o: operand
+// opv: operative combiner
+// p: parameter
+// seg: metacontinuation segment
+// str: string
+// stx: syntax
+// subcont: subcontinuation
+// sym: symbol
+// x: expression
+// xe: extended environment
+// xs: expressions

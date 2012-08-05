@@ -81,8 +81,8 @@ var wat = (function() {
     JSFun.prototype.combine = function(fbr, e, o) { fbr.a = this.jsfun.apply(null, list_to_array(o)); };
     function jswrap(jsfun) { return wrap(new JSFun(jsfun)); }
     var JSOBJ = new Type();
-    function js_global(name) { return js_prop(window, name); }
-    function js_set_global(name, val) { return js_set_prop(window, name, val); }
+    function js_global(name) { return js_prop(WAT_GLOBAL, name); }
+    function js_set_global(name, val) { return js_set_prop(WAT_GLOBAL, name, val); }
     function js_prop(obj, name) { assert(type_of(name) === Str.prototype.wat_type); return obj[name.jsstr]; }
     function js_set_prop(obj, name, val) { assert(type_of(name) === Str.prototype.wat_type); return obj[name.jsstr] = val; }
     function js_function(jsfun) { return jswrap(jsfun); }
@@ -238,6 +238,7 @@ var wat = (function() {
 	"mkenvcore": mkenvcore, "parse": parse,
     };
 }());
+var WAT_GLOBAL = this;
 // Abbreviations:
 // a: accumulator
 // apv: applicative combiner

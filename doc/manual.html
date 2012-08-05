@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-05 16:30:05 CEST"/>
+<meta name="generated" content="2012-08-05 16:46:24 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -136,12 +136,13 @@ lang="en" xml:lang="en">
 <li><a href="#sec-8.1">Common </a>
 <ul>
 <li><a href="#sec-8.1.1"><code>lambda &lt;ptree&gt; . &lt;exprs&gt; → applicative</code> [operative] </a></li>
-<li><a href="#sec-8.1.2"><code>apply &lt;apv&gt; &lt;args&gt; → result</code> [applicative] </a></li>
-<li><a href="#sec-8.1.3"><code>set! &lt;env&gt; &lt;lhs&gt; &lt;rhs&gt; → rhs</code> [operative] </a></li>
-<li><a href="#sec-8.1.4"><code>quote &lt;form&gt; → form</code> [operative] </a></li>
-<li><a href="#sec-8.1.5"><code>define &lt;lhs&gt; &lt;rhs&gt; → result</code> [operative] </a></li>
-<li><a href="#sec-8.1.6"><code>define-syntax &lt;lhs&gt; &lt;rhs&gt; → result</code> [operative] </a></li>
-<li><a href="#sec-8.1.7"><code>provide &lt;names&gt; . &lt;exprs&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-8.1.2"><code>let &lt;lhs&gt; . &lt;rhs&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-8.1.3"><code>apply &lt;apv&gt; &lt;args&gt; → result</code> [applicative] </a></li>
+<li><a href="#sec-8.1.4"><code>set! &lt;env&gt; &lt;lhs&gt; &lt;rhs&gt; → rhs</code> [operative] </a></li>
+<li><a href="#sec-8.1.5"><code>quote &lt;form&gt; → form</code> [operative] </a></li>
+<li><a href="#sec-8.1.6"><code>define &lt;lhs&gt; &lt;rhs&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-8.1.7"><code>define-syntax &lt;lhs&gt; &lt;rhs&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-8.1.8"><code>provide &lt;names&gt; . &lt;exprs&gt; → result</code> [operative] </a></li>
 </ul>
 </li>
 <li><a href="#sec-8.2">Pairs and Lists </a>
@@ -789,13 +790,37 @@ The library consists of definitions written in Wat itself.
 <p>
 Creates an applicative combiner, as in Scheme.
 </p>
+
 </div>
 
 </div>
 
 <div id="outline-container-8.1.2" class="outline-4">
-<h4 id="sec-8.1.2"><code>apply &lt;apv&gt; &lt;args&gt; → result</code> [applicative] </h4>
+<h4 id="sec-8.1.2"><code>let &lt;lhs&gt; . &lt;rhs&gt; → result</code> [operative] </h4>
 <div class="outline-text-4" id="text-8.1.2">
+
+
+<p>
+Scheme-like <code>let</code> with two cases:
+</p>
+<ul>
+<li>
+<code>(let &lt;bindings&gt; . &lt;body&gt;)</code> binds bindings and executes body.
+
+</li>
+<li>
+<code>(let &lt;loop&gt; &lt;bindings&gt; . &lt;body&gt;)</code> executes body with a loop
+function.
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-8.1.3" class="outline-4">
+<h4 id="sec-8.1.3"><code>apply &lt;apv&gt; &lt;args&gt; → result</code> [applicative] </h4>
+<div class="outline-text-4" id="text-8.1.3">
 
 
 <p>
@@ -805,9 +830,9 @@ Applies an applicative to an arguments list.
 
 </div>
 
-<div id="outline-container-8.1.3" class="outline-4">
-<h4 id="sec-8.1.3"><code>set! &lt;env&gt; &lt;lhs&gt; &lt;rhs&gt; → rhs</code> [operative] </h4>
-<div class="outline-text-4" id="text-8.1.3">
+<div id="outline-container-8.1.4" class="outline-4">
+<h4 id="sec-8.1.4"><code>set! &lt;env&gt; &lt;lhs&gt; &lt;rhs&gt; → rhs</code> [operative] </h4>
+<div class="outline-text-4" id="text-8.1.4">
 
 
 <p>
@@ -818,9 +843,9 @@ right-hand side in the given environment.
 
 </div>
 
-<div id="outline-container-8.1.4" class="outline-4">
-<h4 id="sec-8.1.4"><code>quote &lt;form&gt; → form</code> [operative] </h4>
-<div class="outline-text-4" id="text-8.1.4">
+<div id="outline-container-8.1.5" class="outline-4">
+<h4 id="sec-8.1.5"><code>quote &lt;form&gt; → form</code> [operative] </h4>
+<div class="outline-text-4" id="text-8.1.5">
 
 
 <p>
@@ -830,9 +855,9 @@ Returns form unevaluated.
 
 </div>
 
-<div id="outline-container-8.1.5" class="outline-4">
-<h4 id="sec-8.1.5"><code>define &lt;lhs&gt; &lt;rhs&gt; → result</code> [operative] </h4>
-<div class="outline-text-4" id="text-8.1.5">
+<div id="outline-container-8.1.6" class="outline-4">
+<h4 id="sec-8.1.6"><code>define &lt;lhs&gt; &lt;rhs&gt; → result</code> [operative] </h4>
+<div class="outline-text-4" id="text-8.1.6">
 
 
 <p>
@@ -854,9 +879,9 @@ returning the applicative.
 
 </div>
 
-<div id="outline-container-8.1.6" class="outline-4">
-<h4 id="sec-8.1.6"><code>define-syntax &lt;lhs&gt; &lt;rhs&gt; → result</code> [operative] </h4>
-<div class="outline-text-4" id="text-8.1.6">
+<div id="outline-container-8.1.7" class="outline-4">
+<h4 id="sec-8.1.7"><code>define-syntax &lt;lhs&gt; &lt;rhs&gt; → result</code> [operative] </h4>
+<div class="outline-text-4" id="text-8.1.7">
 
 
 <p>
@@ -879,9 +904,9 @@ parameter, and body expressions, returning the operative.
 
 </div>
 
-<div id="outline-container-8.1.7" class="outline-4">
-<h4 id="sec-8.1.7"><code>provide &lt;names&gt; . &lt;exprs&gt; → result</code> [operative] </h4>
-<div class="outline-text-4" id="text-8.1.7">
+<div id="outline-container-8.1.8" class="outline-4">
+<h4 id="sec-8.1.8"><code>provide &lt;names&gt; . &lt;exprs&gt; → result</code> [operative] </h4>
+<div class="outline-text-4" id="text-8.1.8">
 
 
 <p>
@@ -1096,7 +1121,7 @@ Sends object a message with an argument.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-05 16:30:05 CEST</p>
+<p class="date"> Date: 2012-08-05 16:46:24 CEST</p>
 </div>
 </div>
 </body>

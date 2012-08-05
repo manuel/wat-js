@@ -126,9 +126,6 @@ var wat = (function() {
 	var res = []; while(c !== NIL) { res.push(car(c)); c = cdr(c); } return res; }
     function reverse_list(list) {
 	var res = NIL; while(list !== NIL) { res = cons(car(list), res); list = cdr(list); } return res; }
-    function clone(obj) {
-        var cl = Object.create(obj.constructor.prototype);
-	for (var k in obj) if (obj.hasOwnProperty(k)) cl[k] = obj[k]; return cl; };
     /***** Parser *****/
     function parse(s) {
 	var res = program_stx(ps(s));

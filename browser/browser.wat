@@ -1,17 +1,24 @@
 ;; -*- mode: scheme -*-
 
-(provide (read)
-
-(display "Browser")
+(provide (read display)
 
 (define *document* (js-global "document"))
-(define getElementById 
-  (let ((m (js-method "getElementById")))
-    (lambda (str) (m *document* (to-js str)))))
 
 (define getElementById 
   (let ((m (js-method "getElementById")))
     (lambda (str) (m *document* (to-js str)))))
+
+(define createElement
+  (let ((m (js-method "createElement")))
+    (lambda (name) (m *document* (to-js name)))))
+
+(define createTextNode
+  (let ((m (js-method "createTextNode")))
+    (lambda (s) (m *document* (to-js s)))))
+
+(define appendChild
+  (let ((m (js-method "appendChild")))
+    (lambda (e child) (m e child))))
 
 (define (read-input)
   (let ((res (list* 'begin (read-from-string (from-js (js-prop (getElementById "input") "value"))))))
@@ -27,6 +34,19 @@
 
 (js-set-prop! (getElementById "button")
 	      "onclick"
-	      (js-callback (lambda #ign (push-prompt *top-level* (push-sub-cont *read-k* (from-js (read-input)))))))
+	      (js-callback (lambda #ign
+			     (push-prompt *top-level* (push-sub-cont *read-k* (read-input))))))
+
+(js-set-prop! (getElementById "input")
+	      "onkeypress"
+	      (js-callback (lambda (evt)
+			     (when (= (from-js (js-prop evt "keyCode")) 13)
+                      	       (push-prompt *top-level* (push-sub-cont *read-k* (read-input)))))))
+
+(define (display msg)
+  (let ((div (createElement "div")))
+    (appendChild div (createTextNode (to-js msg)))
+    (appendChild (getElementById "output") div)
+    msg))
 
 ) ; edivorp

@@ -167,7 +167,7 @@
 
 (define-generic (to-string obj -> string))
 
-(def String (type-of "foo"))
+(define String (type-of "foo"))
 (define (string? s) (eq? (type-of s) String))
 (define-method (to-string (self String)) self)
 
@@ -234,3 +234,4 @@
 )
 
 (define *top-level* (make-prompt))
+

@@ -1,5 +1,7 @@
 ;; -*- mode: scheme -*-
 
+;; WAT ON THE WWW
+
 (provide (read display)
 
 (define *document* (js-global "document"))

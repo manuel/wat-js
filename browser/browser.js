@@ -1,5 +1,3 @@
-// WAT ON THE WWW
-
 var watbrowser = (function() {
 
     function init() {

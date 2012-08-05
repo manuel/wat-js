@@ -1,17 +1,21 @@
-// REPL for SpiderMonkey command line tool, contributed by Chris Neukirchen
+// REPL for SpiderMonkey command line tool
+// Contributed by Chris Neukirchen
+// Adapted by mjs
 
 // In same directory as repl.js:
 // > js repl.js
 //
 // Or provide files at command line:
 // > js repl.js ../test.wat
+//
+// Use -m for JIT.
 
 load("../jsparse.js");
 load("../wat.js");
 
 var wat_env = wat.mkenvcore();
 
-console = { log: print };
+var console = { log: print };
 
 function wat_console_log(string) {
     console.log(string);
@@ -34,17 +38,7 @@ function wat_load_file(path) {
 }
 
 wat_load_file("../crust.wat");
+wat_load_file("pc.wat");
+wat_load_file("../repl.wat");
 arguments.forEach(wat_load_file);
 
-var line = "";
-while (1) {
-    try {
-        putstr("* ");
-        line = readline();
-        if (line === null)
-            break;
-        wat_eval(line);
-    } catch(err) {
-        wat_console_log(err);
-    }
-}

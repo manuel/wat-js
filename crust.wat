@@ -132,7 +132,12 @@
 	  (eval (list def name (list* lambda args rhs)) env))
 	(eval (list* def lhs rhs) env))))
 
-(def define-syntax def)
+(def define-syntax
+  (vau (lhs . rhs) env
+    (if (pair? lhs)
+	(let (((name . args) lhs))
+	  (eval (list def name (list* vau args (car rhs) (cdr rhs))) env))
+	(eval (list* def lhs rhs) env))))
 
 (define (assq obj alist)
   (if (null? alist) () (if (eq? obj (caar alist)) (car alist) (assq obj (cdr alist)))))
@@ -144,13 +149,10 @@
     (eval name (type-environment type)))
   (define (send obj message arg)
     (apply (find-method (type-of obj) message) (list* obj arg)))
-  (define-syntax define-generic
-    (vau ((name . #ign)) env
-      (eval (list def name (lambda (self . arg) (send self name arg))) env)))
-  (define-syntax define-method
-    (vau ((name (self type) . args) . body) env
-      (put-method (eval type env) name
-		  (eval (list* lambda (list* self args) body) env))))
+  (define-syntax (define-generic (name . #ign)) env
+    (eval (list def name (lambda (self . arg) (send self name arg))) env))
+  (define-syntax (define-method (name (self type) . args) . body) env
+    (put-method (eval type env) name (eval (list* lambda (list* self args) body) env)))
 )
 
 (define-generic (to-string obj -> string))
@@ -164,24 +166,18 @@
 (provide (make-prompt push-prompt take-sub-cont push-sub-cont shift)
   (define prompt-type (make-type))
   (define (make-prompt) (tag prompt-type #void))
-  (define-syntax push-prompt
-    (vau (p . es) env
-      (push-prompt* (eval p env)
-        (lambda () (eval (list* begin es) env)))))
-  (define-syntax take-sub-cont
-    (vau (p k . body) env
-      (take-sub-cont* (eval p env) (eval (list* lambda (list k) body) env))))
-  (define-syntax push-sub-cont
-    (vau (k . es) env
-      (push-sub-cont* (eval k env)
-        (lambda () (eval (list* begin es) env)))))
+  (define-syntax (push-prompt p . es) env
+    (push-prompt* (eval p env) (lambda () (eval (list* begin es) env))))
+  (define-syntax (take-sub-cont p k . body) env
+    (take-sub-cont* (eval p env) (eval (list* lambda (list k) body) env)))
+  (define-syntax (push-sub-cont k . es) env
+    (push-sub-cont* (eval k env) (lambda () (eval (list* begin es) env))))
   (define (shift* p f)
     (take-sub-cont p sk (push-prompt p (f (reifyP p sk)))))
   (define (reifyP p sk)
     (lambda (v) (push-prompt p (push-sub-cont sk v))))
-  (define-syntax shift
-    (vau (p sk . es) env
-      (eval (list shift* p (list* lambda (list sk) es)) env)))
+  (define-syntax (shift p sk . es) env
+    (eval (list shift* p (list* lambda (list sk) es)) env))
 )
 
 (provide (dnew dref dlet dlet*)
@@ -191,11 +187,10 @@
   (define (dlet* p val thunk)
     ((push-prompt p
        (let ((r (thunk)))
-          (lambda (y) r)))
+         (lambda (y) r)))
      val))
-  (define-syntax dlet
-    (vau (key val . body) env
-      (eval (list dlet* key val (list* lambda () body)) env)))
+  (define-syntax (dlet key val . body) env
+    (eval (list dlet* key val (list* lambda () body)) env))
 )
 
 (provide (run yield dynamic-wind for*)
@@ -207,7 +202,7 @@
 	(let (((v k) (untag exp))) (on-y v k))
 	(on-r exp)))
   (define yield-prompt (make-prompt))
-  (define-syntax run (vau (e) env (push-prompt* yield-prompt (eval (list lambda () e) env))))
+  (define-syntax (run e) env (push-prompt* yield-prompt (eval (list lambda () e) env)))
   (define (yield v) (shift yield-prompt k (make-yield-record v k)))
   (define (dynamic-wind before-thunk thunk after-thunk)
     (letrec ((loop (lambda (th)

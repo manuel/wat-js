@@ -280,14 +280,20 @@ Scheme-like =define= with two cases:
 
  * =(define <name> <value>)= simply binds name to value, returning value.
 
- * =(define (<name> . <args>) . <body>)= binds name to an applicative with
-   the given arguments and body expressions, returning the applicative.
+ * =(define (<name> . <params>) . <body>)= binds name to an
+   applicative with the given parameters and body expressions,
+   returning the applicative.
 
-*** =define-syntax <name> <expr> → result= [operative]
+*** =define-syntax <lhs> <rhs> → result= [operative]
 
-Has simply the same effect as =def=, but is used for defining
-operatives in code that uses Scheme-style =define= for defining
-applicatives.
+Scheme-like =define-syntax= with two cases:
+
+ * =(define-syntax <name> <value>)= simply binds name to value,
+   returning value.
+
+ * =(define-syntax (<name> . <params>) <envparam> . <body>)= binds
+   name to an operative with the given parameters, environment
+   parameter, and body expressions, returning the operative.
 
 *** =provide <names> . <exprs> → result= [operative]
 

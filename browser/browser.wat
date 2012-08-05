@@ -14,7 +14,9 @@
     (lambda (str) (m *document* (to-js str)))))
 
 (define (read-input)
-  (list* 'begin (read-from-string (from-js (js-prop (getElementById "input") "value")))))
+  (let ((res (list* 'begin (read-from-string (from-js (js-prop (getElementById "input") "value"))))))
+    (js-set-prop! (getElementById "input") "value" (to-js ""))
+    res))
 
 (define env (current-environment))
 (define *read-k* #void)

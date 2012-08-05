@@ -139,16 +139,15 @@
 	  (eval (list def name (list* vau args (car rhs) (cdr rhs))) env))
 	(eval (list* def lhs rhs) env))))
 
-(define-syntax original-let let)
-(define-syntax (let a . b) env
-  (cond ((pair? a) (eval (list* original-let a b) env))
-	((null? a) (eval (list* original-let a b) env))
+(define-syntax (let-loop a . b) env
+  (cond ((pair? a) (eval (list* let a b) env))
+	((null? a) (eval (list* let a b) env))
 	((symbol? a)
 	 (let (((bindings . body) b))
 	   (eval (list letrec (list (list a (list* lambda (map car bindings) body)))
 		       (list* a (map cadr bindings)))
 		 env)))
-	(#t (fail "let: not a symbol or pair"))))
+	(#t (fail "let: not a symbol or list"))))
 
 (define (assq obj alist)
   (if (null? alist) () (if (eq? obj (caar alist)) (car alist) (assq obj (cdr alist)))))
@@ -216,7 +215,7 @@
   (define-syntax (run e) env (push-prompt* yield-prompt (eval (list lambda () e) env)))
   (define (yield v) (shift yield-prompt k (make-yield-record v k)))
   (define (dynamic-wind before-thunk thunk after-thunk)
-    (let loop ((th (lambda (run-thunk))))
+    (let-loop loop ((th (lambda (run-thunk))))
       (before-thunk)
       (let ((res (th)))
 	(after-thunk)
@@ -226,7 +225,7 @@
 		      (let ((reenter (yield v)))
 			(loop (lambda () (k reenter)))))))))
   (define (for* gen body)
-    (let loop ((thr (run (gen))))
+    (let-loop loop ((thr (run (gen))))
       (try-yield* thr
 		  (lambda (r) r)
 		  (lambda (v k)

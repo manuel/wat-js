@@ -261,16 +261,6 @@ The library consists of definitions written in Wat itself.
 
 Creates an applicative combiner, as in Scheme.
 
-
-*** =let <lhs> . <rhs> → result= [operative]
-
-Scheme-like =let= with two cases:
-
- * =(let <bindings> . <body>)= binds bindings and executes body.
-
- * =(let <loop> <bindings> . <body>)= executes body with a loop
-   function.
-
 *** =apply <apv> <args> → result= [applicative]
 
 Applies an applicative to an arguments list.

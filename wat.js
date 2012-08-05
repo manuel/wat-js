@@ -6,7 +6,7 @@ var wat = (function() {
     Fbr.prototype.prime = function(x, e) { this.a = x; this.k = new KEval(this.k, e); };
     /* Form Evaluation */
     function KEval(k, e) { this.k = k; this.e = e; }
-    KEval.prototype.invoke = function(fbr) { fbr.a.evaluate ? fbr.a.evaluate(fbr, this.k, this.e) : fbr.k = this.k; };
+    KEval.prototype.invoke = function(fbr) { (fbr.a && fbr.a.evaluate) ? fbr.a.evaluate(fbr, this.k, this.e) : fbr.k = this.k; };
     Sym.prototype.evaluate = function(fbr, k, e) { fbr.k = k; fbr.a = lookup(e, this); };
     Cons.prototype.evaluate = function(fbr, k, e) { fbr.k = new KCombine(k, e, cdr(this)); fbr.prime(car(this), e); };
     /* Operative & Applicative Combiners */
@@ -38,10 +38,6 @@ var wat = (function() {
     function begin1(fbr, e, xs) { if (cdr(xs) !== NIL) { fbr.k = new KBegin(fbr.k, e, cdr(xs)); } fbr.prime(car(xs), e); }
     function KBegin(k, e, xs) { this.k = k; this.e = e; this.xs = xs; }
     KBegin.prototype.invoke = function(fbr) { fbr.k = this.k; begin1(fbr, this.e, this.xs); }
-    /* JS Combiners */
-    function JSFun(jsfun) { this.jsfun = jsfun; }
-    JSFun.prototype.combine = function(fbr, e, o) { fbr.a = this.jsfun.apply(null, list_to_array(o)); };
-    function jswrap(jsfun) { return wrap(new JSFun(jsfun)); }
     /* Delimited Control and Metacontinuations */
     function KDone() {};
     KDone.prototype.invoke = function(fbr) { fbr.mk.underflow(fbr); };
@@ -80,6 +76,34 @@ var wat = (function() {
     MKDone.prototype.append_mk = function(mk) { return mk; };
     MKPrompt.prototype.append_mk = function(mk) { return new MKPrompt(this.mk.append_mk(mk), this.p); };
     MKSeg.prototype.append_mk = function(mk) { return mkseg(this.mk.append_mk(mk), this.k); };
+    /* JS Bridge */
+    function JSFun(jsfun) { this.jsfun = jsfun; }
+    JSFun.prototype.combine = function(fbr, e, o) { fbr.a = this.jsfun.apply(null, list_to_array(o)); };
+    function jswrap(jsfun) { return wrap(new JSFun(jsfun)); }
+    var JSOBJ = new Type();
+    function js_global(name) { return js_prop(window, name); }
+    function js_set_global(name, val) { return js_set_prop(window, name, val); }
+    function js_prop(obj, name) { assert(type_of(name) === Str.prototype.wat_type); return obj[name.jsstr]; }
+    function js_set_prop(obj, name, val) { assert(type_of(name) === Str.prototype.wat_type); return obj[name.jsstr] = val; }
+    function js_function(jsfun) { return jswrap(jsfun); }
+    function js_method(name) { return jswrap(function(obj) {
+	var args = Array.prototype.slice.call(arguments, 1); return obj[name.jsstr].apply(obj, args); }); }
+    function JSCallback() {}
+    JSCallback.prototype.combine = function(fbr, e, o) {
+	fbr.a = function() { var args = array_to_list(Array.prototype.slice.call(arguments));
+			     fbr.prime(cons(elt(o, 0), args), e); fbr.run(); }; };
+    function to_js(obj) { return (obj && obj.to_js) ? obj.to_js() : obj; }
+    Str.prototype.to_js = function() { return this.jsstr; }
+    Num.prototype.to_js = function() { return this.jsnum; }
+    Bool.prototype.to_js = function() { return this === T ? true : false; }
+    function from_js(obj) {
+	switch(typeof(obj)) {
+	case "string": return new Str(obj);
+	case "number": return new Num(obj);
+	case "boolean": return obj === true ? T : F;
+	default: return obj;
+	}
+    }
     /***** Objects *****/
     /* Core */
     function Sym(name) { this.name = name; }
@@ -108,14 +132,14 @@ var wat = (function() {
     var VOID = new Void(); var IGN = new Ign(); var NIL = new Nil(); var T = new Bool(); var F = new Bool()
     /* Types */
     function Type() { this.e = new Env() };
-    function type_of(obj) { return obj.wat_type; }
+    function type_of(obj) { if (obj && obj.wat_type) return obj.wat_type; else return JSOBJ; }
     function type_env(type) { return type.e; };
     function Tagged(type, val) { this.wat_type = type; this.val = val };
     function tag(type, val) { return new Tagged(type, val); };
     function untag(obj) { return obj.val; }
     function init_types(types) { types.map(function (type) { type.prototype.wat_type = new Type(); }); }
     init_types([KDone, KEval, KCombine, KApply, KEvalArg, KDef, KIf, KBegin, MKDone, MKPrompt, MKSeg,
-		Opv, Apv, Def, Vau, If, Eval, Begin, JSFun,
+		Opv, Apv, Def, Vau, If, Eval, Begin, JSFun, JSCallback,
 		Sym, Cons, Env, Str, Num, Vector, Void, Ign, Nil, Bool, Type]);
     /* Utilities */
     function assert(b) { if (!b) fail("assertion failed"); }
@@ -189,6 +213,7 @@ var wat = (function() {
 	bind(e, new Sym("tag"), jswrap(tag));
 	bind(e, new Sym("untag"), jswrap(untag));
 	bind(e, new Sym("display"), jswrap(function(str) { console.log(str); return str; }));
+	bind(e, new Sym("read-from-string"), jswrap(function(str) { return array_to_list(parse(str.jsstr)); }));
 	bind(e, new Sym("fail"), jswrap(fail));
 	bind(e, new Sym("="), jswrap(function(num1, num2) { return num_eql(num1, num2) ? T : F }));
 	bind(e, new Sym("+"), jswrap(num_add));
@@ -196,6 +221,15 @@ var wat = (function() {
 	bind(e, new Sym("vector-ref"), jswrap(function(vector, i) { return vector_ref(vector, i.jsnum); }));
 	bind(e, new Sym("vector-set!"), jswrap(function(vector, i, val) { return vector_set(vector, i.jsnum, val); }));
 	bind(e, new Sym("vector-length"), jswrap(function(vector) { return new Num(vector_length(vector)); }));
+	bind(e, new Sym("js-global"), jswrap(js_global));
+	bind(e, new Sym("js-set-global!"), jswrap(js_set_global));
+	bind(e, new Sym("js-prop"), jswrap(js_prop));
+	bind(e, new Sym("js-set-prop!"), jswrap(js_set_prop));
+	bind(e, new Sym("js-function"), jswrap(js_function));
+	bind(e, new Sym("js-method"), jswrap(js_method));
+	bind(e, new Sym("js-callback"), wrap(new JSCallback()));
+	bind(e, new Sym("to-js"), jswrap(to_js));
+	bind(e, new Sym("from-js"), jswrap(from_js));
 	return e;
     }
     /***** API *****/

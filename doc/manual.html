@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-05 18:57:26 CEST"/>
+<meta name="generated" content="2012-08-05 23:53:34 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -159,7 +159,7 @@ lang="en" xml:lang="en">
 <ul>
 <li><a href="#sec-8.3.1"><code>dnew → dynamic</code> [applicative] </a></li>
 <li><a href="#sec-8.3.2"><code>dlet &lt;dynamic&gt; &lt;value&gt; . &lt;exprs&gt; → result</code> [operative] </a></li>
-<li><a href="#sec-8.3.3"><code>dref &lt;dynamic&gt; → value</code> [operative] </a></li>
+<li><a href="#sec-8.3.3"><code>dref &lt;dynamic&gt; → value</code> [applicative] </a></li>
 </ul>
 </li>
 <li><a href="#sec-8.4">Generic Programming </a>
@@ -167,6 +167,22 @@ lang="en" xml:lang="en">
 <li><a href="#sec-8.4.1"><code>define-generic (&lt;name&gt; . &lt;args&gt;) → generic</code> [operative] </a></li>
 <li><a href="#sec-8.4.2"><code>define-method (&lt;name&gt; (&lt;self&gt; &lt;type&gt;) . &lt;args&gt;) → method</code> [operative] </a></li>
 <li><a href="#sec-8.4.3"><code>send &lt;obj&gt; &lt;msg&gt; &lt;arg&gt; → result</code> [applicative] </a></li>
+</ul></li>
+</ul>
+</li>
+<li><a href="#sec-9">External </a>
+<ul>
+<li><a href="#sec-9.1">JavaScript Bridge </a>
+<ul>
+<li><a href="#sec-9.1.1"><code>js-global &lt;string&gt; → result</code> [applicative] </a></li>
+<li><a href="#sec-9.1.2"><code>js-set-global! &lt;string&gt; &lt;val&gt; → val</code> [applicative] </a></li>
+<li><a href="#sec-9.1.3"><code>js-prop &lt;object&gt; &lt;string&gt; → result</code> [applicative] </a></li>
+<li><a href="#sec-9.1.4"><code>js-set-prop! &lt;object&gt; &lt;string&gt; &lt;val&gt; → val</code> [applicative] </a></li>
+<li><a href="#sec-9.1.5"><code>js-function &lt;jsfun&gt; → applicative</code> [applicative] </a></li>
+<li><a href="#sec-9.1.6"><code>js-method &lt;string&gt; → cmb</code> [applicative] </a></li>
+<li><a href="#sec-9.1.7"><code>js-callback &lt;cmb&gt; → jsfun</code> [applicative] </a></li>
+<li><a href="#sec-9.1.8"><code>to-js &lt;obj&gt; → jsobj</code> [applicative] </a></li>
+<li><a href="#sec-9.1.9"><code>from-js &lt;js-obj&gt; → obj</code> [applicative] </a></li>
 </ul>
 </li>
 </ul>
@@ -1036,7 +1052,7 @@ Performs expressions with the dynamic variable bound to the value.
 </div>
 
 <div id="outline-container-8.3.3" class="outline-4">
-<h4 id="sec-8.3.3"><code>dref &lt;dynamic&gt; → value</code> [operative] </h4>
+<h4 id="sec-8.3.3"><code>dref &lt;dynamic&gt; → value</code> [applicative] </h4>
 <div class="outline-text-4" id="text-8.3.3">
 
 
@@ -1091,12 +1107,141 @@ Sends object a message with an argument.
 </div>
 </div>
 </div>
+
+</div>
+
+<div id="outline-container-9" class="outline-2">
+<h2 id="sec-9">External </h2>
+<div class="outline-text-2" id="text-9">
+
+
+</div>
+
+<div id="outline-container-9.1" class="outline-3">
+<h3 id="sec-9.1">JavaScript Bridge </h3>
+<div class="outline-text-3" id="text-9.1">
+
+
+
+</div>
+
+<div id="outline-container-9.1.1" class="outline-4">
+<h4 id="sec-9.1.1"><code>js-global &lt;string&gt; → result</code> [applicative] </h4>
+<div class="outline-text-4" id="text-9.1.1">
+
+
+<p>
+Returns value of JavaScript global variable with given name.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-9.1.2" class="outline-4">
+<h4 id="sec-9.1.2"><code>js-set-global! &lt;string&gt; &lt;val&gt; → val</code> [applicative] </h4>
+<div class="outline-text-4" id="text-9.1.2">
+
+
+<p>
+Updates value of JavaScript global variable with given name and returns it.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-9.1.3" class="outline-4">
+<h4 id="sec-9.1.3"><code>js-prop &lt;object&gt; &lt;string&gt; → result</code> [applicative] </h4>
+<div class="outline-text-4" id="text-9.1.3">
+
+
+<p>
+Returns value of JavaScript member variable with given name of object.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-9.1.4" class="outline-4">
+<h4 id="sec-9.1.4"><code>js-set-prop! &lt;object&gt; &lt;string&gt; &lt;val&gt; → val</code> [applicative] </h4>
+<div class="outline-text-4" id="text-9.1.4">
+
+
+<p>
+Updates value of JavaScript member variable with given name of object
+and returns it.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-9.1.5" class="outline-4">
+<h4 id="sec-9.1.5"><code>js-function &lt;jsfun&gt; → applicative</code> [applicative] </h4>
+<div class="outline-text-4" id="text-9.1.5">
+
+
+<p>
+Creates an applicative that when called will call the given JavaScript
+function with the arguments it received.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-9.1.6" class="outline-4">
+<h4 id="sec-9.1.6"><code>js-method &lt;string&gt; → cmb</code> [applicative] </h4>
+<div class="outline-text-4" id="text-9.1.6">
+
+
+<p>
+Creates an applicative that when called on an object and zero or more
+arguments will invoke the method with the given string name of the
+object with the given arguments.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-9.1.7" class="outline-4">
+<h4 id="sec-9.1.7"><code>js-callback &lt;cmb&gt; → jsfun</code> [applicative] </h4>
+<div class="outline-text-4" id="text-9.1.7">
+
+
+<p>
+Creates a JavaScript function that when called will call the given
+combiner with the arguments it received.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-9.1.8" class="outline-4">
+<h4 id="sec-9.1.8"><code>to-js &lt;obj&gt; → jsobj</code> [applicative] </h4>
+<div class="outline-text-4" id="text-9.1.8">
+
+
+<p>
+Try to convert an object, such as a string, to a usable JavaScript object.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-9.1.9" class="outline-4">
+<h4 id="sec-9.1.9"><code>from-js &lt;js-obj&gt; → obj</code> [applicative] </h4>
+<div class="outline-text-4" id="text-9.1.9">
+
+
+<p>
+Try to convert a JavaScript object, such as a string, to a usable Wat object.
+</p></div>
+</div>
+</div>
 </div>
 <div id="postamble">
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-05 18:57:26 CEST</p>
+<p class="date"> Date: 2012-08-05 23:53:34 CEST</p>
 </div>
 </div>
 </body>

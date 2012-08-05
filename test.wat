@@ -134,7 +134,7 @@
 
 (define-syntax test-check
   (vau (#ign expr res) env
-    (assert (= (display (eval expr env)) (eval res env)))))
+    (assert (= (eval expr env) (eval res env)))))
 
 (define new-prompt make-prompt)
 
@@ -252,9 +252,3 @@
 ;;          (push-sub-cont sk (tailtest))))))
 ;; (tailtest)
 
-;; Generators
-
-(test-check 'generator-1
-  (let ((gen (lambda () (yield 1) (yield 2))))
-    (for* gen display))
-  #void)

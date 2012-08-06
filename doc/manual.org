@@ -233,6 +233,11 @@ Prints a message string to the console and returns it.
 
 Halts evaluation with an object describing the reason (typically an error).
 
+
+*** =read-from-string <string> → forms= [applicative]
+
+Parses a string into a list of forms.
+
 ** Vectors
 
 *** =vector . <elements> → vector= [applicative]

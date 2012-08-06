@@ -8,7 +8,8 @@
 (define readline (js-function (js-global "readline")))
 
 (define (display msg)
-  (print (to-js msg)))
+  (print (to-js msg))
+  msg)
 
 (define (read)
   (list* 'begin (read-from-string (from-js (readline)))))

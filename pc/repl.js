@@ -26,7 +26,6 @@ function wat_eval(str) {
     var start = new Date().getTime();
     for (var i = 0; i < forms.length; i++) {
         var result = wat.eval(forms[i], wat_env);
-        wat_console_log(result.toSource());
     }
     var elapsed = new Date().getTime() - start;
     wat_console_log("Evaluation time " + elapsed + "ms");
@@ -39,6 +38,5 @@ function wat_load_file(path) {
 
 wat_load_file("../crust.wat");
 wat_load_file("pc.wat");
-wat_load_file("../repl.wat");
 arguments.forEach(wat_load_file);
-
+wat_load_file("../repl.wat");

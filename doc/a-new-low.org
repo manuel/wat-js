@@ -1,0 +1,29 @@
+#+TITLE: Wat: A New Low in Programming Language Design
+#+AUTHOR: Manuel Simoni
+#+EMAIL: msimoni@gmail.com
+#+OPTIONS: toc:nil num:nil creator:nil
+#+STYLE: <link rel="stylesheet" type="text/css" href="stylesheet.css"/>
+
+* Abstract
+
+What is a dynamic programming language made of?  /Wat/ is an attempt
+at finding an ultra-minimalist answer to this question.  We join
+Scheme's battle cry that languages should be designed not by piling
+feature on top of feature, but by removing the weaknesses and
+restrictions that make additional features appear necessary.  We
+select three foundational features and show that they are enough to
+implement the next 700 dynamic languages in userland: for control, we
+use delimited continuations that are able to express all control flow
+manipulations; for syntax, we use lexically-scoped fexprs that subsume
+both ordinary procedures and hygienic macros; for data, we use
+first-class type tags for built-in as well as user-defined types,
+allowing the creation of arbitary type-checking and type-generic
+programming mechanisms in userland.
+
+* Core Language
+
+| Basics       | =def=, =if=, =cons=, =eq?=                                        |
+| Control      | =make-prompt=, =push-prompt*=, =take-sub-cont*=, =push-sub-cont*= |
+| Vau Calculus | =vau=, =eval=, =wrap=, =unwrap=, =make-environment=               |
+| Types        | =make-type=, =type-environment=, =type-of=, =tag=, =untag=        |
+| Constants    | =#t=, =#f=, =#void=, =#ign=                                       |

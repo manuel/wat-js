@@ -7,4 +7,5 @@
     (display (eval (read) env))
     (repl)))
 
+(display "Welcome to Wat!")
 (repl)

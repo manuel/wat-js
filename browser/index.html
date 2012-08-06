@@ -6,11 +6,38 @@
   <script type="text/javascript" src="../jsparse.js"></script>
   <script type="text/javascript" src="../wat.js"></script>
   <script type="text/javascript" src="browser.js"></script>
+  <style type="text/css">
+    html, body, input {
+    padding: 0;
+    margin: 0;
+    background-color: #000;
+    color: #ff0;
+    font-family: monospace, sans;
+    }
+    input {
+    border: 0;
+    }
+    #input {
+    padding: 0 .5em;
+    width: 100%;
+    }
+    #output {
+    padding: .5em .5em 0 .5em;
+    }
+    h1 {
+    background-color: #ff0;
+    color: #000;
+    margin: 0;
+    }
+    a:link, a:visited, a:hover {
+    text-decoration: none;
+    }
+  </style>
 </head>
 <body onload="watbrowser.init()">
-<h1>(Wat)</h1>
+<a style="float: right;" href="../doc/manual.html">Language Manual</a>
+<h1>(<a href="../">Wat</a>) REPL</h1>
 <div id="output"></div>
 <input type="text" id="input">
-<input type="button" id="button" value="eval">
 </body>
 </html>

@@ -24,6 +24,7 @@
 
 (define (read-input)
   (let ((res (list* 'begin (read-from-string (from-js (js-prop (getElementById "input") "value"))))))
+    (display (from-js (js-prop (getElementById "input") "value")))
     (js-set-prop! (getElementById "input") "value" (to-js ""))
     res))
 
@@ -33,11 +34,6 @@
 (define (read)
   (take-sub-cont *top-level* k
     (set! env *read-k* k)))
-
-(js-set-prop! (getElementById "button")
-	      "onclick"
-	      (js-callback (lambda #ign
-			     (push-prompt *top-level* (push-sub-cont *read-k* (read-input))))))
 
 (js-set-prop! (getElementById "input")
 	      "onkeypress"
@@ -50,5 +46,7 @@
     (appendChild div (createTextNode (to-js msg)))
     (appendChild (getElementById "output") div)
     msg))
+
+((js-method "focus") (getElementById "input"))
 
 ) ; edivorp

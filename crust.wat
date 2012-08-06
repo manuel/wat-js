@@ -165,14 +165,6 @@
     (put-method (eval type env) name (eval (list* lambda (list* self args) body) env)))
 )
 
-(define-generic (to-string obj -> string))
-
-(define String (type-of "foo"))
-(define (string? s) (eq? (type-of s) String))
-(define-method (to-string (self String)) self)
-
-(define (newline) (display "newline")) ; huh?
-
 (provide (make-prompt push-prompt take-sub-cont push-sub-cont shift)
   (define prompt-type (make-type))
   (define (make-prompt) (tag prompt-type #void))
@@ -234,4 +226,12 @@
 )
 
 (define *top-level* (make-prompt))
+
+(define-generic (to-string obj -> string))
+
+(define String (type-of "foo"))
+(define (string? s) (eq? (type-of s) String))
+(define-method (to-string (self String)) self)
+
+(define (newline) (display "newline")) ; huh?
 

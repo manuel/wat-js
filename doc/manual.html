@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-06 02:02:00 CEST"/>
+<meta name="generated" content="2012-08-06 13:40:57 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -86,49 +86,54 @@ lang="en" xml:lang="en">
 <li><a href="#sec-6">Combiners </a></li>
 <li><a href="#sec-7">Core </a>
 <ul>
-<li><a href="#sec-7.1">Vau Calculus </a>
+<li><a href="#sec-7.1">Basics </a>
 <ul>
 <li><a href="#sec-7.1.1"><code>def &lt;lhs&gt; &lt;rhs&gt; → rhs</code> [operative] </a></li>
-<li><a href="#sec-7.1.2"><code>vau &lt;ptree&gt; &lt;envp&gt; &lt;body&gt; → operative</code> [operative] </a></li>
-<li><a href="#sec-7.1.3"><code>eval &lt;expr&gt; &lt;env&gt; → result</code> [applicative] </a></li>
-<li><a href="#sec-7.1.4"><code>wrap &lt;cmb&gt; → applicative</code> [applicative] </a></li>
-<li><a href="#sec-7.1.5"><code>unwrap &lt;cmb&gt; → combiner</code> [applicative] </a></li>
-<li><a href="#sec-7.1.6"><code>make-environment [&lt;parent&gt;] → environment</code> [applicative] </a></li>
+<li><a href="#sec-7.1.2"><code>begin . &lt;exprs&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-7.1.3"><code>if &lt;test&gt; &lt;then&gt; &lt;else&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-7.1.4"><code>cons &lt;car&gt; &lt;cdr&gt; → cons</code> [applicative] </a></li>
+<li><a href="#sec-7.1.5"><code>eq? &lt;a&gt; &lt;b&gt; → boolean</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-7.2">Control Flow </a>
+<li><a href="#sec-7.2">Vau Calculus </a>
 <ul>
-<li><a href="#sec-7.2.1"><code>if &lt;test&gt; &lt;then&gt; &lt;else&gt; → result</code> [operative] </a></li>
-<li><a href="#sec-7.2.2"><code>begin . &lt;exprs&gt; → result</code> [operative] </a></li>
-<li><a href="#sec-7.2.3"><code>push-prompt* &lt;prompt&gt; &lt;thunk&gt; → result</code> [applicative] </a></li>
-<li><a href="#sec-7.2.4"><code>take-sub-cont* &lt;prompt&gt; &lt;cmb&gt; → result</code> [applicative] </a></li>
-<li><a href="#sec-7.2.5"><code>push-sub-cont* &lt;cont&gt; &lt;thunk&gt; → result</code> [applicative] </a></li>
+<li><a href="#sec-7.2.1"><code>vau &lt;ptree&gt; &lt;envp&gt; &lt;body&gt; → operative</code> [operative] </a></li>
+<li><a href="#sec-7.2.2"><code>eval &lt;expr&gt; &lt;env&gt; → result</code> [applicative] </a></li>
+<li><a href="#sec-7.2.3"><code>wrap &lt;cmb&gt; → applicative</code> [applicative] </a></li>
+<li><a href="#sec-7.2.4"><code>unwrap &lt;cmb&gt; → combiner</code> [applicative] </a></li>
+<li><a href="#sec-7.2.5"><code>make-environment [&lt;parent&gt;] → environment</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-7.3">Types </a>
+<li><a href="#sec-7.3">Control </a>
 <ul>
-<li><a href="#sec-7.3.1"><code>make-type → type</code> [applicative] </a></li>
-<li><a href="#sec-7.3.2"><code>type-environment &lt;type&gt; → environment</code> [applicative] </a></li>
-<li><a href="#sec-7.3.3"><code>type-of &lt;val&gt; → type</code> [applicative] </a></li>
-<li><a href="#sec-7.3.4"><code>tag &lt;type&gt; &lt;val&gt; → tagged</code> [applicative] </a></li>
-<li><a href="#sec-7.3.5"><code>untag &lt;tagged&gt; → value</code> [applicative] </a></li>
+<li><a href="#sec-7.3.1"><code>make-prompt → prompt</code> [applicative] </a></li>
+<li><a href="#sec-7.3.2"><code>push-prompt* &lt;prompt&gt; &lt;thunk&gt; → result</code> [applicative] </a></li>
+<li><a href="#sec-7.3.3"><code>take-sub-cont* &lt;prompt&gt; &lt;cmb&gt; → result</code> [applicative] </a></li>
+<li><a href="#sec-7.3.4"><code>push-sub-cont* &lt;cont&gt; &lt;thunk&gt; → result</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-7.4">Common </a>
+<li><a href="#sec-7.4">Types </a>
 <ul>
-<li><a href="#sec-7.4.1"><code>eq? &lt;a&gt; &lt;b&gt; → boolean</code> [applicative] </a></li>
-<li><a href="#sec-7.4.2"><code>cons &lt;car&gt; &lt;cdr&gt; → cons</code> [applicative] </a></li>
-<li><a href="#sec-7.4.3"><code>display &lt;msg&gt; → msg</code> [applicative] </a></li>
-<li><a href="#sec-7.4.4"><code>fail &lt;reason&gt; → |</code> [applicative] </a></li>
-<li><a href="#sec-7.4.5"><code>read-from-string &lt;string&gt; → forms</code> [applicative] </a></li>
+<li><a href="#sec-7.4.1"><code>make-type → type</code> [applicative] </a></li>
+<li><a href="#sec-7.4.2"><code>type-environment &lt;type&gt; → environment</code> [applicative] </a></li>
+<li><a href="#sec-7.4.3"><code>type-of &lt;val&gt; → type</code> [applicative] </a></li>
+<li><a href="#sec-7.4.4"><code>tag &lt;type&gt; &lt;val&gt; → tagged</code> [applicative] </a></li>
+<li><a href="#sec-7.4.5"><code>untag &lt;tagged&gt; → value</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-7.5">Vectors </a>
+<li><a href="#sec-7.5">System </a>
 <ul>
-<li><a href="#sec-7.5.1"><code>vector . &lt;elements&gt; → vector</code> [applicative] </a></li>
-<li><a href="#sec-7.5.2"><code>vector-ref &lt;vector&gt; &lt;index&gt; → element</code> [applicative] </a></li>
-<li><a href="#sec-7.5.3"><code>vector-set! &lt;vector&gt; &lt;index&gt; &lt;element&gt; → element</code> [applicative] </a></li>
-<li><a href="#sec-7.5.4"><code>vector-length &lt;vector&gt; → number</code> [applicative] </a></li>
+<li><a href="#sec-7.5.1"><code>display &lt;msg&gt; → msg</code> [applicative] </a></li>
+<li><a href="#sec-7.5.2"><code>read-from-string &lt;string&gt; → forms</code> [applicative] </a></li>
+<li><a href="#sec-7.5.3"><code>fail &lt;reason&gt; → |</code> [applicative] </a></li>
+</ul>
+</li>
+<li><a href="#sec-7.6">Vectors </a>
+<ul>
+<li><a href="#sec-7.6.1"><code>vector . &lt;elements&gt; → vector</code> [applicative] </a></li>
+<li><a href="#sec-7.6.2"><code>vector-ref &lt;vector&gt; &lt;index&gt; → element</code> [applicative] </a></li>
+<li><a href="#sec-7.6.3"><code>vector-set! &lt;vector&gt; &lt;index&gt; &lt;element&gt; → element</code> [applicative] </a></li>
+<li><a href="#sec-7.6.4"><code>vector-length &lt;vector&gt; → number</code> [applicative] </a></li>
 </ul></li>
 </ul>
 </li>
@@ -156,7 +161,7 @@ lang="en" xml:lang="en">
 <li><a href="#sec-8.2.7"><code>list* . &lt;vals&gt; → list</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-8.3">Delimited Dynamic Binding </a>
+<li><a href="#sec-8.3">Dynamic Binding </a>
 <ul>
 <li><a href="#sec-8.3.1"><code>dnew → dynamic</code> [applicative] </a></li>
 <li><a href="#sec-8.3.2"><code>dlet &lt;dynamic&gt; &lt;value&gt; . &lt;exprs&gt; → result</code> [operative] </a></li>
@@ -438,7 +443,7 @@ implemented in Wat itself (or it would be cumbersome to do so).
 </div>
 
 <div id="outline-container-7.1" class="outline-3">
-<h3 id="sec-7.1">Vau Calculus </h3>
+<h3 id="sec-7.1">Basics </h3>
 <div class="outline-text-3" id="text-7.1">
 
 
@@ -458,79 +463,25 @@ in the current environment, and returns it.
 </div>
 
 <div id="outline-container-7.1.2" class="outline-4">
-<h4 id="sec-7.1.2"><code>vau &lt;ptree&gt; &lt;envp&gt; &lt;body&gt; → operative</code> [operative] </h4>
+<h4 id="sec-7.1.2"><code>begin . &lt;exprs&gt; → result</code> [operative] </h4>
 <div class="outline-text-4" id="text-7.1.2">
 
 
 <p>
-Constructs a new compound operative that closes over the current
-environment with the given parameter tree, environment parameter, and
-body expression.
+Evaluates expressions from left to right, returning the value of the
+last.  As a special case, <code>(begin)</code> returns void.
+</p>
+<p>
+Note: <code>begin</code> could be implemented in the library, but for performance
+reasons is built into the core.
 </p>
 </div>
 
 </div>
 
 <div id="outline-container-7.1.3" class="outline-4">
-<h4 id="sec-7.1.3"><code>eval &lt;expr&gt; &lt;env&gt; → result</code> [applicative] </h4>
+<h4 id="sec-7.1.3"><code>if &lt;test&gt; &lt;then&gt; &lt;else&gt; → result</code> [operative] </h4>
 <div class="outline-text-4" id="text-7.1.3">
-
-
-<p>
-Evaluates the expression in the given environment.  The expression is
-evaluated in tail-position.
-</p>
-</div>
-
-</div>
-
-<div id="outline-container-7.1.4" class="outline-4">
-<h4 id="sec-7.1.4"><code>wrap &lt;cmb&gt; → applicative</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.1.4">
-
-
-<p>
-Returns an applicative around an underlying combiner.
-</p>
-</div>
-
-</div>
-
-<div id="outline-container-7.1.5" class="outline-4">
-<h4 id="sec-7.1.5"><code>unwrap &lt;cmb&gt; → combiner</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.1.5">
-
-
-<p>
-Returns the underlying combiner of an applicative.
-</p>
-</div>
-
-</div>
-
-<div id="outline-container-7.1.6" class="outline-4">
-<h4 id="sec-7.1.6"><code>make-environment [&lt;parent&gt;] → environment</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.1.6">
-
-
-<p>
-Creates a new empty environment with the given optional parent.
-</p>
-</div>
-</div>
-
-</div>
-
-<div id="outline-container-7.2" class="outline-3">
-<h3 id="sec-7.2">Control Flow </h3>
-<div class="outline-text-3" id="text-7.2">
-
-
-</div>
-
-<div id="outline-container-7.2.1" class="outline-4">
-<h4 id="sec-7.2.1"><code>if &lt;test&gt; &lt;then&gt; &lt;else&gt; → result</code> [operative] </h4>
-<div class="outline-text-4" id="text-7.2.1">
 
 
 <p>
@@ -542,22 +493,129 @@ tail position.
 
 </div>
 
+<div id="outline-container-7.1.4" class="outline-4">
+<h4 id="sec-7.1.4"><code>cons &lt;car&gt; &lt;cdr&gt; → cons</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.1.4">
+
+
+<p>
+Creates a new cons with the given car and cdr.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-7.1.5" class="outline-4">
+<h4 id="sec-7.1.5"><code>eq? &lt;a&gt; &lt;b&gt; → boolean</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.1.5">
+
+
+<p>
+Returns true if the two values are pointer identical, false otherwise.
+</p>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-7.2" class="outline-3">
+<h3 id="sec-7.2">Vau Calculus </h3>
+<div class="outline-text-3" id="text-7.2">
+
+
+</div>
+
+<div id="outline-container-7.2.1" class="outline-4">
+<h4 id="sec-7.2.1"><code>vau &lt;ptree&gt; &lt;envp&gt; &lt;body&gt; → operative</code> [operative] </h4>
+<div class="outline-text-4" id="text-7.2.1">
+
+
+<p>
+Constructs a new compound operative that closes over the current
+environment with the given parameter tree, environment parameter, and
+body expression.
+</p>
+</div>
+
+</div>
+
 <div id="outline-container-7.2.2" class="outline-4">
-<h4 id="sec-7.2.2"><code>begin . &lt;exprs&gt; → result</code> [operative] </h4>
+<h4 id="sec-7.2.2"><code>eval &lt;expr&gt; &lt;env&gt; → result</code> [applicative] </h4>
 <div class="outline-text-4" id="text-7.2.2">
 
 
 <p>
-Evaluates expressions from left to right, returning the value of the
-last.  As a special case, <code>(begin)</code> returns void.
+Evaluates the expression in the given environment.  The expression is
+evaluated in tail-position.
 </p>
 </div>
 
 </div>
 
 <div id="outline-container-7.2.3" class="outline-4">
-<h4 id="sec-7.2.3"><code>push-prompt* &lt;prompt&gt; &lt;thunk&gt; → result</code> [applicative] </h4>
+<h4 id="sec-7.2.3"><code>wrap &lt;cmb&gt; → applicative</code> [applicative] </h4>
 <div class="outline-text-4" id="text-7.2.3">
+
+
+<p>
+Returns an applicative around an underlying combiner.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-7.2.4" class="outline-4">
+<h4 id="sec-7.2.4"><code>unwrap &lt;cmb&gt; → combiner</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.2.4">
+
+
+<p>
+Returns the underlying combiner of an applicative.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-7.2.5" class="outline-4">
+<h4 id="sec-7.2.5"><code>make-environment [&lt;parent&gt;] → environment</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.2.5">
+
+
+<p>
+Creates a new empty environment with the given optional parent.
+</p>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-7.3" class="outline-3">
+<h3 id="sec-7.3">Control </h3>
+<div class="outline-text-3" id="text-7.3">
+
+
+<p>
+These are the control operators from Dybvig, Jones, and Sabry's <a href="http://www.cs.indiana.edu/~dyb/pubs/monadicDC.pdf"><i>A Monadic Framework for Delimited Continuations</i></a> that are able to
+express all other delimited control operators.
+</p>
+
+</div>
+
+<div id="outline-container-7.3.1" class="outline-4">
+<h4 id="sec-7.3.1"><code>make-prompt → prompt</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.3.1">
+
+
+<p>
+Creates a fresh prompt.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-7.3.2" class="outline-4">
+<h4 id="sec-7.3.2"><code>push-prompt* &lt;prompt&gt; &lt;thunk&gt; → result</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.3.2">
 
 
 <p>
@@ -568,9 +626,9 @@ new continuation.
 
 </div>
 
-<div id="outline-container-7.2.4" class="outline-4">
-<h4 id="sec-7.2.4"><code>take-sub-cont* &lt;prompt&gt; &lt;cmb&gt; → result</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.2.4">
+<div id="outline-container-7.3.3" class="outline-4">
+<h4 id="sec-7.3.3"><code>take-sub-cont* &lt;prompt&gt; &lt;cmb&gt; → result</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.3.3">
 
 
 <p>
@@ -582,9 +640,9 @@ to <code>take-sub-cont*</code> up to but not including the prompt.
 
 </div>
 
-<div id="outline-container-7.2.5" class="outline-4">
-<h4 id="sec-7.2.5"><code>push-sub-cont* &lt;cont&gt; &lt;thunk&gt; → result</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.2.5">
+<div id="outline-container-7.3.4" class="outline-4">
+<h4 id="sec-7.3.4"><code>push-sub-cont* &lt;cont&gt; &lt;thunk&gt; → result</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.3.4">
 
 
 <p>
@@ -596,16 +654,16 @@ executes thunk in the new continuation.
 
 </div>
 
-<div id="outline-container-7.3" class="outline-3">
-<h3 id="sec-7.3">Types </h3>
-<div class="outline-text-3" id="text-7.3">
+<div id="outline-container-7.4" class="outline-3">
+<h3 id="sec-7.4">Types </h3>
+<div class="outline-text-3" id="text-7.4">
 
 
 </div>
 
-<div id="outline-container-7.3.1" class="outline-4">
-<h4 id="sec-7.3.1"><code>make-type → type</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.3.1">
+<div id="outline-container-7.4.1" class="outline-4">
+<h4 id="sec-7.4.1"><code>make-type → type</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.4.1">
 
 
 <p>
@@ -615,9 +673,9 @@ Creates a new type with an empty environment.
 
 </div>
 
-<div id="outline-container-7.3.2" class="outline-4">
-<h4 id="sec-7.3.2"><code>type-environment &lt;type&gt; → environment</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.3.2">
+<div id="outline-container-7.4.2" class="outline-4">
+<h4 id="sec-7.4.2"><code>type-environment &lt;type&gt; → environment</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.4.2">
 
 
 <p>
@@ -627,9 +685,9 @@ Returns the type's environment for storing metadata.
 
 </div>
 
-<div id="outline-container-7.3.3" class="outline-4">
-<h4 id="sec-7.3.3"><code>type-of &lt;val&gt; → type</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.3.3">
+<div id="outline-container-7.4.3" class="outline-4">
+<h4 id="sec-7.4.3"><code>type-of &lt;val&gt; → type</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.4.3">
 
 
 <p>
@@ -639,9 +697,9 @@ Returns an object's type.
 
 </div>
 
-<div id="outline-container-7.3.4" class="outline-4">
-<h4 id="sec-7.3.4"><code>tag &lt;type&gt; &lt;val&gt; → tagged</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.3.4">
+<div id="outline-container-7.4.4" class="outline-4">
+<h4 id="sec-7.4.4"><code>tag &lt;type&gt; &lt;val&gt; → tagged</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.4.4">
 
 
 <p>
@@ -652,9 +710,9 @@ underlying value.
 
 </div>
 
-<div id="outline-container-7.3.5" class="outline-4">
-<h4 id="sec-7.3.5"><code>untag &lt;tagged&gt; → value</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.3.5">
+<div id="outline-container-7.4.5" class="outline-4">
+<h4 id="sec-7.4.5"><code>untag &lt;tagged&gt; → value</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.4.5">
 
 
 <p>
@@ -665,40 +723,16 @@ Returns the underlying value of a user-tagged object.
 
 </div>
 
-<div id="outline-container-7.4" class="outline-3">
-<h3 id="sec-7.4">Common </h3>
-<div class="outline-text-3" id="text-7.4">
+<div id="outline-container-7.5" class="outline-3">
+<h3 id="sec-7.5">System </h3>
+<div class="outline-text-3" id="text-7.5">
 
 
 </div>
 
-<div id="outline-container-7.4.1" class="outline-4">
-<h4 id="sec-7.4.1"><code>eq? &lt;a&gt; &lt;b&gt; → boolean</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.4.1">
-
-
-<p>
-Returns true if the two values are pointer identical, false otherwise.
-</p>
-</div>
-
-</div>
-
-<div id="outline-container-7.4.2" class="outline-4">
-<h4 id="sec-7.4.2"><code>cons &lt;car&gt; &lt;cdr&gt; → cons</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.4.2">
-
-
-<p>
-Creates a new cons with the given car and cdr.
-</p>
-</div>
-
-</div>
-
-<div id="outline-container-7.4.3" class="outline-4">
-<h4 id="sec-7.4.3"><code>display &lt;msg&gt; → msg</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.4.3">
+<div id="outline-container-7.5.1" class="outline-4">
+<h4 id="sec-7.5.1"><code>display &lt;msg&gt; → msg</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.5.1">
 
 
 <p>
@@ -708,43 +742,42 @@ Prints a message string to the console and returns it.
 
 </div>
 
-<div id="outline-container-7.4.4" class="outline-4">
-<h4 id="sec-7.4.4"><code>fail &lt;reason&gt; → |</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.4.4">
-
-
-<p>
-Halts evaluation with an object describing the reason (typically an error).
-</p>
-
-</div>
-
-</div>
-
-<div id="outline-container-7.4.5" class="outline-4">
-<h4 id="sec-7.4.5"><code>read-from-string &lt;string&gt; → forms</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.4.5">
+<div id="outline-container-7.5.2" class="outline-4">
+<h4 id="sec-7.5.2"><code>read-from-string &lt;string&gt; → forms</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.5.2">
 
 
 <p>
 Parses a string into a list of forms.
 </p>
 </div>
+
+</div>
+
+<div id="outline-container-7.5.3" class="outline-4">
+<h4 id="sec-7.5.3"><code>fail &lt;reason&gt; → |</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.5.3">
+
+
+<p>
+Halts evaluation with an object describing the reason (typically an error).
+</p>
+</div>
 </div>
 
 </div>
 
-<div id="outline-container-7.5" class="outline-3">
-<h3 id="sec-7.5">Vectors </h3>
-<div class="outline-text-3" id="text-7.5">
+<div id="outline-container-7.6" class="outline-3">
+<h3 id="sec-7.6">Vectors </h3>
+<div class="outline-text-3" id="text-7.6">
 
 
 
 </div>
 
-<div id="outline-container-7.5.1" class="outline-4">
-<h4 id="sec-7.5.1"><code>vector . &lt;elements&gt; → vector</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.5.1">
+<div id="outline-container-7.6.1" class="outline-4">
+<h4 id="sec-7.6.1"><code>vector . &lt;elements&gt; → vector</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.6.1">
 
 
 <p>
@@ -754,9 +787,9 @@ Creates a new vector with the given elements.
 
 </div>
 
-<div id="outline-container-7.5.2" class="outline-4">
-<h4 id="sec-7.5.2"><code>vector-ref &lt;vector&gt; &lt;index&gt; → element</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.5.2">
+<div id="outline-container-7.6.2" class="outline-4">
+<h4 id="sec-7.6.2"><code>vector-ref &lt;vector&gt; &lt;index&gt; → element</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.6.2">
 
 
 <p>
@@ -766,9 +799,9 @@ Returns the vector's element at the given index.
 
 </div>
 
-<div id="outline-container-7.5.3" class="outline-4">
-<h4 id="sec-7.5.3"><code>vector-set! &lt;vector&gt; &lt;index&gt; &lt;element&gt; → element</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.5.3">
+<div id="outline-container-7.6.3" class="outline-4">
+<h4 id="sec-7.6.3"><code>vector-set! &lt;vector&gt; &lt;index&gt; &lt;element&gt; → element</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.6.3">
 
 
 <p>
@@ -778,9 +811,9 @@ Updates the vector's element at the given index and returns it.
 
 </div>
 
-<div id="outline-container-7.5.4" class="outline-4">
-<h4 id="sec-7.5.4"><code>vector-length &lt;vector&gt; → number</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.5.4">
+<div id="outline-container-7.6.4" class="outline-4">
+<h4 id="sec-7.6.4"><code>vector-length &lt;vector&gt; → number</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.6.4">
 
 
 <p>
@@ -806,7 +839,6 @@ The library consists of definitions written in Wat itself.
 <div id="outline-container-8.1" class="outline-3">
 <h3 id="sec-8.1">Common </h3>
 <div class="outline-text-3" id="text-8.1">
-
 
 
 </div>
@@ -1034,10 +1066,14 @@ Constructs a list of the values, terminated by the last value.
 </div>
 
 <div id="outline-container-8.3" class="outline-3">
-<h3 id="sec-8.3">Delimited Dynamic Binding </h3>
+<h3 id="sec-8.3">Dynamic Binding </h3>
 <div class="outline-text-3" id="text-8.3">
 
 
+<p>
+These are the operators from Kiselyov, Shan, and Sabry's
+<a href="http://okmij.org/ftp/papers/DDBinding.pdf"><i>Delimited Dynamic Binding</i></a>.
+</p>
 
 </div>
 
@@ -1255,7 +1291,7 @@ Try to convert a JavaScript object, such as a string, to a usable Wat object.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-06 02:02:00 CEST</p>
+<p class="date"> Date: 2012-08-06 13:40:57 CEST</p>
 </div>
 </div>
 </body>

@@ -1,5 +1,5 @@
-#+TITLE: Wat Language Manual
 #+AUTHOR: Manuel Simoni
+#+TITLE: Wat Language Manual
 #+EMAIL: msimoni@gmail.com
 #+OPTIONS: toc:t num:nil creator:nil
 #+STYLE: <link rel="stylesheet" type="text/css" href="stylesheet.css"/>
@@ -137,12 +137,35 @@ Examples:
 The core contains primitive functionality that could not be
 implemented in Wat itself (or it would be cumbersome to do so).
 
-** Vau Calculus
+** Basics
 *** =def <lhs> <rhs> → rhs= [operative]
 
 Evaluates the right-hand side, matches the left-hand side against it
 in the current environment, and returns it.
 
+*** =begin . <exprs> → result= [operative]
+
+Evaluates expressions from left to right, returning the value of the
+last.  As a special case, =(begin)= returns void.
+
+Note: =begin= could be implemented in the library, but for performance
+reasons is built into the core.
+
+*** =if <test> <then> <else> → result= [operative]
+
+Evaluates the test, and if it is false evaluates the else branch,
+otherwise evaluates the then branch.  The branches are evaluated in
+tail position.
+
+*** =cons <car> <cdr> → cons= [applicative]
+
+Creates a new cons with the given car and cdr.
+
+*** =eq? <a> <b> → boolean= [applicative]
+
+Returns true if the two values are pointer identical, false otherwise.
+
+** Vau Calculus
 *** =vau <ptree> <envp> <body> → operative= [operative]
 
 Constructs a new compound operative that closes over the current
@@ -166,17 +189,15 @@ Returns the underlying combiner of an applicative.
 
 Creates a new empty environment with the given optional parent.
 
-** Control Flow
-*** =if <test> <then> <else> → result= [operative]
+** Control
 
-Evaluates the test, and if it is false evaluates the else branch,
-otherwise evaluates the then branch.  The branches are evaluated in
-tail position.
+These are the control operators from Dybvig, Jones, and Sabry's [[http://www.cs.indiana.edu/~dyb/pubs/monadicDC.pdf][/A
+Monadic Framework for Delimited Continuations/]] that are able to
+express all other delimited control operators.
 
-*** =begin . <exprs> → result= [operative]
+*** =make-prompt → prompt= [applicative]
 
-Evaluates expressions from left to right, returning the value of the
-last.  As a special case, =(begin)= returns void.
+Creates a fresh prompt.
 
 *** =push-prompt* <prompt> <thunk> → result= [applicative]
 
@@ -216,27 +237,18 @@ underlying value.
 
 Returns the underlying value of a user-tagged object.
 
-** Common
-*** =eq? <a> <b> → boolean= [applicative]
-
-Returns true if the two values are pointer identical, false otherwise.
-
-*** =cons <car> <cdr> → cons= [applicative]
-
-Creates a new cons with the given car and cdr.
-
+** System
 *** =display <msg> → msg= [applicative]
 
 Prints a message string to the console and returns it.
 
-*** =fail <reason> → |= [applicative]
-
-Halts evaluation with an object describing the reason (typically an error).
-
-
 *** =read-from-string <string> → forms= [applicative]
 
 Parses a string into a list of forms.
+
+*** =fail <reason> → |= [applicative]
+
+Halts evaluation with an object describing the reason (typically an error).
 
 ** Vectors
 
@@ -261,7 +273,6 @@ Returns the number of elements in the vector.
 The library consists of definitions written in Wat itself.
 
 ** Common
-
 *** =lambda <ptree> . <exprs> → applicative= [operative]
 
 Creates an applicative combiner, as in Scheme.
@@ -347,7 +358,10 @@ Constructs a nil-terminated list containing the values.
 
 Constructs a list of the values, terminated by the last value.
 
-** Delimited Dynamic Binding
+** Dynamic Binding
+
+These are the operators from Kiselyov, Shan, and Sabry's
+[[http://okmij.org/ftp/papers/DDBinding.pdf][/Delimited Dynamic Binding/]].
 
 *** =dnew → dynamic= [applicative]
 

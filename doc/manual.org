@@ -75,25 +75,9 @@ Wat identifiers are case-sensitive.
    arguments list, which it passes to an underlying combiner.
 
  * Type (tag) :: A first-class type tag or just type is associated
-   with every object, discussed in the next section.
+   with every object.
 
  * Vector :: An array of objects.
-
-* Type Tags
-
-Every object in Wat has a type tag or just type.  A type is a
-first-class object that contains an (initially empty) environment into
-which programmers may store metadata.  Type tags are provided for all
-built-in types, and there are routines for creating new types and
-tagged objects that wrap an underlying value with a type.  Type tags
-allow the definition of type systems in userland that interoperate
-with the built-in types.
-
-By principle, Wat does not support fully encapsulated data, i.e. data
-that cannot be inspected from the outside.  Total visibility into the
-running program for debugging and introspection is valued over the
-ability to create total abstraction.  A better design based on
-mirror-based reflection is probably possible.
 
 * Pattern Matching
 
@@ -216,26 +200,24 @@ Prepends the delimited continuation to the current continuation, and
 executes thunk in the new continuation.
 
 ** Types
-*** =make-type → type= [applicative]
+*** =make-type → (type tagger untagger)= [applicative]
 
-Creates a new type with an empty environment.
+Returns a list containing:
 
-*** =type-environment <type> → environment= [applicative]
+ * a fresh first-class type;
 
-Returns the type's environment for storing metadata.
+ * an applicative, the tagger, that takes a value and tags it with the
+   type;
+
+ * an applicative, the untagger, that takes a tagged object created by
+   the tagger and returns its value.
+
+The untagger only untags objects created by the tagger.
 
 *** =type-of <val> → type= [applicative]
 
-Returns an object's type.
-
-*** =tag <type> <val> → tagged= [applicative]
-
-Creates a new user-tagged object with a type and wrapping an
-underlying value.
-
-*** =untag <tagged> → value= [applicative]
-
-Returns the underlying value of a user-tagged object.
+Returns an object's type.  Every object has a type, whether built-in
+objects or tagged objects.
 
 ** System
 *** =display <msg> → msg= [applicative]

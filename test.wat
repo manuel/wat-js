@@ -76,29 +76,17 @@
   ;; MAKE-TYPE
  
   (provide ()
-    (def type (make-type))
-    (assert (eq? (type-of type) (type-of (type-of #t)))))
-
-  ;; TYPE-ENVIRONMENT
-
-  (provide ()
-    (def type (make-type))
-    (def tenv (type-environment type))
-    (assert (eq? (type-of tenv) (type-of (current-environment)))))
+    (def (type tagger untagger) (make-type))
+    (assert (eq? (type-of type) (type-of (type-of #t))))
+    (let ((x (list #void)))
+      (eq? type (type-of (tagger x)))
+      (eq? x (untagger (tagger x)))))
 
   ;; TYPE-OF
 
   (provide ()
     (assert (not (eq? (type-of () #void))))
     (assert (eq? (type-of 0) (type-of 1))))
-
-  ;; TAG, UNTAG
-
-  (provide ()
-    (def type (make-type))
-    (def tagged (tag type #t))
-    (assert (eq? (type-of tagged) type))
-    (assert (eq? (untag tagged) #t)))
 
   ;; VECTOR, VECTOR-REF
 

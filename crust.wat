@@ -152,22 +152,9 @@
 (define (assq obj alist)
   (if (null? alist) () (if (eq? obj (caar alist)) (car alist) (assq obj (cdr alist)))))
 
-(provide (define-method define-generic send)
-  (define (put-method type name method)
-    (eval (list def name method) (type-environment type)))
-  (define (find-method type name)
-    (eval name (type-environment type)))
-  (define (send obj message arg)
-    (apply (find-method (type-of obj) message) (list* obj arg)))
-  (define-syntax (define-generic (name . #ign)) env
-    (eval (list def name (lambda (self . arg) (send self name arg))) env))
-  (define-syntax (define-method (name (self type) . args) . body) env
-    (put-method (eval type env) name (eval (list* lambda (list* self args) body) env)))
-)
-
 (provide (make-prompt push-prompt take-sub-cont push-sub-cont shift)
-  (define prompt-type (make-type))
-  (define (make-prompt) (tag prompt-type #void))
+  (def (prompt-type tag-prompt #ign) (make-type))
+  (define (make-prompt) (tag-prompt #void))
   (define-syntax (push-prompt p . es) env
     (push-prompt* (eval p env) (lambda () (eval (list* begin es) env))))
   (define-syntax (take-sub-cont p k . body) env
@@ -183,8 +170,8 @@
 )
 
 (provide (dnew dref dlet dlet*)
-  (define parameter-type (make-type))
-  (define (dnew) (tag parameter-type #void))
+  (def (parameter-type tag-parameter #ign) (make-type))
+  (define (dnew) (tag-parameter #void))
   (define (dref p) (shift p sk (lambda (y) ((sk y) y))))
   (define (dlet* p val thunk)
     ((push-prompt p
@@ -196,12 +183,12 @@
 )
 
 (provide (run yield dynamic-wind for*)
-  (define yield-record-type (make-type))
+  (def (yield-record-type tag-yield-record untag-yield-record) (make-type))
   (define (make-yield-record v k)
-    (tag yield-record-type (list v k)))
+    (tag-yield-record (list v k)))
   (define (try-yield* exp on-r on-y)
     (if (eq? (type-of exp) yield-record-type)
-	(let (((v k) (untag exp))) (on-y v k))
+	(let (((v k) (untag-yield-record exp))) (on-y v k))
 	(on-r exp)))
   (define yield-prompt (make-prompt))
   (define-syntax (run e) env (push-prompt* yield-prompt (eval (list lambda () e) env)))
@@ -226,12 +213,3 @@
 )
 
 (define *top-level* (make-prompt))
-
-(define-generic (to-string obj -> string))
-
-(define String (type-of "foo"))
-(define (string? s) (eq? (type-of s) String))
-(define-method (to-string (self String)) self)
-
-(define (newline) (display "newline")) ; huh?
-

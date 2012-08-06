@@ -131,12 +131,14 @@ var wat = (function() {
     function Void() {}; function Ign() {}; function Nil() {}; function Bool() {}
     var VOID = new Void(); var IGN = new Ign(); var NIL = new Nil(); var T = new Bool(); var F = new Bool()
     /* Types */
-    function Type() { this.e = new Env() };
-    function type_of(obj) { if (obj && obj.wat_type) return obj.wat_type; else return JSOBJ; }
-    function type_env(type) { return type.e; };
+    function Type() {};
     function Tagged(type, val) { this.wat_type = type; this.val = val };
-    function tag(type, val) { return new Tagged(type, val); };
-    function untag(obj) { return obj.val; }
+    function type_of(obj) { if (obj && obj.wat_type) return obj.wat_type; else return JSOBJ; }
+    function make_type() {
+	var type = new Type();
+	var tagger = jswrap(function(val) { return new Tagged(type, val); });
+	var untagger = jswrap(function(obj) { if (type_of(obj) === type) return obj.val; else fail("wrong type"); });
+	return cons(type, cons(tagger, cons(untagger, NIL))); }
     function init_types(types) { types.map(function (type) { type.prototype.wat_type = new Type(); }); }
     init_types([KDone, KEval, KCombine, KApply, KEvalArg, KDef, KIf, KBegin, MKDone, MKPrompt, MKSeg,
 		Opv, Apv, Def, Vau, If, Eval, Begin, JSFun, JSCallback,
@@ -207,11 +209,8 @@ var wat = (function() {
 	bind(e, new Sym("eq?"), jswrap(function (a, b) { return (a === b) ? T : F }));
 	bind(e, new Sym("cons"), jswrap(cons));
 	bind(e, new Sym("make-environment"), jswrap(function (parent) { return new Env(parent); }));
-	bind(e, new Sym("make-type"), jswrap(function () { return new Type(); }));
-	bind(e, new Sym("type-environment"), jswrap(type_env));
+	bind(e, new Sym("make-type"), jswrap(make_type));
 	bind(e, new Sym("type-of"), jswrap(type_of));
-	bind(e, new Sym("tag"), jswrap(tag));
-	bind(e, new Sym("untag"), jswrap(untag));
 	bind(e, new Sym("display"), jswrap(function(str) { console.log(str); return str; }));
 	bind(e, new Sym("read-from-string"), jswrap(function(str) { return array_to_list(parse(str.jsstr)); }));
 	bind(e, new Sym("fail"), jswrap(fail));

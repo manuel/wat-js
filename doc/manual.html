@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-06 13:40:57 CEST"/>
+<meta name="generated" content="2012-08-07 00:42:12 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -81,114 +81,110 @@ lang="en" xml:lang="en">
 <li><a href="#sec-1">Description </a></li>
 <li><a href="#sec-2">Lexical Structure </a></li>
 <li><a href="#sec-3">Built-in Types </a></li>
-<li><a href="#sec-4">Type Tags </a></li>
-<li><a href="#sec-5">Pattern Matching </a></li>
-<li><a href="#sec-6">Combiners </a></li>
-<li><a href="#sec-7">Core </a>
+<li><a href="#sec-4">Pattern Matching </a></li>
+<li><a href="#sec-5">Combiners </a></li>
+<li><a href="#sec-6">Core </a>
 <ul>
-<li><a href="#sec-7.1">Basics </a>
+<li><a href="#sec-6.1">Basics </a>
 <ul>
-<li><a href="#sec-7.1.1"><code>def &lt;lhs&gt; &lt;rhs&gt; → rhs</code> [operative] </a></li>
-<li><a href="#sec-7.1.2"><code>begin . &lt;exprs&gt; → result</code> [operative] </a></li>
-<li><a href="#sec-7.1.3"><code>if &lt;test&gt; &lt;then&gt; &lt;else&gt; → result</code> [operative] </a></li>
-<li><a href="#sec-7.1.4"><code>cons &lt;car&gt; &lt;cdr&gt; → cons</code> [applicative] </a></li>
-<li><a href="#sec-7.1.5"><code>eq? &lt;a&gt; &lt;b&gt; → boolean</code> [applicative] </a></li>
+<li><a href="#sec-6.1.1"><code>def &lt;lhs&gt; &lt;rhs&gt; → rhs</code> [operative] </a></li>
+<li><a href="#sec-6.1.2"><code>begin . &lt;exprs&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-6.1.3"><code>if &lt;test&gt; &lt;then&gt; &lt;else&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-6.1.4"><code>cons &lt;car&gt; &lt;cdr&gt; → cons</code> [applicative] </a></li>
+<li><a href="#sec-6.1.5"><code>eq? &lt;a&gt; &lt;b&gt; → boolean</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-7.2">Vau Calculus </a>
+<li><a href="#sec-6.2">Vau Calculus </a>
 <ul>
-<li><a href="#sec-7.2.1"><code>vau &lt;ptree&gt; &lt;envp&gt; &lt;body&gt; → operative</code> [operative] </a></li>
-<li><a href="#sec-7.2.2"><code>eval &lt;expr&gt; &lt;env&gt; → result</code> [applicative] </a></li>
-<li><a href="#sec-7.2.3"><code>wrap &lt;cmb&gt; → applicative</code> [applicative] </a></li>
-<li><a href="#sec-7.2.4"><code>unwrap &lt;cmb&gt; → combiner</code> [applicative] </a></li>
-<li><a href="#sec-7.2.5"><code>make-environment [&lt;parent&gt;] → environment</code> [applicative] </a></li>
+<li><a href="#sec-6.2.1"><code>vau &lt;ptree&gt; &lt;envp&gt; &lt;body&gt; → operative</code> [operative] </a></li>
+<li><a href="#sec-6.2.2"><code>eval &lt;expr&gt; &lt;env&gt; → result</code> [applicative] </a></li>
+<li><a href="#sec-6.2.3"><code>wrap &lt;cmb&gt; → applicative</code> [applicative] </a></li>
+<li><a href="#sec-6.2.4"><code>unwrap &lt;cmb&gt; → combiner</code> [applicative] </a></li>
+<li><a href="#sec-6.2.5"><code>make-environment [&lt;parent&gt;] → environment</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-7.3">Control </a>
+<li><a href="#sec-6.3">Control </a>
 <ul>
-<li><a href="#sec-7.3.1"><code>make-prompt → prompt</code> [applicative] </a></li>
-<li><a href="#sec-7.3.2"><code>push-prompt* &lt;prompt&gt; &lt;thunk&gt; → result</code> [applicative] </a></li>
-<li><a href="#sec-7.3.3"><code>take-sub-cont* &lt;prompt&gt; &lt;cmb&gt; → result</code> [applicative] </a></li>
-<li><a href="#sec-7.3.4"><code>push-sub-cont* &lt;cont&gt; &lt;thunk&gt; → result</code> [applicative] </a></li>
+<li><a href="#sec-6.3.1"><code>make-prompt → prompt</code> [applicative] </a></li>
+<li><a href="#sec-6.3.2"><code>push-prompt* &lt;prompt&gt; &lt;thunk&gt; → result</code> [applicative] </a></li>
+<li><a href="#sec-6.3.3"><code>take-sub-cont* &lt;prompt&gt; &lt;cmb&gt; → result</code> [applicative] </a></li>
+<li><a href="#sec-6.3.4"><code>push-sub-cont* &lt;cont&gt; &lt;thunk&gt; → result</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-7.4">Types </a>
+<li><a href="#sec-6.4">Types </a>
 <ul>
-<li><a href="#sec-7.4.1"><code>make-type → type</code> [applicative] </a></li>
-<li><a href="#sec-7.4.2"><code>type-environment &lt;type&gt; → environment</code> [applicative] </a></li>
-<li><a href="#sec-7.4.3"><code>type-of &lt;val&gt; → type</code> [applicative] </a></li>
-<li><a href="#sec-7.4.4"><code>tag &lt;type&gt; &lt;val&gt; → tagged</code> [applicative] </a></li>
-<li><a href="#sec-7.4.5"><code>untag &lt;tagged&gt; → value</code> [applicative] </a></li>
+<li><a href="#sec-6.4.1"><code>make-type → (type tagger untagger)</code> [applicative] </a></li>
+<li><a href="#sec-6.4.2"><code>type-of &lt;val&gt; → type</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-7.5">System </a>
+<li><a href="#sec-6.5">System </a>
 <ul>
-<li><a href="#sec-7.5.1"><code>display &lt;msg&gt; → msg</code> [applicative] </a></li>
-<li><a href="#sec-7.5.2"><code>read-from-string &lt;string&gt; → forms</code> [applicative] </a></li>
-<li><a href="#sec-7.5.3"><code>fail &lt;reason&gt; → |</code> [applicative] </a></li>
+<li><a href="#sec-6.5.1"><code>display &lt;msg&gt; → msg</code> [applicative] </a></li>
+<li><a href="#sec-6.5.2"><code>read-from-string &lt;string&gt; → forms</code> [applicative] </a></li>
+<li><a href="#sec-6.5.3"><code>fail &lt;reason&gt; → |</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-7.6">Vectors </a>
+<li><a href="#sec-6.6">Vectors </a>
 <ul>
-<li><a href="#sec-7.6.1"><code>vector . &lt;elements&gt; → vector</code> [applicative] </a></li>
-<li><a href="#sec-7.6.2"><code>vector-ref &lt;vector&gt; &lt;index&gt; → element</code> [applicative] </a></li>
-<li><a href="#sec-7.6.3"><code>vector-set! &lt;vector&gt; &lt;index&gt; &lt;element&gt; → element</code> [applicative] </a></li>
-<li><a href="#sec-7.6.4"><code>vector-length &lt;vector&gt; → number</code> [applicative] </a></li>
+<li><a href="#sec-6.6.1"><code>vector . &lt;elements&gt; → vector</code> [applicative] </a></li>
+<li><a href="#sec-6.6.2"><code>vector-ref &lt;vector&gt; &lt;index&gt; → element</code> [applicative] </a></li>
+<li><a href="#sec-6.6.3"><code>vector-set! &lt;vector&gt; &lt;index&gt; &lt;element&gt; → element</code> [applicative] </a></li>
+<li><a href="#sec-6.6.4"><code>vector-length &lt;vector&gt; → number</code> [applicative] </a></li>
 </ul></li>
 </ul>
 </li>
-<li><a href="#sec-8">Library </a>
+<li><a href="#sec-7">Library </a>
 <ul>
-<li><a href="#sec-8.1">Common </a>
+<li><a href="#sec-7.1">Common </a>
 <ul>
-<li><a href="#sec-8.1.1"><code>lambda &lt;ptree&gt; . &lt;exprs&gt; → applicative</code> [operative] </a></li>
-<li><a href="#sec-8.1.2"><code>apply &lt;apv&gt; &lt;args&gt; → result</code> [applicative] </a></li>
-<li><a href="#sec-8.1.3"><code>set! &lt;env&gt; &lt;lhs&gt; &lt;rhs&gt; → rhs</code> [operative] </a></li>
-<li><a href="#sec-8.1.4"><code>quote &lt;form&gt; → form</code> [operative] </a></li>
-<li><a href="#sec-8.1.5"><code>define &lt;lhs&gt; &lt;rhs&gt; → result</code> [operative] </a></li>
-<li><a href="#sec-8.1.6"><code>define-syntax &lt;lhs&gt; &lt;rhs&gt; → result</code> [operative] </a></li>
-<li><a href="#sec-8.1.7"><code>provide &lt;names&gt; . &lt;exprs&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-7.1.1"><code>lambda &lt;ptree&gt; . &lt;exprs&gt; → applicative</code> [operative] </a></li>
+<li><a href="#sec-7.1.2"><code>apply &lt;apv&gt; &lt;args&gt; → result</code> [applicative] </a></li>
+<li><a href="#sec-7.1.3"><code>set! &lt;env&gt; &lt;lhs&gt; &lt;rhs&gt; → rhs</code> [operative] </a></li>
+<li><a href="#sec-7.1.4"><code>quote &lt;form&gt; → form</code> [operative] </a></li>
+<li><a href="#sec-7.1.5"><code>define &lt;lhs&gt; &lt;rhs&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-7.1.6"><code>define-syntax &lt;lhs&gt; &lt;rhs&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-7.1.7"><code>provide &lt;names&gt; . &lt;exprs&gt; → result</code> [operative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-8.2">Pairs and Lists </a>
+<li><a href="#sec-7.2">Pairs and Lists </a>
 <ul>
-<li><a href="#sec-8.2.1"><code>car &lt;pair&gt; → value</code> [applicative] </a></li>
-<li><a href="#sec-8.2.2"><code>cdr &lt;pair&gt; → value</code> [applicative] </a></li>
-<li><a href="#sec-8.2.3"><code>caar</code>, <code>cadr</code>, <code>cdar</code>, <code>cddr</code> [applicatives] </a></li>
-<li><a href="#sec-8.2.4"><code>null? &lt;val&gt; → boolean</code> [applicative] </a></li>
-<li><a href="#sec-8.2.5"><code>pair? &lt;val&gt; → boolean</code> [applicative] </a></li>
-<li><a href="#sec-8.2.6"><code>list . &lt;vals&gt; → list</code> [applicative] </a></li>
-<li><a href="#sec-8.2.7"><code>list* . &lt;vals&gt; → list</code> [applicative] </a></li>
+<li><a href="#sec-7.2.1"><code>car &lt;pair&gt; → value</code> [applicative] </a></li>
+<li><a href="#sec-7.2.2"><code>cdr &lt;pair&gt; → value</code> [applicative] </a></li>
+<li><a href="#sec-7.2.3"><code>caar</code>, <code>cadr</code>, <code>cdar</code>, <code>cddr</code> [applicatives] </a></li>
+<li><a href="#sec-7.2.4"><code>null? &lt;val&gt; → boolean</code> [applicative] </a></li>
+<li><a href="#sec-7.2.5"><code>pair? &lt;val&gt; → boolean</code> [applicative] </a></li>
+<li><a href="#sec-7.2.6"><code>list . &lt;vals&gt; → list</code> [applicative] </a></li>
+<li><a href="#sec-7.2.7"><code>list* . &lt;vals&gt; → list</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-8.3">Dynamic Binding </a>
+<li><a href="#sec-7.3">Dynamic Binding </a>
 <ul>
-<li><a href="#sec-8.3.1"><code>dnew → dynamic</code> [applicative] </a></li>
-<li><a href="#sec-8.3.2"><code>dlet &lt;dynamic&gt; &lt;value&gt; . &lt;exprs&gt; → result</code> [operative] </a></li>
-<li><a href="#sec-8.3.3"><code>dref &lt;dynamic&gt; → value</code> [applicative] </a></li>
+<li><a href="#sec-7.3.1"><code>dnew → dynamic</code> [applicative] </a></li>
+<li><a href="#sec-7.3.2"><code>dlet &lt;dynamic&gt; &lt;value&gt; . &lt;exprs&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-7.3.3"><code>dref &lt;dynamic&gt; → value</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-8.4">Generic Programming </a>
+<li><a href="#sec-7.4">Generic Programming </a>
 <ul>
-<li><a href="#sec-8.4.1"><code>define-generic (&lt;name&gt; . &lt;args&gt;) → generic</code> [operative] </a></li>
-<li><a href="#sec-8.4.2"><code>define-method (&lt;name&gt; (&lt;self&gt; &lt;type&gt;) . &lt;args&gt;) → method</code> [operative] </a></li>
-<li><a href="#sec-8.4.3"><code>send &lt;obj&gt; &lt;msg&gt; &lt;arg&gt; → result</code> [applicative] </a></li>
+<li><a href="#sec-7.4.1"><code>define-generic (&lt;name&gt; . &lt;args&gt;) → generic</code> [operative] </a></li>
+<li><a href="#sec-7.4.2"><code>define-method (&lt;name&gt; (&lt;self&gt; &lt;type&gt;) . &lt;args&gt;) → method</code> [operative] </a></li>
+<li><a href="#sec-7.4.3"><code>send &lt;obj&gt; &lt;msg&gt; &lt;arg&gt; → result</code> [applicative] </a></li>
 </ul></li>
 </ul>
 </li>
-<li><a href="#sec-9">External </a>
+<li><a href="#sec-8">External </a>
 <ul>
-<li><a href="#sec-9.1">JavaScript Bridge </a>
+<li><a href="#sec-8.1">JavaScript Bridge </a>
 <ul>
-<li><a href="#sec-9.1.1"><code>js-global &lt;string&gt; → result</code> [applicative] </a></li>
-<li><a href="#sec-9.1.2"><code>js-set-global! &lt;string&gt; &lt;val&gt; → val</code> [applicative] </a></li>
-<li><a href="#sec-9.1.3"><code>js-prop &lt;object&gt; &lt;string&gt; → result</code> [applicative] </a></li>
-<li><a href="#sec-9.1.4"><code>js-set-prop! &lt;object&gt; &lt;string&gt; &lt;val&gt; → val</code> [applicative] </a></li>
-<li><a href="#sec-9.1.5"><code>js-function &lt;jsfun&gt; → applicative</code> [applicative] </a></li>
-<li><a href="#sec-9.1.6"><code>js-method &lt;string&gt; → cmb</code> [applicative] </a></li>
-<li><a href="#sec-9.1.7"><code>js-callback &lt;cmb&gt; → jsfun</code> [applicative] </a></li>
-<li><a href="#sec-9.1.8"><code>to-js &lt;obj&gt; → jsobj</code> [applicative] </a></li>
-<li><a href="#sec-9.1.9"><code>from-js &lt;js-obj&gt; → obj</code> [applicative] </a></li>
+<li><a href="#sec-8.1.1"><code>js-global &lt;string&gt; → result</code> [applicative] </a></li>
+<li><a href="#sec-8.1.2"><code>js-set-global! &lt;string&gt; &lt;val&gt; → val</code> [applicative] </a></li>
+<li><a href="#sec-8.1.3"><code>js-prop &lt;object&gt; &lt;string&gt; → result</code> [applicative] </a></li>
+<li><a href="#sec-8.1.4"><code>js-set-prop! &lt;object&gt; &lt;string&gt; &lt;val&gt; → val</code> [applicative] </a></li>
+<li><a href="#sec-8.1.5"><code>js-function &lt;jsfun&gt; → applicative</code> [applicative] </a></li>
+<li><a href="#sec-8.1.6"><code>js-method &lt;string&gt; → cmb</code> [applicative] </a></li>
+<li><a href="#sec-8.1.7"><code>js-callback &lt;cmb&gt; → jsfun</code> [applicative] </a></li>
+<li><a href="#sec-8.1.8"><code>to-js &lt;obj&gt; → jsobj</code> [applicative] </a></li>
+<li><a href="#sec-8.1.9"><code>from-js &lt;js-obj&gt; → obj</code> [applicative] </a></li>
 </ul>
 </li>
 </ul>
@@ -320,7 +316,7 @@ arguments list, which it passes to an underlying combiner.
 </dd>
 <dt>Type (tag)</dt><dd>
 A first-class type tag or just type is associated
-with every object, discussed in the next section.
+with every object.
 
 </dd>
 <dt>Vector</dt><dd>
@@ -333,33 +329,8 @@ An array of objects.
 </div>
 
 <div id="outline-container-4" class="outline-2">
-<h2 id="sec-4">Type Tags </h2>
+<h2 id="sec-4">Pattern Matching </h2>
 <div class="outline-text-2" id="text-4">
-
-
-<p>
-Every object in Wat has a type tag or just type.  A type is a
-first-class object that contains an (initially empty) environment into
-which programmers may store metadata.  Type tags are provided for all
-built-in types, and there are routines for creating new types and
-tagged objects that wrap an underlying value with a type.  Type tags
-allow the definition of type systems in userland that interoperate
-with the built-in types.
-</p>
-<p>
-By principle, Wat does not support fully encapsulated data, i.e. data
-that cannot be inspected from the outside.  Total visibility into the
-running program for debugging and introspection is valued over the
-ability to create total abstraction.  A better design based on
-mirror-based reflection is probably possible.
-</p>
-</div>
-
-</div>
-
-<div id="outline-container-5" class="outline-2">
-<h2 id="sec-5">Pattern Matching </h2>
-<div class="outline-text-2" id="text-5">
 
 
 <p>
@@ -392,9 +363,9 @@ Examples:
 
 </div>
 
-<div id="outline-container-6" class="outline-2">
-<h2 id="sec-6">Combiners </h2>
-<div class="outline-text-2" id="text-6">
+<div id="outline-container-5" class="outline-2">
+<h2 id="sec-5">Combiners </h2>
+<div class="outline-text-2" id="text-5">
 
 
 <p>
@@ -430,9 +401,9 @@ Examples:
 
 </div>
 
-<div id="outline-container-7" class="outline-2">
-<h2 id="sec-7">Core </h2>
-<div class="outline-text-2" id="text-7">
+<div id="outline-container-6" class="outline-2">
+<h2 id="sec-6">Core </h2>
+<div class="outline-text-2" id="text-6">
 
 
 <p>
@@ -442,16 +413,16 @@ implemented in Wat itself (or it would be cumbersome to do so).
 
 </div>
 
-<div id="outline-container-7.1" class="outline-3">
-<h3 id="sec-7.1">Basics </h3>
-<div class="outline-text-3" id="text-7.1">
+<div id="outline-container-6.1" class="outline-3">
+<h3 id="sec-6.1">Basics </h3>
+<div class="outline-text-3" id="text-6.1">
 
 
 </div>
 
-<div id="outline-container-7.1.1" class="outline-4">
-<h4 id="sec-7.1.1"><code>def &lt;lhs&gt; &lt;rhs&gt; → rhs</code> [operative] </h4>
-<div class="outline-text-4" id="text-7.1.1">
+<div id="outline-container-6.1.1" class="outline-4">
+<h4 id="sec-6.1.1"><code>def &lt;lhs&gt; &lt;rhs&gt; → rhs</code> [operative] </h4>
+<div class="outline-text-4" id="text-6.1.1">
 
 
 <p>
@@ -462,9 +433,9 @@ in the current environment, and returns it.
 
 </div>
 
-<div id="outline-container-7.1.2" class="outline-4">
-<h4 id="sec-7.1.2"><code>begin . &lt;exprs&gt; → result</code> [operative] </h4>
-<div class="outline-text-4" id="text-7.1.2">
+<div id="outline-container-6.1.2" class="outline-4">
+<h4 id="sec-6.1.2"><code>begin . &lt;exprs&gt; → result</code> [operative] </h4>
+<div class="outline-text-4" id="text-6.1.2">
 
 
 <p>
@@ -479,9 +450,9 @@ reasons is built into the core.
 
 </div>
 
-<div id="outline-container-7.1.3" class="outline-4">
-<h4 id="sec-7.1.3"><code>if &lt;test&gt; &lt;then&gt; &lt;else&gt; → result</code> [operative] </h4>
-<div class="outline-text-4" id="text-7.1.3">
+<div id="outline-container-6.1.3" class="outline-4">
+<h4 id="sec-6.1.3"><code>if &lt;test&gt; &lt;then&gt; &lt;else&gt; → result</code> [operative] </h4>
+<div class="outline-text-4" id="text-6.1.3">
 
 
 <p>
@@ -493,9 +464,9 @@ tail position.
 
 </div>
 
-<div id="outline-container-7.1.4" class="outline-4">
-<h4 id="sec-7.1.4"><code>cons &lt;car&gt; &lt;cdr&gt; → cons</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.1.4">
+<div id="outline-container-6.1.4" class="outline-4">
+<h4 id="sec-6.1.4"><code>cons &lt;car&gt; &lt;cdr&gt; → cons</code> [applicative] </h4>
+<div class="outline-text-4" id="text-6.1.4">
 
 
 <p>
@@ -505,9 +476,9 @@ Creates a new cons with the given car and cdr.
 
 </div>
 
-<div id="outline-container-7.1.5" class="outline-4">
-<h4 id="sec-7.1.5"><code>eq? &lt;a&gt; &lt;b&gt; → boolean</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.1.5">
+<div id="outline-container-6.1.5" class="outline-4">
+<h4 id="sec-6.1.5"><code>eq? &lt;a&gt; &lt;b&gt; → boolean</code> [applicative] </h4>
+<div class="outline-text-4" id="text-6.1.5">
 
 
 <p>
@@ -518,16 +489,16 @@ Returns true if the two values are pointer identical, false otherwise.
 
 </div>
 
-<div id="outline-container-7.2" class="outline-3">
-<h3 id="sec-7.2">Vau Calculus </h3>
-<div class="outline-text-3" id="text-7.2">
+<div id="outline-container-6.2" class="outline-3">
+<h3 id="sec-6.2">Vau Calculus </h3>
+<div class="outline-text-3" id="text-6.2">
 
 
 </div>
 
-<div id="outline-container-7.2.1" class="outline-4">
-<h4 id="sec-7.2.1"><code>vau &lt;ptree&gt; &lt;envp&gt; &lt;body&gt; → operative</code> [operative] </h4>
-<div class="outline-text-4" id="text-7.2.1">
+<div id="outline-container-6.2.1" class="outline-4">
+<h4 id="sec-6.2.1"><code>vau &lt;ptree&gt; &lt;envp&gt; &lt;body&gt; → operative</code> [operative] </h4>
+<div class="outline-text-4" id="text-6.2.1">
 
 
 <p>
@@ -539,9 +510,9 @@ body expression.
 
 </div>
 
-<div id="outline-container-7.2.2" class="outline-4">
-<h4 id="sec-7.2.2"><code>eval &lt;expr&gt; &lt;env&gt; → result</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.2.2">
+<div id="outline-container-6.2.2" class="outline-4">
+<h4 id="sec-6.2.2"><code>eval &lt;expr&gt; &lt;env&gt; → result</code> [applicative] </h4>
+<div class="outline-text-4" id="text-6.2.2">
 
 
 <p>
@@ -552,9 +523,9 @@ evaluated in tail-position.
 
 </div>
 
-<div id="outline-container-7.2.3" class="outline-4">
-<h4 id="sec-7.2.3"><code>wrap &lt;cmb&gt; → applicative</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.2.3">
+<div id="outline-container-6.2.3" class="outline-4">
+<h4 id="sec-6.2.3"><code>wrap &lt;cmb&gt; → applicative</code> [applicative] </h4>
+<div class="outline-text-4" id="text-6.2.3">
 
 
 <p>
@@ -564,9 +535,9 @@ Returns an applicative around an underlying combiner.
 
 </div>
 
-<div id="outline-container-7.2.4" class="outline-4">
-<h4 id="sec-7.2.4"><code>unwrap &lt;cmb&gt; → combiner</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.2.4">
+<div id="outline-container-6.2.4" class="outline-4">
+<h4 id="sec-6.2.4"><code>unwrap &lt;cmb&gt; → combiner</code> [applicative] </h4>
+<div class="outline-text-4" id="text-6.2.4">
 
 
 <p>
@@ -576,9 +547,9 @@ Returns the underlying combiner of an applicative.
 
 </div>
 
-<div id="outline-container-7.2.5" class="outline-4">
-<h4 id="sec-7.2.5"><code>make-environment [&lt;parent&gt;] → environment</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.2.5">
+<div id="outline-container-6.2.5" class="outline-4">
+<h4 id="sec-6.2.5"><code>make-environment [&lt;parent&gt;] → environment</code> [applicative] </h4>
+<div class="outline-text-4" id="text-6.2.5">
 
 
 <p>
@@ -589,9 +560,9 @@ Creates a new empty environment with the given optional parent.
 
 </div>
 
-<div id="outline-container-7.3" class="outline-3">
-<h3 id="sec-7.3">Control </h3>
-<div class="outline-text-3" id="text-7.3">
+<div id="outline-container-6.3" class="outline-3">
+<h3 id="sec-6.3">Control </h3>
+<div class="outline-text-3" id="text-6.3">
 
 
 <p>
@@ -601,9 +572,9 @@ express all other delimited control operators.
 
 </div>
 
-<div id="outline-container-7.3.1" class="outline-4">
-<h4 id="sec-7.3.1"><code>make-prompt → prompt</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.3.1">
+<div id="outline-container-6.3.1" class="outline-4">
+<h4 id="sec-6.3.1"><code>make-prompt → prompt</code> [applicative] </h4>
+<div class="outline-text-4" id="text-6.3.1">
 
 
 <p>
@@ -613,9 +584,9 @@ Creates a fresh prompt.
 
 </div>
 
-<div id="outline-container-7.3.2" class="outline-4">
-<h4 id="sec-7.3.2"><code>push-prompt* &lt;prompt&gt; &lt;thunk&gt; → result</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.3.2">
+<div id="outline-container-6.3.2" class="outline-4">
+<h4 id="sec-6.3.2"><code>push-prompt* &lt;prompt&gt; &lt;thunk&gt; → result</code> [applicative] </h4>
+<div class="outline-text-4" id="text-6.3.2">
 
 
 <p>
@@ -626,9 +597,9 @@ new continuation.
 
 </div>
 
-<div id="outline-container-7.3.3" class="outline-4">
-<h4 id="sec-7.3.3"><code>take-sub-cont* &lt;prompt&gt; &lt;cmb&gt; → result</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.3.3">
+<div id="outline-container-6.3.3" class="outline-4">
+<h4 id="sec-6.3.3"><code>take-sub-cont* &lt;prompt&gt; &lt;cmb&gt; → result</code> [applicative] </h4>
+<div class="outline-text-4" id="text-6.3.3">
 
 
 <p>
@@ -640,9 +611,9 @@ to <code>take-sub-cont*</code> up to but not including the prompt.
 
 </div>
 
-<div id="outline-container-7.3.4" class="outline-4">
-<h4 id="sec-7.3.4"><code>push-sub-cont* &lt;cont&gt; &lt;thunk&gt; → result</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.3.4">
+<div id="outline-container-6.3.4" class="outline-4">
+<h4 id="sec-6.3.4"><code>push-sub-cont* &lt;cont&gt; &lt;thunk&gt; → result</code> [applicative] </h4>
+<div class="outline-text-4" id="text-6.3.4">
 
 
 <p>
@@ -654,85 +625,68 @@ executes thunk in the new continuation.
 
 </div>
 
-<div id="outline-container-7.4" class="outline-3">
-<h3 id="sec-7.4">Types </h3>
-<div class="outline-text-3" id="text-7.4">
+<div id="outline-container-6.4" class="outline-3">
+<h3 id="sec-6.4">Types </h3>
+<div class="outline-text-3" id="text-6.4">
 
 
 </div>
 
-<div id="outline-container-7.4.1" class="outline-4">
-<h4 id="sec-7.4.1"><code>make-type → type</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.4.1">
+<div id="outline-container-6.4.1" class="outline-4">
+<h4 id="sec-6.4.1"><code>make-type → (type tagger untagger)</code> [applicative] </h4>
+<div class="outline-text-4" id="text-6.4.1">
 
 
 <p>
-Creates a new type with an empty environment.
+Returns a list containing:
+</p>
+<ul>
+<li>
+a fresh first-class type;
+
+</li>
+<li>
+an applicative, the tagger, that takes a value and tags it with the
+type;
+
+</li>
+<li>
+an applicative, the untagger, that takes a tagged object created by
+the tagger and returns its value.
+
+</li>
+</ul>
+
+<p>The untagger only untags objects created by the tagger.
 </p>
 </div>
 
 </div>
 
-<div id="outline-container-7.4.2" class="outline-4">
-<h4 id="sec-7.4.2"><code>type-environment &lt;type&gt; → environment</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.4.2">
+<div id="outline-container-6.4.2" class="outline-4">
+<h4 id="sec-6.4.2"><code>type-of &lt;val&gt; → type</code> [applicative] </h4>
+<div class="outline-text-4" id="text-6.4.2">
 
 
 <p>
-Returns the type's environment for storing metadata.
-</p>
-</div>
-
-</div>
-
-<div id="outline-container-7.4.3" class="outline-4">
-<h4 id="sec-7.4.3"><code>type-of &lt;val&gt; → type</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.4.3">
-
-
-<p>
-Returns an object's type.
-</p>
-</div>
-
-</div>
-
-<div id="outline-container-7.4.4" class="outline-4">
-<h4 id="sec-7.4.4"><code>tag &lt;type&gt; &lt;val&gt; → tagged</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.4.4">
-
-
-<p>
-Creates a new user-tagged object with a type and wrapping an
-underlying value.
-</p>
-</div>
-
-</div>
-
-<div id="outline-container-7.4.5" class="outline-4">
-<h4 id="sec-7.4.5"><code>untag &lt;tagged&gt; → value</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.4.5">
-
-
-<p>
-Returns the underlying value of a user-tagged object.
+Returns an object's type.  Every object has a type, whether built-in
+objects or tagged objects.
 </p>
 </div>
 </div>
 
 </div>
 
-<div id="outline-container-7.5" class="outline-3">
-<h3 id="sec-7.5">System </h3>
-<div class="outline-text-3" id="text-7.5">
+<div id="outline-container-6.5" class="outline-3">
+<h3 id="sec-6.5">System </h3>
+<div class="outline-text-3" id="text-6.5">
 
 
 </div>
 
-<div id="outline-container-7.5.1" class="outline-4">
-<h4 id="sec-7.5.1"><code>display &lt;msg&gt; → msg</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.5.1">
+<div id="outline-container-6.5.1" class="outline-4">
+<h4 id="sec-6.5.1"><code>display &lt;msg&gt; → msg</code> [applicative] </h4>
+<div class="outline-text-4" id="text-6.5.1">
 
 
 <p>
@@ -742,9 +696,9 @@ Prints a message string to the console and returns it.
 
 </div>
 
-<div id="outline-container-7.5.2" class="outline-4">
-<h4 id="sec-7.5.2"><code>read-from-string &lt;string&gt; → forms</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.5.2">
+<div id="outline-container-6.5.2" class="outline-4">
+<h4 id="sec-6.5.2"><code>read-from-string &lt;string&gt; → forms</code> [applicative] </h4>
+<div class="outline-text-4" id="text-6.5.2">
 
 
 <p>
@@ -754,9 +708,9 @@ Parses a string into a list of forms.
 
 </div>
 
-<div id="outline-container-7.5.3" class="outline-4">
-<h4 id="sec-7.5.3"><code>fail &lt;reason&gt; → |</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.5.3">
+<div id="outline-container-6.5.3" class="outline-4">
+<h4 id="sec-6.5.3"><code>fail &lt;reason&gt; → |</code> [applicative] </h4>
+<div class="outline-text-4" id="text-6.5.3">
 
 
 <p>
@@ -767,17 +721,17 @@ Halts evaluation with an object describing the reason (typically an error).
 
 </div>
 
-<div id="outline-container-7.6" class="outline-3">
-<h3 id="sec-7.6">Vectors </h3>
-<div class="outline-text-3" id="text-7.6">
+<div id="outline-container-6.6" class="outline-3">
+<h3 id="sec-6.6">Vectors </h3>
+<div class="outline-text-3" id="text-6.6">
 
 
 
 </div>
 
-<div id="outline-container-7.6.1" class="outline-4">
-<h4 id="sec-7.6.1"><code>vector . &lt;elements&gt; → vector</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.6.1">
+<div id="outline-container-6.6.1" class="outline-4">
+<h4 id="sec-6.6.1"><code>vector . &lt;elements&gt; → vector</code> [applicative] </h4>
+<div class="outline-text-4" id="text-6.6.1">
 
 
 <p>
@@ -787,9 +741,9 @@ Creates a new vector with the given elements.
 
 </div>
 
-<div id="outline-container-7.6.2" class="outline-4">
-<h4 id="sec-7.6.2"><code>vector-ref &lt;vector&gt; &lt;index&gt; → element</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.6.2">
+<div id="outline-container-6.6.2" class="outline-4">
+<h4 id="sec-6.6.2"><code>vector-ref &lt;vector&gt; &lt;index&gt; → element</code> [applicative] </h4>
+<div class="outline-text-4" id="text-6.6.2">
 
 
 <p>
@@ -799,9 +753,9 @@ Returns the vector's element at the given index.
 
 </div>
 
-<div id="outline-container-7.6.3" class="outline-4">
-<h4 id="sec-7.6.3"><code>vector-set! &lt;vector&gt; &lt;index&gt; &lt;element&gt; → element</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.6.3">
+<div id="outline-container-6.6.3" class="outline-4">
+<h4 id="sec-6.6.3"><code>vector-set! &lt;vector&gt; &lt;index&gt; &lt;element&gt; → element</code> [applicative] </h4>
+<div class="outline-text-4" id="text-6.6.3">
 
 
 <p>
@@ -811,9 +765,9 @@ Updates the vector's element at the given index and returns it.
 
 </div>
 
-<div id="outline-container-7.6.4" class="outline-4">
-<h4 id="sec-7.6.4"><code>vector-length &lt;vector&gt; → number</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.6.4">
+<div id="outline-container-6.6.4" class="outline-4">
+<h4 id="sec-6.6.4"><code>vector-length &lt;vector&gt; → number</code> [applicative] </h4>
+<div class="outline-text-4" id="text-6.6.4">
 
 
 <p>
@@ -825,9 +779,9 @@ Returns the number of elements in the vector.
 
 </div>
 
-<div id="outline-container-8" class="outline-2">
-<h2 id="sec-8">Library </h2>
-<div class="outline-text-2" id="text-8">
+<div id="outline-container-7" class="outline-2">
+<h2 id="sec-7">Library </h2>
+<div class="outline-text-2" id="text-7">
 
 
 <p>
@@ -836,16 +790,16 @@ The library consists of definitions written in Wat itself.
 
 </div>
 
-<div id="outline-container-8.1" class="outline-3">
-<h3 id="sec-8.1">Common </h3>
-<div class="outline-text-3" id="text-8.1">
+<div id="outline-container-7.1" class="outline-3">
+<h3 id="sec-7.1">Common </h3>
+<div class="outline-text-3" id="text-7.1">
 
 
 </div>
 
-<div id="outline-container-8.1.1" class="outline-4">
-<h4 id="sec-8.1.1"><code>lambda &lt;ptree&gt; . &lt;exprs&gt; → applicative</code> [operative] </h4>
-<div class="outline-text-4" id="text-8.1.1">
+<div id="outline-container-7.1.1" class="outline-4">
+<h4 id="sec-7.1.1"><code>lambda &lt;ptree&gt; . &lt;exprs&gt; → applicative</code> [operative] </h4>
+<div class="outline-text-4" id="text-7.1.1">
 
 
 <p>
@@ -855,9 +809,9 @@ Creates an applicative combiner, as in Scheme.
 
 </div>
 
-<div id="outline-container-8.1.2" class="outline-4">
-<h4 id="sec-8.1.2"><code>apply &lt;apv&gt; &lt;args&gt; → result</code> [applicative] </h4>
-<div class="outline-text-4" id="text-8.1.2">
+<div id="outline-container-7.1.2" class="outline-4">
+<h4 id="sec-7.1.2"><code>apply &lt;apv&gt; &lt;args&gt; → result</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.1.2">
 
 
 <p>
@@ -867,9 +821,9 @@ Applies an applicative to an arguments list.
 
 </div>
 
-<div id="outline-container-8.1.3" class="outline-4">
-<h4 id="sec-8.1.3"><code>set! &lt;env&gt; &lt;lhs&gt; &lt;rhs&gt; → rhs</code> [operative] </h4>
-<div class="outline-text-4" id="text-8.1.3">
+<div id="outline-container-7.1.3" class="outline-4">
+<h4 id="sec-7.1.3"><code>set! &lt;env&gt; &lt;lhs&gt; &lt;rhs&gt; → rhs</code> [operative] </h4>
+<div class="outline-text-4" id="text-7.1.3">
 
 
 <p>
@@ -880,9 +834,9 @@ right-hand side in the given environment.
 
 </div>
 
-<div id="outline-container-8.1.4" class="outline-4">
-<h4 id="sec-8.1.4"><code>quote &lt;form&gt; → form</code> [operative] </h4>
-<div class="outline-text-4" id="text-8.1.4">
+<div id="outline-container-7.1.4" class="outline-4">
+<h4 id="sec-7.1.4"><code>quote &lt;form&gt; → form</code> [operative] </h4>
+<div class="outline-text-4" id="text-7.1.4">
 
 
 <p>
@@ -892,9 +846,9 @@ Returns form unevaluated.
 
 </div>
 
-<div id="outline-container-8.1.5" class="outline-4">
-<h4 id="sec-8.1.5"><code>define &lt;lhs&gt; &lt;rhs&gt; → result</code> [operative] </h4>
-<div class="outline-text-4" id="text-8.1.5">
+<div id="outline-container-7.1.5" class="outline-4">
+<h4 id="sec-7.1.5"><code>define &lt;lhs&gt; &lt;rhs&gt; → result</code> [operative] </h4>
+<div class="outline-text-4" id="text-7.1.5">
 
 
 <p>
@@ -916,9 +870,9 @@ returning the applicative.
 
 </div>
 
-<div id="outline-container-8.1.6" class="outline-4">
-<h4 id="sec-8.1.6"><code>define-syntax &lt;lhs&gt; &lt;rhs&gt; → result</code> [operative] </h4>
-<div class="outline-text-4" id="text-8.1.6">
+<div id="outline-container-7.1.6" class="outline-4">
+<h4 id="sec-7.1.6"><code>define-syntax &lt;lhs&gt; &lt;rhs&gt; → result</code> [operative] </h4>
+<div class="outline-text-4" id="text-7.1.6">
 
 
 <p>
@@ -941,9 +895,9 @@ parameter, and body expressions, returning the operative.
 
 </div>
 
-<div id="outline-container-8.1.7" class="outline-4">
-<h4 id="sec-8.1.7"><code>provide &lt;names&gt; . &lt;exprs&gt; → result</code> [operative] </h4>
-<div class="outline-text-4" id="text-8.1.7">
+<div id="outline-container-7.1.7" class="outline-4">
+<h4 id="sec-7.1.7"><code>provide &lt;names&gt; . &lt;exprs&gt; → result</code> [operative] </h4>
+<div class="outline-text-4" id="text-7.1.7">
 
 
 <p>
@@ -971,17 +925,17 @@ quux → error: unbound variable
 
 </div>
 
-<div id="outline-container-8.2" class="outline-3">
-<h3 id="sec-8.2">Pairs and Lists </h3>
-<div class="outline-text-3" id="text-8.2">
+<div id="outline-container-7.2" class="outline-3">
+<h3 id="sec-7.2">Pairs and Lists </h3>
+<div class="outline-text-3" id="text-7.2">
 
 
 
 </div>
 
-<div id="outline-container-8.2.1" class="outline-4">
-<h4 id="sec-8.2.1"><code>car &lt;pair&gt; → value</code> [applicative] </h4>
-<div class="outline-text-4" id="text-8.2.1">
+<div id="outline-container-7.2.1" class="outline-4">
+<h4 id="sec-7.2.1"><code>car &lt;pair&gt; → value</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.2.1">
 
 
 
@@ -992,9 +946,9 @@ Contents of the Address part of Register.
 
 </div>
 
-<div id="outline-container-8.2.2" class="outline-4">
-<h4 id="sec-8.2.2"><code>cdr &lt;pair&gt; → value</code> [applicative] </h4>
-<div class="outline-text-4" id="text-8.2.2">
+<div id="outline-container-7.2.2" class="outline-4">
+<h4 id="sec-7.2.2"><code>cdr &lt;pair&gt; → value</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.2.2">
 
 
 <p>
@@ -1004,9 +958,9 @@ Contents of the Decrement part of Register.
 
 </div>
 
-<div id="outline-container-8.2.3" class="outline-4">
-<h4 id="sec-8.2.3"><code>caar</code>, <code>cadr</code>, <code>cdar</code>, <code>cddr</code> [applicatives] </h4>
-<div class="outline-text-4" id="text-8.2.3">
+<div id="outline-container-7.2.3" class="outline-4">
+<h4 id="sec-7.2.3"><code>caar</code>, <code>cadr</code>, <code>cdar</code>, <code>cddr</code> [applicatives] </h4>
+<div class="outline-text-4" id="text-7.2.3">
 
 
 <p>
@@ -1016,9 +970,9 @@ Combinations of <code>car</code> and <code>cdr</code>, e.g. <code>(cadr x)</code
 
 </div>
 
-<div id="outline-container-8.2.4" class="outline-4">
-<h4 id="sec-8.2.4"><code>null? &lt;val&gt; → boolean</code> [applicative] </h4>
-<div class="outline-text-4" id="text-8.2.4">
+<div id="outline-container-7.2.4" class="outline-4">
+<h4 id="sec-7.2.4"><code>null? &lt;val&gt; → boolean</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.2.4">
 
 
 <p>
@@ -1028,9 +982,9 @@ Returns true if a value is nil, the empty list, false otherwise.
 
 </div>
 
-<div id="outline-container-8.2.5" class="outline-4">
-<h4 id="sec-8.2.5"><code>pair? &lt;val&gt; → boolean</code> [applicative] </h4>
-<div class="outline-text-4" id="text-8.2.5">
+<div id="outline-container-7.2.5" class="outline-4">
+<h4 id="sec-7.2.5"><code>pair? &lt;val&gt; → boolean</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.2.5">
 
 
 <p>
@@ -1040,9 +994,9 @@ Returns true if a value is a pair (cons), false otherwise.
 
 </div>
 
-<div id="outline-container-8.2.6" class="outline-4">
-<h4 id="sec-8.2.6"><code>list . &lt;vals&gt; → list</code> [applicative] </h4>
-<div class="outline-text-4" id="text-8.2.6">
+<div id="outline-container-7.2.6" class="outline-4">
+<h4 id="sec-7.2.6"><code>list . &lt;vals&gt; → list</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.2.6">
 
 
 <p>
@@ -1052,9 +1006,9 @@ Constructs a nil-terminated list containing the values.
 
 </div>
 
-<div id="outline-container-8.2.7" class="outline-4">
-<h4 id="sec-8.2.7"><code>list* . &lt;vals&gt; → list</code> [applicative] </h4>
-<div class="outline-text-4" id="text-8.2.7">
+<div id="outline-container-7.2.7" class="outline-4">
+<h4 id="sec-7.2.7"><code>list* . &lt;vals&gt; → list</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.2.7">
 
 
 <p>
@@ -1065,9 +1019,9 @@ Constructs a list of the values, terminated by the last value.
 
 </div>
 
-<div id="outline-container-8.3" class="outline-3">
-<h3 id="sec-8.3">Dynamic Binding </h3>
-<div class="outline-text-3" id="text-8.3">
+<div id="outline-container-7.3" class="outline-3">
+<h3 id="sec-7.3">Dynamic Binding </h3>
+<div class="outline-text-3" id="text-7.3">
 
 
 <p>
@@ -1077,9 +1031,9 @@ These are the operators from Kiselyov, Shan, and Sabry's
 
 </div>
 
-<div id="outline-container-8.3.1" class="outline-4">
-<h4 id="sec-8.3.1"><code>dnew → dynamic</code> [applicative] </h4>
-<div class="outline-text-4" id="text-8.3.1">
+<div id="outline-container-7.3.1" class="outline-4">
+<h4 id="sec-7.3.1"><code>dnew → dynamic</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.3.1">
 
 
 <p>
@@ -1089,9 +1043,9 @@ Creates a new dynamically-bound variable.
 
 </div>
 
-<div id="outline-container-8.3.2" class="outline-4">
-<h4 id="sec-8.3.2"><code>dlet &lt;dynamic&gt; &lt;value&gt; . &lt;exprs&gt; → result</code> [operative] </h4>
-<div class="outline-text-4" id="text-8.3.2">
+<div id="outline-container-7.3.2" class="outline-4">
+<h4 id="sec-7.3.2"><code>dlet &lt;dynamic&gt; &lt;value&gt; . &lt;exprs&gt; → result</code> [operative] </h4>
+<div class="outline-text-4" id="text-7.3.2">
 
 
 <p>
@@ -1101,9 +1055,9 @@ Performs expressions with the dynamic variable bound to the value.
 
 </div>
 
-<div id="outline-container-8.3.3" class="outline-4">
-<h4 id="sec-8.3.3"><code>dref &lt;dynamic&gt; → value</code> [applicative] </h4>
-<div class="outline-text-4" id="text-8.3.3">
+<div id="outline-container-7.3.3" class="outline-4">
+<h4 id="sec-7.3.3"><code>dref &lt;dynamic&gt; → value</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.3.3">
 
 
 <p>
@@ -1114,17 +1068,17 @@ Retrieves the dynamically-bound value of a dynamic variable.
 
 </div>
 
-<div id="outline-container-8.4" class="outline-3">
-<h3 id="sec-8.4">Generic Programming </h3>
-<div class="outline-text-3" id="text-8.4">
+<div id="outline-container-7.4" class="outline-3">
+<h3 id="sec-7.4">Generic Programming </h3>
+<div class="outline-text-3" id="text-7.4">
 
 
 
 </div>
 
-<div id="outline-container-8.4.1" class="outline-4">
-<h4 id="sec-8.4.1"><code>define-generic (&lt;name&gt; . &lt;args&gt;) → generic</code> [operative] </h4>
-<div class="outline-text-4" id="text-8.4.1">
+<div id="outline-container-7.4.1" class="outline-4">
+<h4 id="sec-7.4.1"><code>define-generic (&lt;name&gt; . &lt;args&gt;) → generic</code> [operative] </h4>
+<div class="outline-text-4" id="text-7.4.1">
 
 
 <p>
@@ -1134,9 +1088,9 @@ Defines a new generic function with the given name.
 
 </div>
 
-<div id="outline-container-8.4.2" class="outline-4">
-<h4 id="sec-8.4.2"><code>define-method (&lt;name&gt; (&lt;self&gt; &lt;type&gt;) . &lt;args&gt;) → method</code> [operative] </h4>
-<div class="outline-text-4" id="text-8.4.2">
+<div id="outline-container-7.4.2" class="outline-4">
+<h4 id="sec-7.4.2"><code>define-method (&lt;name&gt; (&lt;self&gt; &lt;type&gt;) . &lt;args&gt;) → method</code> [operative] </h4>
+<div class="outline-text-4" id="text-7.4.2">
 
 
 <p>
@@ -1146,9 +1100,9 @@ Defines a new method for a generic function.
 
 </div>
 
-<div id="outline-container-8.4.3" class="outline-4">
-<h4 id="sec-8.4.3"><code>send &lt;obj&gt; &lt;msg&gt; &lt;arg&gt; → result</code> [applicative] </h4>
-<div class="outline-text-4" id="text-8.4.3">
+<div id="outline-container-7.4.3" class="outline-4">
+<h4 id="sec-7.4.3"><code>send &lt;obj&gt; &lt;msg&gt; &lt;arg&gt; → result</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.4.3">
 
 
 <p>
@@ -1160,24 +1114,24 @@ Sends object a message with an argument.
 
 </div>
 
-<div id="outline-container-9" class="outline-2">
-<h2 id="sec-9">External </h2>
-<div class="outline-text-2" id="text-9">
+<div id="outline-container-8" class="outline-2">
+<h2 id="sec-8">External </h2>
+<div class="outline-text-2" id="text-8">
 
 
 </div>
 
-<div id="outline-container-9.1" class="outline-3">
-<h3 id="sec-9.1">JavaScript Bridge </h3>
-<div class="outline-text-3" id="text-9.1">
+<div id="outline-container-8.1" class="outline-3">
+<h3 id="sec-8.1">JavaScript Bridge </h3>
+<div class="outline-text-3" id="text-8.1">
 
 
 
 </div>
 
-<div id="outline-container-9.1.1" class="outline-4">
-<h4 id="sec-9.1.1"><code>js-global &lt;string&gt; → result</code> [applicative] </h4>
-<div class="outline-text-4" id="text-9.1.1">
+<div id="outline-container-8.1.1" class="outline-4">
+<h4 id="sec-8.1.1"><code>js-global &lt;string&gt; → result</code> [applicative] </h4>
+<div class="outline-text-4" id="text-8.1.1">
 
 
 <p>
@@ -1187,9 +1141,9 @@ Returns value of JavaScript global variable with given name.
 
 </div>
 
-<div id="outline-container-9.1.2" class="outline-4">
-<h4 id="sec-9.1.2"><code>js-set-global! &lt;string&gt; &lt;val&gt; → val</code> [applicative] </h4>
-<div class="outline-text-4" id="text-9.1.2">
+<div id="outline-container-8.1.2" class="outline-4">
+<h4 id="sec-8.1.2"><code>js-set-global! &lt;string&gt; &lt;val&gt; → val</code> [applicative] </h4>
+<div class="outline-text-4" id="text-8.1.2">
 
 
 <p>
@@ -1199,9 +1153,9 @@ Updates value of JavaScript global variable with given name and returns it.
 
 </div>
 
-<div id="outline-container-9.1.3" class="outline-4">
-<h4 id="sec-9.1.3"><code>js-prop &lt;object&gt; &lt;string&gt; → result</code> [applicative] </h4>
-<div class="outline-text-4" id="text-9.1.3">
+<div id="outline-container-8.1.3" class="outline-4">
+<h4 id="sec-8.1.3"><code>js-prop &lt;object&gt; &lt;string&gt; → result</code> [applicative] </h4>
+<div class="outline-text-4" id="text-8.1.3">
 
 
 <p>
@@ -1211,9 +1165,9 @@ Returns value of JavaScript member variable with given name of object.
 
 </div>
 
-<div id="outline-container-9.1.4" class="outline-4">
-<h4 id="sec-9.1.4"><code>js-set-prop! &lt;object&gt; &lt;string&gt; &lt;val&gt; → val</code> [applicative] </h4>
-<div class="outline-text-4" id="text-9.1.4">
+<div id="outline-container-8.1.4" class="outline-4">
+<h4 id="sec-8.1.4"><code>js-set-prop! &lt;object&gt; &lt;string&gt; &lt;val&gt; → val</code> [applicative] </h4>
+<div class="outline-text-4" id="text-8.1.4">
 
 
 <p>
@@ -1224,9 +1178,9 @@ and returns it.
 
 </div>
 
-<div id="outline-container-9.1.5" class="outline-4">
-<h4 id="sec-9.1.5"><code>js-function &lt;jsfun&gt; → applicative</code> [applicative] </h4>
-<div class="outline-text-4" id="text-9.1.5">
+<div id="outline-container-8.1.5" class="outline-4">
+<h4 id="sec-8.1.5"><code>js-function &lt;jsfun&gt; → applicative</code> [applicative] </h4>
+<div class="outline-text-4" id="text-8.1.5">
 
 
 <p>
@@ -1237,9 +1191,9 @@ function with the arguments it received.
 
 </div>
 
-<div id="outline-container-9.1.6" class="outline-4">
-<h4 id="sec-9.1.6"><code>js-method &lt;string&gt; → cmb</code> [applicative] </h4>
-<div class="outline-text-4" id="text-9.1.6">
+<div id="outline-container-8.1.6" class="outline-4">
+<h4 id="sec-8.1.6"><code>js-method &lt;string&gt; → cmb</code> [applicative] </h4>
+<div class="outline-text-4" id="text-8.1.6">
 
 
 <p>
@@ -1251,9 +1205,9 @@ object with the given arguments.
 
 </div>
 
-<div id="outline-container-9.1.7" class="outline-4">
-<h4 id="sec-9.1.7"><code>js-callback &lt;cmb&gt; → jsfun</code> [applicative] </h4>
-<div class="outline-text-4" id="text-9.1.7">
+<div id="outline-container-8.1.7" class="outline-4">
+<h4 id="sec-8.1.7"><code>js-callback &lt;cmb&gt; → jsfun</code> [applicative] </h4>
+<div class="outline-text-4" id="text-8.1.7">
 
 
 <p>
@@ -1264,9 +1218,9 @@ combiner with the arguments it received.
 
 </div>
 
-<div id="outline-container-9.1.8" class="outline-4">
-<h4 id="sec-9.1.8"><code>to-js &lt;obj&gt; → jsobj</code> [applicative] </h4>
-<div class="outline-text-4" id="text-9.1.8">
+<div id="outline-container-8.1.8" class="outline-4">
+<h4 id="sec-8.1.8"><code>to-js &lt;obj&gt; → jsobj</code> [applicative] </h4>
+<div class="outline-text-4" id="text-8.1.8">
 
 
 <p>
@@ -1276,9 +1230,9 @@ Try to convert an object, such as a string, to a usable JavaScript object.
 
 </div>
 
-<div id="outline-container-9.1.9" class="outline-4">
-<h4 id="sec-9.1.9"><code>from-js &lt;js-obj&gt; → obj</code> [applicative] </h4>
-<div class="outline-text-4" id="text-9.1.9">
+<div id="outline-container-8.1.9" class="outline-4">
+<h4 id="sec-8.1.9"><code>from-js &lt;js-obj&gt; → obj</code> [applicative] </h4>
+<div class="outline-text-4" id="text-8.1.9">
 
 
 <p>
@@ -1291,7 +1245,7 @@ Try to convert a JavaScript object, such as a string, to a usable Wat object.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-06 13:40:57 CEST</p>
+<p class="date"> Date: 2012-08-07 00:42:12 CEST</p>
 </div>
 </div>
 </body>

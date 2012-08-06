@@ -222,13 +222,13 @@ objects or tagged objects.
 
 ** System
 
+*** =read → form= [applicative]
+
+Reads a form from the console and returns it.
+
 *** =display <msg> → msg= [applicative]
 
 Prints a message string to the console and returns it.
-
-*** =read-from-string <string> → forms= [applicative]
-
-Parses a string into a list of forms.
 
 *** =fail <reason> → |= [applicative]
 

@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-07 00:42:12 CEST"/>
+<meta name="generated" content="2012-08-07 00:47:30 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -162,13 +162,6 @@ lang="en" xml:lang="en">
 <li><a href="#sec-7.3.1"><code>dnew → dynamic</code> [applicative] </a></li>
 <li><a href="#sec-7.3.2"><code>dlet &lt;dynamic&gt; &lt;value&gt; . &lt;exprs&gt; → result</code> [operative] </a></li>
 <li><a href="#sec-7.3.3"><code>dref &lt;dynamic&gt; → value</code> [applicative] </a></li>
-</ul>
-</li>
-<li><a href="#sec-7.4">Generic Programming </a>
-<ul>
-<li><a href="#sec-7.4.1"><code>define-generic (&lt;name&gt; . &lt;args&gt;) → generic</code> [operative] </a></li>
-<li><a href="#sec-7.4.2"><code>define-method (&lt;name&gt; (&lt;self&gt; &lt;type&gt;) . &lt;args&gt;) → method</code> [operative] </a></li>
-<li><a href="#sec-7.4.3"><code>send &lt;obj&gt; &lt;msg&gt; &lt;arg&gt; → result</code> [applicative] </a></li>
 </ul></li>
 </ul>
 </li>
@@ -566,8 +559,9 @@ Creates a new empty environment with the given optional parent.
 
 
 <p>
-These are the control operators from Dybvig, Jones, and Sabry's <a href="http://www.cs.indiana.edu/~dyb/pubs/monadicDC.pdf"><i>A Monadic Framework for Delimited Continuations</i></a> that are able to
-express all other delimited control operators.
+These are the control operators from Dybvig, Jones, and Sabry's
+<a href="http://www.cs.indiana.edu/~dyb/pubs/monadicDC.pdf"><i>A Monadic Framework for Delimited Continuations</i></a> that are able to express all
+other delimited control operators.
 </p>
 
 </div>
@@ -682,6 +676,7 @@ objects or tagged objects.
 <div class="outline-text-3" id="text-6.5">
 
 
+
 </div>
 
 <div id="outline-container-6.5.1" class="outline-4">
@@ -793,6 +788,7 @@ The library consists of definitions written in Wat itself.
 <div id="outline-container-7.1" class="outline-3">
 <h3 id="sec-7.1">Common </h3>
 <div class="outline-text-3" id="text-7.1">
+
 
 
 </div>
@@ -938,7 +934,6 @@ quux → error: unbound variable
 <div class="outline-text-4" id="text-7.2.1">
 
 
-
 <p>
 Contents of the Address part of Register.
 </p>
@@ -1065,51 +1060,6 @@ Retrieves the dynamically-bound value of a dynamic variable.
 </p>
 </div>
 </div>
-
-</div>
-
-<div id="outline-container-7.4" class="outline-3">
-<h3 id="sec-7.4">Generic Programming </h3>
-<div class="outline-text-3" id="text-7.4">
-
-
-
-</div>
-
-<div id="outline-container-7.4.1" class="outline-4">
-<h4 id="sec-7.4.1"><code>define-generic (&lt;name&gt; . &lt;args&gt;) → generic</code> [operative] </h4>
-<div class="outline-text-4" id="text-7.4.1">
-
-
-<p>
-Defines a new generic function with the given name.
-</p>
-</div>
-
-</div>
-
-<div id="outline-container-7.4.2" class="outline-4">
-<h4 id="sec-7.4.2"><code>define-method (&lt;name&gt; (&lt;self&gt; &lt;type&gt;) . &lt;args&gt;) → method</code> [operative] </h4>
-<div class="outline-text-4" id="text-7.4.2">
-
-
-<p>
-Defines a new method for a generic function.
-</p>
-</div>
-
-</div>
-
-<div id="outline-container-7.4.3" class="outline-4">
-<h4 id="sec-7.4.3"><code>send &lt;obj&gt; &lt;msg&gt; &lt;arg&gt; → result</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.4.3">
-
-
-<p>
-Sends object a message with an argument.
-</p>
-</div>
-</div>
 </div>
 
 </div>
@@ -1224,7 +1174,8 @@ combiner with the arguments it received.
 
 
 <p>
-Try to convert an object, such as a string, to a usable JavaScript object.
+Try to convert an object, such as a string, to a usable JavaScript
+object.
 </p>
 </div>
 
@@ -1236,7 +1187,8 @@ Try to convert an object, such as a string, to a usable JavaScript object.
 
 
 <p>
-Try to convert a JavaScript object, such as a string, to a usable Wat object.
+Try to convert a JavaScript object, such as a string, to a usable Wat
+object.
 </p></div>
 </div>
 </div>
@@ -1245,7 +1197,7 @@ Try to convert a JavaScript object, such as a string, to a usable Wat object.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-07 00:42:12 CEST</p>
+<p class="date"> Date: 2012-08-07 00:47:30 CEST</p>
 </div>
 </div>
 </body>

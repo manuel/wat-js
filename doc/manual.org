@@ -175,9 +175,10 @@ Creates a new empty environment with the given optional parent.
 
 ** Control
 
-These are the control operators from Dybvig, Jones, and Sabry's [[http://www.cs.indiana.edu/~dyb/pubs/monadicDC.pdf][/A
-Monadic Framework for Delimited Continuations/]] that are able to
-express all other delimited control operators.
+These are the control operators from Dybvig, Jones, and Sabry's
+[[http://www.cs.indiana.edu/~dyb/pubs/monadicDC.pdf][/A Monadic
+Framework for Delimited Continuations/]] that are able to express all
+other delimited control operators.
 
 *** =make-prompt → prompt= [applicative]
 
@@ -220,6 +221,7 @@ Returns an object's type.  Every object has a type, whether built-in
 objects or tagged objects.
 
 ** System
+
 *** =display <msg> → msg= [applicative]
 
 Prints a message string to the console and returns it.
@@ -255,6 +257,7 @@ Returns the number of elements in the vector.
 The library consists of definitions written in Wat itself.
 
 ** Common
+
 *** =lambda <ptree> . <exprs> → applicative= [operative]
 
 Creates an applicative combiner, as in Scheme.
@@ -298,7 +301,7 @@ Scheme-like =define-syntax= with two cases:
 Performs expressions in a new lexical scope and exports only listed
 names to the outer scope.
 
-#+begin_example
+#+BEGIN_EXAMPLE
 (provide (foo bar)
   (def foo 1)
   (def bar 2)
@@ -307,12 +310,11 @@ names to the outer scope.
 foo → 1
 bar → 2
 quux → error: unbound variable
-#+end_example
+#+END_EXAMPLE
 
 ** Pairs and Lists
 
 *** =car <pair> → value= [applicative]
-
 
 Contents of the Address part of Register.
 
@@ -357,20 +359,6 @@ Performs expressions with the dynamic variable bound to the value.
 
 Retrieves the dynamically-bound value of a dynamic variable.
 
-** Generic Programming
-
-*** =define-generic (<name> . <args>) → generic= [operative]
-
-Defines a new generic function with the given name.
-
-*** =define-method (<name> (<self> <type>) . <args>) → method= [operative]
-
-Defines a new method for a generic function.
-
-*** =send <obj> <msg> <arg> → result= [applicative]
-
-Sends object a message with an argument.
-
 * External
 ** JavaScript Bridge
 
@@ -409,8 +397,10 @@ combiner with the arguments it received.
  
 *** =to-js <obj> → jsobj= [applicative]
 
-Try to convert an object, such as a string, to a usable JavaScript object.
+Try to convert an object, such as a string, to a usable JavaScript
+object.
  
 *** =from-js <js-obj> → obj= [applicative]
 
-Try to convert a JavaScript object, such as a string, to a usable Wat object.
+Try to convert a JavaScript object, such as a string, to a usable Wat
+object.

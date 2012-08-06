@@ -22,12 +22,15 @@ function wat_console_log(string) {
 }
 
 function wat_eval(str) {
-    var forms = wat.parse(str);
     var start = new Date().getTime();
+    var forms = wat.parse(str);
+    elapsed = new Date().getTime() - start;
+    wat_console_log("Parse time " + elapsed + "ms");
+    start = new Date().getTime();
     for (var i = 0; i < forms.length; i++) {
         var result = wat.eval(forms[i], wat_env);
     }
-    var elapsed = new Date().getTime() - start;
+    elapsed = new Date().getTime() - start;
     wat_console_log("Evaluation time " + elapsed + "ms");
 }
 

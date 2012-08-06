@@ -113,7 +113,7 @@ var wat = (function() {
     function cdr(cons) { assert(type_of(cons) === Cons.prototype.wat_type); return cons.cdr; }
     function elt(cons, i) { return (i === 0) ? car(cons) : elt(cdr(cons), i - 1); }
     function Env(parent) { this.bindings = Object.create(parent ? parent.bindings : null); }
-    function lookup(e, sym) { var val = e.bindings[sym.name]; return val ? val : fail("unbound: " + sym.name); }
+    function lookup(e, sym) { var val = e.bindings[sym.name]; return (val !== undefined) ? val : fail("unbound: " + sym.name); }
     function bind(e, lhs, rhs) { lhs.match(e, rhs); }
     Sym.prototype.match = function(e, rhs) { assert(type_of(rhs)); e.bindings[this.name] = rhs; };
     Cons.prototype.match = function(e, rhs) { car(this).match(e, car(rhs)); cdr(this).match(e, cdr(rhs)); };

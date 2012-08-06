@@ -28,12 +28,11 @@
     (js-set-prop! (getElementById "input") "value" (to-js ""))
     res))
 
-(define env (current-environment))
 (define *read-k* #void)
 
 (define (read)
   (take-sub-cont *top-level* k
-    (set! env *read-k* k)))
+    (set! *read-k* k)))
 
 (js-set-prop! (getElementById "input")
 	      "onkeypress"

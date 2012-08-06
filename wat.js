@@ -25,10 +25,13 @@ var wat = (function() {
     function KEvalArg(k, e, todo, done) { this.k = k; this.e = e; this.todo = todo; this.done = done; }
     KEvalArg.prototype.invoke = function(fbr) { evalArgs(fbr, this.k, this.e, this.todo, cons(fbr.a, this.done)); };
     /* Built-in Combiners */
-    function Def() {}; function Vau() {}; function If() {}; function Eval() {}; function Begin() {}
+    function Def() {}; function Set() {}; function Vau() {}; function If() {}; function Eval() {}; function Begin() {}
     Def.prototype.combine = function(fbr, e, o) { fbr.k = new KDef(fbr.k, e, elt(o, 0)); fbr.prime(elt(o, 1), e); };
-    function KDef(k, e, name) { this.k = k; this.e = e; this.name = name; }
-    KDef.prototype.invoke = function(fbr) { fbr.k = this.k; bind(this.e, this.name, fbr.a); }
+    function KDef(k, e, p) { this.k = k; this.e = e; this.p = p; }
+    KDef.prototype.invoke = function(fbr) { fbr.k = this.k; bind(this.e, this.p, fbr.a); }
+    Set.prototype.combine = function(fbr, e, o) { fbr.k = new KSet(fbr.k, e, elt(o, 0)); fbr.prime(elt(o, 1), e); };
+    function KSet(k, e, p) { this.k = k; this.e = e; this.p = p; }
+    KSet.prototype.invoke = function(fbr) { fbr.k = this.k; set(this.e, this.p, fbr.a); }
     Vau.prototype.combine = function(fbr, e, o) { fbr.a = new Opv(elt(o, 0), elt(o, 1), elt(o, 2), e); };
     If.prototype.combine = function(fbr, e, o) { fbr.k = new KIf(fbr.k, e, elt(o, 1), elt(o, 2)); fbr.prime(elt(o, 0), e); };
     function KIf(k, e, xthen, xelse) { this.k = k; this.e = e; this.xthen = xthen; this.xelse = xelse; }
@@ -112,13 +115,21 @@ var wat = (function() {
     function car(cons) { assert(type_of(cons) === Cons.prototype.wat_type); return cons.car; }
     function cdr(cons) { assert(type_of(cons) === Cons.prototype.wat_type); return cons.cdr; }
     function elt(cons, i) { return (i === 0) ? car(cons) : elt(cdr(cons), i - 1); }
-    function Env(parent) { this.bindings = Object.create(parent ? parent.bindings : null); }
+    function Env(parent) { this.bindings = Object.create(parent ? parent.bindings : null); this.parent = parent; }
     function lookup(e, sym) { var val = e.bindings[sym.name]; return (val !== undefined) ? val : fail("unbound: " + sym.name); }
     function bind(e, lhs, rhs) { lhs.match(e, rhs); }
-    Sym.prototype.match = function(e, rhs) { assert(type_of(rhs)); e.bindings[this.name] = rhs; };
+    Sym.prototype.match = function(e, rhs) { e.bindings[this.name] = rhs; };
     Cons.prototype.match = function(e, rhs) { car(this).match(e, car(rhs)); cdr(this).match(e, cdr(rhs)); };
     Nil.prototype.match = function(e, rhs) { if (rhs !== NIL) fail("NIL expected"); };
     Ign.prototype.match = function(e, rhs) {};
+    function set(e, lhs, rhs) { lhs.set(e, rhs); }
+    Sym.prototype.set = function(e, rhs) {
+	if (Object.prototype.hasOwnProperty.call(e.bindings, this.name)) e.bindings[this.name] = rhs;
+	else if (e.parent) this.set(e.parent, rhs);
+	else fail("cannot update unbound variable: " + this.name); }
+    Cons.prototype.set = function(e, rhs) { car(this).set(e, car(rhs)); cdr(this).set(e, cdr(rhs)); };
+    Nil.prototype.set = function(e, rhs) { if (rhs !== NIL) fail("NIL expected"); };
+    Ign.prototype.set = function(e, rhs) {};
     /* Data */
     function Str(jsstr) { this.jsstr = jsstr; };
     function Num(jsnum) { this.jsnum = jsnum; };
@@ -140,7 +151,7 @@ var wat = (function() {
 	var untagger = jswrap(function(obj) { if (type_of(obj) === type) return obj.val; else fail("wrong type"); });
 	return cons(type, cons(tagger, cons(untagger, NIL))); }
     function init_types(types) { types.map(function (type) { type.prototype.wat_type = new Type(); }); }
-    init_types([KDone, KEval, KCombine, KApply, KEvalArg, KDef, KIf, KBegin, MKDone, MKPrompt, MKSeg,
+    init_types([KDone, KEval, KCombine, KApply, KEvalArg, KDef, KSet, KIf, KBegin, MKDone, MKPrompt, MKSeg,
 		Opv, Apv, Def, Vau, If, Eval, Begin, JSFun, JSCallback,
 		Sym, Cons, Env, Str, Num, Vector, Void, Ign, Nil, Bool, Type]);
     /* Utilities */
@@ -197,6 +208,7 @@ var wat = (function() {
     function mkenvcore() {
 	var e = new Env();
 	bind(e, new Sym("def"), new Def());
+	bind(e, new Sym("set!"), new Set());
 	bind(e, new Sym("if"), new If());
 	bind(e, new Sym("push-prompt*"), wrap(new PushPrompt()));
 	bind(e, new Sym("take-sub-cont*"), wrap(new TakeSubCont()));
@@ -251,9 +263,9 @@ var WAT_GLOBAL = this;
 // k: continuation
 // mk: metacontinuation
 // num: number
-// o: operand
+// o: operand tree
 // opv: operative combiner
-// p: parameter
+// p: parameter tree, or prompt
 // seg: metacontinuation segment
 // str: string
 // stx: syntax

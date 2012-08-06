@@ -28,7 +28,7 @@ function foldl(f, initial, seq) {
     return initial;
 }
 
-var memoize = true;
+var memoize = false;
 
 function ParseState(input, index) {
     this.input = input;

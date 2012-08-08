@@ -127,11 +127,6 @@ implemented in Wat itself (or it would be cumbersome to do so).
 Evaluates the right-hand side, matches the left-hand side against it
 in the current environment, and returns it.
 
-*** =set! <lhs> <rhs> → rhs= [operative]
-
-Similar to =def=, but the variables in the left-hand side must exist
-in the current environment or one of its parents.
-
 *** =begin . <exprs> → result= [operative]
 
 Evaluates expressions from left to right, returning the value of the

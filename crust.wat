@@ -107,6 +107,12 @@
 (def when (vau (test . body) env (eval (list if test (list* begin body) #void) env)))
 (def unless (vau (test . body) env (eval (list* when (list not test) body) env)))
 
+(def set!
+   (vau (env lhs rhs) denv
+      (eval (list def lhs
+                  (list (unwrap eval) rhs denv))
+            (eval env denv))))
+
 (def provide
   (vau (symbols . body) env
     (eval (list def symbols

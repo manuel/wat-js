@@ -266,6 +266,11 @@ Creates an applicative combiner, as in Scheme.
 
 Applies an applicative to an arguments list.
 
+*** =set! <env> <lhs> <rhs> → rhs= [operative]
+
+Updates the left-hand side bindings by matching it against the
+right-hand side in the given environment.
+
 *** =quote <form> → form= [operative]
 
 Returns form unevaluated.

@@ -194,7 +194,7 @@
   (define-syntax (run e) env (push-prompt* yield-prompt (eval (list lambda () e) env)))
   (define (yield v) (shift yield-prompt k (make-yield-record v k)))
   (define (dynamic-wind before-thunk thunk after-thunk)
-    (let-loop loop ((th (lambda (run-thunk))))
+    (let-loop loop ((th (lambda () (run-thunk))))
       (before-thunk)
       (let ((res (th)))
 	(after-thunk)

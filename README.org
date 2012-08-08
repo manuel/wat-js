@@ -21,3 +21,14 @@ Try Wat online with a rudimentary REPL at
 
 =cd= to =pc/= and execute =js repl.js= (requires the SpiderMonkey JS
 interpreter).
+
+** About =wat-js=
+
+=wat-js= is an inefficient but very small interpreter (~ 300 lines of
+JavaScript) for Wat written in JavaScript.  Its architecture is
+inspired by Tony Garnock-Jones' [[https://github.com/tonyg/js-vau][js-vau]].  For parsing, it uses Chris
+Double's [[https://github.com/doublec/jsparse][jsparse]].
+
+** Licensing
+
+=wat-js= is released under the [[LICENSE][MIT License]].

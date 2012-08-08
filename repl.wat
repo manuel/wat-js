@@ -4,10 +4,10 @@
 
 (define (repl)
   (define (loop)
-    (push-prompt *top-level*
-      (display (eval (read) env))
-      (loop)))
-  (loop))
+    (display (eval (read) env))
+    (loop))
+  (push-prompt *top-level*
+    (loop)))
 
 (display "Welcome to Wat -10.3")
 (repl)

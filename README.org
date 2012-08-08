@@ -29,8 +29,10 @@ JavaScript) for Wat written in JavaScript.  Its architecture is
 inspired by Tony Garnock-Jones' [[https://github.com/tonyg/js-vau][js-vau]].  For parsing, it uses Chris
 Double's [[https://github.com/doublec/jsparse][jsparse]].  The file =crust.wat= (re-)uses code from John
 Shutt's [[http://web.cs.wpi.edu/~jshutt/kernel.html][SINK]], Oleg Kiselyov, Chung-chieh Shan, and Amr Sabry's
-[[http://okmij.org/ftp/Computation/dynamic-binding.html][Delimited Dynamic Binding]], and Oleg Kiselyov's
-[[http://okmij.org/ftp/continuations/implementations.html#dynamic-wind][Delimited continuations do dynamic-wind]].
+[[http://okmij.org/ftp/Computation/dynamic-binding.html][Delimited Dynamic Binding]], and Oleg Kiselyov's [[http://okmij.org/ftp/continuations/implementations.html#dynamic-wind][Delimited continuations
+do dynamic-wind]].  The implementation of metacontinuations follows
+R. Kent Dybvig, Simon Peyton Jones, and Amr Sabry's [[http://www.cs.indiana.edu/~dyb/pubs/monadicDC.pdf][A Monadic
+Framework for Delimited Continuations]].
 
 ** Licensing
 

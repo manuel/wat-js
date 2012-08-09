@@ -233,12 +233,22 @@
   3)
 
 ;; Test to see whether continuations are properly tail-recursive.
+;; From "A Monadic Framework".
+;;
 ;; (define (tailtest)
 ;;   (let ((p (make-prompt)))
 ;;     (push-prompt p
 ;;       (take-sub-cont p sk
 ;;          (push-sub-cont sk (tailtest))))))
 ;; (tailtest)
+;;
+;; Another one, from Oleg's "Argument against call/cc".
+;;
+;; (define (leak-test1 identity-thunk)
+;;   (let-loop loop ((id (lambda (x) x)))
+;;     (loop (id (identity-thunk)))))
+;; (let ((p (make-prompt)))
+;;   (leak-test1 (lambda () (push-prompt p (shift p k k)))))
 
 ;; Error monad from Filinski's "Representing Monads".
 

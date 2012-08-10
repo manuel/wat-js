@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-10 19:27:57 CEST"/>
+<meta name="generated" content="2012-08-10 21:38:44 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -92,7 +92,7 @@ lang="en" xml:lang="en">
 <li><a href="#sec-6.1.3"><code>if &lt;test&gt; &lt;then&gt; &lt;else&gt; → result</code> [operative] </a></li>
 <li><a href="#sec-6.1.4"><code>cons &lt;car&gt; &lt;cdr&gt; → cons</code> [applicative] </a></li>
 <li><a href="#sec-6.1.5"><code>eq? &lt;a&gt; &lt;b&gt; → boolean</code> [applicative] </a></li>
-<li><a href="#sec-6.1.6">=idhash &lt;obj&gt; → number [applicative] </a></li>
+<li><a href="#sec-6.1.6"><code>idhash &lt;obj&gt; → number</code> [applicative] </a></li>
 </ul>
 </li>
 <li><a href="#sec-6.2">Vau Calculus </a>
@@ -118,19 +118,20 @@ lang="en" xml:lang="en">
 <li><a href="#sec-6.4.2"><code>type-of &lt;val&gt; → type</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-6.5">System </a>
+<li><a href="#sec-6.5">Numbers </a></li>
+<li><a href="#sec-6.6">System </a>
 <ul>
-<li><a href="#sec-6.5.1"><code>read → form</code> [applicative] </a></li>
-<li><a href="#sec-6.5.2"><code>display &lt;msg&gt; → msg</code> [applicative] </a></li>
-<li><a href="#sec-6.5.3"><code>fail &lt;reason&gt; → |</code> [applicative] </a></li>
+<li><a href="#sec-6.6.1"><code>read → form</code> [applicative] </a></li>
+<li><a href="#sec-6.6.2"><code>display &lt;msg&gt; → msg</code> [applicative] </a></li>
+<li><a href="#sec-6.6.3"><code>fail &lt;reason&gt; → |</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-6.6">Vectors </a>
+<li><a href="#sec-6.7">Vectors </a>
 <ul>
-<li><a href="#sec-6.6.1"><code>vector . &lt;elements&gt; → vector</code> [applicative] </a></li>
-<li><a href="#sec-6.6.2"><code>vector-ref &lt;vector&gt; &lt;index&gt; → element</code> [applicative] </a></li>
-<li><a href="#sec-6.6.3"><code>vector-set! &lt;vector&gt; &lt;index&gt; &lt;element&gt; → element</code> [applicative] </a></li>
-<li><a href="#sec-6.6.4"><code>vector-length &lt;vector&gt; → number</code> [applicative] </a></li>
+<li><a href="#sec-6.7.1"><code>vector . &lt;elements&gt; → vector</code> [applicative] </a></li>
+<li><a href="#sec-6.7.2"><code>vector-ref &lt;vector&gt; &lt;index&gt; → element</code> [applicative] </a></li>
+<li><a href="#sec-6.7.3"><code>vector-set! &lt;vector&gt; &lt;index&gt; &lt;element&gt; → element</code> [applicative] </a></li>
+<li><a href="#sec-6.7.4"><code>vector-length &lt;vector&gt; → number</code> [applicative] </a></li>
 </ul></li>
 </ul>
 </li>
@@ -483,7 +484,7 @@ Returns true if the two values are pointer identical, false otherwise.
 </div>
 
 <div id="outline-container-6.1.6" class="outline-4">
-<h4 id="sec-6.1.6">=idhash &lt;obj&gt; → number [applicative] </h4>
+<h4 id="sec-6.1.6"><code>idhash &lt;obj&gt; → number</code> [applicative] </h4>
 <div class="outline-text-4" id="text-6.1.6">
 
 
@@ -685,16 +686,25 @@ objects or tagged objects.
 </div>
 
 <div id="outline-container-6.5" class="outline-3">
-<h3 id="sec-6.5">System </h3>
+<h3 id="sec-6.5">Numbers </h3>
 <div class="outline-text-3" id="text-6.5">
+
+
+</div>
+
+</div>
+
+<div id="outline-container-6.6" class="outline-3">
+<h3 id="sec-6.6">System </h3>
+<div class="outline-text-3" id="text-6.6">
 
 
 
 </div>
 
-<div id="outline-container-6.5.1" class="outline-4">
-<h4 id="sec-6.5.1"><code>read → form</code> [applicative] </h4>
-<div class="outline-text-4" id="text-6.5.1">
+<div id="outline-container-6.6.1" class="outline-4">
+<h4 id="sec-6.6.1"><code>read → form</code> [applicative] </h4>
+<div class="outline-text-4" id="text-6.6.1">
 
 
 <p>
@@ -704,9 +714,9 @@ Reads a form from the console and returns it.
 
 </div>
 
-<div id="outline-container-6.5.2" class="outline-4">
-<h4 id="sec-6.5.2"><code>display &lt;msg&gt; → msg</code> [applicative] </h4>
-<div class="outline-text-4" id="text-6.5.2">
+<div id="outline-container-6.6.2" class="outline-4">
+<h4 id="sec-6.6.2"><code>display &lt;msg&gt; → msg</code> [applicative] </h4>
+<div class="outline-text-4" id="text-6.6.2">
 
 
 <p>
@@ -716,9 +726,9 @@ Prints a message string to the console and returns it.
 
 </div>
 
-<div id="outline-container-6.5.3" class="outline-4">
-<h4 id="sec-6.5.3"><code>fail &lt;reason&gt; → |</code> [applicative] </h4>
-<div class="outline-text-4" id="text-6.5.3">
+<div id="outline-container-6.6.3" class="outline-4">
+<h4 id="sec-6.6.3"><code>fail &lt;reason&gt; → |</code> [applicative] </h4>
+<div class="outline-text-4" id="text-6.6.3">
 
 
 <p>
@@ -729,17 +739,17 @@ Halts evaluation with an object describing the reason (typically an error).
 
 </div>
 
-<div id="outline-container-6.6" class="outline-3">
-<h3 id="sec-6.6">Vectors </h3>
-<div class="outline-text-3" id="text-6.6">
+<div id="outline-container-6.7" class="outline-3">
+<h3 id="sec-6.7">Vectors </h3>
+<div class="outline-text-3" id="text-6.7">
 
 
 
 </div>
 
-<div id="outline-container-6.6.1" class="outline-4">
-<h4 id="sec-6.6.1"><code>vector . &lt;elements&gt; → vector</code> [applicative] </h4>
-<div class="outline-text-4" id="text-6.6.1">
+<div id="outline-container-6.7.1" class="outline-4">
+<h4 id="sec-6.7.1"><code>vector . &lt;elements&gt; → vector</code> [applicative] </h4>
+<div class="outline-text-4" id="text-6.7.1">
 
 
 <p>
@@ -749,9 +759,9 @@ Creates a new vector with the given elements.
 
 </div>
 
-<div id="outline-container-6.6.2" class="outline-4">
-<h4 id="sec-6.6.2"><code>vector-ref &lt;vector&gt; &lt;index&gt; → element</code> [applicative] </h4>
-<div class="outline-text-4" id="text-6.6.2">
+<div id="outline-container-6.7.2" class="outline-4">
+<h4 id="sec-6.7.2"><code>vector-ref &lt;vector&gt; &lt;index&gt; → element</code> [applicative] </h4>
+<div class="outline-text-4" id="text-6.7.2">
 
 
 <p>
@@ -761,9 +771,9 @@ Returns the vector's element at the given index.
 
 </div>
 
-<div id="outline-container-6.6.3" class="outline-4">
-<h4 id="sec-6.6.3"><code>vector-set! &lt;vector&gt; &lt;index&gt; &lt;element&gt; → element</code> [applicative] </h4>
-<div class="outline-text-4" id="text-6.6.3">
+<div id="outline-container-6.7.3" class="outline-4">
+<h4 id="sec-6.7.3"><code>vector-set! &lt;vector&gt; &lt;index&gt; &lt;element&gt; → element</code> [applicative] </h4>
+<div class="outline-text-4" id="text-6.7.3">
 
 
 <p>
@@ -773,9 +783,9 @@ Updates the vector's element at the given index and returns it.
 
 </div>
 
-<div id="outline-container-6.6.4" class="outline-4">
-<h4 id="sec-6.6.4"><code>vector-length &lt;vector&gt; → number</code> [applicative] </h4>
-<div class="outline-text-4" id="text-6.6.4">
+<div id="outline-container-6.7.4" class="outline-4">
+<h4 id="sec-6.7.4"><code>vector-length &lt;vector&gt; → number</code> [applicative] </h4>
+<div class="outline-text-4" id="text-6.7.4">
 
 
 <p>
@@ -1210,7 +1220,7 @@ object.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-10 19:27:57 CEST</p>
+<p class="date"> Date: 2012-08-10 21:38:44 CEST</p>
 </div>
 </div>
 </body>

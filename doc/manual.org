@@ -149,7 +149,7 @@ Creates a new cons with the given car and cdr.
 
 Returns true if the two values are pointer identical, false otherwise.
 
-*** =idhash <obj> → number [applicative]
+*** =idhash <obj> → number= [applicative]
 
 Returns the system-determined identity hash-code of the object.
 
@@ -223,6 +223,8 @@ The untagger only untags objects created by the tagger.
 
 Returns an object's type.  Every object has a type, whether built-in
 objects or tagged objects.
+
+** Numbers
 
 ** System
 

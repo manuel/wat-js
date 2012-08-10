@@ -119,6 +119,13 @@ var wat = (function() {
     Cons.prototype.match = function(e, rhs) { car(this).match(e, car(rhs)); cdr(this).match(e, cdr(rhs)); };
     Nil.prototype.match = function(e, rhs) { if (rhs !== NIL) fail("NIL expected"); };
     Ign.prototype.match = function(e, rhs) {};
+    var IDHASH = 0; var IDHASH_MAX = Math.pow(2, 53);
+    function idhash(obj) { 
+        if (obj.wat_idhash === undefined) {
+            if (IDHASH >= IDHASH_MAX) IDHASH = 0;
+            obj.wat_idhash = IDHASH;
+            IDHASH++; }
+        return obj.wat_idhash; }
     /* Data */
     function Str(jsstr) { this.jsstr = jsstr; };
     function Num(jsnum) { this.jsnum = jsnum; };
@@ -211,6 +218,7 @@ var wat = (function() {
 	bind(e, new Sym("make-environment"), jswrap(function (parent) { return new Env(parent); }));
 	bind(e, new Sym("make-type"), jswrap(make_type));
 	bind(e, new Sym("type-of"), jswrap(type_of));
+	bind(e, new Sym("idhash"), jswrap(function(obj) { return new Num(idhash(obj)); }));
 	bind(e, new Sym("display"), jswrap(function(str) { console.log(str); return str; }));
 	bind(e, new Sym("read-from-string"), jswrap(function(str) { return array_to_list(parse(str.jsstr)); }));
 	bind(e, new Sym("fail"), jswrap(fail));

@@ -149,6 +149,10 @@ Creates a new cons with the given car and cdr.
 
 Returns true if the two values are pointer identical, false otherwise.
 
+*** =idhash <obj> → number [applicative]
+
+Returns the system-determined identity hash-code of the object.
+
 ** Vau Calculus
 *** =vau <ptree> <envp> <body> → operative= [operative]
 

@@ -118,6 +118,11 @@
     (assert (eq? #t (begin (eq? #t #t))))
     (assert (eq? #t (begin #f (eq? #t #t)))))
 
+;; IDHASH
+
+(provide ()
+  (assert (not (eq? (idhash "foo") (idhash "bar")))))
+
 ;; Delimited Control
 
 (define-syntax test-check

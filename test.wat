@@ -141,6 +141,24 @@
   (assert (pare? p))
   (assert (eq? #f (pare? 12))))
 
+;; BOUND?
+
+(provide ()
+  (assert (eq? #f (bound? (current-environment) 'x)))
+  (assert (eq? #f (bound? (current-environment) 'y)))
+  (define x 1)
+  (assert (eq? #t (bound? (current-environment) 'x)))
+  (assert (eq? #f (bound? (current-environment) 'y)))
+)
+
+;; NAMES
+
+(provide ()
+  (assert (eq? () (names (current-environment))))
+  (define x 1)
+  (assert (= 1 (eval (car (names (current-environment))) (current-environment))))
+)
+
 ;; Delimited Control
 
 (define-syntax test-check

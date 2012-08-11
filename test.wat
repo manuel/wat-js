@@ -138,7 +138,8 @@
   (set-kdr! p 4)
   (assert (= 3 (kar p)))
   (assert (= 4 (kdr p)))
-  (assert (pare? p)))
+  (assert (pare? p))
+  (assert (eq? #f (pare? 12))))
 
 ;; Delimited Control
 

@@ -149,10 +149,6 @@ Creates a new cons with the given car and cdr.
 
 Returns true if the two values are pointer identical, false otherwise.
 
-*** =idhash <obj> → number= [applicative]
-
-Returns the system-determined identity hash-code of the object.
-
 ** Vau Calculus
 *** =vau <ptree> <envp> <body> → operative= [operative]
 
@@ -224,8 +220,6 @@ The untagger only untags objects created by the tagger.
 Returns an object's type.  Every object has a type, whether built-in
 objects or tagged objects.
 
-** Numbers
-
 ** System
 
 *** =read → form= [applicative]
@@ -235,6 +229,11 @@ Reads a form from the console and returns it.
 *** =display <msg> → msg= [applicative]
 
 Prints a message string to the console and returns it.
+
+*** =idhash <obj> → number= [applicative]
+
+Returns the system-determined identity hash code of the object.  It is
+unlikely that two different objects have the same identity hash code.
 
 *** =fail <reason> → |= [applicative]
 
@@ -373,7 +372,7 @@ to somehow integrate it with Wat's.  It is urged to convert JavaScript
 objects to Wat objects as early as possible with =from-js=, and
 convert back from Wat objects to JavaScript objects as late as
 possible with =to-js=.  JavaScript objects may not implement all Wat
-object functionality, such as identity hash-codes.
+object functionality, such as identity hash codes.
 
 *** =js-global <string> → result= [applicative]
 

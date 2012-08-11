@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-10 21:38:44 CEST"/>
+<meta name="generated" content="2012-08-11 21:14:05 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -1099,6 +1099,14 @@ Retrieves the dynamically-bound value of a dynamic variable.
 <div class="outline-text-3" id="text-8.1">
 
 
+<p>
+The JavaScript object system is treacherous, so we don't even attempt
+to somehow integrate it with Wat's.  It is urged to convert JavaScript
+objects to Wat objects as early as possible with <code>from-js</code>, and
+convert back from Wat objects to JavaScript objects as late as
+possible with <code>to-js</code>.  JavaScript objects may not implement all Wat
+object functionality, such as identity hash-codes.
+</p>
 
 </div>
 
@@ -1220,7 +1228,7 @@ object.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-10 21:38:44 CEST</p>
+<p class="date"> Date: 2012-08-11 21:14:05 CEST</p>
 </div>
 </div>
 </body>

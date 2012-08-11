@@ -368,6 +368,13 @@ Retrieves the dynamically-bound value of a dynamic variable.
 * External
 ** JavaScript Bridge
 
+The JavaScript object system is treacherous, so we don't even attempt
+to somehow integrate it with Wat's.  It is urged to convert JavaScript
+objects to Wat objects as early as possible with =from-js=, and
+convert back from Wat objects to JavaScript objects as late as
+possible with =to-js=.  JavaScript objects may not implement all Wat
+object functionality, such as identity hash-codes.
+
 *** =js-global <string> → result= [applicative]
 
 Returns value of JavaScript global variable with given name.

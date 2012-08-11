@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-11 21:19:55 CEST"/>
+<meta name="generated" content="2012-08-11 22:31:08 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -145,6 +145,7 @@ lang="en" xml:lang="en">
 <li><a href="#sec-7.1.5"><code>define &lt;lhs&gt; &lt;rhs&gt; → result</code> [operative] </a></li>
 <li><a href="#sec-7.1.6"><code>define-syntax &lt;lhs&gt; &lt;rhs&gt; → result</code> [operative] </a></li>
 <li><a href="#sec-7.1.7"><code>provide &lt;names&gt; . &lt;exprs&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-7.1.8"><code>define-record-type &lt;name&gt; &lt;ctor&gt; &lt;pred&gt; . &lt;fields&gt; → type</code> [operative] </a></li>
 </ul>
 </li>
 <li><a href="#sec-7.2">Pairs and Lists </a>
@@ -931,6 +932,54 @@ quux → error: unbound variable
 
 
 </div>
+
+</div>
+
+<div id="outline-container-7.1.8" class="outline-4">
+<h4 id="sec-7.1.8"><code>define-record-type &lt;name&gt; &lt;ctor&gt; &lt;pred&gt; . &lt;fields&gt; → type</code> [operative] </h4>
+<div class="outline-text-4" id="text-7.1.8">
+
+
+<p>
+Defines a new record type with the given name.
+</p>
+<p>
+<code>ctor</code> is of the form <code>(ctor-name . ctor-args)</code>.  <code>ctor-name</code> is bound
+to a function that takes <code>ctor-args</code>, which must be record field
+names, as arguments, and creates a new instance of the record type
+with the given fields initialized to the arguments.
+</p>
+<p>
+<code>pred</code> is bound to a function of one argument that returns true iff an
+object is an instance of the record type.
+</p>
+<p>
+Each element of <code>fields</code> is of the form:
+</p>
+<ul>
+<li>
+<code>(name accessor-name)</code>, or
+
+</li>
+<li>
+<code>(name accessor-name modifier-name)</code>.
+
+
+</li>
+</ul>
+
+
+<pre class="example">(define-record-type pare
+  (kons kar kdr)
+  pare?
+  (kar kar set-kar!)
+  (kdr kdr set-kdr!))
+</pre>
+
+
+
+
+</div>
 </div>
 
 </div>
@@ -1219,7 +1268,7 @@ object.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-11 21:19:55 CEST</p>
+<p class="date"> Date: 2012-08-11 22:31:08 CEST</p>
 </div>
 </div>
 </body>

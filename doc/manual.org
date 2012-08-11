@@ -317,6 +317,32 @@ bar → 2
 quux → error: unbound variable
 #+END_EXAMPLE
 
+*** =define-record-type <name> <ctor> <pred> . <fields> → type= [operative]
+
+Defines a new record type with the given name.
+
+=ctor= is of the form =(ctor-name . ctor-args)=.  =ctor-name= is bound
+to a function that takes =ctor-args=, which must be record field
+names, as arguments, and creates a new instance of the record type
+with the given fields initialized to the arguments.
+
+=pred= is bound to a function of one argument that returns true iff an
+object is an instance of the record type.
+
+Each element of =fields= is of the form:
+
+ * =(name accessor-name)=, or
+
+ * =(name accessor-name modifier-name)=.
+
+#+BEGIN_EXAMPLE
+(define-record-type pare
+  (kons kar kdr)
+  pare?
+  (kar kar set-kar!)
+  (kdr kdr set-kdr!))
+#+END_EXAMPLE
+
 ** Pairs and Lists
 
 *** =car <pair> → value= [applicative]

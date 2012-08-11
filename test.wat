@@ -123,6 +123,23 @@
 (provide ()
   (assert (not (eq? (idhash "foo") (idhash "bar")))))
 
+;; DEFINE-RECORD-TYPE
+
+(provide ()
+  (define-record-type pare
+    (kons kar kdr)
+    pare?
+    (kar kar set-kar!)
+    (kdr kdr set-kdr!))
+  (define p (kons 1 2))
+  (assert (= 1 (kar p)))
+  (assert (= 2 (kdr p)))
+  (set-kar! p 3)
+  (set-kdr! p 4)
+  (assert (= 3 (kar p)))
+  (assert (= 4 (kdr p)))
+  (assert (pare? p)))
+
 ;; Delimited Control
 
 (define-syntax test-check

@@ -55,6 +55,12 @@
 (def cddr (lambda ((#ign . (#ign . x))) x))
 
 (def map (lambda (f l) (if (null? l) () (cons (f (car l)) (map f (cdr l))))))
+(def map2 (lambda (f l1 l2)
+            (if (null? l1)
+                ()
+                (if (null? l2)
+                    ()
+                    (cons (f (car l1) (car l2)) (map2 f (cdr l1) (cdr l2)))))))
 
 (def for-each (lambda (f l) (if (null? l) #void (begin (f (car l)) (for-each f (cdr l))))))
 
@@ -212,4 +218,29 @@
 		    (loop (k #f))))))
 )
 
-
+(define-syntax (define-record-type name (ctor-name . ctor-field-names) pred-name . field-specs) env
+  (let* (((type tagger untagger) (make-type))
+         (ctor (lambda ctor-args
+                 (let ((fields-dict (make-environment)))
+                   (map2 (lambda (field-name arg)
+                           (eval (list def field-name arg) fields-dict))
+                         ctor-field-names
+                         ctor-args)
+                   (tagger fields-dict))))
+         (pred (lambda (obj) (eq? (type-of obj) type))))
+    (eval (list def (list name ctor-name pred-name) (list list type ctor pred)) env)
+    (map (lambda (field-spec)
+           (let (((name accessor-name . opt) field-spec))
+             (eval (list def accessor-name (lambda (obj)
+                                             (let ((fields-dict (untagger obj)))
+                                               (eval name fields-dict))))
+                   env)
+             (unless (null? opt)
+               (let (((modifier-name) opt))
+                 (eval (list def modifier-name (lambda (obj new-val)
+                                                 (let ((fields-dict (untagger obj)))
+                                                   (eval (list def name new-val) fields-dict))))
+                       env)))))
+         field-specs)
+    type))
+    

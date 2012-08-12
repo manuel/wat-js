@@ -10,23 +10,19 @@
     html, body, input {
     padding: 0;
     margin: 0;
-    background-color: #000;
-    color: #ff0;
     font-family: monospace, sans;
     }
     #input {
     border: 0;
-    background-color: #333;
     margin: .5em 0;
     padding: .5em;
     width: 100%;
+    background-color: #ddd;
     }
     #output {
     padding: .5em .5em 0 .5em;
     }
     h1 {
-    background-color: #ff0;
-    color: #000;
     margin: 0;
     }
     a:link, a:visited, a:hover {
@@ -35,7 +31,7 @@
   </style>
 </head>
 <body onload="watbrowser.init()">
-<a style="float: right;" href="../doc/manual.html">Language Manual</a>
+<span style="float: right;"><a href="../doc/manual.html">Language Manual</a></span>
 <h1>(<a href="https://github.com/manuel/wat-js">Wat</a>)</h1>
 <div id="output"></div>
 <input type="text" id="input">

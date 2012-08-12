@@ -163,8 +163,10 @@
 (def define-syntax
   (vau (lhs . rhs) env
     (if (pair? lhs)
-	(let (((name . args) lhs))
-	  (eval (list def name (list* vau args (car rhs) (cdr rhs))) env))
+	(let* (((name . args) lhs)
+               (opv (eval (list* vau args (car rhs) (cdr rhs)) env)))
+	  (eval (list def name opv) env)
+          (set-label! opv (symbol->string name)))
 	(eval (list* def lhs rhs) env))))
 
 (define-syntax (let-loop a . b) env
@@ -361,8 +363,8 @@
   (define-method (->string (obj Symbol)) (symbol->string obj))
   (define-method (->string (obj String)) (str-print obj))
   (define-method (->string (obj Number)) (number->string obj))
-  (define-method (->string (obj Applicative)) (label obj))
-  (define-method (->string (obj Operative)) "#[Operative]")
+  (define-method (->string (obj Applicative)) (strcat "#[Applicative " (label obj) "]"))
+  (define-method (->string (obj Operative)) (strcat "#[Operative " (label obj) "]"))
   (define-method (->string (obj Environment)) "#[Environment]")
   (define-method (->string (obj Vector)) "#[Vector]")
 )

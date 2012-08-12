@@ -103,10 +103,6 @@ var wat = (function() {
     function js_function(jsfun) { return jswrap(jsfun); }
     function js_method(name) { return jswrap(function(obj) {
 	var args = Array.prototype.slice.call(arguments, 1); return obj[name.jsstr].apply(obj, args); }); }
-    function JSCallback() {}
-    JSCallback.prototype.combine = function(fbr, e, o) {
-	fbr.a = function() { var args = array_to_list(Array.prototype.slice.call(arguments));
-			     fbr.prime(cons(elt(o, 0), args), e); fbr.run(); }; };
     function to_js(obj) { return (obj && obj.to_js) ? obj.to_js() : obj; }
     Str.prototype.to_js = function() { return this.jsstr; }
     Num.prototype.to_js = function() { return this.jsnum; }
@@ -183,7 +179,7 @@ var wat = (function() {
 	return cons(type, cons(tagger, cons(untagger, NIL))); }
     function init_types(types) { types.map(function (type) { type.prototype.wat_type = new Type(); }); }
     init_types([KDone, KEval, KCombine, KApply, KEvalArg, KDef, KIf, KBegin, MKDone, MKPrompt, MKSeg,
-		Opv, Apv, Def, Vau, If, Eval, Begin, Stacktrace, JSFun, JSCallback, Pollset, PollsetWait, KPollsetWait,
+		Opv, Apv, Def, Vau, If, Eval, Begin, Stacktrace, JSFun, Pollset, PollsetWait, KPollsetWait,
 		Sym, Cons, Env, Str, Num, Vector, Void, Ign, Nil, Bool, Type]);
     /* Utilities */
     function assert(b) { if (!b) fail("assertion failed"); }
@@ -281,7 +277,6 @@ var wat = (function() {
 	bind(e, new Sym("js-set-prop!"), jswrap(js_set_prop));
 	bind(e, new Sym("js-function"), jswrap(js_function));
 	bind(e, new Sym("js-method"), jswrap(js_method));
-	bind(e, new Sym("js-callback"), wrap(new JSCallback()));
 	bind(e, new Sym("to-js"), jswrap(to_js));
 	bind(e, new Sym("from-js"), jswrap(from_js));
 	return e;

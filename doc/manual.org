@@ -236,14 +236,6 @@ The untagger only untags objects created by the tagger.
 Returns an object's type.  Every object has a type, whether built-in
 objects or tagged objects.
 
-*** =type-name <type> → string= [applicative]
-
-Returns the name of a type.
-
-*** =set-type-name! <type> <string> → string= [applicative]
-
-Updates the name of a type.
-
 ** System
 
 *** =read → form= [applicative]
@@ -253,10 +245,6 @@ Reads a form from the console and returns it.
 *** =display <msg> → msg= [applicative]
 
 Prints a message string to the console and returns it.
-
-*** =stacktrace <depth> → list= [applicative]
-
-Returns a list of stack frames, up to the given depth.
 
 *** =fail <reason> → |= [applicative]
 
@@ -494,14 +482,17 @@ Performs expressions with the dynamic variable bound to the value.
 
 Retrieves the dynamically-bound value of a dynamic variable.
 
-* External
+* Danger Zone
+
+This is the place for all kinds of tasteless things.
+
 ** JavaScript Bridge
 
 The JavaScript object system is treacherous, so we don't even attempt
 to somehow integrate it with Wat's.  It is urged to convert JavaScript
 objects to Wat objects as early as possible with =from-js=, and
-convert back from Wat objects to JavaScript objects as late as
 possible with =to-js=.  JavaScript objects may not implement all Wat
+convert back from Wat objects to JavaScript objects as late as
 object functionality, such as identity hash codes.
 
 *** =js-global <string> → result= [applicative]
@@ -563,3 +554,17 @@ remove it from the queue.
 
 If the poll set's queue is empty, block the fiber until an event
 occurs.
+
+** Debugging Interface
+
+*** =stacktrace <depth> → list= [applicative]
+
+Returns a list of stack frames, up to the given depth.
+
+*** =type-name <type> → string= [applicative]
+
+Returns the name of a type.
+
+*** =set-type-name! <type> <string> → string= [applicative]
+
+Updates the name of a type.

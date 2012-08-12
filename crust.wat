@@ -249,6 +249,7 @@
                    (tagger fields-dict))))
          (pred (lambda (obj) (eq? (type-of obj) type))))
     (eval (list def (list name ctor-name pred-name) (list list type ctor pred)) env)
+    (set-type-name! type (symbol->string name))
     (map (lambda (field-spec)
            (let (((name accessor-name . opt) field-spec))
              (eval (list def accessor-name (lambda (obj)
@@ -264,8 +265,8 @@
          field-specs)
     type))
 
-(provide (make-hashtable hashtable-put! hashtable-get make-identity-hashtable)
-  (define-record-type hashtable
+(provide (Hashtable hashtable? make-hashtable hashtable-put! hashtable-get make-identity-hashtable)
+  (define-record-type Hashtable
     (construct-hashtable hashfn eqfn env)
     hashtable?
     (hashfn hashfn)
@@ -339,7 +340,7 @@
 )
 
 (provide (->string)
-  (define-generic (->string obj) "[Unprintable Object]")
+  (define-generic (->string obj) (strcat "#[" (type-name (type-of obj)) "]"))
   (define-method (->string (obj Void)) "#void")
   (define-method (->string (obj Ign)) "#ign")
   (define-method (->string (obj Boolean)) (if obj "#t" "#f"))

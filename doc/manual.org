@@ -236,6 +236,14 @@ The untagger only untags objects created by the tagger.
 Returns an object's type.  Every object has a type, whether built-in
 objects or tagged objects.
 
+*** =type-name <type> → string= [applicative]
+
+Returns the name of a type.
+
+*** =set-type-name! <type> <string> → string= [applicative]
+
+Updates the name of a type.
+
 ** System
 
 *** =read → form= [applicative]

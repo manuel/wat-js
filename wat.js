@@ -90,7 +90,7 @@ var wat = (function() {
     function ktrace(k, mk, depth) {
         if (depth === 0) return NIL;
         else if (k instanceof KDone) return mk.trace_mk(depth);
-        else return cons(k, ktrace(k.k, mk, depth)); }
+        else return cons(k, ktrace(k.k, mk, depth - 1)); }
     /* JS Bridge */
     function JSFun(jsfun) { this.jsfun = jsfun; }
     JSFun.prototype.combine = function(fbr, e, o) { fbr.a = this.jsfun.apply(null, list_to_array(o)); };

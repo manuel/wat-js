@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-12 03:52:46 CEST"/>
+<meta name="generated" content="2012-08-12 14:42:25 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -102,8 +102,7 @@ lang="en" xml:lang="en">
 <li><a href="#sec-6.2.3"><code>wrap &lt;cmb&gt; → applicative</code> [applicative] </a></li>
 <li><a href="#sec-6.2.4"><code>unwrap &lt;cmb&gt; → combiner</code> [applicative] </a></li>
 <li><a href="#sec-6.2.5"><code>make-environment [&lt;parent&gt;] → environment</code> [applicative] </a></li>
-<li><a href="#sec-6.2.6"><code>names &lt;env&gt; → list</code> [applicative] </a></li>
-<li><a href="#sec-6.2.7"><code>bound? &lt;env&gt; &lt;sym&gt; → boolean</code> [applicative] </a></li>
+<li><a href="#sec-6.2.6"><code>bound? &lt;sym&gt; &lt;env&gt; → boolean</code> [applicative] </a></li>
 </ul>
 </li>
 <li><a href="#sec-6.3">Control </a>
@@ -590,21 +589,8 @@ Creates a new empty environment with the given optional parent.
 </div>
 
 <div id="outline-container-6.2.6" class="outline-4">
-<h4 id="sec-6.2.6"><code>names &lt;env&gt; → list</code> [applicative] </h4>
+<h4 id="sec-6.2.6"><code>bound? &lt;sym&gt; &lt;env&gt; → boolean</code> [applicative] </h4>
 <div class="outline-text-4" id="text-6.2.6">
-
-
-<p>
-Returns a list of the symbols bound in the environment.  Does not
-include symbols bound in ancestor environments.
-</p>
-</div>
-
-</div>
-
-<div id="outline-container-6.2.7" class="outline-4">
-<h4 id="sec-6.2.7"><code>bound? &lt;env&gt; &lt;sym&gt; → boolean</code> [applicative] </h4>
-<div class="outline-text-4" id="text-6.2.7">
 
 
 <p>
@@ -1441,7 +1427,7 @@ object.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-12 03:52:46 CEST</p>
+<p class="date"> Date: 2012-08-12 14:42:25 CEST</p>
 </div>
 </div>
 </body>

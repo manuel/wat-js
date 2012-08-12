@@ -144,19 +144,11 @@
 ;; BOUND?
 
 (provide ()
-  (assert (eq? #f (bound? (current-environment) 'x)))
-  (assert (eq? #f (bound? (current-environment) 'y)))
+  (assert (eq? #f (bound? 'x (current-environment))))
+  (assert (eq? #f (bound? 'y (current-environment))))
   (define x 1)
-  (assert (eq? #t (bound? (current-environment) 'x)))
-  (assert (eq? #f (bound? (current-environment) 'y)))
-)
-
-;; NAMES
-
-(provide ()
-  (assert (eq? () (names (current-environment))))
-  (define x 1)
-  (assert (= 1 (eval (car (names (current-environment))) (current-environment))))
+  (assert (eq? #t (bound? 'x (current-environment))))
+  (assert (eq? #f (bound? 'y (current-environment))))
 )
 
 ;; Hashtables

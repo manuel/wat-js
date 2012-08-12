@@ -119,8 +119,7 @@ var wat = (function() {
     Cons.prototype.match = function(e, rhs) { car(this).match(e, car(rhs)); cdr(this).match(e, cdr(rhs)); };
     Nil.prototype.match = function(e, rhs) { if (rhs !== NIL) fail("NIL expected"); };
     Ign.prototype.match = function(e, rhs) {};
-    function bound(e, sym) { return (e.bindings[sym.name] !== undefined); }
-    function names(e) { return Object.keys(e.bindings); }
+    function bound(sym, e) { return (e.bindings[sym.name] !== undefined); }
     var IDHASH = 0; var IDHASH_MAX = Math.pow(2, 53);
     function idhash(obj) { 
         if (obj.wat_idhash === undefined) {
@@ -222,9 +221,7 @@ var wat = (function() {
 	bind(e, new Sym("eq?"), jswrap(function (a, b) { return (a === b) ? T : F }));
 	bind(e, new Sym("cons"), jswrap(cons));
 	bind(e, new Sym("make-environment"), jswrap(function (parent) { return new Env(parent); }));
-        bind(e, new Sym("bound?"), jswrap(function (e, sym) { return (bound(e, sym)) ? T : F }));
-        bind(e, new Sym("names"), jswrap(function (e) {
-            return array_to_list(names(e).map(function(key) { return new Sym(key); })); }));
+        bind(e, new Sym("bound?"), jswrap(function (sym, e) { return (bound(sym, e)) ? T : F }));
 	bind(e, new Sym("make-type"), jswrap(make_type));
 	bind(e, new Sym("type-of"), jswrap(type_of));
 	bind(e, new Sym("idhash"), jswrap(function(obj) { return new Num(idhash(obj)); }));

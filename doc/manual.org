@@ -179,12 +179,7 @@ Returns the underlying combiner of an applicative.
 
 Creates a new empty environment with the given optional parent.
 
-*** =names <env> → list= [applicative]
-
-Returns a list of the symbols bound in the environment.  Does not
-include symbols bound in ancestor environments.
-
-*** =bound? <env> <sym> → boolean= [applicative]
+*** =bound? <sym> <env> → boolean= [applicative]
 
 Returns true if a symbol is bound in the environment, false otherwise.
 

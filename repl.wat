@@ -11,5 +11,5 @@
   (push-prompt *top-level*
     (loop)))
 
-(display "Welcome to Wat -10.3")
+(display "** Lisp Ready **")
 (repl)

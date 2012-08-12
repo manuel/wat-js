@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-12 21:36:41 CEST"/>
+<meta name="generated" content="2012-08-12 21:52:50 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -310,14 +310,10 @@ The <code>#t</code> constant represents logical truth and the <code>#f</code>
 constant represents logical falsity.
 
 </dd>
-<dt>Number</dt><dd>
-Wat currently only supports IEEE 754 floating-point
-numbers.
-
-</dd>
-<dt>String</dt><dd>
-Wat currently only supports UTF-16 encoded Unicode
-strings.
+<dt>Nil and Pair</dt><dd>
+Lists are built from immutable pairs and nil.
+Notably, lists often contain not only symbols and literals (as is
+usual in Lisp) but also first-class objects such as combiners.
 
 </dd>
 <dt>Symbol</dt><dd>
@@ -326,10 +322,27 @@ It is not guaranteed that symbols with the same name are pointer
 identical.
 
 </dd>
-<dt>List</dt><dd>
-Lists are built from immutable conses and nil.  Notably,
-lists often contain not only symbols and literals (as is usual in
-Lisp) but also first-class objects such as combiners.
+<dt>String</dt><dd>
+Wat currently only supports UTF-16 encoded Unicode
+strings.
+
+</dd>
+<dt>Number</dt><dd>
+Wat currently only supports IEEE 754 floating-point
+numbers.
+
+</dd>
+<dt>Vector</dt><dd>
+An array of objects.
+
+</dd>
+<dt>Operative</dt><dd>
+A combiner that operates directly on its operands.
+
+</dd>
+<dt>Applicative</dt><dd>
+A combiner that evaluates its operands, yielding an
+arguments list, which it passes to an underlying combiner.
 
 </dd>
 <dt>Environment</dt><dd>
@@ -338,22 +351,14 @@ a parent environment in which symbols are looked up if they are not
 found in this environment.
 
 </dd>
-<dt>Operative (combiner)</dt><dd>
-A combiner that operates directly on its operands.
+<dt>Type</dt><dd>
+A first-class type tag or just type is associated with
+every object.
 
 </dd>
-<dt>Applicative (combiner)</dt><dd>
-A combiner that evaluates its operands, yielding an
-arguments list, which it passes to an underlying combiner.
-
-</dd>
-<dt>Type (tag)</dt><dd>
-A first-class type tag or just type is associated
-with every object.
-
-</dd>
-<dt>Vector</dt><dd>
-An array of objects.
+<dt>Continuation</dt><dd>
+Continuations are first-class objects, not wrapped
+in an applicative.
 
 </dd>
 </dl>
@@ -1636,7 +1641,7 @@ created them.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-12 21:36:41 CEST</p>
+<p class="date"> Date: 2012-08-12 21:52:50 CEST</p>
 </div>
 </div>
 </body>

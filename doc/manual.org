@@ -51,33 +51,36 @@ Wat identifiers are case-sensitive.
  * Boolean :: The =#t= constant represents logical truth and the =#f=
    constant represents logical falsity.
 
- * Number :: Wat currently only supports IEEE 754 floating-point
-   numbers.
-
- * String :: Wat currently only supports UTF-16 encoded Unicode
-   strings.
+ * Nil and Pair :: Lists are built from immutable pairs and nil.
+   Notably, lists often contain not only symbols and literals (as is
+   usual in Lisp) but also first-class objects such as combiners.
 
  * Symbol :: Symbols are used as identifiers for variable bindings.
    It is not guaranteed that symbols with the same name are pointer
    identical.
 
- * List :: Lists are built from immutable conses and nil.  Notably,
-   lists often contain not only symbols and literals (as is usual in
-   Lisp) but also first-class objects such as combiners.
+ * String :: Wat currently only supports UTF-16 encoded Unicode
+   strings.
+
+ * Number :: Wat currently only supports IEEE 754 floating-point
+   numbers.
+
+ * Vector :: An array of objects.
+
+ * Operative :: A combiner that operates directly on its operands.
+
+ * Applicative :: A combiner that evaluates its operands, yielding an
+   arguments list, which it passes to an underlying combiner.
 
  * Environment :: An environment maps symbols to values.  It may have
    a parent environment in which symbols are looked up if they are not
    found in this environment.
 
- * Operative (combiner) :: A combiner that operates directly on its operands.
+ * Type :: A first-class type tag or just type is associated with
+   every object.
 
- * Applicative (combiner) :: A combiner that evaluates its operands, yielding an
-   arguments list, which it passes to an underlying combiner.
-
- * Type (tag) :: A first-class type tag or just type is associated
-   with every object.
-
- * Vector :: An array of objects.
+ * Continuation :: Continuations are first-class objects, not wrapped
+   in an applicative.
 
 * Pattern Matching
 

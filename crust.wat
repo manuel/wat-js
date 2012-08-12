@@ -339,6 +339,8 @@
   (define-generic (hash-code obj) (identity-hash-code obj))
 )
 
+(define (make-generic-hashtable) (make-hashtable hash-code =))
+
 (provide (->string)
   (define-generic (->string obj) (strcat "#[" (type-name (type-of obj)) "]"))
   (define-method (->string (obj Void)) "#void")

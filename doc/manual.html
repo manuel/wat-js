@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-12 15:19:02 CEST"/>
+<meta name="generated" content="2012-08-12 15:23:01 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -501,6 +501,13 @@ Creates a new cons with the given car and cdr.
 
 <p>
 Returns true if the two values are pointer identical, false otherwise.
+</p>
+<p>
+Note: it is advised against using <code>eq?</code> except in special
+circumstances.  Because not even symbols or small numbers that "are
+the same" are guaranteed to be <code>eq?</code>, it can be confusing.  The
+generic equality predicate <code>=</code> should almost always be
+used instead.
 </p>
 </div>
 
@@ -1493,7 +1500,7 @@ object.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-12 15:19:02 CEST</p>
+<p class="date"> Date: 2012-08-12 15:23:01 CEST</p>
 </div>
 </div>
 </body>

@@ -149,6 +149,12 @@ Creates a new cons with the given car and cdr.
 
 Returns true if the two values are pointer identical, false otherwise.
 
+Note: it is advised against using =eq?= except in special
+circumstances.  Because not even symbols or small numbers that "are
+the same" are guaranteed to be =eq?=, it can be confusing.  The
+generic equality predicate @<code>=@</code> should almost always be
+used instead.
+
 *** =identity-hash-code <obj> → number= [applicative]
 
 Returns the system-determined identity hash code of the object, which

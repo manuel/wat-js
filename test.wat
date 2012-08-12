@@ -166,6 +166,7 @@
   (define key "key")
   (hashtable-put! ht key 12)
   (assert (= 12 (hashtable-get ht key)))
+  (assert (= 14 (hashtable-get ht "another-key" 14)))
 )
 
 ;; Conversions
@@ -176,6 +177,13 @@
 
 (assert (= (->number "12") 12))
 (assert (= (->number (string->symbol "12")) 12))
+
+(provide ()
+  (define-generic (foo obj x) 12)
+  (assert (= (foo #void #void) 12))
+  (define-method (foo (self String) x) (+ x 5))
+  (assert (= (foo #void #void) 12))
+  (assert (= (foo "blah" (+ 1 1)) 7)))
 
 ;; Delimited Control
 

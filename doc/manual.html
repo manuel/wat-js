@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-12 02:37:47 CEST"/>
+<meta name="generated" content="2012-08-12 03:52:46 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -176,8 +176,8 @@ lang="en" xml:lang="en">
 </li>
 <li><a href="#sec-7.4">Generic Functions </a>
 <ul>
-<li><a href="#sec-7.4.1"><code>define-generic (&lt;name&gt; . &lt;args&gt;) → generic</code> </a></li>
-<li><a href="#sec-7.4.2"><code>define-method (&lt;name&gt; (&lt;self&gt; &lt;type&gt;) . &lt;args&gt;) . &lt;body&gt; → method</code> </a></li>
+<li><a href="#sec-7.4.1"><code>define-generic (&lt;name&gt; . &lt;args&gt;) . [&lt;body&gt;]→ generic</code> [operative] </a></li>
+<li><a href="#sec-7.4.2"><code>define-method (&lt;name&gt; (&lt;self&gt; &lt;type&gt;) . &lt;args&gt;) . &lt;body&gt; → method</code> [operative] </a></li>
 </ul>
 </li>
 <li><a href="#sec-7.5">Dynamic Binding </a>
@@ -1209,19 +1209,21 @@ key is unbound.
 </div>
 
 <div id="outline-container-7.4.1" class="outline-4">
-<h4 id="sec-7.4.1"><code>define-generic (&lt;name&gt; . &lt;args&gt;) → generic</code> </h4>
+<h4 id="sec-7.4.1"><code>define-generic (&lt;name&gt; . &lt;args&gt;) . [&lt;body&gt;]→ generic</code> [operative] </h4>
 <div class="outline-text-4" id="text-7.4.1">
 
 
 <p>
-Defines a new generic function.
+Defines a new generic function.  If the optional body expressions are
+supplied, a default method is installed that will be used when no
+type-specific method is found.
 </p>
 </div>
 
 </div>
 
 <div id="outline-container-7.4.2" class="outline-4">
-<h4 id="sec-7.4.2"><code>define-method (&lt;name&gt; (&lt;self&gt; &lt;type&gt;) . &lt;args&gt;) . &lt;body&gt; → method</code> </h4>
+<h4 id="sec-7.4.2"><code>define-method (&lt;name&gt; (&lt;self&gt; &lt;type&gt;) . &lt;args&gt;) . &lt;body&gt; → method</code> [operative] </h4>
 <div class="outline-text-4" id="text-7.4.2">
 
 
@@ -1439,7 +1441,7 @@ object.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-12 02:37:47 CEST</p>
+<p class="date"> Date: 2012-08-12 03:52:46 CEST</p>
 </div>
 </div>
 </body>

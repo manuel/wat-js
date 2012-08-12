@@ -408,11 +408,13 @@ key is unbound.
 
 ** Generic Functions
 
-*** =define-generic (<name> . <args>) → generic=
+*** =define-generic (<name> . <args>) . [<body>]→ generic= [operative]
 
-Defines a new generic function.
+Defines a new generic function.  If the optional body expressions are
+supplied, a default method is installed that will be used when no
+type-specific method is found.
 
-*** =define-method (<name> (<self> <type>) . <args>) . <body> → method=
+*** =define-method (<name> (<self> <type>) . <args>) . <body> → method= [operative]
 
 Adds a method to a generic function.
 

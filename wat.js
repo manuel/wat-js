@@ -258,7 +258,8 @@ var wat = (function() {
 	bind(e, new Sym("num="), jswrap(function(num1, num2) { return num_eql(num1, num2) ? T : F }));
 	bind(e, new Sym("num+"), jswrap(num_add));
         bind(e, new Sym("str="), jswrap(function(str1, str2) { return str_eql(str1, str2) ? T : F }));
-        bind(e, new Sym("strcat"), jswrap(function() { return str_cat.call(null, Array.prototype.slice.call(arguments)); }));
+        bind(e, new Sym("strcat"), jswrap(function() {
+            return new Str(str_cat.call(null, Array.prototype.slice.call(arguments))); }));
         bind(e, new Sym("str-print"), jswrap(function(str) { return new Str(str_print(str)); }));
 	bind(e, new Sym("string->symbol"), jswrap(str_to_sym));
 	bind(e, new Sym("symbol->string"), jswrap(sym_to_str));

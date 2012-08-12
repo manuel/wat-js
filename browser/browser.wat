@@ -24,7 +24,7 @@
 
 (define (read-input)
   (let ((res (list* 'begin (read-from-string (from-js (js-prop (getElementById "input") "value"))))))
-    (display (from-js (js-prop (getElementById "input") "value")))
+    (display (strcat "USER> " (from-js (js-prop (getElementById "input") "value"))))
     (js-set-prop! (getElementById "input") "value" (to-js ""))
     res))
 

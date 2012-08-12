@@ -5,40 +5,40 @@ var wat = (function() {
     Fbr.prototype.run = function() {
         try { while(this.k !== null) this.k.invoke(this); return this.a; }
         catch(exc) { if (exc !== "suspend") throw exc; } };
-    Fbr.prototype.prime = function(x, e) { this.a = x; this.k = new KEval(this.k, e); };
+    Fbr.prototype.prime = function(x, e) { this.a = x; this.k = new KEval(this.k, e, x); };
     /* Form Evaluation */
-    function KEval(k, e) { this.k = k; this.e = e; }
+    function KEval(k, e, dbg) { this.k = k; this.e = e; this.dbg = dbg; }
     KEval.prototype.invoke = function(fbr) { (fbr.a && fbr.a.evaluate) ? fbr.a.evaluate(fbr, this.k, this.e) : fbr.k = this.k; };
     Sym.prototype.evaluate = function(fbr, k, e) { fbr.k = k; fbr.a = lookup(e, this); };
-    Cons.prototype.evaluate = function(fbr, k, e) { fbr.k = new KCombine(k, e, cdr(this)); fbr.prime(car(this), e); };
+    Cons.prototype.evaluate = function(fbr, k, e) { fbr.k = new KCombine(k, e, cdr(this), this); fbr.prime(car(this), e); };
     /* Operative & Applicative Combiners */
-    function KCombine(k, e, o) { this.k = k; this.e = e; this.o = o; }
+    function KCombine(k, e, o, dbg) { this.k = k; this.e = e; this.o = o; this.dbg = dbg; }
     KCombine.prototype.invoke = function(fbr) { fbr.k = this.k; fbr.a.combine(fbr, this.e, this.o); };
     function Opv(p, ep, x, e) { this.p = p; this.ep = ep; this.x = x; this.e = e; }
     function Apv(cmb) { this.cmb = cmb; }; function wrap(cmb) { return new Apv(cmb); }; function unwrap(apv) { return apv.cmb; }
     Opv.prototype.combine = function(fbr, e, o) {
 	var xe = new Env(this.e); bind(xe, this.p, o); bind(xe, this.ep, e); fbr.prime(this.x, xe); };
-    Apv.prototype.combine = function(fbr, e, o) { evalArgs(fbr, new KApply(fbr.k, e, this.cmb), e, o, NIL); };
-    function KApply(k, e, cmb) { this.k = k; this.e = e; this.cmb = cmb; }
+    Apv.prototype.combine = function(fbr, e, o) { evalArgs(fbr, new KApply(fbr.k, e, this.cmb, o), e, o, NIL); };
+    function KApply(k, e, cmb, dbg) { this.k = k; this.e = e; this.cmb = cmb; this.dbg = dbg; }
     KApply.prototype.invoke = function(fbr) { fbr.k = this.k; fbr.prime(cons(this.cmb, fbr.a), this.e); };
     function evalArgs(fbr, k, e, todo, done) {
 	if (todo === NIL) { fbr.a = reverse_list(done); fbr.k = k; }
-	else { fbr.k = new KEvalArg(k, e, cdr(todo), done); fbr.prime(car(todo), e); } }
-    function KEvalArg(k, e, todo, done) { this.k = k; this.e = e; this.todo = todo; this.done = done; }
+	else { fbr.k = new KEvalArg(k, e, cdr(todo), done, car(todo)); fbr.prime(car(todo), e); } }
+    function KEvalArg(k, e, todo, done, dbg) { this.k = k; this.e = e; this.todo = todo; this.done = done; this.dbg = dbg; }
     KEvalArg.prototype.invoke = function(fbr) { evalArgs(fbr, this.k, this.e, this.todo, cons(fbr.a, this.done)); };
     /* Built-in Combiners */
     function Def() {}; function Vau() {}; function If() {}; function Eval() {}; function Begin() {}
-    Def.prototype.combine = function(fbr, e, o) { fbr.k = new KDef(fbr.k, e, elt(o, 0)); fbr.prime(elt(o, 1), e); };
-    function KDef(k, e, name) { this.k = k; this.e = e; this.name = name; }
+    Def.prototype.combine = function(fbr, e, o) { fbr.k = new KDef(fbr.k, e, elt(o, 0), o); fbr.prime(elt(o, 1), e); };
+    function KDef(k, e, name, dbg) { this.k = k; this.e = e; this.name = name; this.dbg = dbg; }
     KDef.prototype.invoke = function(fbr) { fbr.k = this.k; bind(this.e, this.name, fbr.a); }
     Vau.prototype.combine = function(fbr, e, o) { fbr.a = new Opv(elt(o, 0), elt(o, 1), elt(o, 2), e); };
-    If.prototype.combine = function(fbr, e, o) { fbr.k = new KIf(fbr.k, e, elt(o, 1), elt(o, 2)); fbr.prime(elt(o, 0), e); };
-    function KIf(k, e, xthen, xelse) { this.k = k; this.e = e; this.xthen = xthen; this.xelse = xelse; }
+    If.prototype.combine = function(fbr, e, o) { fbr.k = new KIf(fbr.k, e, elt(o, 1), elt(o, 2), o); fbr.prime(elt(o, 0), e); };
+    function KIf(k, e, xthen, xelse, dbg) { this.k = k; this.e = e; this.xthen = xthen; this.xelse = xelse; this.dbg = dbg; }
     KIf.prototype.invoke = function(fbr) { fbr.k = this.k; fbr.prime(fbr.a === F ? this.xelse : this.xthen, this.e); };
     Eval.prototype.combine = function(fbr, e, o) { fbr.prime(elt(o, 0), elt(o, 1)); };
     Begin.prototype.combine = function(fbr, e, o) { if (o === NIL) fbr.a = VOID; else begin1(fbr, e, o); };
-    function begin1(fbr, e, xs) { if (cdr(xs) !== NIL) { fbr.k = new KBegin(fbr.k, e, cdr(xs)); } fbr.prime(car(xs), e); }
-    function KBegin(k, e, xs) { this.k = k; this.e = e; this.xs = xs; }
+    function begin1(fbr, e, xs) { if (cdr(xs) !== NIL) { fbr.k = new KBegin(fbr.k, e, cdr(xs), xs); } fbr.prime(car(xs), e); }
+    function KBegin(k, e, xs, dbg) { this.k = k; this.e = e; this.xs = xs; }
     KBegin.prototype.invoke = function(fbr) { fbr.k = this.k; begin1(fbr, this.e, this.xs); }
     /* Delimited Control and Metacontinuations */
     function KDone() {}
@@ -182,6 +182,7 @@ var wat = (function() {
                                             eval(typename).prototype.wat_type = type; }); }
     function type_name(type) { return type.wat_typename ? type.wat_typename : "(Anonymous Type)"; }
     function set_type_name(type, name) { type.wat_typename = name; }
+    function dbg(obj) { return obj.dbg ? obj.dbg : VOID; }
     init_types(["KDone", "KEval", "KCombine", "KApply", "KEvalArg", "KDef", "KIf", "KBegin", "MKDone", "MKPrompt", "MKSeg",
 		"Opv", "Apv", "Def", "Vau", "If", "Eval", "Begin", "Stacktrace", "JSFun",
                 "Pollset", "PollsetWait", "KPollsetWait",
@@ -257,6 +258,7 @@ var wat = (function() {
 	bind(e, new Sym("type-of"), jswrap(type_of));
 	bind(e, new Sym("type-name"), jswrap(function(type) { return new Str(type_name(type)); }));
 	bind(e, new Sym("set-type-name!"), jswrap(function(type, name) { set_type_name(type, name.jsstr); return name; }));
+	bind(e, new Sym("dbg"), jswrap(dbg));
 	bind(e, new Sym("identity-hash-code"), jswrap(function(obj) { return new Num(idhash(obj)); }));
 	bind(e, new Sym("display"), jswrap(function(str) { console.log(str); return str; }));
 	bind(e, new Sym("read-from-string"), jswrap(function(str) { return array_to_list(parse(str.jsstr)); }));
@@ -302,6 +304,7 @@ var WAT_GLOBAL = this;
 // arg: argument
 // cmb: combiner
 // cmt: comment
+// dbg: debugging information
 // e: environment
 // ep: environment parameter
 // fbr: fiber

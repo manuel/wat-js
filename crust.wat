@@ -358,8 +358,12 @@
   (define-method (->string (obj Symbol)) (symbol->string obj))
   (define-method (->string (obj String)) (str-print obj))
   (define-method (->string (obj Number)) (number->string obj))
-  (define-method (->string (obj Procedure)) "#[Procedure]")
+  (define-method (->string (obj Procedure)) (strcat "#[Procedure " (->string (unwrap obj)) "]"))
   (define-method (->string (obj Macro)) "#[Macro]")
   (define-method (->string (obj Environment)) "#[Environment]")
   (define-method (->string (obj Vector)) "#[Vector]")
 )
+
+(define (print-stacktrace depth)
+  (map (lambda (k) (display (strcat (->string k) " " (->string (dbg k))))) (stacktrace depth))
+  #void)

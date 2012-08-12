@@ -568,3 +568,8 @@ Returns the name of a type.
 *** =set-type-name! <type> <string> → string= [applicative]
 
 Updates the name of a type.
+*** =dbg <obj> → whatever= [applicative]
+
+Returns arbitrary debugging information about an object.  For
+continuation frames, this will typically be the expression that
+created them.

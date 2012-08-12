@@ -159,6 +159,8 @@
   (hashtable-put! ht key 12)
   (assert (num= 12 (hashtable-get ht key)))
   (assert (num= 14 (hashtable-get ht "another-key" 14)))
+;  (hashtable-put! ht key 16)
+;  (assert (num= 16 (hashtable-get ht key)))
 )
 
 ;; Conversions

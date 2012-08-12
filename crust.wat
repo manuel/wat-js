@@ -1,13 +1,35 @@
 ;; -*- mode: scheme -*-
 ;; This is the hard crust of Wat code around the JS core defined in `wat.js`.
 
+(def quote (vau (x) #ign x))
+
+(def Void (type-of #void))
+(def Ign (type-of #ign))
+(def Boolean (type-of #t))
+(def Nil (type-of ()))
+(def Pair (type-of (cons #void #void)))
+(def Symbol (type-of 'foo))
+(def String (type-of "foo"))
+(def Number (type-of 0))
+(def Procedure (type-of (wrap (vau #ign #ign #void))))
+(def Macro (type-of (vau #ign #ign #void)))
+(def Environment (type-of (make-environment)))
+(def Vector (type-of (vector)))
+(def Type (type-of (make-type)))
+
+(def void? (wrap (vau (val) #ign (eq? #void val))))
+(def ign? (wrap (vau (val) #ign (eq? #ign val))))
+(def boolean? (wrap (vau (val) #ign (eq? (type-of val) Boolean))))
 (def null? (wrap (vau (val) #ign (eq? () val))))
-
-(def pair? (wrap (vau (val) #ign (eq? (type-of val) (type-of (cons #void #void))))))
-
-(def symbol? (wrap (vau (val) #ign (eq? (type-of val) (type-of 'foo)))))
-
-(def procedure? (wrap (vau (val) #ign (eq? (type-of val) (type-of (wrap (vau #ign #ign #void)))))))
+(def pair? (wrap (vau (val) #ign (eq? (type-of val) Pair))))
+(def symbol? (wrap (vau (val) #ign (eq? (type-of val) Symbol))))
+(def string? (wrap (vau (val) #ign (eq? (type-of val) String))))
+(def symbol? (wrap (vau (val) #ign (eq? (type-of val) Symbol))))
+(def procedure? (wrap (vau (val) #ign (eq? (type-of val) Procedure))))
+(def macro? (wrap (vau (val) #ign (eq? (type-of val) Macro))))
+(def environment? (wrap (vau (val) #ign (eq? (type-of val) Environment))))
+(def vector? (wrap (vau (val) #ign (eq? (type-of val) Vector))))
+(def type? (wrap (vau (val) #ign (eq? (type-of val) Type))))
 
 ;; (def begin
 ;;   ((wrap (vau (seq2) #ign
@@ -128,8 +150,6 @@
 	  env)))
 
 (def current-environment (vau #ign e e))
-
-(def quote (vau (x) #ign x))
 
 (def define
   (vau (lhs . rhs) env
@@ -303,10 +323,6 @@
     (put-method! (eval name env) (eval type env) method))
 )
 
-(define String (type-of "foo"))
-(define Symbol (type-of 'foo))
-(define Number (type-of 0))
-
 (provide (=)
   (define-generic (= a b) (eq? a b))
   (define-syntax (define-builtin-= type-name pred-expr) env
@@ -320,4 +336,20 @@
 
 (provide (hash-code)
   (define-generic (hash-code obj) (identity-hash-code obj))
+)
+
+(provide (->string)
+  (define-generic (->string obj) "(Unprintable Object)")
+  (define-method (->string (obj Void)) "#void")
+  (define-method (->string (obj Ign)) "#ign")
+  (define-method (->string (obj Boolean)) (if obj "#t" "#f"))
+  (define-method (->string (obj Nil)) "()")
+  (define-method (->string (obj Pair)) "()")
+  (define-method (->string (obj Symbol)) (symbol->string obj))
+  (define-method (->string (obj String)) (str-print obj))
+  (define-method (->string (obj Number)) (number->string obj))
+  (define-method (->string (obj Procedure)) "#[Procedure]")
+  (define-method (->string (obj Macro)) "#[Macro]")
+  (define-method (->string (obj Environment)) "#[Environment]")
+  (define-method (->string (obj Vector)) "#[Vector]")
 )

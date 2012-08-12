@@ -130,6 +130,7 @@ var wat = (function() {
     /* Data */
     function Str(jsstr) { this.jsstr = jsstr; };
     function str_eql(str1, str2) { return str1.jsstr === str2.jsstr; }
+    function str_print(str1) { return JSON.stringify(str1.jsstr); }
     function Num(jsnum) { this.jsnum = jsnum; };
     function num_eql(num1, num2) { return num1.jsnum === num2.jsnum; }
     function num_add(num1, num2) { return new Num(num1.jsnum + num2.jsnum); };
@@ -232,6 +233,7 @@ var wat = (function() {
 	bind(e, new Sym("num="), jswrap(function(num1, num2) { return num_eql(num1, num2) ? T : F }));
 	bind(e, new Sym("num+"), jswrap(num_add));
         bind(e, new Sym("str="), jswrap(function(str1, str2) { return str_eql(str1, str2) ? T : F }));
+        bind(e, new Sym("str-print"), jswrap(function(str) { return new Str(str_print(str)); }));
 	bind(e, new Sym("string->symbol"), jswrap(str_to_sym));
 	bind(e, new Sym("symbol->string"), jswrap(sym_to_str));
 	bind(e, new Sym("string->number"), jswrap(str_to_num));

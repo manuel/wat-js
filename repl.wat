@@ -6,7 +6,7 @@
 
 (define (repl)
   (define (loop)
-    (display (eval (read) env))
+    (display (->string (eval (read) env)))
     (loop))
   (push-prompt *top-level*
     (loop)))

@@ -275,6 +275,16 @@ Returns the number of elements in the vector.
 
 The library consists of definitions written in Wat itself.
 
+** Types
+
+*** =Void=, =Ign=, =Boolean=, =Nil=, =Pair=, =Symbol=, =String=, =Number=, =Procedure=, =Macro=, =Environment=, =Vector=, =Type= [variables]
+
+Type constants for built-in types.
+
+*** =void?=, =ign?=, =boolean?=, =null?=, =pair?=, =symbol?=, =string?=, =number?=, =procedure?=, =macro?=, =environment?=, =vector?=, =type?= [variables]
+
+Type predicates for built-in types.
+
 ** Common
 
 *** =lambda <ptree> . <exprs> → applicative= [operative]
@@ -371,14 +381,6 @@ Contents of the Decrement part of Register.
 
 Combinations of =car= and =cdr=, e.g. =(cadr x)= === =(car (cdr x))=.
 
-*** =null? <val> → boolean= [applicative]
-
-Returns true if a value is nil, the empty list, false otherwise.
-
-*** =pair? <val> → boolean= [applicative]
-
-Returns true if a value is a pair (cons), false otherwise.
-
 *** =list . <vals> → list= [applicative]
 
 Constructs a nil-terminated list containing the values.
@@ -457,6 +459,11 @@ back to =identity-hash-code=.
 If two objects are generically equal by @<code>=@</code>, their
 generic hash codes must be equal, too.  Conversely, if two objects
 have different generic hash codes, they cannot be generically equal.
+
+*** =->string <obj> → string= [generic]
+
+Generic string conversion function.  Turns any object into a string.
+Methods are defined for all built-in types.
 
 ** Dynamic Binding
 

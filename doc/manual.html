@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-12 15:23:01 CEST"/>
+<meta name="generated" content="2012-08-12 16:21:19 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -142,51 +142,56 @@ lang="en" xml:lang="en">
 </li>
 <li><a href="#sec-7">Library </a>
 <ul>
-<li><a href="#sec-7.1">Common </a>
+<li><a href="#sec-7.1">Types </a>
 <ul>
-<li><a href="#sec-7.1.1"><code>lambda &lt;ptree&gt; . &lt;exprs&gt; → applicative</code> [operative] </a></li>
-<li><a href="#sec-7.1.2"><code>apply &lt;apv&gt; &lt;args&gt; → result</code> [applicative] </a></li>
-<li><a href="#sec-7.1.3"><code>set! &lt;env&gt; &lt;lhs&gt; &lt;rhs&gt; → rhs</code> [operative] </a></li>
-<li><a href="#sec-7.1.4"><code>quote &lt;form&gt; → form</code> [operative] </a></li>
-<li><a href="#sec-7.1.5"><code>define &lt;lhs&gt; &lt;rhs&gt; → result</code> [operative] </a></li>
-<li><a href="#sec-7.1.6"><code>define-syntax &lt;lhs&gt; &lt;rhs&gt; → result</code> [operative] </a></li>
-<li><a href="#sec-7.1.7"><code>provide &lt;names&gt; . &lt;exprs&gt; → result</code> [operative] </a></li>
-<li><a href="#sec-7.1.8"><code>define-record-type &lt;name&gt; &lt;ctor&gt; &lt;pred&gt; . &lt;fields&gt; → type</code> [operative] </a></li>
+<li><a href="#sec-7.1.1"><code>Void</code>, <code>Ign</code>, <code>Boolean</code>, <code>Nil</code>, <code>Pair</code>, <code>Symbol</code>, <code>String</code>, <code>Number</code>, <code>Procedure</code>, <code>Macro</code>, <code>Environment</code>, <code>Vector</code>, <code>Type</code> [variables] </a></li>
+<li><a href="#sec-7.1.2"><code>void?</code>, <code>ign?</code>, <code>boolean?</code>, <code>null?</code>, <code>pair?</code>, <code>symbol?</code>, <code>string?</code>, <code>number?</code>, <code>procedure?</code>, <code>macro?</code>, <code>environment?</code>, <code>vector?</code>, <code>type?</code> [variables] </a></li>
 </ul>
 </li>
-<li><a href="#sec-7.2">Pairs and Lists </a>
+<li><a href="#sec-7.2">Common </a>
 <ul>
-<li><a href="#sec-7.2.1"><code>car &lt;pair&gt; → value</code> [applicative] </a></li>
-<li><a href="#sec-7.2.2"><code>cdr &lt;pair&gt; → value</code> [applicative] </a></li>
-<li><a href="#sec-7.2.3"><code>caar</code>, <code>cadr</code>, <code>cdar</code>, <code>cddr</code> [applicatives] </a></li>
-<li><a href="#sec-7.2.4"><code>null? &lt;val&gt; → boolean</code> [applicative] </a></li>
-<li><a href="#sec-7.2.5"><code>pair? &lt;val&gt; → boolean</code> [applicative] </a></li>
-<li><a href="#sec-7.2.6"><code>list . &lt;vals&gt; → list</code> [applicative] </a></li>
-<li><a href="#sec-7.2.7"><code>list* . &lt;vals&gt; → list</code> [applicative] </a></li>
+<li><a href="#sec-7.2.1"><code>lambda &lt;ptree&gt; . &lt;exprs&gt; → applicative</code> [operative] </a></li>
+<li><a href="#sec-7.2.2"><code>apply &lt;apv&gt; &lt;args&gt; → result</code> [applicative] </a></li>
+<li><a href="#sec-7.2.3"><code>set! &lt;env&gt; &lt;lhs&gt; &lt;rhs&gt; → rhs</code> [operative] </a></li>
+<li><a href="#sec-7.2.4"><code>quote &lt;form&gt; → form</code> [operative] </a></li>
+<li><a href="#sec-7.2.5"><code>define &lt;lhs&gt; &lt;rhs&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-7.2.6"><code>define-syntax &lt;lhs&gt; &lt;rhs&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-7.2.7"><code>provide &lt;names&gt; . &lt;exprs&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-7.2.8"><code>define-record-type &lt;name&gt; &lt;ctor&gt; &lt;pred&gt; . &lt;fields&gt; → type</code> [operative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-7.3">Hashtables </a>
+<li><a href="#sec-7.3">Pairs and Lists </a>
 <ul>
-<li><a href="#sec-7.3.1"><code>make-hashtable &lt;hashfn&gt; &lt;eqfn&gt; → hashtable</code> [applicative] </a></li>
-<li><a href="#sec-7.3.2"><code>make-identity-hashtable → hashtable</code> [applicative] </a></li>
-<li><a href="#sec-7.3.3"><code>make-generic-hashtable → hashtable</code> [applicative] </a></li>
-<li><a href="#sec-7.3.4"><code>hashtable-put! &lt;hashtable&gt; &lt;key&gt; &lt;val&gt; → val</code> [applicative] </a></li>
-<li><a href="#sec-7.3.5"><code>hashtable-get &lt;hashtable&gt; &lt;key&gt; → val</code> [applicative] </a></li>
+<li><a href="#sec-7.3.1"><code>car &lt;pair&gt; → value</code> [applicative] </a></li>
+<li><a href="#sec-7.3.2"><code>cdr &lt;pair&gt; → value</code> [applicative] </a></li>
+<li><a href="#sec-7.3.3"><code>caar</code>, <code>cadr</code>, <code>cdar</code>, <code>cddr</code> [applicatives] </a></li>
+<li><a href="#sec-7.3.4"><code>list . &lt;vals&gt; → list</code> [applicative] </a></li>
+<li><a href="#sec-7.3.5"><code>list* . &lt;vals&gt; → list</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-7.4">Generic Functions </a>
+<li><a href="#sec-7.4">Hashtables </a>
 <ul>
-<li><a href="#sec-7.4.1"><code>define-generic (&lt;name&gt; . &lt;args&gt;) . [&lt;body&gt;] → generic</code> [operative] </a></li>
-<li><a href="#sec-7.4.2"><code>define-method (&lt;name&gt; (&lt;self&gt; &lt;type&gt;) . &lt;args&gt;) . &lt;body&gt; → method</code> [operative] </a></li>
-<li><a href="#sec-7.4.3"><code>= &lt;a&gt; &lt;b&gt; → boolean</code> [generic] </a></li>
-<li><a href="#sec-7.4.4"><code>hash-code &lt;obj&gt; → number</code> [generic] </a></li>
+<li><a href="#sec-7.4.1"><code>make-hashtable &lt;hashfn&gt; &lt;eqfn&gt; → hashtable</code> [applicative] </a></li>
+<li><a href="#sec-7.4.2"><code>make-identity-hashtable → hashtable</code> [applicative] </a></li>
+<li><a href="#sec-7.4.3"><code>make-generic-hashtable → hashtable</code> [applicative] </a></li>
+<li><a href="#sec-7.4.4"><code>hashtable-put! &lt;hashtable&gt; &lt;key&gt; &lt;val&gt; → val</code> [applicative] </a></li>
+<li><a href="#sec-7.4.5"><code>hashtable-get &lt;hashtable&gt; &lt;key&gt; → val</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-7.5">Dynamic Binding </a>
+<li><a href="#sec-7.5">Generic Functions </a>
 <ul>
-<li><a href="#sec-7.5.1"><code>dnew → dynamic</code> [applicative] </a></li>
-<li><a href="#sec-7.5.2"><code>dlet &lt;dynamic&gt; &lt;value&gt; . &lt;exprs&gt; → result</code> [operative] </a></li>
-<li><a href="#sec-7.5.3"><code>dref &lt;dynamic&gt; → value</code> [applicative] </a></li>
+<li><a href="#sec-7.5.1"><code>define-generic (&lt;name&gt; . &lt;args&gt;) . [&lt;body&gt;] → generic</code> [operative] </a></li>
+<li><a href="#sec-7.5.2"><code>define-method (&lt;name&gt; (&lt;self&gt; &lt;type&gt;) . &lt;args&gt;) . &lt;body&gt; → method</code> [operative] </a></li>
+<li><a href="#sec-7.5.3"><code>= &lt;a&gt; &lt;b&gt; → boolean</code> [generic] </a></li>
+<li><a href="#sec-7.5.4"><code>hash-code &lt;obj&gt; → number</code> [generic] </a></li>
+<li><a href="#sec-7.5.5"><code>-&gt;string &lt;obj&gt; → string</code> [generic] </a></li>
+</ul>
+</li>
+<li><a href="#sec-7.6">Dynamic Binding </a>
+<ul>
+<li><a href="#sec-7.6.1"><code>dnew → dynamic</code> [applicative] </a></li>
+<li><a href="#sec-7.6.2"><code>dlet &lt;dynamic&gt; &lt;value&gt; . &lt;exprs&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-7.6.3"><code>dref &lt;dynamic&gt; → value</code> [applicative] </a></li>
 </ul></li>
 </ul>
 </li>
@@ -861,7 +866,7 @@ The library consists of definitions written in Wat itself.
 </div>
 
 <div id="outline-container-7.1" class="outline-3">
-<h3 id="sec-7.1">Common </h3>
+<h3 id="sec-7.1">Types </h3>
 <div class="outline-text-3" id="text-7.1">
 
 
@@ -869,8 +874,41 @@ The library consists of definitions written in Wat itself.
 </div>
 
 <div id="outline-container-7.1.1" class="outline-4">
-<h4 id="sec-7.1.1"><code>lambda &lt;ptree&gt; . &lt;exprs&gt; → applicative</code> [operative] </h4>
+<h4 id="sec-7.1.1"><code>Void</code>, <code>Ign</code>, <code>Boolean</code>, <code>Nil</code>, <code>Pair</code>, <code>Symbol</code>, <code>String</code>, <code>Number</code>, <code>Procedure</code>, <code>Macro</code>, <code>Environment</code>, <code>Vector</code>, <code>Type</code> [variables] </h4>
 <div class="outline-text-4" id="text-7.1.1">
+
+
+<p>
+Type constants for built-in types.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-7.1.2" class="outline-4">
+<h4 id="sec-7.1.2"><code>void?</code>, <code>ign?</code>, <code>boolean?</code>, <code>null?</code>, <code>pair?</code>, <code>symbol?</code>, <code>string?</code>, <code>number?</code>, <code>procedure?</code>, <code>macro?</code>, <code>environment?</code>, <code>vector?</code>, <code>type?</code> [variables] </h4>
+<div class="outline-text-4" id="text-7.1.2">
+
+
+<p>
+Type predicates for built-in types.
+</p>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-7.2" class="outline-3">
+<h3 id="sec-7.2">Common </h3>
+<div class="outline-text-3" id="text-7.2">
+
+
+
+</div>
+
+<div id="outline-container-7.2.1" class="outline-4">
+<h4 id="sec-7.2.1"><code>lambda &lt;ptree&gt; . &lt;exprs&gt; → applicative</code> [operative] </h4>
+<div class="outline-text-4" id="text-7.2.1">
 
 
 <p>
@@ -880,9 +918,9 @@ Creates an applicative combiner, as in Scheme.
 
 </div>
 
-<div id="outline-container-7.1.2" class="outline-4">
-<h4 id="sec-7.1.2"><code>apply &lt;apv&gt; &lt;args&gt; → result</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.1.2">
+<div id="outline-container-7.2.2" class="outline-4">
+<h4 id="sec-7.2.2"><code>apply &lt;apv&gt; &lt;args&gt; → result</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.2.2">
 
 
 <p>
@@ -892,9 +930,9 @@ Applies an applicative to an arguments list.
 
 </div>
 
-<div id="outline-container-7.1.3" class="outline-4">
-<h4 id="sec-7.1.3"><code>set! &lt;env&gt; &lt;lhs&gt; &lt;rhs&gt; → rhs</code> [operative] </h4>
-<div class="outline-text-4" id="text-7.1.3">
+<div id="outline-container-7.2.3" class="outline-4">
+<h4 id="sec-7.2.3"><code>set! &lt;env&gt; &lt;lhs&gt; &lt;rhs&gt; → rhs</code> [operative] </h4>
+<div class="outline-text-4" id="text-7.2.3">
 
 
 <p>
@@ -905,9 +943,9 @@ right-hand side in the given environment.
 
 </div>
 
-<div id="outline-container-7.1.4" class="outline-4">
-<h4 id="sec-7.1.4"><code>quote &lt;form&gt; → form</code> [operative] </h4>
-<div class="outline-text-4" id="text-7.1.4">
+<div id="outline-container-7.2.4" class="outline-4">
+<h4 id="sec-7.2.4"><code>quote &lt;form&gt; → form</code> [operative] </h4>
+<div class="outline-text-4" id="text-7.2.4">
 
 
 <p>
@@ -917,9 +955,9 @@ Returns form unevaluated.
 
 </div>
 
-<div id="outline-container-7.1.5" class="outline-4">
-<h4 id="sec-7.1.5"><code>define &lt;lhs&gt; &lt;rhs&gt; → result</code> [operative] </h4>
-<div class="outline-text-4" id="text-7.1.5">
+<div id="outline-container-7.2.5" class="outline-4">
+<h4 id="sec-7.2.5"><code>define &lt;lhs&gt; &lt;rhs&gt; → result</code> [operative] </h4>
+<div class="outline-text-4" id="text-7.2.5">
 
 
 <p>
@@ -941,9 +979,9 @@ returning the applicative.
 
 </div>
 
-<div id="outline-container-7.1.6" class="outline-4">
-<h4 id="sec-7.1.6"><code>define-syntax &lt;lhs&gt; &lt;rhs&gt; → result</code> [operative] </h4>
-<div class="outline-text-4" id="text-7.1.6">
+<div id="outline-container-7.2.6" class="outline-4">
+<h4 id="sec-7.2.6"><code>define-syntax &lt;lhs&gt; &lt;rhs&gt; → result</code> [operative] </h4>
+<div class="outline-text-4" id="text-7.2.6">
 
 
 <p>
@@ -966,9 +1004,9 @@ parameter, and body expressions, returning the operative.
 
 </div>
 
-<div id="outline-container-7.1.7" class="outline-4">
-<h4 id="sec-7.1.7"><code>provide &lt;names&gt; . &lt;exprs&gt; → result</code> [operative] </h4>
-<div class="outline-text-4" id="text-7.1.7">
+<div id="outline-container-7.2.7" class="outline-4">
+<h4 id="sec-7.2.7"><code>provide &lt;names&gt; . &lt;exprs&gt; → result</code> [operative] </h4>
+<div class="outline-text-4" id="text-7.2.7">
 
 
 <p>
@@ -995,9 +1033,9 @@ quux → error: unbound variable
 
 </div>
 
-<div id="outline-container-7.1.8" class="outline-4">
-<h4 id="sec-7.1.8"><code>define-record-type &lt;name&gt; &lt;ctor&gt; &lt;pred&gt; . &lt;fields&gt; → type</code> [operative] </h4>
-<div class="outline-text-4" id="text-7.1.8">
+<div id="outline-container-7.2.8" class="outline-4">
+<h4 id="sec-7.2.8"><code>define-record-type &lt;name&gt; &lt;ctor&gt; &lt;pred&gt; . &lt;fields&gt; → type</code> [operative] </h4>
+<div class="outline-text-4" id="text-7.2.8">
 
 
 <p>
@@ -1044,17 +1082,17 @@ Each element of <code>fields</code> is of the form:
 
 </div>
 
-<div id="outline-container-7.2" class="outline-3">
-<h3 id="sec-7.2">Pairs and Lists </h3>
-<div class="outline-text-3" id="text-7.2">
+<div id="outline-container-7.3" class="outline-3">
+<h3 id="sec-7.3">Pairs and Lists </h3>
+<div class="outline-text-3" id="text-7.3">
 
 
 
 </div>
 
-<div id="outline-container-7.2.1" class="outline-4">
-<h4 id="sec-7.2.1"><code>car &lt;pair&gt; → value</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.2.1">
+<div id="outline-container-7.3.1" class="outline-4">
+<h4 id="sec-7.3.1"><code>car &lt;pair&gt; → value</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.3.1">
 
 
 <p>
@@ -1064,9 +1102,9 @@ Contents of the Address part of Register.
 
 </div>
 
-<div id="outline-container-7.2.2" class="outline-4">
-<h4 id="sec-7.2.2"><code>cdr &lt;pair&gt; → value</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.2.2">
+<div id="outline-container-7.3.2" class="outline-4">
+<h4 id="sec-7.3.2"><code>cdr &lt;pair&gt; → value</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.3.2">
 
 
 <p>
@@ -1076,9 +1114,9 @@ Contents of the Decrement part of Register.
 
 </div>
 
-<div id="outline-container-7.2.3" class="outline-4">
-<h4 id="sec-7.2.3"><code>caar</code>, <code>cadr</code>, <code>cdar</code>, <code>cddr</code> [applicatives] </h4>
-<div class="outline-text-4" id="text-7.2.3">
+<div id="outline-container-7.3.3" class="outline-4">
+<h4 id="sec-7.3.3"><code>caar</code>, <code>cadr</code>, <code>cdar</code>, <code>cddr</code> [applicatives] </h4>
+<div class="outline-text-4" id="text-7.3.3">
 
 
 <p>
@@ -1088,33 +1126,9 @@ Combinations of <code>car</code> and <code>cdr</code>, e.g. <code>(cadr x)</code
 
 </div>
 
-<div id="outline-container-7.2.4" class="outline-4">
-<h4 id="sec-7.2.4"><code>null? &lt;val&gt; → boolean</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.2.4">
-
-
-<p>
-Returns true if a value is nil, the empty list, false otherwise.
-</p>
-</div>
-
-</div>
-
-<div id="outline-container-7.2.5" class="outline-4">
-<h4 id="sec-7.2.5"><code>pair? &lt;val&gt; → boolean</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.2.5">
-
-
-<p>
-Returns true if a value is a pair (cons), false otherwise.
-</p>
-</div>
-
-</div>
-
-<div id="outline-container-7.2.6" class="outline-4">
-<h4 id="sec-7.2.6"><code>list . &lt;vals&gt; → list</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.2.6">
+<div id="outline-container-7.3.4" class="outline-4">
+<h4 id="sec-7.3.4"><code>list . &lt;vals&gt; → list</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.3.4">
 
 
 <p>
@@ -1124,9 +1138,9 @@ Constructs a nil-terminated list containing the values.
 
 </div>
 
-<div id="outline-container-7.2.7" class="outline-4">
-<h4 id="sec-7.2.7"><code>list* . &lt;vals&gt; → list</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.2.7">
+<div id="outline-container-7.3.5" class="outline-4">
+<h4 id="sec-7.3.5"><code>list* . &lt;vals&gt; → list</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.3.5">
 
 
 <p>
@@ -1137,17 +1151,17 @@ Constructs a list of the values, terminated by the last value.
 
 </div>
 
-<div id="outline-container-7.3" class="outline-3">
-<h3 id="sec-7.3">Hashtables </h3>
-<div class="outline-text-3" id="text-7.3">
+<div id="outline-container-7.4" class="outline-3">
+<h3 id="sec-7.4">Hashtables </h3>
+<div class="outline-text-3" id="text-7.4">
 
 
 
 </div>
 
-<div id="outline-container-7.3.1" class="outline-4">
-<h4 id="sec-7.3.1"><code>make-hashtable &lt;hashfn&gt; &lt;eqfn&gt; → hashtable</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.3.1">
+<div id="outline-container-7.4.1" class="outline-4">
+<h4 id="sec-7.4.1"><code>make-hashtable &lt;hashfn&gt; &lt;eqfn&gt; → hashtable</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.4.1">
 
 
 <p>
@@ -1157,9 +1171,9 @@ Creates a new hashtable with the given hash function and equality function.
 
 </div>
 
-<div id="outline-container-7.3.2" class="outline-4">
-<h4 id="sec-7.3.2"><code>make-identity-hashtable → hashtable</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.3.2">
+<div id="outline-container-7.4.2" class="outline-4">
+<h4 id="sec-7.4.2"><code>make-identity-hashtable → hashtable</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.4.2">
 
 
 <p>
@@ -1170,9 +1184,9 @@ equality function.
 
 </div>
 
-<div id="outline-container-7.3.3" class="outline-4">
-<h4 id="sec-7.3.3"><code>make-generic-hashtable → hashtable</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.3.3">
+<div id="outline-container-7.4.3" class="outline-4">
+<h4 id="sec-7.4.3"><code>make-generic-hashtable → hashtable</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.4.3">
 
 
 <p>
@@ -1183,9 +1197,9 @@ Creates a new hashtable with <code>hash-code</code> as hash function and
 
 </div>
 
-<div id="outline-container-7.3.4" class="outline-4">
-<h4 id="sec-7.3.4"><code>hashtable-put! &lt;hashtable&gt; &lt;key&gt; &lt;val&gt; → val</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.3.4">
+<div id="outline-container-7.4.4" class="outline-4">
+<h4 id="sec-7.4.4"><code>hashtable-put! &lt;hashtable&gt; &lt;key&gt; &lt;val&gt; → val</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.4.4">
 
 
 <p>
@@ -1195,9 +1209,9 @@ Associates key with value in hashtable.
 
 </div>
 
-<div id="outline-container-7.3.5" class="outline-4">
-<h4 id="sec-7.3.5"><code>hashtable-get &lt;hashtable&gt; &lt;key&gt; → val</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.3.5">
+<div id="outline-container-7.4.5" class="outline-4">
+<h4 id="sec-7.4.5"><code>hashtable-get &lt;hashtable&gt; &lt;key&gt; → val</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.4.5">
 
 
 <p>
@@ -1209,17 +1223,17 @@ key is unbound.
 
 </div>
 
-<div id="outline-container-7.4" class="outline-3">
-<h3 id="sec-7.4">Generic Functions </h3>
-<div class="outline-text-3" id="text-7.4">
+<div id="outline-container-7.5" class="outline-3">
+<h3 id="sec-7.5">Generic Functions </h3>
+<div class="outline-text-3" id="text-7.5">
 
 
 
 </div>
 
-<div id="outline-container-7.4.1" class="outline-4">
-<h4 id="sec-7.4.1"><code>define-generic (&lt;name&gt; . &lt;args&gt;) . [&lt;body&gt;] → generic</code> [operative] </h4>
-<div class="outline-text-4" id="text-7.4.1">
+<div id="outline-container-7.5.1" class="outline-4">
+<h4 id="sec-7.5.1"><code>define-generic (&lt;name&gt; . &lt;args&gt;) . [&lt;body&gt;] → generic</code> [operative] </h4>
+<div class="outline-text-4" id="text-7.5.1">
 
 
 <p>
@@ -1231,9 +1245,9 @@ type-specific method is found.
 
 </div>
 
-<div id="outline-container-7.4.2" class="outline-4">
-<h4 id="sec-7.4.2"><code>define-method (&lt;name&gt; (&lt;self&gt; &lt;type&gt;) . &lt;args&gt;) . &lt;body&gt; → method</code> [operative] </h4>
-<div class="outline-text-4" id="text-7.4.2">
+<div id="outline-container-7.5.2" class="outline-4">
+<h4 id="sec-7.5.2"><code>define-method (&lt;name&gt; (&lt;self&gt; &lt;type&gt;) . &lt;args&gt;) . &lt;body&gt; → method</code> [operative] </h4>
+<div class="outline-text-4" id="text-7.5.2">
 
 
 <p>
@@ -1258,9 +1272,9 @@ Adds a method to a generic function.
 
 </div>
 
-<div id="outline-container-7.4.3" class="outline-4">
-<h4 id="sec-7.4.3"><code>= &lt;a&gt; &lt;b&gt; → boolean</code> [generic] </h4>
-<div class="outline-text-4" id="text-7.4.3">
+<div id="outline-container-7.5.3" class="outline-4">
+<h4 id="sec-7.5.3"><code>= &lt;a&gt; &lt;b&gt; → boolean</code> [generic] </h4>
+<div class="outline-text-4" id="text-7.5.3">
 
 
 <p>
@@ -1289,9 +1303,9 @@ Two strings are equal if they contain the same code points.
 
 </div>
 
-<div id="outline-container-7.4.4" class="outline-4">
-<h4 id="sec-7.4.4"><code>hash-code &lt;obj&gt; → number</code> [generic] </h4>
-<div class="outline-text-4" id="text-7.4.4">
+<div id="outline-container-7.5.4" class="outline-4">
+<h4 id="sec-7.5.4"><code>hash-code &lt;obj&gt; → number</code> [generic] </h4>
+<div class="outline-text-4" id="text-7.5.4">
 
 
 <p>
@@ -1305,13 +1319,26 @@ generic hash codes must be equal, too.  Conversely, if two objects
 have different generic hash codes, they cannot be generically equal.
 </p>
 </div>
+
+</div>
+
+<div id="outline-container-7.5.5" class="outline-4">
+<h4 id="sec-7.5.5"><code>-&gt;string &lt;obj&gt; → string</code> [generic] </h4>
+<div class="outline-text-4" id="text-7.5.5">
+
+
+<p>
+Generic string conversion function.  Turns any object into a string.
+Methods are defined for all built-in types.
+</p>
+</div>
 </div>
 
 </div>
 
-<div id="outline-container-7.5" class="outline-3">
-<h3 id="sec-7.5">Dynamic Binding </h3>
-<div class="outline-text-3" id="text-7.5">
+<div id="outline-container-7.6" class="outline-3">
+<h3 id="sec-7.6">Dynamic Binding </h3>
+<div class="outline-text-3" id="text-7.6">
 
 
 <p>
@@ -1321,9 +1348,9 @@ These are the operators from Kiselyov, Shan, and Sabry's
 
 </div>
 
-<div id="outline-container-7.5.1" class="outline-4">
-<h4 id="sec-7.5.1"><code>dnew → dynamic</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.5.1">
+<div id="outline-container-7.6.1" class="outline-4">
+<h4 id="sec-7.6.1"><code>dnew → dynamic</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.6.1">
 
 
 <p>
@@ -1333,9 +1360,9 @@ Creates a new dynamically-bound variable.
 
 </div>
 
-<div id="outline-container-7.5.2" class="outline-4">
-<h4 id="sec-7.5.2"><code>dlet &lt;dynamic&gt; &lt;value&gt; . &lt;exprs&gt; → result</code> [operative] </h4>
-<div class="outline-text-4" id="text-7.5.2">
+<div id="outline-container-7.6.2" class="outline-4">
+<h4 id="sec-7.6.2"><code>dlet &lt;dynamic&gt; &lt;value&gt; . &lt;exprs&gt; → result</code> [operative] </h4>
+<div class="outline-text-4" id="text-7.6.2">
 
 
 <p>
@@ -1345,9 +1372,9 @@ Performs expressions with the dynamic variable bound to the value.
 
 </div>
 
-<div id="outline-container-7.5.3" class="outline-4">
-<h4 id="sec-7.5.3"><code>dref &lt;dynamic&gt; → value</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.5.3">
+<div id="outline-container-7.6.3" class="outline-4">
+<h4 id="sec-7.6.3"><code>dref &lt;dynamic&gt; → value</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.6.3">
 
 
 <p>
@@ -1500,7 +1527,7 @@ object.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-12 15:23:01 CEST</p>
+<p class="date"> Date: 2012-08-12 16:21:19 CEST</p>
 </div>
 </div>
 </body>

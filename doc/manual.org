@@ -281,7 +281,7 @@ The library consists of definitions written in Wat itself.
 
 Type constants for built-in types.
 
-*** =void?=, =ign?=, =boolean?=, =null?=, =pair?=, =symbol?=, =string?=, =number?=, =procedure?=, =macro?=, =environment?=, =vector?=, =type?= [variables]
+*** =void?=, =ign?=, =boolean?=, =null?=, =pair?=, =symbol?=, =string?=, =number?=, =procedure?=, =macro?=, =environment?=, =vector?=, =type?= [applicatives]
 
 Type predicates for built-in types.
 

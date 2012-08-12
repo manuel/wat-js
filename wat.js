@@ -95,7 +95,7 @@ var wat = (function() {
     function JSFun(jsfun) { this.jsfun = jsfun; }
     JSFun.prototype.combine = function(fbr, e, o) { fbr.a = this.jsfun.apply(null, list_to_array(o)); };
     function jswrap(jsfun) { return wrap(new JSFun(jsfun)); }
-    var JSOBJ = new Type();
+    var JSOBJ = new Type(); JSOBJ.wat_label = "JS-Object";
     function js_global(name) { return js_prop(WAT_GLOBAL, name); }
     function js_set_global(name, val) { return js_set_prop(WAT_GLOBAL, name, val); }
     function js_prop(obj, name) { assert(type_of(name) === Str.prototype.wat_type); return obj[name.jsstr]; }

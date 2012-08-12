@@ -498,9 +498,9 @@ This is the place for all kinds of tasteless things.
 The JavaScript object system is treacherous, so we don't even attempt
 to somehow integrate it with Wat's.  It is urged to convert JavaScript
 objects to Wat objects as early as possible with =from-js=, and
-possible with =to-js=.  JavaScript objects may not implement all Wat
-convert back from Wat objects to JavaScript objects as late as
-object functionality, such as identity hash codes.
+convert Wat objects to JavaScript objects as late as possible with
+=to-js=.  JavaScript objects may not implement all Wat object
+functionality, such as identity hash codes.
 
 *** =js-global <string> → result= [applicative]
 
@@ -532,13 +532,13 @@ object with the given arguments.
 
 *** =to-js <obj> → jsobj= [applicative]
 
-Try to convert an object, such as a string, to a usable JavaScript
-object.
+Tries to convert a Wat object, such as a string, to a similar
+JavaScript object.
  
 *** =from-js <js-obj> → obj= [applicative]
 
-Try to convert a JavaScript object, such as a string, to a usable Wat
-object.
+Tries to convert a JavaScript object, such as a string, to a similar
+Wat object.
 
 *** =make-pollset → pollset= [applicative]
 

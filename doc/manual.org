@@ -581,3 +581,12 @@ Updates the descriptive label of an object.
 Returns arbitrary debugging information about an object.  For
 continuation frames, this will typically be the expression that
 created them.
+
+*** =trap <exc> → |= [applicative]
+
+If an applicative named =trap= is defined in the top-level
+environment, it will be called when an error (such as variable
+unbound) happens during evaluation.
+
+The trap should abort to a known good continuation, the current one is
+broken and must not be resumed.

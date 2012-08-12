@@ -149,7 +149,13 @@ Creates a new cons with the given car and cdr.
 
 Returns true if the two values are pointer identical, false otherwise.
 
-** Vau Calculus
+*** =idhash <obj> → number= [applicative]
+
+Returns the system-determined identity hash code of the object, which
+is equal if two objects are =eq?=.  It is unlikely that two different
+objects have the same identity hash code.
+
+** Combiners and Environments
 *** =vau <ptree> <envp> <body> → operative= [operative]
 
 Constructs a new compound operative that closes over the current
@@ -172,6 +178,15 @@ Returns the underlying combiner of an applicative.
 *** =make-environment [<parent>] → environment= [applicative]
 
 Creates a new empty environment with the given optional parent.
+
+*** =names <env> → list= [applicative]
+
+Returns a list of the symbols bound in the environment.  Does not
+include symbols bound in ancestor environments.
+
+*** =bound? <env> <sym> → boolean= [applicative]
+
+Returns true if a symbol is bound in the environment, false otherwise.
 
 ** Control
 
@@ -230,11 +245,6 @@ Reads a form from the console and returns it.
 
 Prints a message string to the console and returns it.
 
-*** =idhash <obj> → number= [applicative]
-
-Returns the system-determined identity hash code of the object.  It is
-unlikely that two different objects have the same identity hash code.
-
 *** =fail <reason> → |= [applicative]
 
 Halts evaluation with an object describing the reason (typically an error).
@@ -257,6 +267,9 @@ Updates the vector's element at the given index and returns it.
 
 Returns the number of elements in the vector.
 
+** Conversions
+
+*** =string->symbol=, =symbol->string=, =string->number=, =number->string= [applicatives]
 * Library
 
 The library consists of definitions written in Wat itself.
@@ -372,6 +385,21 @@ Constructs a nil-terminated list containing the values.
 *** =list* . <vals> → list= [applicative]
 
 Constructs a list of the values, terminated by the last value.
+
+** Hashtables
+
+*** =make-hashtable <hashfn> <eqfn> → hashtable= [applicative]
+
+Creates a new hashtable with the given hash function and equality function.
+
+*** =hashtable-put! <hashtable> <key> <val> → val= [applicative]
+
+Associates key with value in hashtable.
+
+*** =hashtable-get <hashtable> <key> → val= [applicative]
+
+Retrieves value associated with key from hash, or signals an error if
+key is unbound.
 
 ** Dynamic Binding
 

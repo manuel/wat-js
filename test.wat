@@ -159,6 +159,21 @@
   (assert (= 1 (eval (car (names (current-environment))) (current-environment))))
 )
 
+;; Hashtables
+
+(provide ()
+  (define ht (make-hashtable idhash eq?))
+  (assert (eq? #f (hashtable-has? ht 'foo)))
+  (assert (eq? #f (hashtable-has? ht 10)))
+  (define key "key")
+  (hashtable-put! ht key 12)
+  (assert (= 12 (hashtable-get ht key)))
+)
+
+;; Conversions
+
+;(assert (= 1 (string->number (symbol->string (string->symbol (number->string 1))))))
+
 ;; Delimited Control
 
 (define-syntax test-check

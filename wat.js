@@ -139,6 +139,10 @@ var wat = (function() {
     function vector_length(vector) { return vector.length; }
     function Void() {}; function Ign() {}; function Nil() {}; function Bool() {}
     var VOID = new Void(); var IGN = new Ign(); var NIL = new Nil(); var T = new Bool(); var F = new Bool()
+    function str_to_sym(str) { return new Sym(str.jsstr); }
+    function sym_to_str(sym) { return new Str(sym.name); }
+    function str_to_num(str) { return new Num(Number(str.jsstr)); }
+    function num_to_str(num) { return new Str(String(num.jsnum)); }
     /* Types */
     function Type() {};
     function Tagged(type, val) { this.wat_type = type; this.val = val };
@@ -229,6 +233,10 @@ var wat = (function() {
 	bind(e, new Sym("fail"), jswrap(fail));
 	bind(e, new Sym("="), jswrap(function(num1, num2) { return num_eql(num1, num2) ? T : F }));
 	bind(e, new Sym("+"), jswrap(num_add));
+	bind(e, new Sym("string->symbol"), jswrap(str_to_sym));
+	bind(e, new Sym("symbol->string"), jswrap(sym_to_str));
+	bind(e, new Sym("string->number"), jswrap(str_to_num));
+	bind(e, new Sym("number->string"), jswrap(num_to_str));
 	bind(e, new Sym("vector"), jswrap(function() { return new Vector(Array.prototype.slice.call(arguments)); }));
 	bind(e, new Sym("vector-ref"), jswrap(function(vector, i) { return vector_ref(vector, i.jsnum); }));
 	bind(e, new Sym("vector-set!"), jswrap(function(vector, i, val) { return vector_set(vector, i.jsnum, val); }));

@@ -163,8 +163,6 @@
 
 (provide ()
   (define ht (make-hashtable idhash eq?))
-  (assert (eq? #f (hashtable-has? ht 'foo)))
-  (assert (eq? #f (hashtable-has? ht 10)))
   (define key "key")
   (hashtable-put! ht key 12)
   (assert (= 12 (hashtable-get ht key)))
@@ -172,7 +170,12 @@
 
 ;; Conversions
 
-;(assert (= 1 (string->number (symbol->string (string->symbol (number->string 1))))))
+(assert (= 1 (string->number (symbol->string (string->symbol (number->string 1))))))
+
+;; Generics
+
+(assert (= (->number "12") 12))
+(assert (= (->number (string->symbol "12")) 12))
 
 ;; Delimited Control
 

@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-12 02:14:14 CEST"/>
+<meta name="generated" content="2012-08-12 02:37:47 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -169,15 +169,22 @@ lang="en" xml:lang="en">
 <li><a href="#sec-7.3">Hashtables </a>
 <ul>
 <li><a href="#sec-7.3.1"><code>make-hashtable &lt;hashfn&gt; &lt;eqfn&gt; → hashtable</code> [applicative] </a></li>
-<li><a href="#sec-7.3.2"><code>hashtable-put! &lt;hashtable&gt; &lt;key&gt; &lt;val&gt; → val</code> [applicative] </a></li>
-<li><a href="#sec-7.3.3"><code>hashtable-get &lt;hashtable&gt; &lt;key&gt; → val</code> [applicative] </a></li>
+<li><a href="#sec-7.3.2"><code>make-identity-hashtable → hashtable</code> [applicative] </a></li>
+<li><a href="#sec-7.3.3"><code>hashtable-put! &lt;hashtable&gt; &lt;key&gt; &lt;val&gt; → val</code> [applicative] </a></li>
+<li><a href="#sec-7.3.4"><code>hashtable-get &lt;hashtable&gt; &lt;key&gt; → val</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-7.4">Dynamic Binding </a>
+<li><a href="#sec-7.4">Generic Functions </a>
 <ul>
-<li><a href="#sec-7.4.1"><code>dnew → dynamic</code> [applicative] </a></li>
-<li><a href="#sec-7.4.2"><code>dlet &lt;dynamic&gt; &lt;value&gt; . &lt;exprs&gt; → result</code> [operative] </a></li>
-<li><a href="#sec-7.4.3"><code>dref &lt;dynamic&gt; → value</code> [applicative] </a></li>
+<li><a href="#sec-7.4.1"><code>define-generic (&lt;name&gt; . &lt;args&gt;) → generic</code> </a></li>
+<li><a href="#sec-7.4.2"><code>define-method (&lt;name&gt; (&lt;self&gt; &lt;type&gt;) . &lt;args&gt;) . &lt;body&gt; → method</code> </a></li>
+</ul>
+</li>
+<li><a href="#sec-7.5">Dynamic Binding </a>
+<ul>
+<li><a href="#sec-7.5.1"><code>dnew → dynamic</code> [applicative] </a></li>
+<li><a href="#sec-7.5.2"><code>dlet &lt;dynamic&gt; &lt;value&gt; . &lt;exprs&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-7.5.3"><code>dref &lt;dynamic&gt; → value</code> [applicative] </a></li>
 </ul></li>
 </ul>
 </li>
@@ -1155,8 +1162,21 @@ Creates a new hashtable with the given hash function and equality function.
 </div>
 
 <div id="outline-container-7.3.2" class="outline-4">
-<h4 id="sec-7.3.2"><code>hashtable-put! &lt;hashtable&gt; &lt;key&gt; &lt;val&gt; → val</code> [applicative] </h4>
+<h4 id="sec-7.3.2"><code>make-identity-hashtable → hashtable</code> [applicative] </h4>
 <div class="outline-text-4" id="text-7.3.2">
+
+
+<p>
+Creates a new hashtable with <code>idhash</code> as hash function and <code>eq?</code> as
+equality function.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-7.3.3" class="outline-4">
+<h4 id="sec-7.3.3"><code>hashtable-put! &lt;hashtable&gt; &lt;key&gt; &lt;val&gt; → val</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.3.3">
 
 
 <p>
@@ -1166,9 +1186,9 @@ Associates key with value in hashtable.
 
 </div>
 
-<div id="outline-container-7.3.3" class="outline-4">
-<h4 id="sec-7.3.3"><code>hashtable-get &lt;hashtable&gt; &lt;key&gt; → val</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.3.3">
+<div id="outline-container-7.3.4" class="outline-4">
+<h4 id="sec-7.3.4"><code>hashtable-get &lt;hashtable&gt; &lt;key&gt; → val</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.3.4">
 
 
 <p>
@@ -1181,8 +1201,56 @@ key is unbound.
 </div>
 
 <div id="outline-container-7.4" class="outline-3">
-<h3 id="sec-7.4">Dynamic Binding </h3>
+<h3 id="sec-7.4">Generic Functions </h3>
 <div class="outline-text-3" id="text-7.4">
+
+
+
+</div>
+
+<div id="outline-container-7.4.1" class="outline-4">
+<h4 id="sec-7.4.1"><code>define-generic (&lt;name&gt; . &lt;args&gt;) → generic</code> </h4>
+<div class="outline-text-4" id="text-7.4.1">
+
+
+<p>
+Defines a new generic function.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-7.4.2" class="outline-4">
+<h4 id="sec-7.4.2"><code>define-method (&lt;name&gt; (&lt;self&gt; &lt;type&gt;) . &lt;args&gt;) . &lt;body&gt; → method</code> </h4>
+<div class="outline-text-4" id="text-7.4.2">
+
+
+<p>
+Adds a method to a generic function.
+</p>
+
+
+
+<pre class="example">(define-generic (-&gt;number obj))
+(define-method (-&gt;number (self Number))
+  self)
+(define-method (-&gt;number (self String))
+  (string-&gt;number self))
+(define-method (-&gt;number (self Symbol))
+  (string-&gt;number (symbol-&gt;string self)))
+</pre>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-7.5" class="outline-3">
+<h3 id="sec-7.5">Dynamic Binding </h3>
+<div class="outline-text-3" id="text-7.5">
 
 
 <p>
@@ -1192,9 +1260,9 @@ These are the operators from Kiselyov, Shan, and Sabry's
 
 </div>
 
-<div id="outline-container-7.4.1" class="outline-4">
-<h4 id="sec-7.4.1"><code>dnew → dynamic</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.4.1">
+<div id="outline-container-7.5.1" class="outline-4">
+<h4 id="sec-7.5.1"><code>dnew → dynamic</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.5.1">
 
 
 <p>
@@ -1204,9 +1272,9 @@ Creates a new dynamically-bound variable.
 
 </div>
 
-<div id="outline-container-7.4.2" class="outline-4">
-<h4 id="sec-7.4.2"><code>dlet &lt;dynamic&gt; &lt;value&gt; . &lt;exprs&gt; → result</code> [operative] </h4>
-<div class="outline-text-4" id="text-7.4.2">
+<div id="outline-container-7.5.2" class="outline-4">
+<h4 id="sec-7.5.2"><code>dlet &lt;dynamic&gt; &lt;value&gt; . &lt;exprs&gt; → result</code> [operative] </h4>
+<div class="outline-text-4" id="text-7.5.2">
 
 
 <p>
@@ -1216,9 +1284,9 @@ Performs expressions with the dynamic variable bound to the value.
 
 </div>
 
-<div id="outline-container-7.4.3" class="outline-4">
-<h4 id="sec-7.4.3"><code>dref &lt;dynamic&gt; → value</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.4.3">
+<div id="outline-container-7.5.3" class="outline-4">
+<h4 id="sec-7.5.3"><code>dref &lt;dynamic&gt; → value</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.5.3">
 
 
 <p>
@@ -1371,7 +1439,7 @@ object.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-12 02:14:14 CEST</p>
+<p class="date"> Date: 2012-08-12 02:37:47 CEST</p>
 </div>
 </div>
 </body>

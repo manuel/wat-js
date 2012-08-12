@@ -244,7 +244,7 @@
          field-specs)
     type))
 
-(provide (make-hashtable hashtable-put! hashtable-get)
+(provide (make-hashtable hashtable-put! hashtable-get make-identity-hashtable)
   (define-record-type hashtable
     (construct-hashtable hashfn eqfn env)
     hashtable?
@@ -279,4 +279,40 @@
         (if (eqfn k (caar buckets))
             (cdar buckets)
             (buckets-find (cdr buckets) k eqfn))))
+  (define (make-identity-hashtable) (make-hashtable idhash eq?))
 )
+
+(provide (define-generic define-method)
+  (define generic->vtable (make-identity-hashtable))
+  (define-syntax (define-generic (name . #ign)) env
+    (define vtable (make-identity-hashtable))
+    (define generic (lambda (self . arg) (apply (hashtable-get vtable (type-of self)) (cons self arg))))
+    (eval (list def name generic) env)
+    (hashtable-put! generic->vtable generic vtable)
+    generic)
+  (define-syntax (define-method (name (self type) . args) . body) env
+    (define vtable (hashtable-get generic->vtable (eval name env)))
+    (define method (eval (list* lambda (list* self args) body) env))
+    (hashtable-put! vtable (eval type env) method)
+    method)
+)
+
+(define String (type-of "foo"))
+(define Symbol (type-of 'foo))
+(define Number (type-of 0))
+
+(define-generic (->string obj))
+(define-method (->string (self String))
+  self)
+(define-method (->string (self Symbol))
+  (string->symbol self))
+(define-method (->string (self Number))
+  (number->string self))
+
+(define-generic (->number obj))
+(define-method (->number (self Number))
+  self)
+(define-method (->number (self String))
+  (string->number self))
+(define-method (->number (self Symbol))
+  (string->number (symbol->string self)))

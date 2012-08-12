@@ -392,6 +392,11 @@ Constructs a list of the values, terminated by the last value.
 
 Creates a new hashtable with the given hash function and equality function.
 
+*** =make-identity-hashtable → hashtable= [applicative]
+
+Creates a new hashtable with =idhash= as hash function and =eq?= as
+equality function.
+
 *** =hashtable-put! <hashtable> <key> <val> → val= [applicative]
 
 Associates key with value in hashtable.
@@ -400,6 +405,26 @@ Associates key with value in hashtable.
 
 Retrieves value associated with key from hash, or signals an error if
 key is unbound.
+
+** Generic Functions
+
+*** =define-generic (<name> . <args>) → generic=
+
+Defines a new generic function.
+
+*** =define-method (<name> (<self> <type>) . <args>) . <body> → method=
+
+Adds a method to a generic function.
+
+#+BEGIN_EXAMPLE
+(define-generic (->number obj))
+(define-method (->number (self Number))
+  self)
+(define-method (->number (self String))
+  (string->number self))
+(define-method (->number (self Symbol))
+  (string->number (symbol->string self)))
+#+END_EXAMPLE
 
 ** Dynamic Binding
 

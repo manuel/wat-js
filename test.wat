@@ -175,9 +175,6 @@
 
 ;; Generics
 
-(assert (= (->number "12") 12))
-(assert (= (->number (string->symbol "12")) 12))
-
 (provide ()
   (define-generic (foo obj x) 12)
   (assert (= (foo #void #void) 12))

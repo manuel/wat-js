@@ -280,11 +280,11 @@ The library consists of definitions written in Wat itself.
 
 ** Types
 
-*** =Void=, =Ign=, =Boolean=, =Nil=, =Pair=, =Symbol=, =String=, =Number=, =Procedure=, =Macro=, =Environment=, =Vector=, =Type= [variables]
+*** =Void=, =Ign=, =Boolean=, =Nil=, =Pair=, =Symbol=, =String=, =Number=, =Applicative=, =Operative=, =Environment=, =Vector=, =Type= [variables]
 
 Type constants for built-in types.
 
-*** =void?=, =ign?=, =boolean?=, =null?=, =pair?=, =symbol?=, =string?=, =number?=, =procedure?=, =macro?=, =environment?=, =vector?=, =type?= [applicatives]
+*** =void?=, =ign?=, =boolean?=, =null?=, =pair?=, =symbol?=, =string?=, =number?=, =applicative?=, =operative?=, =environment?=, =vector?=, =type?= [applicatives]
 
 Type predicates for built-in types.
 
@@ -393,6 +393,10 @@ Constructs a nil-terminated list containing the values.
 Constructs a list of the values, terminated by the last value.
 
 ** Hashtables
+
+*** =Hashtable= [variable], =hashtable?= [applicative]
+
+Hashtable type and type predicate.
 
 *** =make-hashtable <hashfn> <eqfn> → hashtable= [applicative]
 

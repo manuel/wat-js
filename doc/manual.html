@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-12 21:52:50 CEST"/>
+<meta name="generated" content="2012-08-12 21:56:57 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -144,8 +144,8 @@ lang="en" xml:lang="en">
 <ul>
 <li><a href="#sec-7.1">Types </a>
 <ul>
-<li><a href="#sec-7.1.1"><code>Void</code>, <code>Ign</code>, <code>Boolean</code>, <code>Nil</code>, <code>Pair</code>, <code>Symbol</code>, <code>String</code>, <code>Number</code>, <code>Procedure</code>, <code>Macro</code>, <code>Environment</code>, <code>Vector</code>, <code>Type</code> [variables] </a></li>
-<li><a href="#sec-7.1.2"><code>void?</code>, <code>ign?</code>, <code>boolean?</code>, <code>null?</code>, <code>pair?</code>, <code>symbol?</code>, <code>string?</code>, <code>number?</code>, <code>procedure?</code>, <code>macro?</code>, <code>environment?</code>, <code>vector?</code>, <code>type?</code> [applicatives] </a></li>
+<li><a href="#sec-7.1.1"><code>Void</code>, <code>Ign</code>, <code>Boolean</code>, <code>Nil</code>, <code>Pair</code>, <code>Symbol</code>, <code>String</code>, <code>Number</code>, <code>Applicative</code>, <code>Operative</code>, <code>Environment</code>, <code>Vector</code>, <code>Type</code> [variables] </a></li>
+<li><a href="#sec-7.1.2"><code>void?</code>, <code>ign?</code>, <code>boolean?</code>, <code>null?</code>, <code>pair?</code>, <code>symbol?</code>, <code>string?</code>, <code>number?</code>, <code>applicative?</code>, <code>operative?</code>, <code>environment?</code>, <code>vector?</code>, <code>type?</code> [applicatives] </a></li>
 </ul>
 </li>
 <li><a href="#sec-7.2">Common </a>
@@ -171,11 +171,12 @@ lang="en" xml:lang="en">
 </li>
 <li><a href="#sec-7.4">Hashtables </a>
 <ul>
-<li><a href="#sec-7.4.1"><code>make-hashtable &lt;hashfn&gt; &lt;eqfn&gt; → hashtable</code> [applicative] </a></li>
-<li><a href="#sec-7.4.2"><code>make-identity-hashtable → hashtable</code> [applicative] </a></li>
-<li><a href="#sec-7.4.3"><code>make-generic-hashtable → hashtable</code> [applicative] </a></li>
-<li><a href="#sec-7.4.4"><code>hashtable-put! &lt;hashtable&gt; &lt;key&gt; &lt;val&gt; → val</code> [applicative] </a></li>
-<li><a href="#sec-7.4.5"><code>hashtable-get &lt;hashtable&gt; &lt;key&gt; → val</code> [applicative] </a></li>
+<li><a href="#sec-7.4.1"><code>Hashtable</code> [variable], <code>hashtable?</code> [applicative] </a></li>
+<li><a href="#sec-7.4.2"><code>make-hashtable &lt;hashfn&gt; &lt;eqfn&gt; → hashtable</code> [applicative] </a></li>
+<li><a href="#sec-7.4.3"><code>make-identity-hashtable → hashtable</code> [applicative] </a></li>
+<li><a href="#sec-7.4.4"><code>make-generic-hashtable → hashtable</code> [applicative] </a></li>
+<li><a href="#sec-7.4.5"><code>hashtable-put! &lt;hashtable&gt; &lt;key&gt; &lt;val&gt; → val</code> [applicative] </a></li>
+<li><a href="#sec-7.4.6"><code>hashtable-get &lt;hashtable&gt; &lt;key&gt; → val</code> [applicative] </a></li>
 </ul>
 </li>
 <li><a href="#sec-7.5">Generic Functions </a>
@@ -889,7 +890,7 @@ The library consists of definitions written in Wat itself.
 </div>
 
 <div id="outline-container-7.1.1" class="outline-4">
-<h4 id="sec-7.1.1"><code>Void</code>, <code>Ign</code>, <code>Boolean</code>, <code>Nil</code>, <code>Pair</code>, <code>Symbol</code>, <code>String</code>, <code>Number</code>, <code>Procedure</code>, <code>Macro</code>, <code>Environment</code>, <code>Vector</code>, <code>Type</code> [variables] </h4>
+<h4 id="sec-7.1.1"><code>Void</code>, <code>Ign</code>, <code>Boolean</code>, <code>Nil</code>, <code>Pair</code>, <code>Symbol</code>, <code>String</code>, <code>Number</code>, <code>Applicative</code>, <code>Operative</code>, <code>Environment</code>, <code>Vector</code>, <code>Type</code> [variables] </h4>
 <div class="outline-text-4" id="text-7.1.1">
 
 
@@ -901,7 +902,7 @@ Type constants for built-in types.
 </div>
 
 <div id="outline-container-7.1.2" class="outline-4">
-<h4 id="sec-7.1.2"><code>void?</code>, <code>ign?</code>, <code>boolean?</code>, <code>null?</code>, <code>pair?</code>, <code>symbol?</code>, <code>string?</code>, <code>number?</code>, <code>procedure?</code>, <code>macro?</code>, <code>environment?</code>, <code>vector?</code>, <code>type?</code> [applicatives] </h4>
+<h4 id="sec-7.1.2"><code>void?</code>, <code>ign?</code>, <code>boolean?</code>, <code>null?</code>, <code>pair?</code>, <code>symbol?</code>, <code>string?</code>, <code>number?</code>, <code>applicative?</code>, <code>operative?</code>, <code>environment?</code>, <code>vector?</code>, <code>type?</code> [applicatives] </h4>
 <div class="outline-text-4" id="text-7.1.2">
 
 
@@ -1175,8 +1176,20 @@ Constructs a list of the values, terminated by the last value.
 </div>
 
 <div id="outline-container-7.4.1" class="outline-4">
-<h4 id="sec-7.4.1"><code>make-hashtable &lt;hashfn&gt; &lt;eqfn&gt; → hashtable</code> [applicative] </h4>
+<h4 id="sec-7.4.1"><code>Hashtable</code> [variable], <code>hashtable?</code> [applicative] </h4>
 <div class="outline-text-4" id="text-7.4.1">
+
+
+<p>
+Hashtable type and type predicate.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-7.4.2" class="outline-4">
+<h4 id="sec-7.4.2"><code>make-hashtable &lt;hashfn&gt; &lt;eqfn&gt; → hashtable</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.4.2">
 
 
 <p>
@@ -1186,9 +1199,9 @@ Creates a new hashtable with the given hash function and equality function.
 
 </div>
 
-<div id="outline-container-7.4.2" class="outline-4">
-<h4 id="sec-7.4.2"><code>make-identity-hashtable → hashtable</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.4.2">
+<div id="outline-container-7.4.3" class="outline-4">
+<h4 id="sec-7.4.3"><code>make-identity-hashtable → hashtable</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.4.3">
 
 
 <p>
@@ -1199,9 +1212,9 @@ equality function.
 
 </div>
 
-<div id="outline-container-7.4.3" class="outline-4">
-<h4 id="sec-7.4.3"><code>make-generic-hashtable → hashtable</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.4.3">
+<div id="outline-container-7.4.4" class="outline-4">
+<h4 id="sec-7.4.4"><code>make-generic-hashtable → hashtable</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.4.4">
 
 
 <p>
@@ -1212,9 +1225,9 @@ Creates a new hashtable with <code>hash-code</code> as hash function and
 
 </div>
 
-<div id="outline-container-7.4.4" class="outline-4">
-<h4 id="sec-7.4.4"><code>hashtable-put! &lt;hashtable&gt; &lt;key&gt; &lt;val&gt; → val</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.4.4">
+<div id="outline-container-7.4.5" class="outline-4">
+<h4 id="sec-7.4.5"><code>hashtable-put! &lt;hashtable&gt; &lt;key&gt; &lt;val&gt; → val</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.4.5">
 
 
 <p>
@@ -1224,9 +1237,9 @@ Associates key with value in hashtable.
 
 </div>
 
-<div id="outline-container-7.4.5" class="outline-4">
-<h4 id="sec-7.4.5"><code>hashtable-get &lt;hashtable&gt; &lt;key&gt; → val</code> [applicative] </h4>
-<div class="outline-text-4" id="text-7.4.5">
+<div id="outline-container-7.4.6" class="outline-4">
+<h4 id="sec-7.4.6"><code>hashtable-get &lt;hashtable&gt; &lt;key&gt; → val</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.4.6">
 
 
 <p>
@@ -1641,7 +1654,7 @@ created them.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-12 21:52:50 CEST</p>
+<p class="date"> Date: 2012-08-12 21:56:57 CEST</p>
 </div>
 </div>
 </body>

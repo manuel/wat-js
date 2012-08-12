@@ -132,12 +132,12 @@
     (kar kar set-kar!)
     (kdr kdr set-kdr!))
   (define p (kons 1 2))
-  (assert (= 1 (kar p)))
-  (assert (= 2 (kdr p)))
+  (assert (num= 1 (kar p)))
+  (assert (num= 2 (kdr p)))
   (set-kar! p 3)
   (set-kdr! p 4)
-  (assert (= 3 (kar p)))
-  (assert (= 4 (kdr p)))
+  (assert (num= 3 (kar p)))
+  (assert (num= 4 (kdr p)))
   (assert (pare? p))
   (assert (eq? #f (pare? 12))))
 
@@ -157,62 +157,62 @@
   (define ht (make-hashtable idhash eq?))
   (define key "key")
   (hashtable-put! ht key 12)
-  (assert (= 12 (hashtable-get ht key)))
-  (assert (= 14 (hashtable-get ht "another-key" 14)))
+  (assert (num= 12 (hashtable-get ht key)))
+  (assert (num= 14 (hashtable-get ht "another-key" 14)))
 )
 
 ;; Conversions
 
-(assert (= 1 (string->number (symbol->string (string->symbol (number->string 1))))))
+(assert (num= 1 (string->number (symbol->string (string->symbol (number->string 1))))))
 
 ;; Generics
 
 (provide ()
   (define-generic (foo obj x) 12)
-  (assert (= (foo #void #void) 12))
-  (define-method (foo (self String) x) (+ x 5))
-  (assert (= (foo #void #void) 12))
-  (assert (= (foo "blah" (+ 1 1)) 7)))
+  (assert (num= (foo #void #void) 12))
+  (define-method (foo (self String) x) (num+ x 5))
+  (assert (num= (foo #void #void) 12))
+  (assert (num= (foo "blah" (num+ 1 1)) 7)))
 
 ;; Delimited Control
 
 (define-syntax test-check
   (vau (#ign expr res) env
-    (assert (= (eval expr env) (eval res env)))))
+    (assert (num= (eval expr env) (eval res env)))))
 
 (define new-prompt make-prompt)
 
 (test-check 'test2
   (let ((p (new-prompt)))
-    (+ (push-prompt p (push-prompt p 5))
+    (num+ (push-prompt p (push-prompt p 5))
        4))
   9)
 
 (test-check 'test3
   (let ((p (new-prompt)))
-    (+ (push-prompt p (+ (take-sub-cont p #ign 5) 6))
+    (num+ (push-prompt p (num+ (take-sub-cont p #ign 5) 6))
        4))
   9)
 
 (test-check 'test3-1
   (let ((p (new-prompt)))
-    (+ (push-prompt p (push-prompt p (+ (take-sub-cont p #ign 5) 6)))
+    (num+ (push-prompt p (push-prompt p (num+ (take-sub-cont p #ign 5) 6)))
        4))
   9)
 
 (test-check 'test3-2
   (let ((p (new-prompt)))
     (let ((v (push-prompt p
-	       (let* ((v1 (push-prompt p (+ (take-sub-cont p #ign 5) 6)))
+	       (let* ((v1 (push-prompt p (num+ (take-sub-cont p #ign 5) 6)))
 		      (v1 (take-sub-cont p #ign 7)))
-		 (+ v1 10)))))
-      (+ v 20)))
+		 (num+ v1 10)))))
+      (num+ v 20)))
   27)
 
 (test-check 'test4
   (let ((p (make-prompt)))
-    (+ (push-prompt p
-         (+ (take-sub-cont p sk (push-sub-cont sk 5))
+    (num+ (push-prompt p
+         (num+ (take-sub-cont p sk (push-sub-cont sk 5))
 	    7))
        20))
   32)
@@ -222,8 +222,8 @@
 	(p2 (new-prompt))
 	(push-twice (lambda (sk)
 		      (push-sub-cont sk (push-sub-cont sk 3)))))
-    (+ 10
-      (push-prompt p1 (+ 1
+    (num+ 10
+      (push-prompt p1 (num+ 1
         (push-prompt p2 (take-sub-cont p1 sk (push-twice sk)))))))
   15)
 
@@ -237,19 +237,19 @@
 		(take-sub-cont p2 sk2
 		  (push-sub-cont sk2
 		    (push-sub-cont sk2 3))))))))
-    (+ 100
+    (num+ 100
       (push-prompt p1
-	(+ 1
+	(num+ 1
 	  (push-prompt p2
-	    (+ 10
+	    (num+ 10
 	      (push-prompt p3 (take-sub-cont p1 sk (push-twice sk)))))))))
   135)
 
 (test-check 'monadic-paper
   (let ((p (make-prompt)))
-    (+ 2 (push-prompt p
+    (num+ 2 (push-prompt p
             (if (take-sub-cont p k
-                  (+ (push-sub-cont k #f)
+                  (num+ (push-sub-cont k #f)
 		     (push-sub-cont k #t)))
 		3
 		4))))
@@ -258,7 +258,7 @@
 ;; Delimited Dynamic Binding
 
 (let ((p (make-prompt)))
-  (assert (= 117 (+ 10 (push-prompt p (+ 2 (shift p k (+ 100 (k (k 3))))))))))
+  (assert (num= 117 (num+ 10 (push-prompt p (num+ 2 (shift p k (num+ 100 (k (k 3))))))))))
 
 (test-check 'ddb-1
   (let ((dv (dnew)))
@@ -334,7 +334,7 @@
     (myhandle (lambda () (t))
               (lambda (s) s)))
 
-  (assert (= 3 (show (lambda () (+ 1 2)))))
-  (assert (eq? #f (show (lambda () (+ 1 (myraise #f))))))
+  (assert (num= 3 (show (lambda () (num+ 1 2)))))
+  (assert (eq? #f (show (lambda () (num+ 1 (myraise #f))))))
 )
 

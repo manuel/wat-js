@@ -228,8 +228,8 @@ var wat = (function() {
 	bind(e, new Sym("display"), jswrap(function(str) { console.log(str); return str; }));
 	bind(e, new Sym("read-from-string"), jswrap(function(str) { return array_to_list(parse(str.jsstr)); }));
 	bind(e, new Sym("fail"), jswrap(fail));
-	bind(e, new Sym("="), jswrap(function(num1, num2) { return num_eql(num1, num2) ? T : F }));
-	bind(e, new Sym("+"), jswrap(num_add));
+	bind(e, new Sym("num="), jswrap(function(num1, num2) { return num_eql(num1, num2) ? T : F }));
+	bind(e, new Sym("num+"), jswrap(num_add));
 	bind(e, new Sym("string->symbol"), jswrap(str_to_sym));
 	bind(e, new Sym("symbol->string"), jswrap(sym_to_str));
 	bind(e, new Sym("string->number"), jswrap(str_to_num));

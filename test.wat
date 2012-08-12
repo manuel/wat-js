@@ -174,6 +174,17 @@
   (assert (num= (foo #void #void) 12))
   (assert (num= (foo "blah" (num+ 1 1)) 7)))
 
+;; Generic Equality
+
+(provide ()
+  (assert (= 1 1))
+  (assert (= 'foo 'foo))
+  (assert (not (= 1 2)))
+  (assert (not (= 1 "foo")))
+  (assert (not (= "bar" "foo")))
+  (assert (not (= 'bar 'foo)))
+)
+
 ;; Delimited Control
 
 (define-syntax test-check

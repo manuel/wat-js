@@ -283,7 +283,7 @@
   (define (make-identity-hashtable) (make-hashtable idhash eq?))
 )
 
-(provide (define-generic define-method)
+(provide (define-generic define-method put-method!)
   (define generic->vtable (make-identity-hashtable))
   (define-syntax (define-generic (name . args) . body) env
     (define vtable (make-identity-hashtable))
@@ -295,13 +295,26 @@
     (eval (list def name generic) env)
     (hashtable-put! generic->vtable generic vtable)
     generic)
+  (define (put-method! generic type method)
+    (define vtable (hashtable-get generic->vtable generic))
+    (hashtable-put! vtable type method))
   (define-syntax (define-method (name (self type) . args) . body) env
-    (define vtable (hashtable-get generic->vtable (eval name env)))
     (define method (eval (list* lambda (list* self args) body) env))
-    (hashtable-put! vtable (eval type env) method)
-    method)
+    (put-method! (eval name env) (eval type env) method))
 )
 
 (define String (type-of "foo"))
 (define Symbol (type-of 'foo))
 (define Number (type-of 0))
+
+(provide (=)
+  (define-generic (= a b) (eq? a b))
+  (define-syntax (define-builtin-= type-name pred-expr) env
+    (define type (eval type-name env))
+    (define pred (eval pred-expr env))
+    (put-method! = type (lambda (a b) (if (eq? type (type-of b)) (pred a b) #f))))
+  (define-builtin-= Number num=)
+  (define-builtin-= String str=)
+  (define-builtin-= Symbol (lambda (a b) (= (symbol->string a) (symbol->string b))))
+)
+

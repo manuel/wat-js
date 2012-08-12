@@ -403,7 +403,7 @@ key is unbound.
 
 ** Generic Functions
 
-*** =define-generic (<name> . <args>) . [<body>]→ generic= [operative]
+*** =define-generic (<name> . <args>) . [<body>] → generic= [operative]
 
 Defines a new generic function.  If the optional body expressions are
 supplied, a default method is installed that will be used when no
@@ -422,6 +422,20 @@ Adds a method to a generic function.
 (define-method (->number (self Symbol))
   (string->number (symbol->string self)))
 #+END_EXAMPLE
+
+*** @<code>= <a> <b> → boolean@</code> [generic]
+
+Generic equality predicate.  Different types may attach different
+methods to this generic function.  If no method is defined for a type,
+falls back to =eq?=.
+
+Methods for the following types are predefined:
+
+ * Two symbols are equal if they have the same string name.
+
+ * Two numbers are equal if they are the same numerically.
+
+ * Two strings are equal if they contain the same code points.
 
 ** Dynamic Binding
 

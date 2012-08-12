@@ -38,7 +38,7 @@ var wat = (function() {
     Eval.prototype.combine = function(fbr, e, o) { fbr.prime(elt(o, 0), elt(o, 1)); };
     Begin.prototype.combine = function(fbr, e, o) { if (o === NIL) fbr.a = VOID; else begin1(fbr, e, o); };
     function begin1(fbr, e, xs) { if (cdr(xs) !== NIL) { fbr.k = new KBegin(fbr.k, e, cdr(xs), xs); } fbr.prime(car(xs), e); }
-    function KBegin(k, e, xs, dbg) { this.k = k; this.e = e; this.xs = xs; }
+    function KBegin(k, e, xs, dbg) { this.k = k; this.e = e; this.xs = xs; this.dbg = dbg; }
     KBegin.prototype.invoke = function(fbr) { fbr.k = this.k; begin1(fbr, this.e, this.xs); }
     /* Delimited Control and Metacontinuations */
     function KDone() {}

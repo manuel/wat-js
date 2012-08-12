@@ -28,18 +28,14 @@
     (js-set-prop! (getElementById "input") "value" (to-js ""))
     res))
 
-(define env (current-environment))
-(define *read-k* #void)
+(define *input-pollset* (make-pollset))
+(js-set-prop! (getElementById "input") "onkeypress" (pollset-callback *input-pollset*))
 
 (define (read)
-  (take-sub-cont *top-level* k
-    (set! env *read-k* k)))
-
-(js-set-prop! (getElementById "input")
-	      "onkeypress"
-	      (js-callback (lambda (evt)
-			     (when (= (from-js (js-prop evt "keyCode")) 13)
-                      	       (push-prompt *top-level* (push-sub-cont *read-k* (read-input)))))))
+  (let ((evt (pollset-wait *input-pollset*)))
+    (if (= (from-js (js-prop evt "keyCode")) 13)
+        (read-input)
+        (read))))
 
 (define (display msg)
   (let ((div (createElement "div")))

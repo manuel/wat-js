@@ -5,7 +5,7 @@ var watbrowser = (function() {
 	load_file("../crust.wat");
 	load_file("browser.wat");
 	load_file("../repl.wat");
-//	load_file("../test.wat");
+	load_file("../test.wat");
     }
 
     function load_file(path) {

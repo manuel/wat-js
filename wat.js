@@ -2,7 +2,9 @@ var wat = (function() {
     /***** Evaluation *****/
     /* Fibers */
     function Fbr() { this.a = null; this.k = new KDone(); this.mk = new MKDone(); }
-    Fbr.prototype.run = function() { while(this.k !== null) this.k.invoke(this); return this.a; };
+    Fbr.prototype.run = function() {
+        try { while(this.k !== null) this.k.invoke(this); return this.a; }
+        catch(exc) { if (exc !== "suspend") throw exc; } };
     Fbr.prototype.prime = function(x, e) { this.a = x; this.k = new KEval(this.k, e); };
     /* Form Evaluation */
     function KEval(k, e) { this.k = k; this.e = e; }
@@ -43,10 +45,10 @@ var wat = (function() {
     KDone.prototype.invoke = function(fbr) { fbr.mk.underflow(fbr); };
     function MKDone() {};
     MKDone.prototype.underflow = function(fbr) { fbr.k = null; };
-    function MKSeg(mk, k) { assert(type_of(mk)); assert(type_of(k)); this.mk = mk; this.k = k; }
+    function MKSeg(mk, k) { this.mk = mk; this.k = k; }
     function mkseg(mk, k) { if (k instanceof KDone) return mk; else return new MKSeg(mk, k); } // TCO
     MKSeg.prototype.underflow = function(fbr) { fbr.mk = this.mk; fbr.k = this.k; };
-    function MKPrompt(mk, p) { assert(type_of(mk)); assert(type_of(p)); this.mk = mk; this.p = p; }
+    function MKPrompt(mk, p) { this.mk = mk; this.p = p; }
     MKPrompt.prototype.underflow = function(fbr) { fbr.mk = this.mk; fbr.mk.underflow(fbr); };
     function PushPrompt() {}; function TakeSubCont() {}; function PushSubCont() {}
     PushPrompt.prototype.combine = function(fbr, e, o) {
@@ -76,6 +78,19 @@ var wat = (function() {
     MKDone.prototype.append_mk = function(mk) { return mk; };
     MKPrompt.prototype.append_mk = function(mk) { return new MKPrompt(this.mk.append_mk(mk), this.p); };
     MKSeg.prototype.append_mk = function(mk) { return mkseg(this.mk.append_mk(mk), this.k); };
+    /* Stack Inspection */
+    function Stacktrace() {}
+    Stacktrace.prototype.combine = function(fbr, e, o) {
+        var depth = elt(o, 0); fbr.a = ktrace(fbr.k, fbr.mk, depth.jsnum); };
+    MKDone.prototype.trace_mk = function(depth) { return NIL; };
+    MKPrompt.prototype.trace_mk = function(depth) {
+        if (depth === 0) return NIL; else return cons(this, this.mk.trace_mk(depth - 1)); };
+    MKSeg.prototype.trace_mk = function(depth) {
+        return ktrace(this.k, this.mk, depth); };
+    function ktrace(k, mk, depth) {
+        if (depth === 0) return NIL;
+        else if (k instanceof KDone) return mk.trace_mk(depth);
+        else return cons(k, ktrace(k.k, mk, depth)); }
     /* JS Bridge */
     function JSFun(jsfun) { this.jsfun = jsfun; }
     JSFun.prototype.combine = function(fbr, e, o) { fbr.a = this.jsfun.apply(null, list_to_array(o)); };
@@ -104,6 +119,18 @@ var wat = (function() {
 	default: return obj;
 	}
     }
+    /* Poll Sets */
+    function Pollset() { this.events = []; this.suspendedFbr = null; }
+    function PollsetWait() {}; function KPollsetWait(k) { this.k = k; }
+    PollsetWait.prototype.combine = function(fbr, e, o) { fbr.k = new KPollsetWait(fbr.k); fbr.prime(elt(o, 0), e); }
+    KPollsetWait.prototype.invoke = function(fbr) {
+        var ps = fbr.a;
+        if (ps.events.length > 0) { fbr.k = this.k; fbr.a = ps.events.shift(); }
+        else { ps.suspendedFbr = fbr; throw "suspend"; } };
+    function pollset_callback(ps) {
+        return function(evt) {
+            ps.events.push(evt);
+            if (ps.suspendedFbr !== null) { var fbr = ps.suspendedFbr; ps.suspendedFbr = null; fbr.run(); } } };
     /***** Objects *****/
     /* Core */
     function Sym(name) { this.name = name; }
@@ -115,7 +142,7 @@ var wat = (function() {
     function Env(parent) { this.bindings = Object.create(parent ? parent.bindings : null); }
     function lookup(e, sym) { var val = e.bindings[sym.name]; return (val !== undefined) ? val : fail("unbound: " + sym.name); }
     function bind(e, lhs, rhs) { lhs.match(e, rhs); }
-    Sym.prototype.match = function(e, rhs) { assert(type_of(rhs)); e.bindings[this.name] = rhs; };
+    Sym.prototype.match = function(e, rhs) { e.bindings[this.name] = rhs; };
     Cons.prototype.match = function(e, rhs) { car(this).match(e, car(rhs)); cdr(this).match(e, cdr(rhs)); };
     Nil.prototype.match = function(e, rhs) { if (rhs !== NIL) fail("NIL expected"); };
     Ign.prototype.match = function(e, rhs) {};
@@ -130,6 +157,7 @@ var wat = (function() {
     /* Data */
     function Str(jsstr) { this.jsstr = jsstr; };
     function str_eql(str1, str2) { return str1.jsstr === str2.jsstr; }
+    function str_cat(strings) { return strings.map(function(str) { return str.jsstr; }).join(""); }
     function str_print(str1) { return JSON.stringify(str1.jsstr); }
     function Num(jsnum) { this.jsnum = jsnum; };
     function num_eql(num1, num2) { return num1.jsnum === num2.jsnum; }
@@ -155,7 +183,7 @@ var wat = (function() {
 	return cons(type, cons(tagger, cons(untagger, NIL))); }
     function init_types(types) { types.map(function (type) { type.prototype.wat_type = new Type(); }); }
     init_types([KDone, KEval, KCombine, KApply, KEvalArg, KDef, KIf, KBegin, MKDone, MKPrompt, MKSeg,
-		Opv, Apv, Def, Vau, If, Eval, Begin, JSFun, JSCallback,
+		Opv, Apv, Def, Vau, If, Eval, Begin, Stacktrace, JSFun, JSCallback, Pollset, PollsetWait, KPollsetWait,
 		Sym, Cons, Env, Str, Num, Vector, Void, Ign, Nil, Bool, Type]);
     /* Utilities */
     function assert(b) { if (!b) fail("assertion failed"); }
@@ -229,10 +257,12 @@ var wat = (function() {
 	bind(e, new Sym("identity-hash-code"), jswrap(function(obj) { return new Num(idhash(obj)); }));
 	bind(e, new Sym("display"), jswrap(function(str) { console.log(str); return str; }));
 	bind(e, new Sym("read-from-string"), jswrap(function(str) { return array_to_list(parse(str.jsstr)); }));
+        bind(e, new Sym("stacktrace"), wrap(new Stacktrace()));
 	bind(e, new Sym("fail"), jswrap(fail));
 	bind(e, new Sym("num="), jswrap(function(num1, num2) { return num_eql(num1, num2) ? T : F }));
 	bind(e, new Sym("num+"), jswrap(num_add));
         bind(e, new Sym("str="), jswrap(function(str1, str2) { return str_eql(str1, str2) ? T : F }));
+        bind(e, new Sym("strcat"), jswrap(function() { return str_cat.call(null, Array.prototype.slice.call(arguments)); }));
         bind(e, new Sym("str-print"), jswrap(function(str) { return new Str(str_print(str)); }));
 	bind(e, new Sym("string->symbol"), jswrap(str_to_sym));
 	bind(e, new Sym("symbol->string"), jswrap(sym_to_str));
@@ -242,6 +272,9 @@ var wat = (function() {
 	bind(e, new Sym("vector-ref"), jswrap(function(vector, i) { return vector_ref(vector, i.jsnum); }));
 	bind(e, new Sym("vector-set!"), jswrap(function(vector, i, val) { return vector_set(vector, i.jsnum, val); }));
 	bind(e, new Sym("vector-length"), jswrap(function(vector) { return new Num(vector_length(vector)); }));
+        bind(e, new Sym("make-pollset"), jswrap(function() { return new Pollset(); }));
+        bind(e, new Sym("pollset-callback"), jswrap(function(ps) { return pollset_callback(ps); }));
+        bind(e, new Sym("pollset-wait"), new PollsetWait());
 	bind(e, new Sym("js-global"), jswrap(js_global));
 	bind(e, new Sym("js-set-global!"), jswrap(js_set_global));
 	bind(e, new Sym("js-prop"), jswrap(js_prop));

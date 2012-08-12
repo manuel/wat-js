@@ -2,16 +2,8 @@
 // Contributed by Chris Neukirchen
 // Adapted by mjs
 
-// In same directory as repl.js:
-// > js repl.js
-//
-// Or provide files at command line:
-// > js repl.js ../test.wat
-//
-// Use -m for JIT.
-
-load("../jsparse.js");
-load("../wat.js");
+load("jsparse.js");
+load("wat.js");
 
 var wat_env = wat.mkenvcore();
 

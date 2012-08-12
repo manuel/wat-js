@@ -118,10 +118,10 @@
     (assert (eq? #t (begin (eq? #t #t))))
     (assert (eq? #t (begin #f (eq? #t #t)))))
 
-;; IDHASH
+;; IDENTITY-HASH-CODE
 
 (provide ()
-  (assert (not (eq? (idhash "foo") (idhash "bar")))))
+  (assert (not (eq? (identity-hash-code "foo") (identity-hash-code "bar")))))
 
 ;; DEFINE-RECORD-TYPE
 
@@ -154,7 +154,7 @@
 ;; Hashtables
 
 (provide ()
-  (define ht (make-hashtable idhash eq?))
+  (define ht (make-hashtable identity-hash-code eq?))
   (define key "key")
   (hashtable-put! ht key 12)
   (assert (num= 12 (hashtable-get ht key)))

@@ -280,7 +280,7 @@
         (if (eqfn k (caar buckets))
             (cdar buckets)
             (buckets-find (cdr buckets) k eqfn default))))
-  (define (make-identity-hashtable) (make-hashtable idhash eq?))
+  (define (make-identity-hashtable) (make-hashtable identity-hash-code eq?))
 )
 
 (provide (define-generic define-method put-method!)
@@ -318,3 +318,6 @@
   (define-builtin-= Symbol (lambda (a b) (= (symbol->string a) (symbol->string b))))
 )
 
+(provide (hash-code)
+  (define-generic (hash-code obj) (identity-hash-code obj))
+)

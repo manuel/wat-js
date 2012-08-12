@@ -225,7 +225,7 @@ var wat = (function() {
         bind(e, new Sym("bound?"), jswrap(function (sym, e) { return (bound(sym, e)) ? T : F }));
 	bind(e, new Sym("make-type"), jswrap(make_type));
 	bind(e, new Sym("type-of"), jswrap(type_of));
-	bind(e, new Sym("idhash"), jswrap(function(obj) { return new Num(idhash(obj)); }));
+	bind(e, new Sym("identity-hash-code"), jswrap(function(obj) { return new Num(idhash(obj)); }));
 	bind(e, new Sym("display"), jswrap(function(str) { console.log(str); return str; }));
 	bind(e, new Sym("read-from-string"), jswrap(function(str) { return array_to_list(parse(str.jsstr)); }));
 	bind(e, new Sym("fail"), jswrap(fail));

@@ -1,10 +1,23 @@
 var wat = (function() {
     /***** Evaluation *****/
     /* Fibers */
-    function Fbr() { this.a = null; this.k = new KDone(); this.mk = new MKDone(); }
+    function Fbr(e) { this.e = e; this.a = null; this.k = new KDone(); this.mk = new MKDone(); }
     Fbr.prototype.run = function() {
-        try { while(this.k !== null) this.k.invoke(this); return this.a; }
-        catch(exc) { if (exc !== "suspend") throw exc; } };
+        while(this.k !== null) {
+            try {
+                this.k.invoke(this);
+            } catch(exc) {
+                if (exc === "suspend") {
+                    return VOID;
+                } else {
+                    var trap = this.e.bindings["trap"];
+                    if (trap !== undefined) this.prime(cons(trap, cons(exc, NIL)), this.e);
+                    else throw exc;
+                }
+            }
+        }
+        return this.a;
+    };
     Fbr.prototype.prime = function(x, e) { this.a = x; this.k = new KEval(this.k, e, x); };
     /* Form Evaluation */
     function KEval(k, e, dbg) { this.k = k; this.e = e; this.dbg = dbg; }
@@ -13,7 +26,8 @@ var wat = (function() {
     Cons.prototype.evaluate = function(fbr, k, e) { fbr.k = new KCombine(k, e, cdr(this), this); fbr.prime(car(this), e); };
     /* Operative & Applicative Combiners */
     function KCombine(k, e, o, dbg) { this.k = k; this.e = e; this.o = o; this.dbg = dbg; }
-    KCombine.prototype.invoke = function(fbr) { fbr.k = this.k; fbr.a.combine(fbr, this.e, this.o); };
+    KCombine.prototype.invoke = function(fbr) {
+        fbr.k = this.k; fbr.a.combine ? fbr.a.combine(fbr, this.e, this.o) : fail("not a combiner"); };
     function Opv(p, ep, x, e) { this.p = p; this.ep = ep; this.x = x; this.e = e; }
     function Apv(cmb) { this.cmb = cmb; }; function wrap(cmb) { return new Apv(cmb); }; function unwrap(apv) { return apv.cmb; }
     Opv.prototype.combine = function(fbr, e, o) {
@@ -48,7 +62,7 @@ var wat = (function() {
     function MKSeg(mk, k) { this.mk = mk; this.k = k; }
     function mkseg(mk, k) { if (k instanceof KDone) return mk; else return new MKSeg(mk, k); } // TCO
     MKSeg.prototype.underflow = function(fbr) { fbr.mk = this.mk; fbr.k = this.k; };
-    function MKPrompt(mk, p) { this.mk = mk; this.p = p; }
+    function MKPrompt(mk, p) { this.mk = mk; this.p = p; this.dbg = p; }
     MKPrompt.prototype.underflow = function(fbr) { fbr.mk = this.mk; fbr.mk.underflow(fbr); };
     function PushPrompt() {}; function TakeSubCont() {}; function PushSubCont() {}
     PushPrompt.prototype.combine = function(fbr, e, o) {
@@ -294,7 +308,7 @@ var wat = (function() {
     }
     /***** API *****/
     return {
-	"eval": function(x, e) { var fbr = new Fbr(); fbr.prime(x, e); return fbr.run(); },
+	"eval": function(x, e) { var fbr = new Fbr(e); fbr.prime(x, e); return fbr.run(); },
 	"mkenvcore": mkenvcore, "parse": parse,
     };
 }());

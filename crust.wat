@@ -269,6 +269,14 @@
          field-specs)
     type))
 
+(define *top-level* '*top-level*)
+
+(define (trap exc)
+  (display (strcat "An error occurred: " (->string (from-js exc))))
+  (display (strcat "Stacktrace:"))
+  (print-stacktrace 20)
+  (take-sub-cont *top-level* k (push-prompt *top-level* #void)))
+
 (provide (Hashtable hashtable? make-hashtable hashtable-put! hashtable-get make-identity-hashtable)
   (define-record-type Hashtable
     (construct-hashtable hashfn eqfn env)
@@ -372,3 +380,5 @@
 (define (print-stacktrace depth)
   (map (lambda (k) (display (strcat (->string k) " " (->string (debug-info k))))) (stacktrace depth))
   #void)
+
+

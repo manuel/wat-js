@@ -154,8 +154,10 @@
 (def define
   (vau (lhs . rhs) env
     (if (pair? lhs)
-	(let (((name . args) lhs))
-	  (eval (list def name (list* lambda args rhs)) env))
+	(let* (((name . args) lhs)
+               (proc (eval (list* lambda args rhs) env)))
+	  (eval (list def name proc) env)
+          (set-label! proc (symbol->string name)))
 	(eval (list* def lhs rhs) env))))
 
 (def define-syntax
@@ -249,7 +251,7 @@
                    (tagger fields-dict))))
          (pred (lambda (obj) (eq? (type-of obj) type))))
     (eval (list def (list name ctor-name pred-name) (list list type ctor pred)) env)
-    (set-type-name! type (symbol->string name))
+    (set-label! type (symbol->string name))
     (map (lambda (field-spec)
            (let (((name accessor-name . opt) field-spec))
              (eval (list def accessor-name (lambda (obj)
@@ -313,6 +315,7 @@
                                (eval (list* lambda args body) env)))
     (define (generic self . arg)
       (apply (hashtable-get vtable (type-of self) default-method) (cons self arg)))
+    (set-label! generic (symbol->string name))
     (eval (list def name generic) env)
     (hashtable-put! generic->vtable generic vtable)
     generic)
@@ -342,7 +345,7 @@
 (define (make-generic-hashtable) (make-hashtable hash-code =))
 
 (provide (->string)
-  (define-generic (->string obj) (strcat "#[" (type-name (type-of obj)) "]"))
+  (define-generic (->string obj) (strcat "#[" (label (type-of obj)) "]"))
   (define-method (->string (obj Void)) "#void")
   (define-method (->string (obj Ign)) "#ign")
   (define-method (->string (obj Boolean)) (if obj "#t" "#f"))
@@ -358,12 +361,12 @@
   (define-method (->string (obj Symbol)) (symbol->string obj))
   (define-method (->string (obj String)) (str-print obj))
   (define-method (->string (obj Number)) (number->string obj))
-  (define-method (->string (obj Procedure)) (strcat "#[Procedure " (->string (unwrap obj)) "]"))
+  (define-method (->string (obj Procedure)) (label obj))
   (define-method (->string (obj Macro)) "#[Macro]")
   (define-method (->string (obj Environment)) "#[Environment]")
   (define-method (->string (obj Vector)) "#[Vector]")
 )
 
 (define (print-stacktrace depth)
-  (map (lambda (k) (display (strcat (->string k) " " (->string (dbg k))))) (stacktrace depth))
+  (map (lambda (k) (display (strcat (->string k) " " (->string (debug-info k))))) (stacktrace depth))
   #void)

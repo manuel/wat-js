@@ -18,7 +18,7 @@ var wat = (function() {
     function Apv(cmb) { this.cmb = cmb; }; function wrap(cmb) { return new Apv(cmb); }; function unwrap(apv) { return apv.cmb; }
     Opv.prototype.combine = function(fbr, e, o) {
 	var xe = new Env(this.e); bind(xe, this.p, o); bind(xe, this.ep, e); fbr.prime(this.x, xe); };
-    Apv.prototype.combine = function(fbr, e, o) { evalArgs(fbr, new KApply(fbr.k, e, this.cmb, o), e, o, NIL); };
+    Apv.prototype.combine = function(fbr, e, o) { evalArgs(fbr, new KApply(fbr.k, e, this.cmb, cons(fbr.a, o)), e, o, NIL); };
     function KApply(k, e, cmb, dbg) { this.k = k; this.e = e; this.cmb = cmb; this.dbg = dbg; }
     KApply.prototype.invoke = function(fbr) { fbr.k = this.k; fbr.prime(cons(this.cmb, fbr.a), this.e); };
     function evalArgs(fbr, k, e, todo, done) {
@@ -177,12 +177,12 @@ var wat = (function() {
 	var tagger = jswrap(function(val) { return new Tagged(type, val); });
 	var untagger = jswrap(function(obj) { if (type_of(obj) === type) return obj.val; else fail("wrong type"); });
 	return cons(type, cons(tagger, cons(untagger, NIL))); }
-    function init_types(typenames) {
-        typenames.map(function (typename) { var type = new Type(); set_type_name(type, typename);
-                                            eval(typename).prototype.wat_type = type; }); }
-    function type_name(type) { return type.wat_typename ? type.wat_typename : "(Anonymous Type)"; }
-    function set_type_name(type, name) { type.wat_typename = name; }
+    function label(type) { return type.wat_label ? type.wat_label : "[anonymous]"; }
+    function set_label(type, name) { type.wat_label = name; }
     function dbg(obj) { return obj.dbg ? obj.dbg : VOID; }
+    function init_types(typenames) {
+        typenames.map(function (typename) { var type = new Type(); set_label(type, typename);
+                                            eval(typename).prototype.wat_type = type; }); }
     init_types(["KDone", "KEval", "KCombine", "KApply", "KEvalArg", "KDef", "KIf", "KBegin", "MKDone", "MKPrompt", "MKSeg",
 		"Opv", "Apv", "Def", "Vau", "If", "Eval", "Begin", "Stacktrace", "JSFun",
                 "Pollset", "PollsetWait", "KPollsetWait",
@@ -256,9 +256,9 @@ var wat = (function() {
         bind(e, new Sym("bound?"), jswrap(function (sym, e) { return (bound(sym, e)) ? T : F }));
 	bind(e, new Sym("make-type"), jswrap(make_type));
 	bind(e, new Sym("type-of"), jswrap(type_of));
-	bind(e, new Sym("type-name"), jswrap(function(type) { return new Str(type_name(type)); }));
-	bind(e, new Sym("set-type-name!"), jswrap(function(type, name) { set_type_name(type, name.jsstr); return name; }));
-	bind(e, new Sym("dbg"), jswrap(dbg));
+	bind(e, new Sym("label"), jswrap(function(type) { return new Str(label(type)); }));
+	bind(e, new Sym("set-label!"), jswrap(function(type, name) { set_label(type, name.jsstr); return name; }));
+	bind(e, new Sym("debug-info"), jswrap(dbg));
 	bind(e, new Sym("identity-hash-code"), jswrap(function(obj) { return new Num(idhash(obj)); }));
 	bind(e, new Sym("display"), jswrap(function(str) { console.log(str); return str; }));
 	bind(e, new Sym("read-from-string"), jswrap(function(str) { return array_to_list(parse(str.jsstr)); }));

@@ -561,14 +561,15 @@ occurs.
 
 Returns a list of stack frames, up to the given depth.
 
-*** =type-name <type> → string= [applicative]
+*** =label <obj> → string= [applicative]
 
-Returns the name of a type.
+Returns the descriptive label of an object.
 
-*** =set-type-name! <type> <string> → string= [applicative]
+*** =set-label! <obj> <string> → string= [applicative]
 
-Updates the name of a type.
-*** =dbg <obj> → whatever= [applicative]
+Updates the descriptive label of an object.
+
+*** =debug-info <obj> → whatever= [applicative]
 
 Returns arbitrary debugging information about an object.  For
 continuation frames, this will typically be the expression that

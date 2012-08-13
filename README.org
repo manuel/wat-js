@@ -19,8 +19,7 @@ Try Wat online with a rudimentary REPL at
 
 ** Wat on the PC
 
-=cd= to =pc/= and execute =js repl.js= (requires the SpiderMonkey JS
-interpreter).
+Execute =./wat=.  (Requires SpiderMonkey command-line JS interpreter.)
 
 ** About =wat-js=
 

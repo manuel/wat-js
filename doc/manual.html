@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-13 00:34:50 CEST"/>
+<meta name="generated" content="2012-08-13 14:38:12 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -198,7 +198,7 @@ lang="en" xml:lang="en">
 </li>
 <li><a href="#sec-8">Danger Zone </a>
 <ul>
-<li><a href="#sec-8.1">JavaScript Bridge </a>
+<li><a href="#sec-8.1">JavaScript Object Bridge </a>
 <ul>
 <li><a href="#sec-8.1.1"><code>js-global &lt;string&gt; → result</code> [applicative] </a></li>
 <li><a href="#sec-8.1.2"><code>js-set-global! &lt;string&gt; &lt;val&gt; → val</code> [applicative] </a></li>
@@ -208,18 +208,22 @@ lang="en" xml:lang="en">
 <li><a href="#sec-8.1.6"><code>js-method &lt;string&gt; → cmb</code> [applicative] </a></li>
 <li><a href="#sec-8.1.7"><code>to-js &lt;obj&gt; → jsobj</code> [applicative] </a></li>
 <li><a href="#sec-8.1.8"><code>from-js &lt;js-obj&gt; → obj</code> [applicative] </a></li>
-<li><a href="#sec-8.1.9"><code>make-pollset → pollset</code> [applicative] </a></li>
-<li><a href="#sec-8.1.10"><code>pollset-callback &lt;pollset&gt; → jsfun</code> [applicative] </a></li>
-<li><a href="#sec-8.1.11"><code>pollset-wait &lt;pollset&gt; → event</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-8.2">Debugging Interface </a>
+<li><a href="#sec-8.2">JavaScript Event Pollsets </a>
 <ul>
-<li><a href="#sec-8.2.1"><code>stacktrace &lt;depth&gt; → list</code> [applicative] </a></li>
-<li><a href="#sec-8.2.2"><code>label &lt;obj&gt; → string</code> [applicative] </a></li>
-<li><a href="#sec-8.2.3"><code>set-label! &lt;obj&gt; &lt;string&gt; → string</code> [applicative] </a></li>
-<li><a href="#sec-8.2.4"><code>debug-info &lt;obj&gt; → whatever</code> [applicative] </a></li>
-<li><a href="#sec-8.2.5"><code>trap &lt;exc&gt; → |</code> [applicative] </a></li>
+<li><a href="#sec-8.2.1"><code>make-pollset → pollset</code> [applicative] </a></li>
+<li><a href="#sec-8.2.2"><code>pollset-callback &lt;pollset&gt; → jsfun</code> [applicative] </a></li>
+<li><a href="#sec-8.2.3"><code>pollset-wait &lt;pollset&gt; → event</code> [applicative] </a></li>
+</ul>
+</li>
+<li><a href="#sec-8.3">Debugging Interface </a>
+<ul>
+<li><a href="#sec-8.3.1"><code>stacktrace &lt;depth&gt; → list</code> [applicative] </a></li>
+<li><a href="#sec-8.3.2"><code>label &lt;obj&gt; → string</code> [applicative] </a></li>
+<li><a href="#sec-8.3.3"><code>set-label! &lt;obj&gt; &lt;string&gt; → string</code> [applicative] </a></li>
+<li><a href="#sec-8.3.4"><code>debug-info &lt;obj&gt; → whatever</code> [applicative] </a></li>
+<li><a href="#sec-8.3.5"><code>trap &lt;exc&gt; → |</code> [applicative] </a></li>
 </ul>
 </li>
 </ul>
@@ -1427,7 +1431,7 @@ This is the place for all kinds of tasteless things.
 </div>
 
 <div id="outline-container-8.1" class="outline-3">
-<h3 id="sec-8.1">JavaScript Bridge </h3>
+<h3 id="sec-8.1">JavaScript Object Bridge </h3>
 <div class="outline-text-3" id="text-8.1">
 
 
@@ -1540,17 +1544,33 @@ JavaScript object.
 Tries to convert a JavaScript object, such as a string, to a similar
 Wat object.
 </p>
+
+</div>
 </div>
 
 </div>
 
-<div id="outline-container-8.1.9" class="outline-4">
-<h4 id="sec-8.1.9"><code>make-pollset → pollset</code> [applicative] </h4>
-<div class="outline-text-4" id="text-8.1.9">
+<div id="outline-container-8.2" class="outline-3">
+<h3 id="sec-8.2">JavaScript Event Pollsets </h3>
+<div class="outline-text-3" id="text-8.2">
 
 
 <p>
-Creates a poll set for waiting on JS events.
+When Wat code needs to wait for a JavaScript event, such as a mouse
+click or textfield input, the execution context (fiber) needs to be
+suspended.  This mechanism of suspending while waiting for events is
+offered in the form of <code>epoll</code>-style pollsets.
+</p>
+
+</div>
+
+<div id="outline-container-8.2.1" class="outline-4">
+<h4 id="sec-8.2.1"><code>make-pollset → pollset</code> [applicative] </h4>
+<div class="outline-text-4" id="text-8.2.1">
+
+
+<p>
+Creates a pollset for waiting on JS events.
 </p>
 <p>
 A pollset contains a queue of JS events.
@@ -1559,9 +1579,9 @@ A pollset contains a queue of JS events.
 
 </div>
 
-<div id="outline-container-8.1.10" class="outline-4">
-<h4 id="sec-8.1.10"><code>pollset-callback &lt;pollset&gt; → jsfun</code> [applicative] </h4>
-<div class="outline-text-4" id="text-8.1.10">
+<div id="outline-container-8.2.2" class="outline-4">
+<h4 id="sec-8.2.2"><code>pollset-callback &lt;pollset&gt; → jsfun</code> [applicative] </h4>
+<div class="outline-text-4" id="text-8.2.2">
 
 
 <p>
@@ -1569,24 +1589,23 @@ Returns a native JS function that can be used as single-argument
 callback on e.g. DOM elements.
 </p>
 <p>
-Events delivered to the callback will be added to the poll set's
-queue.
+Events delivered to the callback will be added to the pollset's queue.
 </p>
 </div>
 
 </div>
 
-<div id="outline-container-8.1.11" class="outline-4">
-<h4 id="sec-8.1.11"><code>pollset-wait &lt;pollset&gt; → event</code> [applicative] </h4>
-<div class="outline-text-4" id="text-8.1.11">
+<div id="outline-container-8.2.3" class="outline-4">
+<h4 id="sec-8.2.3"><code>pollset-wait &lt;pollset&gt; → event</code> [applicative] </h4>
+<div class="outline-text-4" id="text-8.2.3">
 
 
 <p>
-If the poll set's queue is non-empty, return the oldest event and
+If the pollset's queue is non-empty, return the oldest event and
 remove it from the queue.
 </p>
 <p>
-If the poll set's queue is empty, block the fiber until an event
+If the pollset's queue is empty, block the fiber until an event
 occurs.
 </p>
 </div>
@@ -1594,17 +1613,17 @@ occurs.
 
 </div>
 
-<div id="outline-container-8.2" class="outline-3">
-<h3 id="sec-8.2">Debugging Interface </h3>
-<div class="outline-text-3" id="text-8.2">
+<div id="outline-container-8.3" class="outline-3">
+<h3 id="sec-8.3">Debugging Interface </h3>
+<div class="outline-text-3" id="text-8.3">
 
 
 
 </div>
 
-<div id="outline-container-8.2.1" class="outline-4">
-<h4 id="sec-8.2.1"><code>stacktrace &lt;depth&gt; → list</code> [applicative] </h4>
-<div class="outline-text-4" id="text-8.2.1">
+<div id="outline-container-8.3.1" class="outline-4">
+<h4 id="sec-8.3.1"><code>stacktrace &lt;depth&gt; → list</code> [applicative] </h4>
+<div class="outline-text-4" id="text-8.3.1">
 
 
 <p>
@@ -1614,9 +1633,9 @@ Returns a list of stack frames, up to the given depth.
 
 </div>
 
-<div id="outline-container-8.2.2" class="outline-4">
-<h4 id="sec-8.2.2"><code>label &lt;obj&gt; → string</code> [applicative] </h4>
-<div class="outline-text-4" id="text-8.2.2">
+<div id="outline-container-8.3.2" class="outline-4">
+<h4 id="sec-8.3.2"><code>label &lt;obj&gt; → string</code> [applicative] </h4>
+<div class="outline-text-4" id="text-8.3.2">
 
 
 <p>
@@ -1626,9 +1645,9 @@ Returns the descriptive label of an object.
 
 </div>
 
-<div id="outline-container-8.2.3" class="outline-4">
-<h4 id="sec-8.2.3"><code>set-label! &lt;obj&gt; &lt;string&gt; → string</code> [applicative] </h4>
-<div class="outline-text-4" id="text-8.2.3">
+<div id="outline-container-8.3.3" class="outline-4">
+<h4 id="sec-8.3.3"><code>set-label! &lt;obj&gt; &lt;string&gt; → string</code> [applicative] </h4>
+<div class="outline-text-4" id="text-8.3.3">
 
 
 <p>
@@ -1638,9 +1657,9 @@ Updates the descriptive label of an object.
 
 </div>
 
-<div id="outline-container-8.2.4" class="outline-4">
-<h4 id="sec-8.2.4"><code>debug-info &lt;obj&gt; → whatever</code> [applicative] </h4>
-<div class="outline-text-4" id="text-8.2.4">
+<div id="outline-container-8.3.4" class="outline-4">
+<h4 id="sec-8.3.4"><code>debug-info &lt;obj&gt; → whatever</code> [applicative] </h4>
+<div class="outline-text-4" id="text-8.3.4">
 
 
 <p>
@@ -1652,9 +1671,9 @@ created them.
 
 </div>
 
-<div id="outline-container-8.2.5" class="outline-4">
-<h4 id="sec-8.2.5"><code>trap &lt;exc&gt; → |</code> [applicative] </h4>
-<div class="outline-text-4" id="text-8.2.5">
+<div id="outline-container-8.3.5" class="outline-4">
+<h4 id="sec-8.3.5"><code>trap &lt;exc&gt; → |</code> [applicative] </h4>
+<div class="outline-text-4" id="text-8.3.5">
 
 
 <p>
@@ -1673,7 +1692,7 @@ broken and must not be resumed.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-13 00:34:50 CEST</p>
+<p class="date"> Date: 2012-08-13 14:38:12 CEST</p>
 </div>
 </div>
 </body>

@@ -493,7 +493,7 @@ Retrieves the dynamically-bound value of a dynamic variable.
 
 This is the place for all kinds of tasteless things.
 
-** JavaScript Bridge
+** JavaScript Object Bridge
 
 The JavaScript object system is treacherous, so we don't even attempt
 to somehow integrate it with Wat's.  It is urged to convert JavaScript
@@ -540,9 +540,17 @@ JavaScript object.
 Tries to convert a JavaScript object, such as a string, to a similar
 Wat object.
 
+
+** JavaScript Event Pollsets
+
+When Wat code needs to wait for a JavaScript event, such as a mouse
+click or textfield input, the execution context (fiber) needs to be
+suspended.  This mechanism of suspending while waiting for events is
+offered in the form of =epoll=-style pollsets.
+
 *** =make-pollset → pollset= [applicative]
 
-Creates a poll set for waiting on JS events.
+Creates a pollset for waiting on JS events.
 
 A pollset contains a queue of JS events.
 
@@ -551,15 +559,14 @@ A pollset contains a queue of JS events.
 Returns a native JS function that can be used as single-argument
 callback on e.g. DOM elements.
 
-Events delivered to the callback will be added to the poll set's
-queue.
+Events delivered to the callback will be added to the pollset's queue.
 
 *** =pollset-wait <pollset> → event= [applicative]
 
-If the poll set's queue is non-empty, return the oldest event and
+If the pollset's queue is non-empty, return the oldest event and
 remove it from the queue.
 
-If the poll set's queue is empty, block the fiber until an event
+If the pollset's queue is empty, block the fiber until an event
 occurs.
 
 ** Debugging Interface

@@ -253,6 +253,13 @@ Prints a message string to the console and returns it.
 
 Halts evaluation with an object describing the reason (typically an error).
 
+** Numbers
+
+*** =+=, =-=, =*=, =/=, =%= [applicatives]
+
+The binary applicatives for addition, subtraction, multiplication,
+division, and modulo.
+
 ** Vectors
 
 *** =vector . <elements> → vector= [applicative]
@@ -370,6 +377,10 @@ Each element of =fields= is of the form:
   (kdr kdr set-kdr!))
 #+END_EXAMPLE
 
+*** =and=, =or=, =not= [applicatives]
+
+Binary and unary logical connectives.
+
 ** Pairs and Lists
 
 *** =car <pair> → value= [applicative]
@@ -457,6 +468,10 @@ Methods for the following types are predefined:
 
  * Two strings are equal if they contain the same code points.
 
+*** @<code>/= <a> <b> → boolean@</code> [generic]
+
+Inequality predicate, defined in terms of @<code>=@</code>.
+
 *** =hash-code <obj> → number= [generic]
 
 Generic hash function.  Different types may attach different methods
@@ -471,6 +486,14 @@ have different generic hash codes, they cannot be generically equal.
 
 Generic string conversion function.  Turns any object into a string.
 Methods are defined for all built-in types.
+
+*** =< <a> <b> → boolean= [generic]
+
+Generic binary comparison function.  A method is defined for numbers.
+
+*** @<code>>@</code>, @<code>=<@</code>, @<code>>=@</code> [applicatives]
+
+Binary comparison functions defined in terms of =<= and @<code>=@</code>.
 
 ** Dynamic Binding
 

@@ -25,6 +25,7 @@
 (def symbol? (wrap (vau (val) #ign (eq? (type-of val) Symbol))))
 (def string? (wrap (vau (val) #ign (eq? (type-of val) String))))
 (def symbol? (wrap (vau (val) #ign (eq? (type-of val) Symbol))))
+(def number? (wrap (vau (val) #ign (eq? (type-of val) Number))))
 (def applicative? (wrap (vau (val) #ign (eq? (type-of val) Applicative))))
 (def operative? (wrap (vau (val) #ign (eq? (type-of val) Operative))))
 (def environment? (wrap (vau (val) #ign (eq? (type-of val) Environment))))
@@ -132,7 +133,12 @@
 
 (def not (lambda (val) (if val #f #t)))
 
+(def or (vau (a b) env (if (eval a env) #t (eval b env))))
+
+(def and (vau (a b) env (if (eval a env) (eval b env) #f)))
+
 (def when (vau (test . body) env (eval (list if test (list* begin body) #void) env)))
+
 (def unless (vau (test . body) env (eval (list* when (list not test) body) env)))
 
 (def set!
@@ -337,7 +343,7 @@
     (put-method! (eval name env) (eval type env) method))
 )
 
-(provide (=)
+(provide (= /=)
   (define-generic (= a b) (eq? a b))
   (define-syntax (define-builtin-= type-name pred-expr) env
     (define type (eval type-name env))
@@ -346,6 +352,15 @@
   (define-builtin-= Number num=)
   (define-builtin-= String str=)
   (define-builtin-= Symbol (lambda (a b) (= (symbol->string a) (symbol->string b))))
+  (define (/= a b) (not (= a b)))
+)
+
+(provide (< > <= >=)
+  (define-generic (< a b))
+  (define-method (< (a Number) b) (if (number? b) (num< a b) (fail "can't compare number")))
+  (define (> a b) (< b a))
+  (define (<= a b) (or (< a b) (= a b)))
+  (define (>= a b) (or (> a b) (= a b)))
 )
 
 (provide (hash-code)

@@ -171,7 +171,12 @@ var wat = (function() {
     function str_print(str1) { return JSON.stringify(str1.jsstr); }
     function Num(jsnum) { this.jsnum = jsnum; };
     function num_eql(num1, num2) { return num1.jsnum === num2.jsnum; }
+    function num_lt(num1, num2) { return num1.jsnum < num2.jsnum; }
     function num_add(num1, num2) { return new Num(num1.jsnum + num2.jsnum); };
+    function num_sub(num1, num2) { return new Num(num1.jsnum - num2.jsnum); };
+    function num_mul(num1, num2) { return new Num(num1.jsnum * num2.jsnum); };
+    function num_div(num1, num2) { return new Num(num1.jsnum / num2.jsnum); };
+    function num_mod(num1, num2) { return new Num(num1.jsnum % num2.jsnum); };
     function Vector(elements) { this.elements = elements; }
     function vector_ref(vector, i) { return vector.elements[i]; }
     function vector_set(vector, i, val) { vector.elements[i] = val; return val; }
@@ -280,7 +285,12 @@ var wat = (function() {
         envbind(e, "stacktrace", wrap(new Stacktrace()));
 	envbind(e, "fail", jswrap(fail));
 	envbind(e, "num=", jswrap(function(num1, num2) { return num_eql(num1, num2) ? T : F }));
-	envbind(e, "num+", jswrap(num_add));
+	envbind(e, "num<", jswrap(function(num1, num2) { return num_lt(num1, num2) ? T : F }));
+	envbind(e, "+", jswrap(num_add));
+	envbind(e, "-", jswrap(num_sub));
+	envbind(e, "*", jswrap(num_mul));
+	envbind(e, "/", jswrap(num_div));
+	envbind(e, "%", jswrap(num_mod));
         envbind(e, "str=", jswrap(function(str1, str2) { return str_eql(str1, str2) ? T : F }));
         envbind(e, "strcat", jswrap(function() {
             return new Str(str_cat.call(null, Array.prototype.slice.call(arguments))); }));

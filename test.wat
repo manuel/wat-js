@@ -172,9 +172,9 @@
 (provide ()
   (define-generic (foo obj x) 12)
   (assert (num= (foo #void #void) 12))
-  (define-method (foo (self String) x) (num+ x 5))
+  (define-method (foo (self String) x) (+ x 5))
   (assert (num= (foo #void #void) 12))
-  (assert (num= (foo "blah" (num+ 1 1)) 7)))
+  (assert (num= (foo "blah" (+ 1 1)) 7)))
 
 ;; Generic Equality
 
@@ -197,35 +197,35 @@
 
 (test-check 'test2
   (let ((p (new-prompt)))
-    (num+ (push-prompt p (push-prompt p 5))
+    (+ (push-prompt p (push-prompt p 5))
        4))
   9)
 
 (test-check 'test3
   (let ((p (new-prompt)))
-    (num+ (push-prompt p (num+ (take-sub-cont p #ign 5) 6))
+    (+ (push-prompt p (+ (take-sub-cont p #ign 5) 6))
        4))
   9)
 
 (test-check 'test3-1
   (let ((p (new-prompt)))
-    (num+ (push-prompt p (push-prompt p (num+ (take-sub-cont p #ign 5) 6)))
+    (+ (push-prompt p (push-prompt p (+ (take-sub-cont p #ign 5) 6)))
        4))
   9)
 
 (test-check 'test3-2
   (let ((p (new-prompt)))
     (let ((v (push-prompt p
-	       (let* ((v1 (push-prompt p (num+ (take-sub-cont p #ign 5) 6)))
+	       (let* ((v1 (push-prompt p (+ (take-sub-cont p #ign 5) 6)))
 		      (v1 (take-sub-cont p #ign 7)))
-		 (num+ v1 10)))))
-      (num+ v 20)))
+		 (+ v1 10)))))
+      (+ v 20)))
   27)
 
 (test-check 'test4
   (let ((p (make-prompt)))
-    (num+ (push-prompt p
-         (num+ (take-sub-cont p sk (push-sub-cont sk 5))
+    (+ (push-prompt p
+         (+ (take-sub-cont p sk (push-sub-cont sk 5))
 	    7))
        20))
   32)
@@ -235,8 +235,8 @@
 	(p2 (new-prompt))
 	(push-twice (lambda (sk)
 		      (push-sub-cont sk (push-sub-cont sk 3)))))
-    (num+ 10
-      (push-prompt p1 (num+ 1
+    (+ 10
+      (push-prompt p1 (+ 1
         (push-prompt p2 (take-sub-cont p1 sk (push-twice sk)))))))
   15)
 
@@ -250,19 +250,19 @@
 		(take-sub-cont p2 sk2
 		  (push-sub-cont sk2
 		    (push-sub-cont sk2 3))))))))
-    (num+ 100
+    (+ 100
       (push-prompt p1
-	(num+ 1
+	(+ 1
 	  (push-prompt p2
-	    (num+ 10
+	    (+ 10
 	      (push-prompt p3 (take-sub-cont p1 sk (push-twice sk)))))))))
   135)
 
 (test-check 'monadic-paper
   (let ((p (make-prompt)))
-    (num+ 2 (push-prompt p
+    (+ 2 (push-prompt p
             (if (take-sub-cont p k
-                  (num+ (push-sub-cont k #f)
+                  (+ (push-sub-cont k #f)
 		     (push-sub-cont k #t)))
 		3
 		4))))
@@ -271,7 +271,7 @@
 ;; Delimited Dynamic Binding
 
 (let ((p (make-prompt)))
-  (assert (num= 117 (num+ 10 (push-prompt p (num+ 2 (shift p k (num+ 100 (k (k 3))))))))))
+  (assert (num= 117 (+ 10 (push-prompt p (+ 2 (shift p k (+ 100 (k (k 3))))))))))
 
 (test-check 'ddb-1
   (let ((dv (dnew)))
@@ -347,6 +347,6 @@
     (myhandle (lambda () (t))
               (lambda (s) s)))
 
-  (assert (num= 3 (show (lambda () (num+ 1 2)))))
-  (assert (eq? #f (show (lambda () (num+ 1 (myraise #f))))))
+  (assert (num= 3 (show (lambda () (+ 1 2)))))
+  (assert (eq? #f (show (lambda () (+ 1 (myraise #f))))))
 )

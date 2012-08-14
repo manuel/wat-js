@@ -185,6 +185,8 @@
 		 env)))
 	(#t (fail "let: not a symbol or list"))))
 
+(define (sublist l i) (if (<= i 0) l (sublist (cdr l) (- i 1))))
+
 (define (assq obj alist)
   (if (null? alist) () (if (eq? obj (caar alist)) (car alist) (assq obj (cdr alist)))))
 
@@ -393,7 +395,7 @@
 )
 
 (define (print-stacktrace depth)
-  (map (lambda (k) (display (strcat (->string k) " " (->string (debug-info k))))) (stacktrace depth))
+  (map (lambda (k) (display (strcat "- " (->string (debug-info k))))) (sublist (stacktrace (+ depth 6)) 6))
   #void)
 
 

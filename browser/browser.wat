@@ -4,7 +4,9 @@
 
 (provide (read display)
 
+(define *window* (js-global "window"))
 (define *document* (js-global "document"))
+(define *body* (js-prop *document* "body"))
 
 (define getElementById 
   (let ((m (js-method "getElementById")))
@@ -21,6 +23,10 @@
 (define appendChild
   (let ((m (js-method "appendChild")))
     (lambda (e child) (m e child))))
+
+(define scrollTo
+  (let ((m (js-method "scrollTo")))
+    (lambda (x y) (m *window* x y))))
 
 (define (read-input)
   (let ((res (list* 'begin (read-from-string (from-js (js-prop (getElementById "input") "value"))))))
@@ -41,6 +47,7 @@
   (let ((div (createElement "div")))
     (appendChild div (createTextNode (to-js msg)))
     (appendChild (getElementById "output") div)
+    (scrollTo (to-js 0) (js-prop *body* "scrollHeight"))
     msg))
 
 ((js-method "focus") (getElementById "input"))

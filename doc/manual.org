@@ -377,9 +377,13 @@ Each element of =fields= is of the form:
   (kdr kdr set-kdr!))
 #+END_EXAMPLE
 
-*** =and=, =or=, =not= [applicatives]
+*** =and=, =or= [operatives]
 
-Binary and unary logical connectives.
+Short-circuiting binary logical connectives.
+
+*** =not= [applicative]
+
+Unary logical connective.
 
 ** Pairs and Lists
 

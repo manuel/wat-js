@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-14 23:55:19 CEST"/>
+<meta name="generated" content="2012-08-15 00:20:46 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -163,7 +163,8 @@ lang="en" xml:lang="en">
 <li><a href="#sec-7.2.6"><code>define-syntax &lt;lhs&gt; &lt;rhs&gt; → result</code> [operative] </a></li>
 <li><a href="#sec-7.2.7"><code>provide &lt;names&gt; . &lt;exprs&gt; → result</code> [operative] </a></li>
 <li><a href="#sec-7.2.8"><code>define-record-type &lt;name&gt; &lt;ctor&gt; &lt;pred&gt; . &lt;fields&gt; → type</code> [operative] </a></li>
-<li><a href="#sec-7.2.9"><code>and</code>, <code>or</code>, <code>not</code> [applicatives] </a></li>
+<li><a href="#sec-7.2.9"><code>and</code>, <code>or</code> [operatives] </a></li>
+<li><a href="#sec-7.2.10"><code>not</code> [applicative] </a></li>
 </ul>
 </li>
 <li><a href="#sec-7.3">Pairs and Lists </a>
@@ -1134,12 +1135,24 @@ Each element of <code>fields</code> is of the form:
 </div>
 
 <div id="outline-container-7.2.9" class="outline-4">
-<h4 id="sec-7.2.9"><code>and</code>, <code>or</code>, <code>not</code> [applicatives] </h4>
+<h4 id="sec-7.2.9"><code>and</code>, <code>or</code> [operatives] </h4>
 <div class="outline-text-4" id="text-7.2.9">
 
 
 <p>
-Binary and unary logical connectives.
+Short-circuiting binary logical connectives.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-7.2.10" class="outline-4">
+<h4 id="sec-7.2.10"><code>not</code> [applicative] </h4>
+<div class="outline-text-4" id="text-7.2.10">
+
+
+<p>
+Unary logical connective.
 </p>
 </div>
 </div>
@@ -1771,7 +1784,7 @@ broken and must not be resumed.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-14 23:55:19 CEST</p>
+<p class="date"> Date: 2012-08-15 00:20:46 CEST</p>
 </div>
 </div>
 </body>

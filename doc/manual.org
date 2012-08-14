@@ -472,7 +472,7 @@ Methods for the following types are predefined:
 
  * Two strings are equal if they contain the same code points.
 
-*** @<code>/= <a> <b> → boolean@</code> [generic]
+*** @<code>/= <a> <b> → boolean@</code> [applicative]
 
 Inequality predicate, defined in terms of @<code>=@</code>.
 

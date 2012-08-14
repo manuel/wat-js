@@ -3,7 +3,7 @@
 // Adapted by mjs
 
 load("jsparse.js");
-load("wat.js");
+load("altwat.js");
 
 var wat_env = wat.mkenvcore();
 
@@ -32,6 +32,6 @@ function wat_load_file(path) {
 }
 
 wat_load_file("../crust.wat");
-wat_load_file("pc.wat");
-arguments.forEach(wat_load_file);
-wat_load_file("../repl.wat");
+//wat_load_file("pc.wat");
+//arguments.forEach(wat_load_file);
+//wat_load_file("../repl.wat");

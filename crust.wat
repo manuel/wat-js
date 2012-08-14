@@ -157,7 +157,8 @@
 	(let* (((name . args) lhs)
                (proc (eval (list* lambda args rhs) env)))
 	  (eval (list def name proc) env)
-          (set-label! proc (symbol->string name)))
+;          (set-label! proc (symbol->string name))
+          )
 	(eval (list* def lhs rhs) env))))
 
 (def define-syntax
@@ -166,7 +167,8 @@
 	(let* (((name . args) lhs)
                (opv (eval (list* vau args (car rhs) (cdr rhs)) env)))
 	  (eval (list def name opv) env)
-          (set-label! opv (symbol->string name)))
+;          (set-label! opv (symbol->string name))
+          )
 	(eval (list* def lhs rhs) env))))
 
 (define-syntax (let-loop a . b) env
@@ -253,7 +255,7 @@
                    (tagger fields-dict))))
          (pred (lambda (obj) (eq? (type-of obj) type))))
     (eval (list def (list name ctor-name pred-name) (list list type ctor pred)) env)
-    (set-label! type (symbol->string name))
+;    (set-label! type (symbol->string name))
     (map (lambda (field-spec)
            (let (((name accessor-name . opt) field-spec))
              (eval (list def accessor-name (lambda (obj)
@@ -325,7 +327,7 @@
                                (eval (list* lambda args body) env)))
     (define (generic self . arg)
       (apply (hashtable-get vtable (type-of self) default-method) (cons self arg)))
-    (set-label! generic (symbol->string name))
+;    (set-label! generic (symbol->string name))
     (eval (list def name generic) env)
     (hashtable-put! generic->vtable generic vtable)
     generic)

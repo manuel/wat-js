@@ -3,8 +3,8 @@ var watbrowser = (function() {
     function init() {
 	wat_env = wat.mkenvcore();
 	load_file("../crust.wat");
-	load_file("browser.wat");
-	load_file("../repl.wat");
+//	load_file("browser.wat");
+//	load_file("../repl.wat");
 //	load_file("../test.wat");
     }
 

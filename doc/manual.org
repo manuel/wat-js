@@ -495,7 +495,7 @@ Methods are defined for all built-in types.
 
 Generic binary comparison function.  A method is defined for numbers.
 
-*** @<code>>@</code>, @<code>=<@</code>, @<code>>=@</code> [applicatives]
+*** @<code>>@</code>, @<code><=@</code>, @<code>>=@</code> [applicatives]
 
 Binary comparison functions defined in terms of =<= and @<code>=@</code>.
 

@@ -6,13 +6,10 @@
 
 * Description
 
-/Wat/ is an ultra-lightweight dialect of Lisp, specifically
-[[http://web.cs.wpi.edu/~jshutt/kernel.html][Kernel]], in which
-everything is first-class: syntax, control, and data.  Syntax is based
-on lexically-scoped fexprs and first-class environments, subsuming
-ordinary procedures and hygienic macros.  Control is based on
-delimited continuations and tail-call elimination, subsuming all
-computational effects.  Data uses a dynamic type-tagging system that
+/Wat/ is a web systems programming language.  Syntax is based on
+lexically-scoped fexprs and first-class environments, subsuming
+ordinary procedures and hygienic macros.  Control is based on fully
+asymmetric coroutines.  Data uses a dynamic type-tagging system that
 allows generic programming over built-in as well as user-defined data
 types.
 
@@ -192,32 +189,25 @@ Creates a new empty environment with the given optional parent.
 
 Returns true if a symbol is bound in the environment, false otherwise.
 
-** Control
+** Coroutines
 
-These are the control operators from Dybvig, Jones, and Sabry's
-[[http://www.cs.indiana.edu/~dyb/pubs/monadicDC.pdf][/A Monadic
-Framework for Delimited Continuations/]] that are able to express all
-other delimited control operators.
+*** =coro-create <thunk> → coro= [applicative]
 
-*** =make-prompt → prompt= [applicative]
+Creates a new, not yet running coroutine that will execute the thunk
+when it is resumed.
 
-Creates a fresh prompt.
+*** =coro-yield <val> → result= [applicative]
 
-*** =push-prompt* <prompt> <thunk> → result= [applicative]
+Suspends the current coroutine, returning value to the caller.
 
-Pushes the continuation-delimiting prompt and executes thunk in the
-new continuation.
+*** =coro-resume <coro> <val> → result= [applicative]
 
-*** =take-sub-cont* <prompt> <cmb> → result= [applicative]
+Passes value into a suspended coroutine, resuming its execution from
+the first expression, or from the last call to =coro-yield=.
 
-Aborts up to and including the prompt, and calls the combiner with a
-single argument representing the delimited continuation from the call
-to =take-sub-cont*= up to but not including the prompt.
+*** =current-coro → coro= [applicative]
 
-*** =push-sub-cont* <cont> <thunk> → result= [applicative]
-
-Prepends the delimited continuation to the current continuation, and
-executes thunk in the new continuation.
+Returns the currently executing coroutine.
 
 ** Types
 *** =make-type → (type tagger untagger)= [applicative]

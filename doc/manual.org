@@ -509,7 +509,7 @@ Retrieves the dynamically-bound value of a dynamic variable.
 
 This is the place for all kinds of tasteless things.
 
-** JavaScript Object Bridge
+** JavaScript Bridge
 
 The JavaScript object system is treacherous, so we don't even attempt
 to somehow integrate it with Wat's.  It is urged to convert JavaScript
@@ -556,6 +556,15 @@ JavaScript object.
 Tries to convert a JavaScript object, such as a string, to a similar
 Wat object.
 
+*** =js-callback <cmb> → jsfun= [applicative]
+
+Returns a JS function that, when called, will apply the provided
+combiner with the arguments the callback received.
+
+=js-callback= is intended for use with JS asynchronous functions such
+as =setTimeout= and event handlers.  It is assumed that when the
+callback is called, the current fiber has returned.  The combiner is
+therefore applied in a fresh fiber.
 
 ** Debugging Interface
 

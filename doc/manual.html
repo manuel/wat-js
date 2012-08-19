@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-19 20:44:03 CEST"/>
+<meta name="generated" content="2012-08-19 20:55:56 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -208,7 +208,7 @@ lang="en" xml:lang="en">
 </li>
 <li><a href="#sec-8">Danger Zone </a>
 <ul>
-<li><a href="#sec-8.1">JavaScript Object Bridge </a>
+<li><a href="#sec-8.1">JavaScript Bridge </a>
 <ul>
 <li><a href="#sec-8.1.1"><code>js-global &lt;string&gt; → result</code> [applicative] </a></li>
 <li><a href="#sec-8.1.2"><code>js-set-global! &lt;string&gt; &lt;val&gt; → val</code> [applicative] </a></li>
@@ -218,6 +218,7 @@ lang="en" xml:lang="en">
 <li><a href="#sec-8.1.6"><code>js-method &lt;string&gt; → cmb</code> [applicative] </a></li>
 <li><a href="#sec-8.1.7"><code>to-js &lt;obj&gt; → jsobj</code> [applicative] </a></li>
 <li><a href="#sec-8.1.8"><code>from-js &lt;js-obj&gt; → obj</code> [applicative] </a></li>
+<li><a href="#sec-8.1.9"><code>js-callback &lt;cmb&gt; → jsfun</code> [applicative] </a></li>
 </ul>
 </li>
 <li><a href="#sec-8.2">Debugging Interface </a>
@@ -1505,7 +1506,7 @@ This is the place for all kinds of tasteless things.
 </div>
 
 <div id="outline-container-8.1" class="outline-3">
-<h3 id="sec-8.1">JavaScript Object Bridge </h3>
+<h3 id="sec-8.1">JavaScript Bridge </h3>
 <div class="outline-text-3" id="text-8.1">
 
 
@@ -1618,7 +1619,25 @@ JavaScript object.
 Tries to convert a JavaScript object, such as a string, to a similar
 Wat object.
 </p>
+</div>
 
+</div>
+
+<div id="outline-container-8.1.9" class="outline-4">
+<h4 id="sec-8.1.9"><code>js-callback &lt;cmb&gt; → jsfun</code> [applicative] </h4>
+<div class="outline-text-4" id="text-8.1.9">
+
+
+<p>
+Returns a JS function that, when called, will apply the provided
+combiner with the arguments the callback received.
+</p>
+<p>
+<code>js-callback</code> is intended for use with JS asynchronous functions such
+as <code>setTimeout</code> and event handlers.  It is assumed that when the
+callback is called, the current fiber has returned.  The combiner is
+therefore applied in a fresh fiber.
+</p>
 </div>
 </div>
 
@@ -1703,7 +1722,7 @@ broken and must not be resumed.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-19 20:44:03 CEST</p>
+<p class="date"> Date: 2012-08-19 20:55:56 CEST</p>
 </div>
 </div>
 </body>

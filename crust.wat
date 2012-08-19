@@ -32,22 +32,6 @@
 (def vector? (wrap (vau (val) #ign (eq? (type-of val) Vector))))
 (def type? (wrap (vau (val) #ign (eq? (type-of val) Type))))
 
-;; (def begin
-;;   ((wrap (vau (seq2) #ign
-;; 	   (seq2
-;;              (def aux
-;;                (vau (head . tail) env
-;; 		 (if (null? tail)
-;; 		     (eval head env)
-;; 		     (seq2 (eval head env) (eval (cons aux tail) env)))))
-;;              (vau body env
-;;                (if (null? body)
-;;                    #void
-;;                    (eval (cons aux body) env))))))
-;;    (vau (first second) env
-;;      ((wrap (vau #ign #ign (eval second env)))
-;;       (eval first env)))))
-
 (def list (wrap (vau x #ign x)))
 
 (def list*
@@ -189,66 +173,6 @@
 
 (define (assq obj alist)
   (if (null? alist) () (if (eq? obj (caar alist)) (car alist) (assq obj (cdr alist)))))
-
-(provide (make-prompt push-prompt take-sub-cont push-sub-cont shift)
-  (def (prompt-type tag-prompt #ign) (make-type))
-  (define (make-prompt) (tag-prompt #void))
-  (define-syntax (push-prompt p . es) env
-    (push-prompt* (eval p env) (lambda () (eval (list* begin es) env))))
-  (define-syntax (take-sub-cont p k . body) env
-    (take-sub-cont* (eval p env) (eval (list* lambda (list k) body) env)))
-  (define-syntax (push-sub-cont k . es) env
-    (push-sub-cont* (eval k env) (lambda () (eval (list* begin es) env))))
-  (define (shift* p f)
-    (take-sub-cont p sk (push-prompt p (f (reifyP p sk)))))
-  (define (reifyP p sk)
-    (lambda (v) (push-prompt p (push-sub-cont sk v))))
-  (define-syntax (shift p sk . es) env
-    (eval (list shift* p (list* lambda (list sk) es)) env))
-)
-
-(provide (dnew dref dlet dlet*)
-  (def (parameter-type tag-parameter #ign) (make-type))
-  (define (dnew) (tag-parameter #void))
-  (define (dref p) (shift p sk (lambda (y) ((sk y) y))))
-  (define (dlet* p val thunk)
-    ((push-prompt p
-       (let ((r (thunk)))
-         (lambda (y) r)))
-     val))
-  (define-syntax (dlet key val . body) env
-    (eval (list dlet* key val (list* lambda () body)) env))
-)
-
-(provide (run yield dynamic-wind for*)
-  (def (yield-record-type tag-yield-record untag-yield-record) (make-type))
-  (define (make-yield-record v k)
-    (tag-yield-record (list v k)))
-  (define (try-yield* exp on-r on-y)
-    (if (eq? (type-of exp) yield-record-type)
-	(let (((v k) (untag-yield-record exp))) (on-y v k))
-	(on-r exp)))
-  (define yield-prompt (make-prompt))
-  (define-syntax (run e) env (push-prompt* yield-prompt (eval (list lambda () e) env)))
-  (define (yield v) (shift yield-prompt k (make-yield-record v k)))
-  (define (dynamic-wind before-thunk thunk after-thunk)
-    (let-loop loop ((th (lambda () (run-thunk))))
-      (before-thunk)
-      (let ((res (th)))
-	(after-thunk)
-	(try-yield* res
-		    (lambda (r) r)
-		    (lambda (v k)
-		      (let ((reenter (yield v)))
-			(loop (lambda () (k reenter)))))))))
-  (define (for* gen body)
-    (let-loop loop ((thr (run (gen))))
-      (try-yield* thr
-		  (lambda (r) r)
-		  (lambda (v k)
-		    (body v)
-		    (loop (k #f))))))
-)
 
 (define-syntax (define-record-type name (ctor-name . ctor-field-names) pred-name . field-specs) env
   (let* (((type tagger untagger) (make-type))

@@ -151,39 +151,3 @@
   (assert (eq? #f (bound? 'y (current-environment))))
 )
 
-;; Hashtables
-
-(provide ()
-  (define ht (make-hashtable identity-hash-code eq?))
-  (define key "key")
-  (hashtable-put! ht key 12)
-  (assert (num= 12 (hashtable-get ht key)))
-  (assert (num= 14 (hashtable-get ht "another-key" 14)))
-;  (hashtable-put! ht key 16)
-;  (assert (num= 16 (hashtable-get ht key)))
-)
-
-;; Conversions
-
-(assert (num= 1 (string->number (symbol->string (string->symbol (number->string 1))))))
-
-;; Generics
-
-(provide ()
-  (define-generic (foo obj x) 12)
-  (assert (num= (foo #void #void) 12))
-  (define-method (foo (self String) x) (+ x 5))
-  (assert (num= (foo #void #void) 12))
-  (assert (num= (foo "blah" (+ 1 1)) 7)))
-
-;; Generic Equality
-
-(provide ()
-  (assert (= 1 1))
-  (assert (= 'foo 'foo))
-  (assert (not (= 1 2)))
-  (assert (not (= 1 "foo")))
-  (assert (not (= "bar" "foo")))
-  (assert (not (= 'bar 'foo)))
-)
-

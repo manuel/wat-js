@@ -1,17 +1,19 @@
 var wat = (function() {
     /***** Evaluation *****/
     /* Fibers */
-    function Fbr() { this.suspensions = []; this.resuming = false; }
+    function Fbr() { this.suspensions = null; this.resuming = false; }
     function resume(fbr) {
         fbr.resuming = true;
-        var susp = fbr.suspensions.pop();
+        var susp = fbr.suspensions.thunk;
+        fbr.suspensions = fbr.suspensions.next;
         var res = susp();
-        fbr.resuming = fbr.suspensions.length > 0;
+        fbr.resuming = fbr.suspensions !== null;
         return res;
     }
     function Suspend() {}
     var SUSPEND = new Suspend();
-    function pushSuspend(fbr, susp) { fbr.suspensions.push(susp); }
+    function Suspension(thunk, next) { this.thunk = thunk; this.next = next; }
+    function pushSuspend(fbr, thunk) { fbr.suspensions = new Suspension(thunk, fbr.suspensions); }
     function evaluate(fbr, e, x) {
         if (x && x.wat_eval) return x.wat_eval(fbr, e); else return x;
     }
@@ -119,7 +121,12 @@ var wat = (function() {
             }
         }
     }
-    /* Threading */
+    /* Delimited Control */
+    function PushPrompt() {}; function TakeSubCont() {}; function PushSubCont() {};
+    // PushPrompt.prototype.combine = function(fbr, e, o) {
+    //     var th = elt(o, 0);
+    //     if (fbr.resuming 
+    // };
     /* JS Bridge */
     function JSFun(jsfun) { this.jsfun = jsfun; }
     JSFun.prototype.combine = function(fbr, e, o) { return this.jsfun.apply(null, list_to_array(o)); };

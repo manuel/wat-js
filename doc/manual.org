@@ -76,8 +76,7 @@ Wat identifiers are case-sensitive.
  * Type :: A first-class type tag or just type is associated with
    every object.
 
- * Continuation :: Continuations are first-class objects, not wrapped
-   in an applicative.
+ * Coroutines :: Coroutines are first-class objects.
 
 * Pattern Matching
 
@@ -557,34 +556,6 @@ JavaScript object.
 Tries to convert a JavaScript object, such as a string, to a similar
 Wat object.
 
-
-** JavaScript Event Pollsets
-
-When Wat code needs to wait for a JavaScript event, such as a mouse
-click or textfield input, the execution context (fiber) needs to be
-suspended.  This mechanism of suspending while waiting for events is
-offered in the form of =epoll=-style pollsets.
-
-*** =make-pollset → pollset= [applicative]
-
-Creates a pollset for waiting on JS events.
-
-A pollset contains a queue of JS events.
-
-*** =pollset-callback <pollset> → jsfun= [applicative]
-
-Returns a native JS function that can be used as single-argument
-callback on e.g. DOM elements.
-
-Events delivered to the callback will be added to the pollset's queue.
-
-*** =pollset-wait <pollset> → event= [applicative]
-
-If the pollset's queue is non-empty, return the oldest event and
-remove it from the queue.
-
-If the pollset's queue is empty, block the fiber until an event
-occurs.
 
 ** Debugging Interface
 

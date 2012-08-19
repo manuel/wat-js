@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-19 19:31:35 CEST"/>
+<meta name="generated" content="2012-08-19 20:44:03 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -220,20 +220,13 @@ lang="en" xml:lang="en">
 <li><a href="#sec-8.1.8"><code>from-js &lt;js-obj&gt; → obj</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-8.2">JavaScript Event Pollsets </a>
+<li><a href="#sec-8.2">Debugging Interface </a>
 <ul>
-<li><a href="#sec-8.2.1"><code>make-pollset → pollset</code> [applicative] </a></li>
-<li><a href="#sec-8.2.2"><code>pollset-callback &lt;pollset&gt; → jsfun</code> [applicative] </a></li>
-<li><a href="#sec-8.2.3"><code>pollset-wait &lt;pollset&gt; → event</code> [applicative] </a></li>
-</ul>
-</li>
-<li><a href="#sec-8.3">Debugging Interface </a>
-<ul>
-<li><a href="#sec-8.3.1"><code>stacktrace &lt;depth&gt; → list</code> [applicative] </a></li>
-<li><a href="#sec-8.3.2"><code>label &lt;obj&gt; → string</code> [applicative] </a></li>
-<li><a href="#sec-8.3.3"><code>set-label! &lt;obj&gt; &lt;string&gt; → string</code> [applicative] </a></li>
-<li><a href="#sec-8.3.4"><code>debug-info &lt;obj&gt; → whatever</code> [applicative] </a></li>
-<li><a href="#sec-8.3.5"><code>trap &lt;exc&gt; → |</code> [applicative] </a></li>
+<li><a href="#sec-8.2.1"><code>stacktrace &lt;depth&gt; → list</code> [applicative] </a></li>
+<li><a href="#sec-8.2.2"><code>label &lt;obj&gt; → string</code> [applicative] </a></li>
+<li><a href="#sec-8.2.3"><code>set-label! &lt;obj&gt; &lt;string&gt; → string</code> [applicative] </a></li>
+<li><a href="#sec-8.2.4"><code>debug-info &lt;obj&gt; → whatever</code> [applicative] </a></li>
+<li><a href="#sec-8.2.5"><code>trap &lt;exc&gt; → |</code> [applicative] </a></li>
 </ul>
 </li>
 </ul>
@@ -369,9 +362,8 @@ A first-class type tag or just type is associated with
 every object.
 
 </dd>
-<dt>Continuation</dt><dd>
-Continuations are first-class objects, not wrapped
-in an applicative.
+<dt>Coroutines</dt><dd>
+Coroutines are first-class objects.
 
 </dd>
 </dl>
@@ -1633,79 +1625,16 @@ Wat object.
 </div>
 
 <div id="outline-container-8.2" class="outline-3">
-<h3 id="sec-8.2">JavaScript Event Pollsets </h3>
+<h3 id="sec-8.2">Debugging Interface </h3>
 <div class="outline-text-3" id="text-8.2">
 
 
-<p>
-When Wat code needs to wait for a JavaScript event, such as a mouse
-click or textfield input, the execution context (fiber) needs to be
-suspended.  This mechanism of suspending while waiting for events is
-offered in the form of <code>epoll</code>-style pollsets.
-</p>
 
 </div>
 
 <div id="outline-container-8.2.1" class="outline-4">
-<h4 id="sec-8.2.1"><code>make-pollset → pollset</code> [applicative] </h4>
+<h4 id="sec-8.2.1"><code>stacktrace &lt;depth&gt; → list</code> [applicative] </h4>
 <div class="outline-text-4" id="text-8.2.1">
-
-
-<p>
-Creates a pollset for waiting on JS events.
-</p>
-<p>
-A pollset contains a queue of JS events.
-</p>
-</div>
-
-</div>
-
-<div id="outline-container-8.2.2" class="outline-4">
-<h4 id="sec-8.2.2"><code>pollset-callback &lt;pollset&gt; → jsfun</code> [applicative] </h4>
-<div class="outline-text-4" id="text-8.2.2">
-
-
-<p>
-Returns a native JS function that can be used as single-argument
-callback on e.g. DOM elements.
-</p>
-<p>
-Events delivered to the callback will be added to the pollset's queue.
-</p>
-</div>
-
-</div>
-
-<div id="outline-container-8.2.3" class="outline-4">
-<h4 id="sec-8.2.3"><code>pollset-wait &lt;pollset&gt; → event</code> [applicative] </h4>
-<div class="outline-text-4" id="text-8.2.3">
-
-
-<p>
-If the pollset's queue is non-empty, return the oldest event and
-remove it from the queue.
-</p>
-<p>
-If the pollset's queue is empty, block the fiber until an event
-occurs.
-</p>
-</div>
-</div>
-
-</div>
-
-<div id="outline-container-8.3" class="outline-3">
-<h3 id="sec-8.3">Debugging Interface </h3>
-<div class="outline-text-3" id="text-8.3">
-
-
-
-</div>
-
-<div id="outline-container-8.3.1" class="outline-4">
-<h4 id="sec-8.3.1"><code>stacktrace &lt;depth&gt; → list</code> [applicative] </h4>
-<div class="outline-text-4" id="text-8.3.1">
 
 
 <p>
@@ -1715,9 +1644,9 @@ Returns a list of stack frames, up to the given depth.
 
 </div>
 
-<div id="outline-container-8.3.2" class="outline-4">
-<h4 id="sec-8.3.2"><code>label &lt;obj&gt; → string</code> [applicative] </h4>
-<div class="outline-text-4" id="text-8.3.2">
+<div id="outline-container-8.2.2" class="outline-4">
+<h4 id="sec-8.2.2"><code>label &lt;obj&gt; → string</code> [applicative] </h4>
+<div class="outline-text-4" id="text-8.2.2">
 
 
 <p>
@@ -1727,9 +1656,9 @@ Returns the descriptive label of an object.
 
 </div>
 
-<div id="outline-container-8.3.3" class="outline-4">
-<h4 id="sec-8.3.3"><code>set-label! &lt;obj&gt; &lt;string&gt; → string</code> [applicative] </h4>
-<div class="outline-text-4" id="text-8.3.3">
+<div id="outline-container-8.2.3" class="outline-4">
+<h4 id="sec-8.2.3"><code>set-label! &lt;obj&gt; &lt;string&gt; → string</code> [applicative] </h4>
+<div class="outline-text-4" id="text-8.2.3">
 
 
 <p>
@@ -1739,9 +1668,9 @@ Updates the descriptive label of an object.
 
 </div>
 
-<div id="outline-container-8.3.4" class="outline-4">
-<h4 id="sec-8.3.4"><code>debug-info &lt;obj&gt; → whatever</code> [applicative] </h4>
-<div class="outline-text-4" id="text-8.3.4">
+<div id="outline-container-8.2.4" class="outline-4">
+<h4 id="sec-8.2.4"><code>debug-info &lt;obj&gt; → whatever</code> [applicative] </h4>
+<div class="outline-text-4" id="text-8.2.4">
 
 
 <p>
@@ -1753,9 +1682,9 @@ created them.
 
 </div>
 
-<div id="outline-container-8.3.5" class="outline-4">
-<h4 id="sec-8.3.5"><code>trap &lt;exc&gt; → |</code> [applicative] </h4>
-<div class="outline-text-4" id="text-8.3.5">
+<div id="outline-container-8.2.5" class="outline-4">
+<h4 id="sec-8.2.5"><code>trap &lt;exc&gt; → |</code> [applicative] </h4>
+<div class="outline-text-4" id="text-8.2.5">
 
 
 <p>
@@ -1774,7 +1703,7 @@ broken and must not be resumed.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-19 19:31:35 CEST</p>
+<p class="date"> Date: 2012-08-19 20:44:03 CEST</p>
 </div>
 </div>
 </body>

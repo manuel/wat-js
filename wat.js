@@ -4,11 +4,18 @@ var wat = (function() {
     function Fbr() { this.suspensions = []; this.resuming = false; }
     function resume(fbr) {
         fbr.resuming = true;
-        var res = fbr.suspensions.shift()();
+        var susp = fbr.suspensions.pop();
+        var res = susp();
         fbr.resuming = fbr.suspensions.length > 0;
         return res;
     }
-    var SUSPEND = {};
+    function Suspend() {}
+    var SUSPEND = new Suspend();
+
+    function pushSuspend(fbr, susp) {
+        fbr.suspensions.push(susp);
+    }
+
     function evaluate(fbr, e, x) { if (x && x.wat_eval) return x.wat_eval(fbr, e); else return x; }
     Sym.prototype.wat_eval = function(fbr, e) { return lookup(e, this); };
     Cons.prototype.wat_eval = function(fbr, e) {
@@ -16,11 +23,11 @@ var wat = (function() {
             var op = resume(fbr);
         } else {
             var op = evaluate(fbr, e, car(this));
-            if (op === SUSPEND) {
-                var that = this;
-                pushSuspend(fbr, function() { return that.wat_eval(fbr, e); });
-                return SUSPEND;
-            }
+        }
+        if (op === SUSPEND) {
+            var that = this;
+            pushSuspend(fbr, function() { return that.wat_eval(fbr, e); });
+            return SUSPEND;
         }
         return combine(fbr, e, op, cdr(this));
     };
@@ -30,10 +37,10 @@ var wat = (function() {
             var val = resume(fbr);
         } else {
             var val = evaluate(fbr, e, elt(o, 1));
-            if (val === SUSPEND) {
-                pushSuspend(fbr, function() { return Def.prototype.combine(fbr, e, o); });
-                return SUSPEND;
-            }
+        }
+        if (val === SUSPEND) {
+            pushSuspend(fbr, function() { return Def.prototype.combine(fbr, e, o); });
+            return SUSPEND;
         }
         return bind(e, elt(o, 0), val);
     };
@@ -50,11 +57,11 @@ var wat = (function() {
             var args = resume(fbr);
         } else {
             var args = evalArgs(fbr, e, o, NIL);
-            if (args === SUSPEND) {
-                var that = this;
-                pushSuspend(fbr, function() { return that.combine(fbr, e, o); })
-                return SUSPEND;
-            }
+        }
+        if (args === SUSPEND) {
+            var that = this;
+            pushSuspend(fbr, function() { return that.combine(fbr, e, o); })
+            return SUSPEND;
         }
         return evaluate(fbr, e, cons(this.cmb, args));
     };
@@ -64,10 +71,10 @@ var wat = (function() {
             var arg = resume(fbr);
         } else {
             var arg = evaluate(fbr, e, car(todo));
-            if (arg === SUSPEND) {
-                pushSuspend(fbr, function() { return evalArgs(fbr, e, todo, done); });
-                return SUSPEND;
-            }
+        }
+        if (arg === SUSPEND) {
+            pushSuspend(fbr, function() { return evalArgs(fbr, e, todo, done); });
+            return SUSPEND;
         }
         return evalArgs(fbr, e, cdr(todo), cons(arg, done));
     };
@@ -79,31 +86,14 @@ var wat = (function() {
             var test = resume(fbr);
         } else {
             var test = evaluate(fbr, e, elt(o, 0));
-            if (test === SUSPEND) {
-                pushSuspend(fbr, function() { return If.prototype.combine(fbr, e, o); });
-                return SUSPEND;
-            }
+        }
+        if (test === SUSPEND) {
+            pushSuspend(fbr, function() { return If.prototype.combine(fbr, e, o); });
+            return SUSPEND;
         }
         return evaluate(fbr, e, (test === F) ? elt(o, 2) : elt(o, 1));
     };
     Eval.prototype.combine = function(fbr, e, o) { return evaluate(fbr, elt(o, 1), elt(o, 0)); };
-    Begin.prototype.combine = function(fbr, e, o) { if (o === NIL) return VOID; else return begin(fbr, e, o); };
-    function begin(fbr, e, xs) {
-        if (cdr(xs) === NIL) {
-            return evaluate(fbr, e, car(xs));
-        } else {
-            if (fbr.resuming === true) {
-                resume(fbr);
-            } else {
-                var res = evaluate(fbr, e, car(xs));
-                if (res === SUSPEND) {
-                    pushSuspend(fbr, function() { return begin(fbr, e, xs); });
-                    return SUSPEND;
-                }
-            }
-            return begin(fbr, e, cdr(xs));
-        }
-    }
     /* JS Bridge */
     function JSFun(jsfun) { this.jsfun = jsfun; }
     JSFun.prototype.combine = function(fbr, e, o) { return this.jsfun.apply(null, list_to_array(o)); };
@@ -127,6 +117,29 @@ var wat = (function() {
 	case "boolean": return obj === true ? T : F;
 	default: return obj;
 	}
+    }
+    /* Poll Sets */
+    function Pollset() { this.events = []; this.suspendedFbr = null; }
+    function PollsetWait() {};
+    PollsetWait.prototype.combine = function(fbr, e, o) {
+        var ps = elt(o, 0);
+        if (ps.events.length > 0) {
+            return ps.events.shift();
+        } else {
+            pushSuspend(fbr, function() { return PollsetWait.prototype.combine(fbr, e, o); });
+            ps.suspendedFbr = fbr;
+            return SUSPEND;
+        }
+    };
+    function pollset_callback(ps) {
+        return function(evt) {
+            ps.events.push(evt);
+            if (ps.suspendedFbr !== null) {
+                var fbr = ps.suspendedFbr;
+                ps.suspendedFbr = null;
+                resume(fbr);
+            }
+        };
     }
     /***** Objects *****/
     /* Core */
@@ -189,7 +202,7 @@ var wat = (function() {
     function init_types(typenames) {
         typenames.map(function (typename) { var type = new Type(); set_label(type, typename);
                                             eval(typename).prototype.wat_type = type; }); }
-    init_types(["Opv", "Apv", "Def", "Vau", "If", "Eval", "JSFun",
+    init_types(["Opv", "Apv", "Def", "Vau", "If", "Eval", "JSFun", "Pollset", "PollsetWait",
 		"Sym", "Cons", "Env", "Str", "Num", "Vector", "Void", "Ign", "Nil", "Bool", "Type"]);
     /* Utilities */
     function assert(b) { if (!b) fail("assertion failed"); }
@@ -249,7 +262,7 @@ var wat = (function() {
 	envbind(e, "if", new If());
 	envbind(e, "vau", new Vau());
 	envbind(e, "eval", wrap(new Eval()));
-	envbind(e, "begin", new Begin());
+//	envbind(e, "begin", new Begin());
 	envbind(e, "wrap", jswrap(wrap));
 	envbind(e, "unwrap", jswrap(unwrap));
 	envbind(e, "eq?", jswrap(function (a, b) { return (a === b) ? T : F }));
@@ -292,6 +305,9 @@ var wat = (function() {
 	envbind(e, "js-method", jswrap(js_method));
 	envbind(e, "to-js", jswrap(to_js));
 	envbind(e, "from-js", jswrap(from_js));
+        envbind(e, "make-pollset", jswrap(function() { return new Pollset(); }));
+        envbind(e, "pollset-callback", jswrap(function(ps) { return pollset_callback(ps); }));
+        envbind(e, "pollset-wait", wrap(new PollsetWait()));
 	return e;
     }
     /***** API *****/

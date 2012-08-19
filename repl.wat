@@ -3,8 +3,7 @@
 (define env (current-environment))
 
 (define (repl)
-  (display (eval (read) env))
-  (repl))
+  (loop (display (eval (read) env))))
 
 (display "** Lisp Ready **")
 (repl)

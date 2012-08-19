@@ -1,6 +1,16 @@
 var wat = (function() {
     /***** Evaluation *****/
     /* Fibers */
+    var runnables = []; var scheduling = false;
+    function makeRunnable(fbr) {
+        runnables.push(fbr);
+        if (!scheduling) schedule();
+    }
+    function schedule() {
+        scheduling = true;
+        var fbr; while((fbr = runnables.shift()) !== undefined) resume(fbr);
+        scheduling = false;
+    }
     function Fbr() { this.suspensions = null; this.resuming = false; }
     function resume(fbr) {
         fbr.resuming = true;
@@ -121,12 +131,6 @@ var wat = (function() {
             }
         }
     }
-    /* Delimited Control */
-    function PushPrompt() {}; function TakeSubCont() {}; function PushSubCont() {};
-    // PushPrompt.prototype.combine = function(fbr, e, o) {
-    //     var th = elt(o, 0);
-    //     if (fbr.resuming 
-    // };
     /* JS Bridge */
     function JSFun(jsfun) { this.jsfun = jsfun; }
     JSFun.prototype.combine = function(fbr, e, o) { return this.jsfun.apply(null, list_to_array(o)); };
@@ -152,8 +156,16 @@ var wat = (function() {
 	}
     }
     /* Poll Sets */
+    function Spawn() {};
+    Spawn.prototype.combine = function(fbr, e, o) {
+        var cmb = elt(o, 0);
+        var newfbr = new Fbr();
+        pushSuspend(newfbr, function() { newfbr.resuming = false; return cmb.combine(newfbr, e, NIL); });
+        makeRunnable(newfbr);
+        return newfbr;
+    };
     function Pollset() { this.events = []; this.suspendedFbr = null; }
-    function PollsetWait() {};
+    function PollsetWait() {}; function PollsetWrite() {};
     PollsetWait.prototype.combine = function(fbr, e, o) {
         var ps = elt(o, 0);
         if (ps.events.length > 0) {
@@ -164,16 +176,52 @@ var wat = (function() {
             return SUSPEND;
         }
     };
+    function pushEvent(ps, evt) {
+        ps.events.push(evt);
+        if (ps.suspendedFbr !== null) {
+            var fbr = ps.suspendedFbr;
+            ps.suspendedFbr = null;
+            makeRunnable(fbr);
+        }
+        return VOID;
+    }
+    PollsetWrite.prototype.combine = function(fbr, e, o) {
+        var ps = elt(o, 0);
+        var evt = elt(o, 1);
+        return pushEvent(ps, evt);
+    };
     function pollset_callback(ps) {
         return function(evt) {
-            ps.events.push(evt);
-            if (ps.suspendedFbr !== null) {
-                var fbr = ps.suspendedFbr;
-                ps.suspendedFbr = null;
-                resume(fbr);
-            }
+            return pushEvent(ps, evt);
         };
     }
+    /* Coroutines */
+    function CoroCreate() {}; function CoroResume() {}; function CoroYield() {};
+    CoroCreate.prototype.combine = function(fbr, e, o) {
+        var cmb = elt(o, 0);
+        var newfbr = new Fbr();
+        pushSuspend(newfbr, function() { newfbr.resuming = false; return cmb.combine(newfbr, e, NIL); });
+        return newfbr;
+    };
+    CoroResume.prototype.combine = function(fbr, e, o) {
+        var newfbr = elt(o, 0);
+        var arg = elt(o, 1);
+        newfbr.val = arg;
+        var res = resume(newfbr);
+        if (res === SUSPEND) {
+            var val = newfbr.val;
+            newfbr.val = null;
+            return val;
+        } else {
+            return res;
+        }
+    };
+    CoroYield.prototype.combine = function(fbr, e, o) {
+        var arg = elt(o, 0);
+        fbr.val = arg;
+        pushSuspend(fbr, function() { return fbr.val; });
+        return SUSPEND;
+    };
     /***** Objects *****/
     /* Core */
     function Sym(name) { this.name = name; }
@@ -235,7 +283,7 @@ var wat = (function() {
     function init_types(typenames) {
         typenames.map(function (typename) { var type = new Type(); set_label(type, typename);
                                             eval(typename).prototype.wat_type = type; }); }
-    init_types(["Fbr", "Opv", "Apv", "Def", "Vau", "If", "Eval", "JSFun",
+    init_types(["Fbr", "Opv", "Apv", "Def", "Vau", "If", "Eval", "JSFun", "Pollset", "PollsetWait", "PollsetWrite",
 		"Sym", "Cons", "Env", "Str", "Num", "Vector", "Void", "Ign", "Nil", "Bool", "Type"]);
     /* Utilities */
     function assert(b) { if (!b) fail("assertion failed"); }
@@ -342,6 +390,11 @@ var wat = (function() {
         envbind(e, "make-pollset", jswrap(function() { return new Pollset(); }));
         envbind(e, "pollset-callback", jswrap(function(ps) { return pollset_callback(ps); }));
         envbind(e, "pollset-wait", wrap(new PollsetWait()));
+        envbind(e, "pollset-write", wrap(new PollsetWrite()));
+        envbind(e, "spawn", wrap(new Spawn()));
+        envbind(e, "coro-create", wrap(new CoroCreate()));
+        envbind(e, "coro-resume", wrap(new CoroResume()));
+        envbind(e, "coro-yield", wrap(new CoroYield()));
 	return e;
     }
     /***** API *****/

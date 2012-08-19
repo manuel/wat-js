@@ -72,7 +72,7 @@ var wat = (function() {
         return evalArgs(fbr, e, cdr(todo), cons(arg, done));
     };
     /* Built-in Combiners */
-    function Vau() {}; function If() {}; function Eval() {};
+    function Vau() {}; function If() {}; function Eval() {}; function Begin() {};
     Vau.prototype.combine = function(fbr, e, o) { return new Opv(elt(o, 0), elt(o, 1), elt(o, 2), e); };
     If.prototype.combine = function(fbr, e, o) {
         if (fbr.resuming === true) {
@@ -87,6 +87,23 @@ var wat = (function() {
         return evaluate(fbr, e, (test === F) ? elt(o, 2) : elt(o, 1));
     };
     Eval.prototype.combine = function(fbr, e, o) { return evaluate(fbr, elt(o, 1), elt(o, 0)); };
+    Begin.prototype.combine = function(fbr, e, o) { if (o === NIL) return VOID; else return begin(fbr, e, o); };
+    function begin(fbr, e, xs) {
+        if (cdr(xs) === NIL) {
+            return evaluate(fbr, e, car(xs));
+        } else {
+            if (fbr.resuming === true) {
+                resume(fbr);
+            } else {
+                var res = evaluate(fbr, e, car(xs));
+                if (res === SUSPEND) {
+                    pushSuspend(fbr, function() { return begin(fbr, e, xs); });
+                    return SUSPEND;
+                }
+            }
+            return begin(fbr, e, cdr(xs));
+        }
+    }
     /* JS Bridge */
     function JSFun(jsfun) { this.jsfun = jsfun; }
     JSFun.prototype.combine = function(fbr, e, o) { return this.jsfun.apply(null, list_to_array(o)); };
@@ -232,6 +249,7 @@ var wat = (function() {
 	envbind(e, "if", new If());
 	envbind(e, "vau", new Vau());
 	envbind(e, "eval", wrap(new Eval()));
+	envbind(e, "begin", new Begin());
 	envbind(e, "wrap", jswrap(wrap));
 	envbind(e, "unwrap", jswrap(unwrap));
 	envbind(e, "eq?", jswrap(function (a, b) { return (a === b) ? T : F }));

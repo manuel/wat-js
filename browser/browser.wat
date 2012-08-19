@@ -34,22 +34,22 @@
     (js-set-prop! (getElementById "input") "value" (to-js ""))
     res))
 
-(define *input-pollset* (make-pollset))
-(js-set-prop! (getElementById "input") "onkeypress" (pollset-callback *input-pollset*))
+;; (define *input-pollset* (make-pollset))
+;; (js-set-prop! (getElementById "input") "onkeypress" (pollset-callback *input-pollset*))
 
-(define (read)
-  (let ((evt (pollset-wait *input-pollset*)))
-    (if (= (from-js (js-prop evt "keyCode")) 13)
-        (read-input)
-        (read))))
+;; (define (read)
+;;   (let ((evt (pollset-wait *input-pollset*)))
+;;     (if (= (from-js (js-prop evt "keyCode")) 13)
+;;         (read-input)
+;;         (read))))
 
-(define (display msg)
-  (let ((div (createElement "div")))
-    (appendChild div (createTextNode (to-js msg)))
-    (appendChild (getElementById "output") div)
-    (scrollTo (to-js 0) (js-prop *body* "scrollHeight"))
-    msg))
+;; (define (display msg)
+;;   (let ((div (createElement "div")))
+;;     (appendChild div (createTextNode (to-js msg)))
+;;     (appendChild (getElementById "output") div)
+;;     (scrollTo (to-js 0) (js-prop *body* "scrollHeight"))
+;;     msg))
 
-((js-method "focus") (getElementById "input"))
+;; ((js-method "focus") (getElementById "input"))
 
 ) ; edivorp

@@ -1,7 +1,7 @@
 var wat = (function() {
     /***** Evaluation *****/
     /* Fibers */
-    function Fbr(sched) { this.sched = sched; this.suspensions = []; this.resuming = false; this.ticks = 0; }
+    function Fbr() { this.suspensions = []; this.resuming = false; }
     function resume(fbr) {
         fbr.resuming = true;
         var susp = fbr.suspensions.pop();
@@ -12,28 +12,8 @@ var wat = (function() {
     function Suspend() {}
     var SUSPEND = new Suspend();
     function pushSuspend(fbr, susp) { fbr.suspensions.push(susp); }
-    function makeResumable(fbr) {
-        fbr.sched.runnables.push(fbr);
-    }
-    function Sched() {
-        this.runnables = [];
-    }
-    Sched.prototype.schedule = function() {
-        var fbr;
-        while((fbr = this.runnables.shift()) !== undefined) {
-            resume(fbr);
-        }
-    }
     function evaluate(fbr, e, x) {
-        if (fbr.ticks < 10) {
-            fbr.ticks++;
-            if (x && x.wat_eval) return x.wat_eval(fbr, e); else return x;
-        } else {
-            fbr.ticks = 0;
-            pushSuspend(fbr, function() { fbr.resuming = false; return evaluate(fbr, e, x); });
-            makeResumable(fbr);
-            return SUSPEND;
-        }
+        if (x && x.wat_eval) return x.wat_eval(fbr, e); else return x;
     }
     Sym.prototype.wat_eval = function(fbr, e) { return lookup(e, this); };
     Cons.prototype.wat_eval = function(fbr, e) {
@@ -140,24 +120,6 @@ var wat = (function() {
         }
     }
     /* Threading */
-    function Spawn() {};
-    Spawn.prototype.combine = function(fbr, e, o) {
-        var cmb = elt(o, 0);
-        var newfbr = new Fbr(fbr.sched);
-        pushSuspend(newfbr, function() { newfbr.resuming = false; return cmb.combine(newfbr, e, NIL); });
-        makeResumable(newfbr);
-        return newfbr;
-    };
-    function Sleep() {};
-    Sleep.prototype.combine = function(fbr, e, o) {
-        if (fbr.resuming) {
-            return VOID;
-        } else {
-            pushSuspend(fbr, function() { return Sleep.prototype.combine(fbr, e, o); });
-            setTimeout(function() { makeResumable(fbr); fbr.sched.schedule(); }, elt(o, 0).jsnum);
-            return SUSPEND;
-        }
-    };
     /* JS Bridge */
     function JSFun(jsfun) { this.jsfun = jsfun; }
     JSFun.prototype.combine = function(fbr, e, o) { return this.jsfun.apply(null, list_to_array(o)); };
@@ -201,8 +163,7 @@ var wat = (function() {
             if (ps.suspendedFbr !== null) {
                 var fbr = ps.suspendedFbr;
                 ps.suspendedFbr = null;
-                makeResumable(fbr);
-                fbr.sched.schedule();
+                resume(fbr);
             }
         };
     }
@@ -267,7 +228,7 @@ var wat = (function() {
     function init_types(typenames) {
         typenames.map(function (typename) { var type = new Type(); set_label(type, typename);
                                             eval(typename).prototype.wat_type = type; }); }
-    init_types(["Fbr", "Opv", "Apv", "Def", "Vau", "If", "Eval", "JSFun", "Pollset", "PollsetWait",
+    init_types(["Fbr", "Opv", "Apv", "Def", "Vau", "If", "Eval", "JSFun",
 		"Sym", "Cons", "Env", "Str", "Num", "Vector", "Void", "Ign", "Nil", "Bool", "Type"]);
     /* Utilities */
     function assert(b) { if (!b) fail("assertion failed"); }
@@ -328,6 +289,7 @@ var wat = (function() {
 	envbind(e, "vau", new Vau());
 	envbind(e, "eval", wrap(new Eval()));
 	envbind(e, "begin", new Begin());
+        envbind(e, "loop", new Loop());
 	envbind(e, "wrap", jswrap(wrap));
 	envbind(e, "unwrap", jswrap(unwrap));
 	envbind(e, "eq?", jswrap(function (a, b) { return (a === b) ? T : F }));
@@ -373,20 +335,11 @@ var wat = (function() {
         envbind(e, "make-pollset", jswrap(function() { return new Pollset(); }));
         envbind(e, "pollset-callback", jswrap(function(ps) { return pollset_callback(ps); }));
         envbind(e, "pollset-wait", wrap(new PollsetWait()));
-        envbind(e, "spawn", wrap(new Spawn()));
-        envbind(e, "loop", new Loop());
-        envbind(e, "sleep", wrap(new Sleep()));
 	return e;
     }
     /***** API *****/
     return {
-	"eval": function(x, e) {
-            var sched = new Sched();
-            var fbr = new Fbr(sched);
-            pushSuspend(fbr, function() { fbr.resuming = false; return evaluate(fbr, e, x); });
-            makeResumable(fbr);
-            fbr.sched.schedule();
-        },
+	"eval": function(x, e) { var fbr = new Fbr(); return evaluate(fbr, e, x); },
 	"mkenvcore": mkenvcore, "parse": parse, "Sym": Sym, "array_to_list": array_to_list,
     };
 }());

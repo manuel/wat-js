@@ -34,14 +34,18 @@
     (js-set-prop! (getElementById "input") "value" (to-js ""))
     res))
 
-(define *input-pollset* (make-pollset))
-(js-set-prop! (getElementById "input") "onkeypress" (pollset-callback *input-pollset*))
-
-(define (read)
-  (let ((evt (pollset-wait *input-pollset*)))
+(provide (read input-callback)
+  (def *env* (current-environment))
+  (def *read-coro* #f)
+  (define (read)
+    (set! *env* *read-coro* (current-coro))
+    (coro-yield #void))
+  (define (input-callback evt)
     (if (num= (from-js (js-prop evt "keyCode")) 13)
-        (read-input)
-        (read))))
+        (coro-resume *read-coro* (read-input))
+        #void)))
+
+(js-set-prop! (getElementById "input") "onkeypress" (js-callback input-callback))
 
 (define (display msg)
   (let ((div (createElement "div")))

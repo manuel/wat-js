@@ -289,5 +289,6 @@
 
 (define (trap exc)
   (define trace (stacktrace))
-  (display (strcat "An error occurred: " (->string exc)))
+  (display "ERROR")
+  (display exc)
   (display-stacktrace trace))

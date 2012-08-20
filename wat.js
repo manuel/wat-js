@@ -1,9 +1,19 @@
 var wat = (function() {
     /***** Evaluation *****/
     /* Fibers */
-    function Fbr() { this.suspensions = null; this.resuming = false; this.val = null; this.stack = NIL; }
+    function Fbr(e) { this.e = e; this.suspensions = null; this.resuming = false; this.val = null; this.stack = NIL; }
+    function runFbr(x, e) {
+        try {
+            var fbr = new Fbr(e); return evaluate(fbr, e, x);
+        } catch(exc) {
+            var trap = fbr.e.bindings["trap"];
+            if (trap !== undefined) return runFbr(cons(trap, cons(exc, NIL)), this.e);
+            else throw exc;
+        }
+    }
     function resume(fbr) {
         fbr.resuming = true;
+        if (!fbr.suspensions) throw "trying to resume finished coroutine";
         var susp = fbr.suspensions.thunk;
         fbr.suspensions = fbr.suspensions.next;
         var res = susp();
@@ -293,7 +303,7 @@ var wat = (function() {
         var cmb = elt(o, 0);
         return function() {
             var args = array_to_list(Array.prototype.slice.call(arguments));
-            var newfbr = new Fbr(); return combine(newfbr, e, cmb, args);
+            runFbr(cons(cmb, args), e);
         };
     }
     /***** Objects *****/
@@ -509,7 +519,7 @@ var wat = (function() {
     }
     /***** API *****/
     return {
-	"eval": function(x, e) { var fbr = new Fbr(); return evaluate(fbr, e, x); },
+	"eval": runFbr,
 	"mkenvcore": mkenvcore, "parse": parse, "Sym": Sym, "array_to_list": array_to_list,
     };
 }());

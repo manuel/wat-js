@@ -219,7 +219,5 @@
          field-specs)
     type))
 
-(define *top-level* '*top-level*)
-
-(define (trap exc)
-  (display exc))
+(define-syntax (dlet dv val . exprs) env
+  (eval (list dlet* dv val (list* lambda () exprs)) env))

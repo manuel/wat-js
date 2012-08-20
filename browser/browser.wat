@@ -49,6 +49,7 @@
 
 (define (display msg)
   (let ((div (createElement "div")))
+    ((js-method "log") (js-global "console") msg)
     (appendChild div (createTextNode (to-js msg)))
     (appendChild (getElementById "output") div)
     (scrollTo (to-js 0) (js-prop *body* "scrollHeight"))

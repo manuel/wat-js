@@ -80,7 +80,7 @@ var wat = (function() {
     };
     /* Built-in Combiners */
     function Vau() {}; function If() {}; function Eval() {}; function Begin() {}; function Loop() {};
-    function Catch() {}; function Throw() {}; function DynamicWind() {};
+    function Catch() {}; function Throw() {}; function Finally() {};
     Vau.prototype.combine = function(fbr, e, o) { return new Opv(elt(o, 0), elt(o, 1), elt(o, 2), e); };
     If.prototype.combine = function(fbr, e, o) {
         if (fbr.resuming === true) {
@@ -151,14 +151,51 @@ var wat = (function() {
         var val = elt(o, 1);
         throw new Exc(tag, val);
     };
-    DynamicWind.prototype.combine = function(fbr, e, o) {
-        var pre = elt(o, 0);
-        var th = elt(o, 1);
-        var post = elt(o, 2);
-        var resuming = fbr.resuming;
-        fbr.resuming = false;
-        combine(fbr, e, pre, NIL);
-        fbr.resuming = resuming;
+    Finally.prototype.combine = function(fbr, e, o) {
+        var prot = elt(o, 0);
+        var cleanup = elt(o, 1);
+        try {
+            if (fbr.resuming === true) {
+                var res = resume(fbr);
+            } else {
+                var res = evaluate(fbr, e, prot);
+            }
+            if (res === SUSPEND) {
+                pushSuspend(fbr, function() { return Finally.prototype.combine(fbr, e, o); });
+            }
+        } finally {
+            if (res === SUSPEND) {
+                return SUSPEND;
+            } else {
+                return doFinally(fbr, e, cleanup, res);
+            }
+        }
+    };
+    function doFinally(fbr, e, cleanup, res) {
+        if (fbr.resuming === true) {
+            var fres = resume(fbr);
+        } else {
+            var fres = evaluate(fbr, e, cleanup);
+        }
+        if (fres === SUSPEND) {
+            pushSuspend(fbr, function() { return doFinally(fbr, e, cleanup, res); });
+            return SUSPEND;
+        } else {
+            return res;
+        }
+    }
+    /* Dynamic Variables */
+    function DV(val) { this.val = val; }
+    function DNew() {}; function DLet() {}; function DRef() {};
+    DNew.prototype.combine = function(fbr, e, o) {
+        return new DV(elt(o, 0));
+    }
+    DLet.prototype.combine = function(fbr, e, o) {
+        var dv = elt(o, 0);
+        var val = elt(o, 1);
+        var th = elt(o, 2);
+        var oldVal = dv.val;
+        dv.val = val;
         try {
             if (fbr.resuming === true) {
                 var res = resume(fbr);
@@ -166,18 +203,18 @@ var wat = (function() {
                 var res = combine(fbr, e, th, NIL);
             }
             if (res === SUSPEND) {
-                pushSuspend(fbr, function() { return DynamicWind.prototype.combine(fbr, e, o); });
+                pushSuspend(fbr, function() { return DLet.prototype.combine(fbr, e, o); });
                 return SUSPEND;
             } else {
                 return res;
-            }        
+            }
         } finally {
-            combine(fbr, e, post, NIL);
+            dv.val = oldVal;
         }
-    };
-    function doFinally(fbr, e, cleanup, res) {
-        combine(fbr, e, cleanup, NIL);
     }
+    DRef.prototype.combine = function(fbr, e, o) {
+        return elt(o, 0).val;
+    };
     /* Coroutines */
     function CoroCreate() {}; function CoroResume() {}; function CoroYield() {}; function CurrentCoro() {};
     CoroCreate.prototype.combine = function(fbr, e, o) {
@@ -412,7 +449,10 @@ var wat = (function() {
         envbind(e, "coro-resume", wrap(new CoroResume()));
         envbind(e, "coro-yield", wrap(new CoroYield()));
         envbind(e, "current-coro", new CurrentCoro());
-        envbind(e, "dynamic-wind", wrap(new DynamicWind()));
+        envbind(e, "finally", new Finally());
+        envbind(e, "dnew", wrap(new DNew()));
+        envbind(e, "dlet*", wrap(new DLet()));
+        envbind(e, "dref", wrap(new DRef()));
 	return e;
     }
     /***** API *****/

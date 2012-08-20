@@ -222,8 +222,4 @@
 (define *top-level* '*top-level*)
 
 (define (trap exc)
-  (display (strcat "An error occurred: " (->string (from-js exc))))
-  (display (strcat "Stacktrace:"))
-  (print-stacktrace 20)
-  (take-sub-cont *top-level* k (push-prompt *top-level* #void)))
-
+  (display exc))

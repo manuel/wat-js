@@ -188,7 +188,7 @@ Creates a new empty environment with the given optional parent.
 
 Returns true if a symbol is bound in the environment, false otherwise.
 
-** Coroutines
+** Control
 
 *** =coro-create <thunk> → coro= [applicative]
 
@@ -207,6 +207,19 @@ the first expression, or from the last call to =coro-yield=.
 *** =current-coro → coro= [applicative]
 
 Returns the currently executing coroutine.
+
+*** =dynamic-wind <pre-thunk> <thunk> <post-thunk> → result= [applicative]
+
+Normally, applies the pre thunk, the thunk, and the post thunk,
+returning the value returned by the thunk.
+
+Every time control exits the thunk abnormally (by yielding or
+throwing), the post thunk is executed.
+
+Every time control again enters the thunk (by resuming after a yield),
+the pre thunk is executed before the thunk.
+
+The pre and post thunks should not yield, although they may throw.
 
 ** Types
 *** =make-type → (type tagger untagger)= [applicative]

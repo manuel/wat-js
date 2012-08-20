@@ -323,6 +323,35 @@ var wat = (function() {
     function sym_to_str(sym) { return new Str(sym.name); }
     function str_to_num(str) { return new Num(Number(str.jsstr)); }
     function num_to_str(num) { return new Str(String(num.jsnum)); }
+    function IdentityHashtable() { this.entries = Object.create(null); }
+    function hashtable_put(tbl, k, v) {
+        var hash = String(idhash(k));
+        var bucket = tbl.entries[hash];
+        if (bucket === undefined) {
+            bucket = [];
+            tbl.entries[hash] = bucket;
+        }
+        for (var i = 0; i < bucket.length; i++) {
+            if (bucket[i][0] === k) {
+                bucket[i][1] = v;
+                return v;
+            }
+        }
+        bucket.push([k, v]);
+        return v;
+    }
+    function hashtable_get(tbl, k, def) {
+        var hash = String(idhash(k));
+        var bucket = tbl.entries[hash];
+        if (bucket === undefined) {
+            return def;
+        }
+        for (var i = 0; i < bucket.length; i++) {
+            if (bucket[i][0] === k)
+                return bucket[i][1];
+        }
+        return def;
+    }
     /* Types */
     function Type() {};
     function Tagged(type, val) { this.wat_type = type; this.val = val };
@@ -436,6 +465,9 @@ var wat = (function() {
 	envbind(e, "vector-ref", jswrap(function(vector, i) { return vector_ref(vector, i.jsnum); }));
 	envbind(e, "vector-set!", jswrap(function(vector, i, val) { return vector_set(vector, i.jsnum, val); }));
 	envbind(e, "vector-length", jswrap(function(vector) { return new Num(vector_length(vector)); }));
+        envbind(e, "make-identity-hashtable", jswrap(function() { return new IdentityHashtable(); }));
+        envbind(e, "hashtable-put!", jswrap(hashtable_put));
+        envbind(e, "hashtable-get", jswrap(hashtable_get));
 	envbind(e, "js-global", jswrap(js_global));
 	envbind(e, "js-set-global!", jswrap(js_set_global));
 	envbind(e, "js-prop", jswrap(js_prop));
@@ -463,7 +495,6 @@ var wat = (function() {
 }());
 var WAT_GLOBAL = this;
 // Abbreviations:
-// a: accumulator
 // apv: applicative combiner
 // arg: argument
 // cmb: combiner
@@ -473,16 +504,12 @@ var WAT_GLOBAL = this;
 // ep: environment parameter
 // fbr: fiber
 // id: identifier
-// k: continuation
-// mk: metacontinuation
 // num: number
 // o: operand
 // opv: operative combiner
 // p: parameter
-// seg: metacontinuation segment
 // str: string
 // stx: syntax
-// subcont: subcontinuation
 // sym: symbol
 // x: expression
 // xe: extended environment

@@ -210,6 +210,12 @@
 (define-syntax (coroutine . exprs) env
   (coroutine* (eval (list* lambda () exprs) env)))
 
+;; (define-syntax (block name . exprs) env
+;;   (letrec ((aborter (lambda (val) (throw aborter val))))
+;;     (eval (list* let (list (list name aborter))
+;;             (list* catch aborter exprs))
+;;           env)))
+
 (provide (define-generic define-method put-method!)
   (define generic->vtable (make-identity-hashtable))
   (define-syntax (define-generic (name . args) . body) env

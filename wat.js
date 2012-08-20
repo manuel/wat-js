@@ -1,7 +1,7 @@
 var wat = (function() {
     /***** Evaluation *****/
     /* Fibers */
-    function Fbr() { this.suspensions = null; this.resuming = false; this.val = null; }
+    function Fbr() { this.suspensions = null; this.resuming = false; this.val = null; this.stack = NIL; }
     function resume(fbr) {
         fbr.resuming = true;
         var susp = fbr.suspensions.thunk;
@@ -19,17 +19,17 @@ var wat = (function() {
     }
     Sym.prototype.wat_eval = function(fbr, e) { return lookup(e, this); };
     Cons.prototype.wat_eval = function(fbr, e) {
-        if (fbr.resuming === true) {
-            var op = resume(fbr);
-        } else {
-            var op = evaluate(fbr, e, car(this));
-        }
-        if (op === SUSPEND) {
-            var that = this;
-            pushSuspend(fbr, function() { return that.wat_eval(fbr, e); });
-            return SUSPEND;
-        }
-        return combine(fbr, e, op, cdr(this));
+            if (fbr.resuming === true) {
+                var op = resume(fbr);
+            } else {
+                var op = evaluate(fbr, e, car(this));
+            }
+            if (op === SUSPEND) {
+                var that = this;
+                pushSuspend(fbr, function() { return that.wat_eval(fbr, e); });
+                return SUSPEND;
+            }
+            return combine(fbr, e, op, cdr(this));
     };
     function Def() {}
     Def.prototype.combine = function(fbr, e, o) {
@@ -45,25 +45,39 @@ var wat = (function() {
         return bind(e, elt(o, 0), val);
     };
     /* Operative & Applicative Combiners */
-    function combine(fbr, e, cmb, o) { return cmb.combine ? cmb.combine(fbr, e, o) : fail("not a combiner"); }
+    function combine(fbr, e, cmb, o) {
+        return cmb.combine ? cmb.combine(fbr, e, o) : fail("not a combiner");
+    }
     function Opv(p, ep, x, e) { this.p = p; this.ep = ep; this.x = x; this.e = e; }
     function Apv(cmb) { this.cmb = cmb; }; function wrap(cmb) { return new Apv(cmb); }; function unwrap(apv) { return apv.cmb; }
     Opv.prototype.combine = function(fbr, e, o) {
-	var xe = new Env(this.e); bind(xe, this.p, o); bind(xe, this.ep, e);
-        return evaluate(fbr, xe, this.x);
+        var oldStack = fbr.stack;
+        fbr.stack = cons(cons(this, o), fbr.stack);
+        try {
+	    var xe = new Env(this.e); bind(xe, this.p, o); bind(xe, this.ep, e);
+            return evaluate(fbr, xe, this.x);
+        } finally {
+            fbr.stack = oldStack;
+        }
     };
     Apv.prototype.combine = function(fbr, e, o) {
-        if (fbr.resuming === true) {
-            var args = resume(fbr);
-        } else {
-            var args = evalArgs(fbr, e, o, NIL);
+        var oldStack = fbr.stack;
+        fbr.stack = cons(cons(this, o), fbr.stack);
+        try {
+            if (fbr.resuming === true) {
+                var args = resume(fbr);
+            } else {
+                var args = evalArgs(fbr, e, o, NIL);
+            }
+            if (args === SUSPEND) {
+                var that = this;
+                pushSuspend(fbr, function() { return that.combine(fbr, e, o); })
+                return SUSPEND;
+            }
+            return this.cmb.combine(fbr, e, args);
+        } finally {
+            fbr.stack = oldStack;
         }
-        if (args === SUSPEND) {
-            var that = this;
-            pushSuspend(fbr, function() { return that.combine(fbr, e, o); })
-            return SUSPEND;
-        }
-        return this.cmb.combine(fbr, e, args);
     };
     function evalArgs(fbr, e, todo, done) {
 	if (todo === NIL) { return reverse_list(done); }
@@ -244,6 +258,11 @@ var wat = (function() {
     };
     CurrentCoro.prototype.combine = function(fbr, e, o) {
         return fbr;
+    };
+    /* Stack Trace */
+    function Stacktrace() {};
+    Stacktrace.prototype.combine = function(fbr, e, o) {
+        return fbr.stack;
     };
     /* JS Bridge */
     function JSFun(jsfun) { this.jsfun = jsfun; }
@@ -485,6 +504,7 @@ var wat = (function() {
         envbind(e, "dnew", wrap(new DNew()));
         envbind(e, "dlet*", wrap(new DLet()));
         envbind(e, "dref", wrap(new DRef()));
+        envbind(e, "stacktrace", new Stacktrace());
 	return e;
     }
     /***** API *****/

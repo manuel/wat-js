@@ -283,3 +283,11 @@
   (define-method (->string (obj Environment)) "#[Environment]")
   (define-method (->string (obj Vector)) "#[Vector]")
 )
+
+(define (display-stacktrace trace)
+  (for-each (lambda (frame) (display (->string frame))) trace))
+
+(define (trap exc)
+  (define trace (stacktrace))
+  (display (strcat "An error occurred: " (->string exc)))
+  (display-stacktrace trace))

@@ -557,9 +557,9 @@ therefore applied in a fresh fiber.
 
 * Debugging Interface
 
-** =stacktrace <depth> → list= [applicative] /NIY/
+** =stacktrace → list= [applicative]
 
-Returns a list of stack frames, up to the given depth.
+Returns a list of recent stack frames.
 
 ** =label <obj> → string= [applicative]
 

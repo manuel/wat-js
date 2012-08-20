@@ -436,7 +436,7 @@ var wat = (function() {
 	envbind(e, "eq?", jswrap(function (a, b) { return (a === b) ? T : F }));
 	envbind(e, "cons", jswrap(cons));
 	envbind(e, "make-environment", jswrap(function (parent) { return new Env(parent); }));
-        envbind(e, "bound?", jswrap(function (sym, e) { return (bound(sym, e)) ? T : F }));
+        envbind(e, "defined?", jswrap(function (sym, e) { return (bound(sym, e)) ? T : F }));
 	envbind(e, "make-type", jswrap(make_type));
 	envbind(e, "type-of", jswrap(type_of));
 	envbind(e, "label", jswrap(function(type) { return new Str(label(type)); }));
@@ -477,10 +477,10 @@ var wat = (function() {
 	envbind(e, "to-js", jswrap(to_js));
 	envbind(e, "from-js", jswrap(from_js));
 	envbind(e, "js-callback", wrap(new JSCallback()));
-        envbind(e, "coro-create", wrap(new CoroCreate()));
-        envbind(e, "coro-resume", wrap(new CoroResume()));
-        envbind(e, "coro-yield", wrap(new CoroYield()));
-        envbind(e, "current-coro", new CurrentCoro());
+        envbind(e, "coroutine*", wrap(new CoroCreate()));
+        envbind(e, "resume", wrap(new CoroResume()));
+        envbind(e, "yield", wrap(new CoroYield()));
+        envbind(e, "current-coroutine", new CurrentCoro());
         envbind(e, "finally", new Finally());
         envbind(e, "dnew", wrap(new DNew()));
         envbind(e, "dlet*", wrap(new DLet()));

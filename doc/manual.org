@@ -64,6 +64,8 @@ Wat identifiers are case-sensitive.
 
  * Vector :: An array of objects.
 
+ * Hashtable :: Wat currently only supports identity hashtables.
+
  * Operative :: A combiner that operates directly on its operands.
 
  * Applicative :: A combiner that evaluates its operands, yielding an
@@ -115,208 +117,13 @@ Examples:
 | =(vau #ign e e)=       | (1 (+ 2 3) 4) | /<the current environment>/ |
 | =(wrap (vau x #ign x))= | (1 (+ 2 3) 4) | (1 5 4)                     |
 
-* Core
-
-The core contains primitive functionality that could not be
-implemented in Wat itself (or it would be cumbersome to do so).
-
-** Basics
-*** =def <lhs> <rhs> → rhs= [operative]
+* Bindings
+** =def <lhs> <rhs> → rhs= [operative]
 
 Evaluates the right-hand side, matches the left-hand side against it
 in the current environment, and returns it.
 
-*** =begin . <exprs> → result= [operative]
-
-Evaluates expressions from left to right, returning the value of the
-last.  As a special case, =(begin)= returns void.
-
-Note: =begin= could be implemented in the library, but for performance
-reasons is built into the core.
-
-*** =if <test> <then> <else> → result= [operative]
-
-Evaluates the test, and if it is false evaluates the else branch,
-otherwise evaluates the then branch.  The branches are evaluated in
-tail position.
-
-*** =cons <car> <cdr> → cons= [applicative]
-
-Creates a new cons with the given car and cdr.
-
-*** =eq? <a> <b> → boolean= [applicative]
-
-Returns true if the two values are pointer identical, false otherwise.
-
-Note: it is advised against using =eq?= except in special
-circumstances.  Because not even symbols or small numbers that "are
-the same" are guaranteed to be =eq?=, it can be confusing.  The
-generic equality predicate @<code>=@</code> should almost always be
-used instead.
-
-*** =identity-hash-code <obj> → number= [applicative]
-
-Returns the system-determined identity hash code of the object, which
-is equal if two objects are =eq?=.  It is unlikely that two different
-objects have the same identity hash code.
-
-** Combiners and Environments
-*** =vau <ptree> <envp> <body> → operative= [operative]
-
-Constructs a new compound operative that closes over the current
-environment with the given parameter tree, environment parameter, and
-body expression.
-
-*** =eval <expr> <env> → result= [applicative]
-
-Evaluates the expression in the given environment.  The expression is
-evaluated in tail-position.
-
-*** =wrap <cmb> → applicative= [applicative]
-
-Returns an applicative around an underlying combiner.
-
-*** =unwrap <cmb> → combiner= [applicative]
-
-Returns the underlying combiner of an applicative.
-
-*** =make-environment [<parent>] → environment= [applicative]
-
-Creates a new empty environment with the given optional parent.
-
-*** =bound? <sym> <env> → boolean= [applicative]
-
-Returns true if a symbol is bound in the environment, false otherwise.
-
-** Control
-
-*** =coro-create <thunk> → coro= [applicative]
-
-Creates a new, not yet running coroutine that will execute the thunk
-when it is resumed.
-
-*** =coro-yield <val> → result= [applicative]
-
-Suspends the current coroutine, returning value to the caller.
-
-*** =coro-resume <coro> <val> → result= [applicative]
-
-Passes value into a suspended coroutine, resuming its execution from
-the first expression, or from the last call to =coro-yield=.
-
-*** =current-coro → coro= [applicative]
-
-Returns the currently executing coroutine.
-
-*** =dynamic-wind <pre-thunk> <thunk> <post-thunk> → result= [applicative]
-
-Normally, applies the pre thunk, the thunk, and the post thunk,
-returning the value returned by the thunk.
-
-Every time control exits the thunk abnormally (by yielding or
-throwing), the post thunk is executed.
-
-Every time control again enters the thunk (by resuming after a yield),
-the pre thunk is executed before the thunk.
-
-The pre and post thunks should not yield, although they may throw.
-
-** Types
-*** =make-type → (type tagger untagger)= [applicative]
-
-Returns a list containing:
-
- * a fresh first-class type;
-
- * an applicative, the tagger, that takes a value and tags it with the
-   type;
-
- * an applicative, the untagger, that takes a tagged object created by
-   the tagger and returns its value.
-
-The untagger only untags objects created by the tagger.
-
-*** =type-of <val> → type= [applicative]
-
-Returns an object's type.  Every object has a type, whether built-in
-objects or tagged objects.
-
-** System
-
-*** =read → form= [applicative]
-
-Reads a form from the console and returns it.
-
-*** =display <msg> → msg= [applicative]
-
-Prints a message string to the console and returns it.
-
-*** =fail <reason> → |= [applicative]
-
-Halts evaluation with an object describing the reason (typically an error).
-
-** Numbers
-
-*** =+=, =-=, =*=, =/=, =%= [applicatives]
-
-The binary applicatives for addition, subtraction, multiplication,
-division, and modulo.
-
-** Vectors
-
-*** =vector . <elements> → vector= [applicative]
-
-Creates a new vector with the given elements.
-
-*** =vector-ref <vector> <index> → element= [applicative]
-
-Returns the vector's element at the given index.
-
-*** =vector-set! <vector> <index> <element> → element= [applicative]
-
-Updates the vector's element at the given index and returns it.
-
-*** =vector-length <vector> → number= [applicative]
-
-Returns the number of elements in the vector.
-
-** Conversions
-
-*** =string->symbol=, =symbol->string=, =string->number=, =number->string= [applicatives]
-* Library
-
-The library consists of definitions written in Wat itself.
-
-** Types
-
-*** =Void=, =Ign=, =Boolean=, =Nil=, =Pair=, =Symbol=, =String=, =Number=, =Applicative=, =Operative=, =Environment=, =Vector=, =Type= [variables]
-
-Type constants for built-in types.
-
-*** =void?=, =ign?=, =boolean?=, =null?=, =pair?=, =symbol?=, =string?=, =number?=, =applicative?=, =operative?=, =environment?=, =vector?=, =type?= [applicatives]
-
-Type predicates for built-in types.
-
-** Common
-
-*** =lambda <ptree> . <exprs> → applicative= [operative]
-
-Creates an applicative combiner, as in Scheme.
-
-*** =apply <apv> <args> → result= [applicative]
-
-Applies an applicative to an arguments list.
-
-*** =set! <env> <lhs> <rhs> → rhs= [operative]
-
-Updates the left-hand side bindings by matching it against the
-right-hand side in the given environment.
-
-*** =quote <form> → form= [operative]
-
-Returns form unevaluated.
-
-*** =define <lhs> <rhs> → result= [operative]
+** =define <lhs> <rhs> → result= [operative]
 
 Scheme-like =define= with two cases:
 
@@ -326,7 +133,7 @@ Scheme-like =define= with two cases:
    applicative with the given parameters and body expressions,
    returning the applicative.
 
-*** =define-syntax <lhs> <rhs> → result= [operative]
+** =define-syntax <lhs> <rhs> → result= [operative]
 
 Scheme-like =define-syntax= with two cases:
 
@@ -337,7 +144,16 @@ Scheme-like =define-syntax= with two cases:
    name to an operative with the given parameters, environment
    parameter, and body expressions, returning the operative.
 
-*** =provide <names> . <exprs> → result= [operative]
+** =set! <env> <lhs> <rhs> → rhs= [operative]
+
+Updates the left-hand side bindings by matching it against the
+right-hand side in the given environment.
+
+** =defined? <sym> <env> → boolean= [applicative]
+
+Returns true if a symbol is bound in the environment, false otherwise.
+
+** =provide <names> . <exprs> → result= [operative]
 
 Performs expressions in a new lexical scope and exports only listed
 names to the outer scope.
@@ -353,7 +169,128 @@ bar → 2
 quux → error: unbound variable
 #+END_EXAMPLE
 
-*** =define-record-type <name> <ctor> <pred> . <fields> → type= [operative]
+* Evaluation and Environments
+** =make-environment [<parent>] → environment= [applicative]
+
+Creates a new empty environment with the given optional parent.
+
+** =current-environment → environment= [applicative]
+
+Returns the current environment.
+
+** =eval <expr> <env> → result= [applicative]
+
+Evaluates the expression in the given environment.  The expression is
+evaluated in tail-position.
+
+** =quote <form> → form= [operative]
+
+Returns form unevaluated.
+
+* Combiners
+** =vau <ptree> <envp> <body> → operative= [operative]
+
+Constructs a new compound operative that closes over the current
+environment with the given parameter tree, environment parameter, and
+body expression.
+
+** =lambda <ptree> . <exprs> → applicative= [operative]
+
+Creates an applicative combiner, as in Scheme.
+
+** =apply <apv> <args> → result= [applicative]
+
+Applies an applicative to an arguments list.
+
+** =wrap <cmb> → applicative= [applicative]
+
+Returns an applicative around an underlying combiner.
+
+** =unwrap <cmb> → combiner= [applicative]
+
+Returns the underlying combiner of an applicative.
+
+* Control Flow
+** =begin . <exprs> → result= [operative]
+
+Evaluates expressions from left to right, returning the value of the
+last.  As a special case, =(begin)= returns void.
+
+** =if <test> <then> <else> → result= [operative]
+
+Evaluates the test, and if it is false evaluates the else branch,
+otherwise evaluates the then branch.  The branches are evaluated in
+tail position.
+
+** =finally <protected> <cleanup> → result= [operative]
+
+Executes and returns the value of the protected form.  When control
+exits the protected form, either normally by a return, or abnormally
+through a throw, the cleanup form is executed.  The cleanup form is
+not executed when the protected form is exited by a yield.
+
+* Coroutines
+** =coroutine . <exprs> → coro= [applicative]
+
+Creates a new, not yet running coroutine that will execute the
+expressions when it is resumed.
+
+** =yield <val> → result= [applicative]
+
+Suspends the current coroutine, returning value to the caller.
+
+** =resume <coro> <val> → result= [applicative]
+
+Passes value into a suspended coroutine, resuming its execution from
+the first expression, or from the last call to =yield=.
+
+** =current-coroutine → coro= [applicative]
+
+Returns the currently executing coroutine.
+
+* Dynamic Binding
+** =dnew <val> → dynamic= [applicative]
+
+Creates a new dynamically-bound variable with the given initial value.
+
+** =dlet <dynamic> <value> . <exprs> → result= [operative]
+
+Performs expressions with the dynamic variable bound to the value.
+
+** =dref <dynamic> → value= [applicative]
+
+Retrieves the dynamically-bound value of a dynamic variable.
+
+* Types
+** =make-type → (type tagger untagger)= [applicative]
+
+Returns a list containing:
+
+ * a fresh first-class type;
+
+ * an applicative, the tagger, that takes a value and tags it with the
+   type;
+
+ * an applicative, the untagger, that takes a tagged object created by
+   the tagger and returns its value.
+
+The untagger only untags objects created by the tagger.
+
+** =type-of <val> → type= [applicative]
+
+Returns an object's type.  Every object has a type, whether built-in
+objects or tagged objects.
+
+** =Void=, =Ign=, =Boolean=, =Nil=, =Pair=, =Symbol=, =String=, =Number=, =Applicative=, =Operative=, =Environment=, =Vector=, =Type= [variables]
+
+Type constants for built-in types.
+
+** =void?=, =ign?=, =boolean?=, =null?=, =pair?=, =symbol?=, =string?=, =number?=, =applicative?=, =operative?=, =environment?=, =vector?=, =type?= [applicatives]
+
+Type predicates for built-in types.
+
+* Records
+** =define-record-type <name> <ctor> <pred> . <fields> → type= [operative]
 
 Defines a new record type with the given name.
 
@@ -379,74 +316,14 @@ Each element of =fields= is of the form:
   (kdr kdr set-kdr!))
 #+END_EXAMPLE
 
-*** =and=, =or= [operatives]
-
-Short-circuiting binary logical connectives.
-
-*** =not= [applicative]
-
-Unary logical connective.
-
-** Pairs and Lists
-
-*** =car <pair> → value= [applicative]
-
-Contents of the Address part of Register.
-
-*** =cdr <pair> → value= [applicative]
-
-Contents of the Decrement part of Register.
-
-*** =caar=, =cadr=, =cdar=, =cddr= [applicatives]
-
-Combinations of =car= and =cdr=, e.g. =(cadr x)= === =(car (cdr x))=.
-
-*** =list . <vals> → list= [applicative]
-
-Constructs a nil-terminated list containing the values.
-
-*** =list* . <vals> → list= [applicative]
-
-Constructs a list of the values, terminated by the last value.
-
-** Hashtables
-
-*** =Hashtable= [variable], =hashtable?= [applicative]
-
-Hashtable type and type predicate.
-
-*** =make-hashtable <hashfn> <eqfn> → hashtable= [applicative]
-
-Creates a new hashtable with the given hash function and equality function.
-
-*** =make-identity-hashtable → hashtable= [applicative]
-
-Creates a new hashtable with =identity-hash-code= as hash function and =eq?= as
-equality function.
-
-*** =make-generic-hashtable → hashtable= [applicative]
-
-Creates a new hashtable with =hash-code= as hash function and
-@<code>=@</code> as equality function.
-
-*** =hashtable-put! <hashtable> <key> <val> → val= [applicative]
-
-Associates key with value in hashtable.
-
-*** =hashtable-get <hashtable> <key> → val= [applicative]
-
-Retrieves value associated with key from hash, or signals an error if
-key is unbound.
-
-** Generic Functions
-
-*** =define-generic (<name> . <args>) . [<body>] → generic= [operative]
+* Generic Functions
+** =define-generic (<name> . <args>) . [<body>] → generic= [operative]
 
 Defines a new generic function.  If the optional body expressions are
 supplied, a default method is installed that will be used when no
 type-specific method is found.
 
-*** =define-method (<name> (<self> <type>) . <args>) . <body> → method= [operative]
+** =define-method (<name> (<self> <type>) . <args>) . <body> → method= [operative]
 
 Adds a method to a generic function.
 
@@ -460,7 +337,8 @@ Adds a method to a generic function.
   (string->number (symbol->string self)))
 #+END_EXAMPLE
 
-*** @<code>= <a> <b> → boolean@</code> [generic]
+* Equality
+** @<code>= <a> <b> → boolean@</code> [generic]
 
 Generic equality predicate.  Different types may attach different
 methods to this generic function.  If no method is defined for a type,
@@ -474,11 +352,31 @@ Methods for the following types are predefined:
 
  * Two strings are equal if they contain the same code points.
 
-*** @<code>/= <a> <b> → boolean@</code> [applicative]
+** @<code>/= <a> <b> → boolean@</code> [applicative]
 
 Inequality predicate, defined in terms of @<code>=@</code>.
 
-*** =hash-code <obj> → number= [generic]
+** =eq? <a> <b> → boolean= [applicative]
+
+Returns true if the two values are pointer identical, false otherwise.
+
+Note: it is advised against using =eq?= except in special
+circumstances.  Because not even symbols or small numbers that "are
+the same" are guaranteed to be =eq?=, it can be confusing.  The
+generic equality predicate @<code>=@</code> should almost always be
+used instead.
+
+* Order
+** =< <a> <b> → boolean= [generic]
+
+Generic binary comparison function.  A method is defined for numbers.
+
+** @<code>>@</code>, @<code><=@</code>, @<code>>=@</code> [applicatives]
+
+Binary comparison functions defined in terms of =<= and @<code>=@</code>.
+
+* Hashing
+** =hash-code <obj> → number= [generic]
 
 Generic hash function.  Different types may attach different methods
 to this generic function.  If no method is defined for a type, falls
@@ -488,41 +386,119 @@ If two objects are generically equal by @<code>=@</code>, their
 generic hash codes must be equal, too.  Conversely, if two objects
 have different generic hash codes, they cannot be generically equal.
 
-*** =->string <obj> → string= [generic]
+** =identity-hash-code <obj> → number= [applicative]
+
+Returns the system-determined identity hash code of the object, which
+is equal if two objects are =eq?=.  It is unlikely that two different
+objects have the same identity hash code.
+
+* Conversion
+** =->string <obj> → string= [generic]
 
 Generic string conversion function.  Turns any object into a string.
 Methods are defined for all built-in types.
 
-*** =< <a> <b> → boolean= [generic]
+** =string->symbol=, =symbol->string=, =string->number=, =number->string= [applicatives]
+* Booleans
+** =and=, =or= [operatives]
 
-Generic binary comparison function.  A method is defined for numbers.
+Short-circuiting binary logical connectives.
 
-*** @<code>>@</code>, @<code><=@</code>, @<code>>=@</code> [applicatives]
+** =not= [applicative]
 
-Binary comparison functions defined in terms of =<= and @<code>=@</code>.
+Unary logical connective.
 
-** Dynamic Binding
+* Numbers
+** =+=, =-=, =*=, =/=, =%= [applicatives]
 
-These are the operators from Kiselyov, Shan, and Sabry's
-[[http://okmij.org/ftp/papers/DDBinding.pdf][/Delimited Dynamic Binding/]].
+The binary applicatives for addition, subtraction, multiplication,
+division, and modulo.
 
-*** =dnew → dynamic= [applicative]
+* Pairs and Lists
 
-Creates a new dynamically-bound variable.
+** =cons <car> <cdr> → cons= [applicative]
 
-*** =dlet <dynamic> <value> . <exprs> → result= [operative]
+Creates a new cons with the given car and cdr.
 
-Performs expressions with the dynamic variable bound to the value.
+** =car <pair> → value= [applicative]
 
-*** =dref <dynamic> → value= [applicative]
+Contents of the Address part of Register.
 
-Retrieves the dynamically-bound value of a dynamic variable.
+** =cdr <pair> → value= [applicative]
 
-* Danger Zone
+Contents of the Decrement part of Register.
 
-This is the place for all kinds of tasteless things.
+** =caar=, =cadr=, =cdar=, =cddr= [applicatives]
 
-** JavaScript Bridge
+Combinations of =car= and =cdr=, e.g. =(cadr x)= === =(car (cdr x))=.
+
+** =list . <vals> → list= [applicative]
+
+Constructs a nil-terminated list containing the values.
+
+** =list* . <vals> → list= [applicative]
+
+Constructs a list of the values, terminated by the last value.
+
+* Vectors
+** =vector . <elements> → vector= [applicative]
+
+Creates a new vector with the given elements.
+
+** =vector-ref <vector> <index> → element= [applicative]
+
+Returns the vector's element at the given index.
+
+** =vector-set! <vector> <index> <element> → element= [applicative]
+
+Updates the vector's element at the given index and returns it.
+
+** =vector-length <vector> → number= [applicative]
+
+Returns the number of elements in the vector.
+
+* Hashtables
+** =Hashtable= [variable], =hashtable?= [applicative] /NIY/
+
+Hashtable type and type predicate.
+
+** =make-hashtable <hashfn> <eqfn> → hashtable= [applicative] /NIY/
+
+Creates a new hashtable with the given hash function and equality function.
+
+** =make-identity-hashtable → hashtable= [applicative]
+
+Creates a new hashtable with =identity-hash-code= as hash function and =eq?= as
+equality function.
+
+** =make-generic-hashtable → hashtable= [applicative] /NIY/
+
+Creates a new hashtable with =hash-code= as hash function and
+@<code>=@</code> as equality function.
+
+** =hashtable-put! <hashtable> <key> <val> → val= [applicative]
+
+Associates key with value in hashtable.
+
+** =hashtable-get <hashtable> <key> <default> → val= [applicative]
+
+Returns value associated with key from hash, or default value if not
+found.
+
+* System
+** =read → form= [applicative]
+
+Reads a form from the console and returns it.
+
+** =display <msg> → msg= [applicative]
+
+Prints a message string to the console and returns it.
+
+** =fail <reason> → |= [applicative]
+
+Halts evaluation with an object describing the reason (typically an error).
+
+* JavaScript Bridge
 
 The JavaScript object system is treacherous, so we don't even attempt
 to somehow integrate it with Wat's.  It is urged to convert JavaScript
@@ -531,45 +507,45 @@ convert Wat objects to JavaScript objects as late as possible with
 =to-js=.  JavaScript objects may not implement all Wat object
 functionality, such as identity hash codes.
 
-*** =js-global <string> → result= [applicative]
+** =js-global <string> → result= [applicative]
 
 Returns value of JavaScript global variable with given name.
 
-*** =js-set-global! <string> <val> → val= [applicative]
+** =js-set-global! <string> <val> → val= [applicative]
 
 Updates value of JavaScript global variable with given name and returns it.
 
-*** =js-prop <object> <string> → result= [applicative]
+** =js-prop <object> <string> → result= [applicative]
 
 Returns value of JavaScript member variable with given name of object.
 
-*** =js-set-prop! <object> <string> <val> → val= [applicative]
+** =js-set-prop! <object> <string> <val> → val= [applicative]
 
 Updates value of JavaScript member variable with given name of object
 and returns it.
 
-*** =js-function <jsfun> → applicative= [applicative]
+** =js-function <jsfun> → applicative= [applicative]
 
 Creates an applicative that when called will call the given JavaScript
 function with the arguments it received.
 
-*** =js-method <string> → cmb= [applicative]
+** =js-method <string> → cmb= [applicative]
 
 Creates an applicative that when called on an object and zero or more
 arguments will invoke the method with the given string name of the
 object with the given arguments.
 
-*** =to-js <obj> → jsobj= [applicative]
+** =to-js <obj> → jsobj= [applicative]
 
 Tries to convert a Wat object, such as a string, to a similar
 JavaScript object.
  
-*** =from-js <js-obj> → obj= [applicative]
+** =from-js <js-obj> → obj= [applicative]
 
 Tries to convert a JavaScript object, such as a string, to a similar
 Wat object.
 
-*** =js-callback <cmb> → jsfun= [applicative]
+** =js-callback <cmb> → jsfun= [applicative]
 
 Returns a JS function that, when called, will apply the provided
 combiner with the arguments the callback received.
@@ -579,27 +555,21 @@ as =setTimeout= and event handlers.  It is assumed that when the
 callback is called, the current fiber has returned.  The combiner is
 therefore applied in a fresh fiber.
 
-** Debugging Interface
+* Debugging Interface
 
-*** =stacktrace <depth> → list= [applicative]
+** =stacktrace <depth> → list= [applicative] /NIY/
 
 Returns a list of stack frames, up to the given depth.
 
-*** =label <obj> → string= [applicative]
+** =label <obj> → string= [applicative]
 
 Returns the descriptive label of an object.
 
-*** =set-label! <obj> <string> → string= [applicative]
+** =set-label! <obj> <string> → string= [applicative]
 
 Updates the descriptive label of an object.
 
-*** =debug-info <obj> → whatever= [applicative]
-
-Returns arbitrary debugging information about an object.  For
-continuation frames, this will typically be the expression that
-created them.
-
-*** =trap <exc> → |= [applicative]
+** =trap <exc> → |= [applicative] /NIY/
 
 If an applicative named =trap= is defined in the top-level
 environment, it will be called when an error (such as variable

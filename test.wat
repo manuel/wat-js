@@ -141,13 +141,13 @@
   (assert (pare? p))
   (assert (eq? #f (pare? 12))))
 
-;; BOUND?
+;; DEFINED?
 
 (provide ()
-  (assert (eq? #f (bound? 'x (current-environment))))
-  (assert (eq? #f (bound? 'y (current-environment))))
+  (assert (eq? #f (defined? 'x (current-environment))))
+  (assert (eq? #f (defined? 'y (current-environment))))
   (define x 1)
-  (assert (eq? #t (bound? 'x (current-environment))))
-  (assert (eq? #f (bound? 'y (current-environment))))
+  (assert (eq? #t (defined? 'x (current-environment))))
+  (assert (eq? #f (defined? 'y (current-environment))))
 )
 

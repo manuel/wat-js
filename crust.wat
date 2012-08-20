@@ -207,6 +207,9 @@
 (define-syntax (dlet dv val . exprs) env
   (eval (list dlet* dv val (list* lambda () exprs)) env))
 
+(define-syntax (coroutine . exprs) env
+  (coroutine* (eval (list* lambda () exprs) env)))
+
 (provide (define-generic define-method put-method!)
   (define generic->vtable (make-identity-hashtable))
   (define-syntax (define-generic (name . args) . body) env

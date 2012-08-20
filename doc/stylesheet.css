@@ -1,6 +1,5 @@
 h1, h2, h3, h4, h5, h6, h7, th { font-family: sans; }
 h1 { font-size: 300%; }
-h2 { border-bottom: 2px solid black; }
-h3 { border-bottom: 2px dotted black; }
-h4 code { background-color: #eee; padding: .125em .5em; border-radius: .5em;} 
+h2 { border-bottom: 1px solid black; }
+h3 code { background-color: #eee; padding: .125em .5em; border-radius: .5em;} 
 a:link, a:visited, a:hover { text-decoration: none; }

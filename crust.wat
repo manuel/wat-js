@@ -177,21 +177,6 @@
           (set-label! opv (symbol->string name)))
 	(eval (list* def lhs rhs) env))))
 
-(define-syntax (let-loop a . b) env
-  (cond ((pair? a) (eval (list* let a b) env))
-	((null? a) (eval (list* let a b) env))
-	((symbol? a)
-	 (let (((bindings . body) b))
-	   (eval (list letrec (list (list a (list* lambda (map car bindings) body)))
-		       (list* a (map cadr bindings)))
-		 env)))
-	(#t (fail "let: not a symbol or list"))))
-
-(define (sublist l i) (if (<= i 0) l (sublist (cdr l) (- i 1))))
-
-(define (assq obj alist)
-  (if (null? alist) () (if (eq? obj (caar alist)) (car alist) (assq obj (cdr alist)))))
-
 (define-syntax (define-record-type name (ctor-name . ctor-field-names) pred-name . field-specs) env
   (let* (((type tagger untagger) (make-type))
          (ctor (lambda ctor-args
@@ -221,3 +206,71 @@
 
 (define-syntax (dlet dv val . exprs) env
   (eval (list dlet* dv val (list* lambda () exprs)) env))
+
+(provide (define-generic define-method put-method!)
+  (define generic->vtable (make-identity-hashtable))
+  (define-syntax (define-generic (name . args) . body) env
+    (define vtable (make-identity-hashtable))
+    (define default-method (if (null? body)
+                               (lambda #ign (fail "method not found"))
+                               (eval (list* lambda args body) env)))
+    (define (generic self . arg)
+      (apply (hashtable-get vtable (type-of self) default-method) (cons self arg)))
+    (set-label! generic (symbol->string name))
+    (eval (list def name generic) env)
+    (hashtable-put! generic->vtable generic vtable)
+    generic)
+  (define (put-method! generic type method)
+    (define vtable (hashtable-get generic->vtable generic))
+    (hashtable-put! vtable type method))
+  (define-syntax (define-method (name (self type) . args) . body) env
+    (define method (eval (list* lambda (list* self args) body) env))
+    (put-method! (eval name env) (eval type env) method))
+)
+
+(provide (= /=)
+  (define-generic (= a b) (eq? a b))
+  (define-syntax (define-builtin-= type-name pred-expr) env
+    (define type (eval type-name env))
+    (define pred (eval pred-expr env))
+    (put-method! = type (lambda (a b) (if (eq? type (type-of b)) (pred a b) #f))))
+  (define-builtin-= Number num=)
+  (define-builtin-= String str=)
+  (define-builtin-= Symbol (lambda (a b) (= (symbol->string a) (symbol->string b))))
+  (define (/= a b) (not (= a b)))
+)
+
+(provide (< > <= >=)
+  (define-generic (< a b))
+  (define-method (< (a Number) b) (if (number? b) (num< a b) (fail "can't compare number")))
+  (define (> a b) (< b a))
+  (define (<= a b) (or (< a b) (= a b)))
+  (define (>= a b) (or (> a b) (= a b)))
+)
+
+(provide (hash-code)
+  (define-generic (hash-code obj) (identity-hash-code obj))
+)
+
+(provide (->string)
+  (define-generic (->string obj) (strcat "#[" (label obj) "]"))
+  (define-method (->string (obj Void)) "#void")
+  (define-method (->string (obj Ign)) "#ign")
+  (define-method (->string (obj Boolean)) (if obj "#t" "#f"))
+  (define-method (->string (obj Nil)) "()")
+  (define-method (->string (obj Pair))
+    (define (pair->string (kar . kdr))
+      (if (null? kdr)
+          (->string kar)
+          (if (pair? kdr)
+              (strcat (->string kar) " " (pair->string kdr))
+              (strcat (->string kar) " . " (->string kdr)))))
+    (strcat "(" (pair->string obj) ")"))
+  (define-method (->string (obj Symbol)) (symbol->string obj))
+  (define-method (->string (obj String)) (str-print obj))
+  (define-method (->string (obj Number)) (number->string obj))
+  (define-method (->string (obj Applicative)) (strcat "#[Applicative " (label obj) "]"))
+  (define-method (->string (obj Operative)) (strcat "#[Operative " (label obj) "]"))
+  (define-method (->string (obj Environment)) "#[Environment]")
+  (define-method (->string (obj Vector)) "#[Vector]")
+)

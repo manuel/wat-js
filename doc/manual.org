@@ -6,16 +6,18 @@
 
 * Description
 
-/Wat/ is a web systems programming language.  Syntax is based on
-lexically-scoped fexprs and first-class environments, subsuming
-ordinary procedures and hygienic macros.  Control is based on fully
-asymmetric coroutines.  Data uses a dynamic type-tagging system that
-allows generic programming over built-in as well as user-defined data
-types.
+/Wat/ is a lightweight Lisp for web systems scripting.  Syntax is
+based on lexically-scoped fexprs and first-class environments,
+subsuming ordinary procedures and hygienic macros.  Control is based
+on fully asymmetric coroutines, providing cooperative multitasking.
+Data uses a dynamic type-tagging system that allows generic
+programming over built-in as well as user-defined data types.
 
 Wat is hosted at <https://github.com/manuel/wat-js>.
 
 This manual assumes familiarity with Kernel and Scheme.
+
+Sections marked with /NIY/ are not implemented yet.
 
 * Lexical Structure
 

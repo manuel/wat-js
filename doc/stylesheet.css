@@ -1,5 +1,12 @@
-h1, h2, h3, h4, h5, h6, h7, th { font-family: sans; }
+html { font-family: sans; }
+h1, h2, h3, h4, h5, h6, h7, th { font-family: serif; }
 h1 { font-size: 300%; }
-h2 { border-bottom: 1px solid black; }
-h3 code { background-color: #eee; padding: .125em .5em; border-radius: .5em;} 
+h2 { border-bottom: 3px double black; }
+h3 code { padding: .125em .5em; border-radius: .5em; 
+background-color:#eee;
+border-top: 1px solid #ccc; 
+border-right: 1px solid #ccc; 
+border-bottom: 1px solid #333; 
+border-left: 1px solid #333; 
+}
 a:link, a:visited, a:hover { text-decoration: none; }

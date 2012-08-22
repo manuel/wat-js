@@ -1,7 +1,10 @@
 ;; -*- mode: scheme -*-
 ;; This is the hard crust of Wat code around the JS core defined in `wat.js`.
 
+;(start-profile)
+
 (def quote (vau (x) #ign x))
+(set-label! quote "quote")
 
 (def Void (type-of #void))
 (def Ign (type-of #ign))
@@ -51,26 +54,30 @@
 ;;           (eval first env)))))
 
 (def list (wrap (vau x #ign x)))
+(set-label! list "list")
 
-(def list*
-  (wrap (vau args #ign
-          (begin
-            (def aux
-              (wrap (vau ((head . tail)) #ign
-                      (if (null? tail)
-			  head
-			  (cons head (aux tail))))))
-	    (aux args)))))
+;; (def list*
+;;   (wrap (vau args #ign
+;;           (begin
+;;             (def aux
+;;               (wrap (vau ((head . tail)) #ign
+;;                       (if (null? tail)
+;; 			  head
+;; 			  (cons head (aux tail))))))
+;; 	    (aux args)))))
+;; (set-label! list* "list*")
 
 (def vau
   ((wrap (vau (vau) #ign
            (vau (formals eformal . body) env
              (eval (list vau formals eformal (cons begin body)) env))))
    vau))
+(set-label! vau "vau")
 
 (def lambda
   (vau (formals . body) env
     (wrap (eval (list* vau formals #ign body) env))))
+(set-label! lambda "lambda")
 
 (def car (lambda ((x . #ign)) x))
 (def cdr (lambda ((#ign . x)) x))
@@ -216,25 +223,20 @@
 ;;             (list* catch aborter exprs))
 ;;           env)))
 
-(provide (define-generic define-method put-method!)
-  (define generic->vtable (make-identity-hashtable))
+(provide (define-generic define-method)
   (define-syntax (define-generic (name . args) . body) env
-    (define vtable (make-identity-hashtable))
+    (define str-name (symbol->string name))
     (define default-method (if (null? body)
-                               (lambda #ign (fail "method not found"))
+                               (lambda #ign (fail (strcat "method not found: " str-name)))
                                (eval (list* lambda args body) env)))
     (define (generic self . arg)
-      (apply (hashtable-get vtable (type-of self) default-method) (cons self arg)))
-    (set-label! generic (symbol->string name))
+      (apply (find-method (type-of self) str-name default-method) (cons self arg)))
+    (set-label! generic str-name)
     (eval (list def name generic) env)
-    (hashtable-put! generic->vtable generic vtable)
     generic)
-  (define (put-method! generic type method)
-    (define vtable (hashtable-get generic->vtable generic))
-    (hashtable-put! vtable type method))
   (define-syntax (define-method (name (self type) . args) . body) env
     (define method (eval (list* lambda (list* self args) body) env))
-    (put-method! (eval name env) (eval type env) method))
+    (put-method! (eval type env) (symbol->string name) method))
 )
 
 (provide (= /=)
@@ -242,7 +244,7 @@
   (define-syntax (define-builtin-= type-name pred-expr) env
     (define type (eval type-name env))
     (define pred (eval pred-expr env))
-    (put-method! = type (lambda (a b) (if (eq? type (type-of b)) (pred a b) #f))))
+    (put-method! type "=" (lambda (a b) (if (eq? type (type-of b)) (pred a b) #f))))
   (define-builtin-= Number num=)
   (define-builtin-= String str=)
   (define-builtin-= Symbol (lambda (a b) (= (symbol->string a) (symbol->string b))))
@@ -292,3 +294,21 @@
   (display "ERROR")
   (display exc)
   (display-stacktrace trace))
+
+(provide (make-prompt push-prompt take-sub-cont push-sub-cont shift)
+  (def (prompt-type tag-prompt #ign) (make-type))
+  (define (make-prompt) (tag-prompt #void))
+  (define-syntax (push-prompt p . es) env
+    (push-prompt* (eval p env) (eval (list* lambda () es) env)))
+  (define-syntax (take-sub-cont p k . body) env
+    (take-sub-cont* (eval p env) (eval (list* lambda (list k) body) env)))
+  (define-syntax (push-sub-cont k . es) env
+    (push-sub-cont* (eval k env) (eval (list* lambda () es) env)))
+  (define (shift* p f)
+    (take-sub-cont p sk (push-prompt p (f (reifyP p sk)))))
+  (define (reifyP p sk)
+    (lambda (v) (push-prompt p (push-sub-cont sk v))))
+  (define-syntax (shift p sk . es) env
+    (eval (list shift* p (list* lambda (list sk) es)) env))
+)
+

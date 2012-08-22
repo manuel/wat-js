@@ -1,159 +1,129 @@
 var wat = (function() {
     /***** Evaluation *****/
     /* Fibers */
-    function Fbr(e) { this.e = e; this.suspensions = null; this.resuming = false; this.val = null; this.stack = NIL; }
-    function runFbr(x, e) {
-        try {
-            var fbr = new Fbr(e); return evaluate(fbr, e, x);
-        } catch(exc) {
-            var trap = fbr.e.bindings["trap"];
-            if (trap !== undefined) return runFbr(cons(trap, cons(exc, NIL)), this.e);
-            else throw exc;
+    function run(x, e) { return evaluate(e, null, null, x); }
+    function Suspension(prompt, handler) { this.prompt = prompt; this.handler = handler; this.resumption = null; }
+    function isSuspend(x) { return x instanceof Suspension; }
+    function Resumption(fun, next) { this.fun = fun; this.next = next; }
+    function isResume(x) { return x instanceof Resumption; }
+    function pushResume(susp, fun) { susp.resumption = new Resumption(fun, susp.resumption); }
+    function resume(resumption, f) { return resumption.fun(resumption.next, f); }
+    function evaluate(e, k, f, x) { if (x && x.wat_eval) return x.wat_eval(e, k, f); else return x; }
+    Sym.prototype.wat_eval = function(e, k, f) { return lookup(e, this); };
+    Cons.prototype.wat_eval = function(e, k, f) {
+        if (isResume(k)) {
+            var op = resume(k, f);
+        } else {
+            var op = evaluate(e, null, null, car(this));
         }
-    }
-    function resume(fbr) {
-        fbr.resuming = true;
-        if (!fbr.suspensions) throw "trying to resume finished coroutine";
-        var susp = fbr.suspensions.thunk;
-        fbr.suspensions = fbr.suspensions.next;
-        var res = susp();
-        fbr.resuming = fbr.suspensions !== null;
-        return res;
-    }
-    function Suspend() {}
-    var SUSPEND = new Suspend();
-    function Suspension(thunk, next) { this.thunk = thunk; this.next = next; }
-    function pushSuspend(fbr, thunk) { fbr.suspensions = new Suspension(thunk, fbr.suspensions); }
-    function evaluate(fbr, e, x) {
-        if (x && x.wat_eval) return x.wat_eval(fbr, e); else return x;
-    }
-    Sym.prototype.wat_eval = function(fbr, e) { return lookup(e, this); };
-    Cons.prototype.wat_eval = function(fbr, e) {
-            if (fbr.resuming === true) {
-                var op = resume(fbr);
-            } else {
-                var op = evaluate(fbr, e, car(this));
-            }
-            if (op === SUSPEND) {
-                var that = this;
-                pushSuspend(fbr, function() { return that.wat_eval(fbr, e); });
-                return SUSPEND;
-            }
-            return combine(fbr, e, op, cdr(this));
+        if (isSuspend(op)) {
+            var that = this;
+            pushResume(op, function(k, f) { return that.wat_eval(e, k, f); });
+            return op;
+        }
+        return combine(e, null, null, op, cdr(this));
     };
     function Def() {}
-    Def.prototype.combine = function(fbr, e, o) {
-        if (fbr.resuming === true) {
-            var val = resume(fbr);
+    Def.prototype.combine = function(e, k, f, o) {
+        if (isResume(k)) {
+            var val = resume(k, f);
         } else {
-            var val = evaluate(fbr, e, elt(o, 1));
+            var val = evaluate(e, null, null, elt(o, 1));
         }
-        if (val === SUSPEND) {
-            pushSuspend(fbr, function() { return Def.prototype.combine(fbr, e, o); });
-            return SUSPEND;
+        if (isSuspend(val)) {
+            pushResume(val, function(k, f) { return Def.prototype.combine(e, k, f, o); });
+            return val;
         }
         return bind(e, elt(o, 0), val);
     };
     /* Operative & Applicative Combiners */
-    function combine(fbr, e, cmb, o) {
-        return cmb.combine ? cmb.combine(fbr, e, o) : fail("not a combiner");
+    function combine(e, k, f, cmb, o) {
+        return cmb.combine ? cmb.combine(e, k, f, o) : fail("not a combiner");
     }
     function Opv(p, ep, x, e) { this.p = p; this.ep = ep; this.x = x; this.e = e; }
     function Apv(cmb) { this.cmb = cmb; }; function wrap(cmb) { return new Apv(cmb); }; function unwrap(apv) { return apv.cmb; }
-    Opv.prototype.combine = function(fbr, e, o) {
-        var oldStack = fbr.stack;
-        fbr.stack = cons(cons(this, o), fbr.stack);
-        try {
-	    var xe = new Env(this.e); bind(xe, this.p, o); bind(xe, this.ep, e);
-            return evaluate(fbr, xe, this.x);
-        } finally {
-            fbr.stack = oldStack;
-        }
+    Opv.prototype.combine = function(e, k, f, o) {
+	var xe = new Env(this.e); bind(xe, this.p, o); bind(xe, this.ep, e);
+        return evaluate(xe, k, f, this.x);
     };
-    Apv.prototype.combine = function(fbr, e, o) {
-        var oldStack = fbr.stack;
-        fbr.stack = cons(cons(this, o), fbr.stack);
-        try {
-            if (fbr.resuming === true) {
-                var args = resume(fbr);
-            } else {
-                var args = evalArgs(fbr, e, o, NIL);
-            }
-            if (args === SUSPEND) {
-                var that = this;
-                pushSuspend(fbr, function() { return that.combine(fbr, e, o); })
-                return SUSPEND;
-            }
-            return this.cmb.combine(fbr, e, args);
-        } finally {
-            fbr.stack = oldStack;
-        }
-    };
-    function evalArgs(fbr, e, todo, done) {
-	if (todo === NIL) { return reverse_list(done); }
-        if (fbr.resuming === true) {
-            var arg = resume(fbr);
+    Apv.prototype.combine = function(e, k, f, o) {
+        if (isResume(k)) {
+            var args = resume(k, f);
         } else {
-            var arg = evaluate(fbr, e, car(todo));
+            var args = evalArgs(e, null, null, o, NIL);
         }
-        if (arg === SUSPEND) {
-            pushSuspend(fbr, function() { return evalArgs(fbr, e, todo, done); });
-            return SUSPEND;
+        if (isSuspend(args)) {
+            var that = this;
+            pushResume(args, function(k, f) { return that.combine(e, k, f, o); })
+            return args;
         }
-        return evalArgs(fbr, e, cdr(todo), cons(arg, done));
+        return this.cmb.combine(e, null, null, args);
+    };
+    function evalArgs(e, k, f, todo, done) {
+	if (todo === NIL) { return reverse_list(done); }
+        if (isResume(k)) {
+            var arg = resume(k, f);
+        } else {
+            var arg = evaluate(e, null, null, car(todo));
+        }
+        if (isSuspend(arg)) {
+            pushResume(arg, function(k, f) { return evalArgs(e, k, f, todo, done); });
+            return arg;
+        }
+        return evalArgs(e, null, null, cdr(todo), cons(arg, done));
     };
     /* Built-in Combiners */
     function Vau() {}; function If() {}; function Eval() {}; function Begin() {}; function Loop() {};
     function Catch() {}; function Throw() {}; function Finally() {};
-    Vau.prototype.combine = function(fbr, e, o) { return new Opv(elt(o, 0), elt(o, 1), elt(o, 2), e); };
-    If.prototype.combine = function(fbr, e, o) {
-        if (fbr.resuming === true) {
-            var test = resume(fbr);
+    Vau.prototype.combine = function(e, k, f, o) { return new Opv(elt(o, 0), elt(o, 1), elt(o, 2), e); };
+    If.prototype.combine = function(e, k, f, o) {
+        if (isResume(k)) {
+            var test = resume(k, f);
         } else {
-            var test = evaluate(fbr, e, elt(o, 0));
+            var test = evaluate(e, null, null, elt(o, 0));
         }
-        if (test === SUSPEND) {
-            pushSuspend(fbr, function() { return If.prototype.combine(fbr, e, o); });
-            return SUSPEND;
+        if (isSuspend(test)) {
+            pushResume(test, function(k, f) { return If.prototype.combine(e, k, f, o); });
+            return test;
         }
-        return evaluate(fbr, e, (test === F) ? elt(o, 2) : elt(o, 1));
+        return evaluate(e, null, null, (test === F) ? elt(o, 2) : elt(o, 1));
     };
-    Eval.prototype.combine = function(fbr, e, o) { return evaluate(fbr, elt(o, 1), elt(o, 0)); };
-    Begin.prototype.combine = function(fbr, e, o) { if (o === NIL) return VOID; else return begin(fbr, e, o); };
-    function begin(fbr, e, xs) {
-        if (fbr.resuming === true) {
-            var res = resume(fbr);
+    Eval.prototype.combine = function(e, k, f, o) { return evaluate(elt(o, 1), k, f, elt(o, 0)); };
+    Begin.prototype.combine = function(e, k, f, o) { if (o === NIL) return VOID; else return begin(e, k, f, o); };
+    function begin(e, k, f, xs) {
+        if (isResume(k)) {
+            var res = resume(k, f);
         } else {
-            var res = evaluate(fbr, e, car(xs));
+            var res = evaluate(e, null, null, car(xs));
         }
-        if (res === SUSPEND) {
-            pushSuspend(fbr, function() { return begin(fbr, e, xs); });
-            return SUSPEND;
+        if (isSuspend(res)) {
+            pushResume(res, function(k, f) { return begin(e, k, f, xs); });
+            return res;
         }
         var kdr = cdr(xs);
-        if (kdr === NIL) return res; else return begin(fbr, e, kdr);
+        if (kdr === NIL) return res; else return begin(e, null, null, kdr);
     }
-    Loop.prototype.combine = function(fbr, e, o) {
+    Loop.prototype.combine = function(e, k, f, o) {
         while (true) {
-            if (fbr.resuming === true) {
-                var res = resume(fbr);
+            if (isResume(k)) {
+                var res = resume(k, f);
             } else {
-                var res = evaluate(fbr, e, elt(o, 0));
+                var res = evaluate(e, null, null, elt(o, 0));
             }
-            if (res === SUSPEND) {
-                pushSuspend(fbr, function() { return Loop.prototype.combine(fbr, e, o); });
-                return SUSPEND;
+            if (isSuspend(res)) {
+                pushResume(res, function(k, f) { return Loop.prototype.combine(e, k, f, o); });
+                return res;
             }
         }
     }
-    Catch.prototype.combine = function(fbr, e, o) {
+    Catch.prototype.combine = function(e, k, f, o) {
         var tag = elt(o, 0);
         var th = elt(o, 1);
         try {
-            if (fbr.resuming === true) {
-                var res = resume(fbr);
+            if (isResume(k)) {
+                var res = resume(k, f);
             } else {
-                var res = combine(fbr, e, th, NIL);
+                var res = combine(e, null, null, th, NIL);
             }
         } catch(exc) {
             if (exc.wat_tag && exc.wat_tag === tag) {
@@ -162,48 +132,48 @@ var wat = (function() {
                 throw exc;
             }
         }
-        if (res === SUSPEND) {
-            pushSuspend(fbr, function() { return Catch.prototype.combine(fbr, e, o); });
-            return SUSPEND;
+        if (isSuspend(res)) {
+            pushResume(res, function(k, f) { return Catch.prototype.combine(e, k, f, o); });
+            return res;
         } else {
             return res;
         }
     };
     function Exc(tag, val) { this.wat_tag = tag; this.wat_val = val; }
-    Throw.prototype.combine = function(fbr, e, o) {
+    Throw.prototype.combine = function(e, k, f, o) {
         var tag = elt(o, 0);
         var val = elt(o, 1);
         throw new Exc(tag, val);
     };
-    Finally.prototype.combine = function(fbr, e, o) {
+    Finally.prototype.combine = function(e, k, f, o) { // ??
         var prot = elt(o, 0);
         var cleanup = elt(o, 1);
         try {
-            if (fbr.resuming === true) {
-                var res = resume(fbr);
+            if (isResume(k)) {
+                var res = resume(k, f);
             } else {
-                var res = evaluate(fbr, e, prot);
+                var res = evaluate(e, null, null, prot);
             }
-            if (res === SUSPEND) {
-                pushSuspend(fbr, function() { return Finally.prototype.combine(fbr, e, o); });
+            if (isSuspend(res)) {
+                pushResume(res, function(k, f) { return Finally.prototype.combine(e, k, f, o); });
             }
         } finally {
-            if (res === SUSPEND) {
-                return SUSPEND;
+            if (isSuspend(res)) {
+                return res;
             } else {
-                return doFinally(fbr, e, cleanup, res);
+                return doFinally(e, null, null, cleanup, res);
             }
         }
     };
-    function doFinally(fbr, e, cleanup, res) {
-        if (fbr.resuming === true) {
-            var fres = resume(fbr);
+    function doFinally(e, k, f, cleanup, res) {
+        if (isResume(k)) {
+            var fres = resume(k, f);
         } else {
-            var fres = evaluate(fbr, e, cleanup);
+            var fres = evaluate(e, null, null, cleanup);
         }
-        if (fres === SUSPEND) {
-            pushSuspend(fbr, function() { return doFinally(fbr, e, cleanup, res); });
-            return SUSPEND;
+        if (isSuspend(fres)) {
+            pushResume(fres, function(k, f) { return doFinally(e, k, f, cleanup, res); });
+            return fres;
         } else {
             return res;
         }
@@ -211,24 +181,24 @@ var wat = (function() {
     /* Dynamic Variables */
     function DV(val) { this.val = val; }
     function DNew() {}; function DLet() {}; function DRef() {};
-    DNew.prototype.combine = function(fbr, e, o) {
+    DNew.prototype.combine = function(e, k, f, o) {
         return new DV(elt(o, 0));
     }
-    DLet.prototype.combine = function(fbr, e, o) {
+    DLet.prototype.combine = function(e, k, f, o) {
         var dv = elt(o, 0);
         var val = elt(o, 1);
         var th = elt(o, 2);
         var oldVal = dv.val;
         dv.val = val;
         try {
-            if (fbr.resuming === true) {
-                var res = resume(fbr);
+            if (isResume(k)) {
+                var res = resume(k, f);
             } else {
-                var res = combine(fbr, e, th, NIL);
+                var res = combine(e, null, null, th, NIL);
             }
-            if (res === SUSPEND) {
-                pushSuspend(fbr, function() { return DLet.prototype.combine(fbr, e, o); });
-                return SUSPEND;
+            if (isSuspend(res)) {
+                pushResume(res, function(k, f) { return DLet.prototype.combine(e, k, f, o); });
+                return res;
             } else {
                 return res;
             }
@@ -236,47 +206,57 @@ var wat = (function() {
             dv.val = oldVal;
         }
     }
-    DRef.prototype.combine = function(fbr, e, o) {
+    DRef.prototype.combine = function(e, k, f, o) {
         return elt(o, 0).val;
     };
-    /* Coroutines */
-    function CoroCreate() {}; function CoroResume() {}; function CoroYield() {}; function CurrentCoro() {};
-    CoroCreate.prototype.combine = function(fbr, e, o) {
-        var cmb = elt(o, 0);
-        var newfbr = new Fbr();
-        pushSuspend(newfbr, function() { newfbr.resuming = false; return combine(newfbr, e, cmb, NIL); });
-        return newfbr;
-    };
-    CoroResume.prototype.combine = function(fbr, e, o) {
-        var newfbr = elt(o, 0);
-        var arg = elt(o, 1);
-        newfbr.val = arg;
-        var res = resume(newfbr);
-        if (res === SUSPEND) {
-            var val = newfbr.val;
-            newfbr.val = null;
-            return val;
+    /* Delimited Control */
+    function PushPrompt() {}; function TakeSubcont() {}; function PushSubcont() {};
+    PushPrompt.prototype.combine = function(e, k, f, o) {
+        var prompt = elt(o, 0);
+        var th = elt(o, 1);
+        if (isResume(k)) {
+            var res = resume(k, f);
+        } else {
+            var res = combine(e, null, null, th, NIL);
+        }
+        if (isSuspend(res)) {
+            if (res.prompt === prompt) {
+                var resumption = res.resumption;
+                var handler = res.handler;
+                return combine(e, null, null, handler, cons(resumption, NIL));
+            } else {
+                pushResume(res, function(k, f) { return PushPrompt.prototype.combine(e, k, f, o); });
+                return res;
+            }
         } else {
             return res;
         }
     };
-    CoroYield.prototype.combine = function(fbr, e, o) {
-        var arg = elt(o, 0);
-        fbr.val = arg;
-        pushSuspend(fbr, function() { return fbr.val; });
-        return SUSPEND;
+    TakeSubcont.prototype.combine = function(e, k, f, o) {
+        var prompt = elt(o, 0);
+        var handler = elt(o, 1);
+        var susp = new Suspension(prompt, handler);
+        pushResume(susp, function(k, f) { return combine(e, null, null, f, NIL); });
+        return susp;
     };
-    CurrentCoro.prototype.combine = function(fbr, e, o) {
-        return fbr;
-    };
-    /* Stack Trace */
-    function Stacktrace() {};
-    Stacktrace.prototype.combine = function(fbr, e, o) {
-        return fbr.stack;
+    PushSubcont.prototype.combine = function(e, k, f, o) {
+        var thek = elt(o, 0);
+        var thef = elt(o, 1);
+        if (isResume(k)) {
+            var res = resume(k, f);
+        } else {
+            var res = resume(thek, thef);
+        }
+        if (isSuspend(res)) {
+            pushResume(res, function(k, f) { return PushSubcont.prototype.combine(e, k, f, o); });
+            return res;
+        } else {
+            return res;
+        }
     };
     /* JS Bridge */
     function JSFun(jsfun) { this.jsfun = jsfun; }
-    JSFun.prototype.combine = function(fbr, e, o) { return this.jsfun.apply(null, list_to_array(o)); };
+    JSFun.prototype.combine = function(e, k, f, o) { return this.jsfun.apply(null, list_to_array(o)); };
     function jswrap(jsfun) { return wrap(new JSFun(jsfun)); }
     var JSOBJ = new Type(); JSOBJ.wat_label = "JS-Object";
     function js_global(name) { return js_prop(WAT_GLOBAL, name); }
@@ -299,11 +279,11 @@ var wat = (function() {
 	}
     }
     function JSCallback() {};
-    JSCallback.prototype.combine = function(fbr, e, o) {
+    JSCallback.prototype.combine = function(e, k, f, o) {
         var cmb = elt(o, 0);
         return function() {
             var args = array_to_list(Array.prototype.slice.call(arguments));
-            runFbr(cons(cmb, args), e);
+            combine(e, null, null, cmb, args);
         };
     }
     /***** Objects *****/
@@ -393,16 +373,31 @@ var wat = (function() {
     function label(type) { return type.wat_label ? type.wat_label : "[anonymous]"; }
     function set_label(type, name) { type.wat_label = name; }
     function dbg(obj) { return obj.dbg ? obj.dbg : VOID; }
+    function put_method(type, name, method) { type[name.jsstr] = method; return method; }
+    function find_method(type, name, deflt) {
+        var method = type[name.jsstr];
+        if (method !== undefined) return method; else return deflt;
+    }
     function init_types(typenames) {
         typenames.map(function (typename) { var type = new Type(); set_label(type, typename);
                                             eval(typename).prototype.wat_type = type; }); }
-    init_types(["Fbr", "Opv", "Apv", "Def", "Vau", "If", "Eval", "JSFun",
+    init_types(["Opv", "Apv", "Def", "Vau", "If", "Eval", "JSFun",
 		"Sym", "Cons", "Env", "Str", "Num", "Vector", "Void", "Ign", "Nil", "Bool", "Type"]);
     /* Utilities */
     function assert(b) { if (!b) fail("assertion failed"); }
     function fail(err) { throw err; }
+
+    function log(str) {
+        console.log(str);
+        return str;
+    }
+
     function array_to_list(array, end) {
 	var c = end ? end : NIL; for (var i = array.length; i > 0; i--) c = cons(array[i - 1], c); return c; }
+    function list() { return array_to_list(arguments); }
+    function list_star() {
+        var len = arguments.length;
+	var c = len >= 1 ? arguments[len-1] : NIL; for (var i = len-1; i > 0; i--) c = cons(arguments[i - 1], c); return c; }
     function list_to_array(c) {
 	var res = []; while(c !== NIL) { res.push(car(c)); c = cdr(c); } return res; }
     function reverse_list(list) {
@@ -464,6 +459,8 @@ var wat = (function() {
 	envbind(e, "unwrap", jswrap(unwrap));
 	envbind(e, "eq?", jswrap(function (a, b) { return (a === b) ? T : F }));
 	envbind(e, "cons", jswrap(cons));
+	envbind(e, "list", jswrap(list));
+	envbind(e, "list*", jswrap(list_star));
 	envbind(e, "make-environment", jswrap(function (parent) { return new Env(parent); }));
         envbind(e, "defined?", jswrap(function (sym, e) { return (bound(sym, e)) ? T : F }));
 	envbind(e, "make-type", jswrap(make_type));
@@ -472,7 +469,8 @@ var wat = (function() {
 	envbind(e, "set-label!", jswrap(function(type, name) { set_label(type, name.jsstr); return name; }));
 	envbind(e, "debug-info", jswrap(dbg));
 	envbind(e, "identity-hash-code", jswrap(function(obj) { return new Num(idhash(obj)); }));
-	envbind(e, "display", jswrap(function(str) { console.log(str); return str; }));
+	envbind(e, "display", jswrap(log));
+	envbind(e, "log", jswrap(log));
 	envbind(e, "read-from-string", jswrap(function(str) { return array_to_list(parse(str.jsstr)); }));
 	envbind(e, "fail", jswrap(fail));
 	envbind(e, "num=", jswrap(function(num1, num2) { return num_eql(num1, num2) ? T : F }));
@@ -506,20 +504,20 @@ var wat = (function() {
 	envbind(e, "to-js", jswrap(to_js));
 	envbind(e, "from-js", jswrap(from_js));
 	envbind(e, "js-callback", wrap(new JSCallback()));
-        envbind(e, "coroutine*", wrap(new CoroCreate()));
-        envbind(e, "resume", wrap(new CoroResume()));
-        envbind(e, "yield", wrap(new CoroYield()));
-        envbind(e, "current-coroutine", new CurrentCoro());
         envbind(e, "finally", new Finally());
         envbind(e, "dnew", wrap(new DNew()));
         envbind(e, "dlet*", wrap(new DLet()));
         envbind(e, "dref", wrap(new DRef()));
-        envbind(e, "stacktrace", new Stacktrace());
+        envbind(e, "push-prompt*", wrap(new PushPrompt()));
+        envbind(e, "take-sub-cont*", wrap(new TakeSubcont()));
+        envbind(e, "push-sub-cont*", wrap(new PushSubcont()));
+        envbind(e, "put-method!", jswrap(put_method));
+        envbind(e, "find-method", jswrap(find_method));
 	return e;
     }
     /***** API *****/
     return {
-	"eval": runFbr,
+	"eval": run,
 	"mkenvcore": mkenvcore, "parse": parse, "Sym": Sym, "array_to_list": array_to_list,
     };
 }());

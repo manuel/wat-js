@@ -21,8 +21,25 @@ var wat = (function() {
             pushResume(op, function(k, f) { return that.wat_eval(e, k, f); });
             return op;
         }
-        return combine(e, null, null, op, cdr(this));
+        if (isMacro(op)) {
+            return macroCombine(e, null, null, op, this);
+        } else {
+            return combine(e, null, null, op, cdr(this));
+        }
     };
+    function macroCombine(e, k, f, op, form) {
+        var cache = form.cache;
+        if (cache === undefined) {
+            cache = macroExpand(e, k, f, op, form);
+            form.cache = cache;
+        }
+        return evaluate(e, k, f, cache);
+    }
+    function macroExpand(e, k, f, op, form) {
+        return combine(e, k, f, op.expander, cdr(form));
+    }
+    function Macro(expander) { this.expander = expander; }
+    function isMacro(x) { return x instanceof Macro; }
     function Def() {}
     Def.prototype.combine = function(e, k, f, o) {
         if (isResume(k)) {
@@ -145,7 +162,7 @@ var wat = (function() {
         var val = elt(o, 1);
         throw new Exc(tag, val);
     };
-    Finally.prototype.combine = function(e, k, f, o) { // ??
+    Finally.prototype.combine = function(e, k, f, o) {
         var prot = elt(o, 0);
         var cleanup = elt(o, 1);
         try {
@@ -513,6 +530,7 @@ var wat = (function() {
         envbind(e, "push-sub-cont*", wrap(new PushSubcont()));
         envbind(e, "put-method!", jswrap(put_method));
         envbind(e, "find-method", jswrap(find_method));
+        envbind(e, "macro", jswrap(function(exp) { return new Macro(exp); }));
 	return e;
     }
     /***** API *****/

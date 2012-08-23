@@ -97,28 +97,25 @@
 (def for-each (lambda (f l) (if (null? l) #void (begin (f (car l)) (for-each f (cdr l))))))
 
 (def let
-  (vau (bindings . body) env
-    (eval (cons (list* lambda (map car bindings) body)
-		(map cadr bindings))
-	  env)))
+  (macro (vau (bindings . body) #ign
+           (cons (list* lambda (map car bindings) body)
+                 (map cadr bindings)))))
 
 (def let*
-  (vau (bindings . body) env
-    (eval (if (null? bindings)
-	      (list* let bindings body)
-	      (list let
-		    (list (car bindings))
-		    (list* let* (cdr bindings) body)))
-	  env)))
+  (macro (vau (bindings . body) #ign
+           (if (null? bindings)
+               (list* let bindings body)
+               (list let
+                     (list (car bindings))
+                     (list* let* (cdr bindings) body))))))
 
 (def letrec
-  (vau (bindings . body) env
-    (eval (list* let ()
-		 (list def
-		       (map car bindings)
-		       (list* list (map cadr bindings)))
-		 body)
-	  env)))
+  (macro (vau (bindings . body) #ign
+           (list* let ()
+                  (list def
+                        (map car bindings)
+                        (list* list (map cadr bindings)))
+                  body))))
 
 (def apply
   (lambda (appv arg . opt)
@@ -146,9 +143,9 @@
 
 (def and (vau (a b) env (if (eval a env) (eval b env) #f)))
 
-(def when (vau (test . body) env (eval (list if test (list* begin body) #void) env)))
+(def when (macro (vau (test . body) #ign (list if test (list* begin body) #void))))
 
-(def unless (vau (test . body) env (eval (list* when (list not test) body) env)))
+(def unless (macro (vau (test . body) #ign (list* when (list not test) body))))
 
 (def set!
    (vau (env lhs rhs) denv
@@ -157,12 +154,11 @@
             (eval env denv))))
 
 (def provide
-  (vau (symbols . body) env
-    (eval (list def symbols
-		(list let ()
-		      (list* begin body)
-		      (list* list symbols)))
-	  env)))
+  (macro (vau (symbols . body) env
+           (list def symbols
+                 (list let ()
+                       (list* begin body)
+                       (list* list symbols))))))
 
 (def current-environment (vau #ign e e))
 

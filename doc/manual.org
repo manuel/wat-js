@@ -1,19 +1,17 @@
 #+AUTHOR: Manuel Simoni
-#+TITLE: Virtua Reference
+#+TITLE: Wat Language Manual
 #+EMAIL: msimoni@gmail.com
 #+OPTIONS: toc:t num:nil creator:nil
 #+STYLE: <link rel="stylesheet" type="text/css" href="stylesheet.css"/>
 
 * Description
 
-/Virtua/ is a Lisp for web systems scripting.  Syntax is based on
-lexically-scoped fexprs and first-class environments, subsuming
-ordinary procedures and hygienic macros.  Control is based on fully
-asymmetric coroutines, providing cooperative multitasking.  Data uses
-a dynamic type-tagging system that allows generic programming over
-built-in as well as user-defined data types.
+/Wat/ is an advanced systems scripting language.  It provides a
+nuanced set of features, such as delimited continuations, resumable
+exceptions, dynamic binding, first-class environments, fexprs, macros,
+generic functions, protocols, and first-class types.
 
-Virtua is hosted at <https://github.com/manuel/wat-js>.
+Wat is hosted at <https://github.com/manuel/wat-js>.
 
 This manual assumes familiarity with Kernel and Scheme.
 
@@ -21,7 +19,7 @@ Sections marked with /NIY/ are not implemented yet.
 
 * Lexical Structure
 
-Virtua has a mostly Scheme-like lexical structure, incompletely described
+Wat has a mostly Scheme-like lexical structure, incompletely described
 by the following table:
 
 | ; ...                                         | /line comment/               |
@@ -36,7 +34,7 @@ by the following table:
 | a-z A-Z 0-9 - & ! : = > < % + ? / * # $ _ ' . | /symbol characters/          |
 | '<expr>                                       | /short for/ =(quote <expr>)= |
 
-Virtua identifiers are case-sensitive.
+Wat identifiers are case-sensitive.
 
 * Built-in Types
 
@@ -58,15 +56,15 @@ Virtua identifiers are case-sensitive.
    It is not guaranteed that symbols with the same name are pointer
    identical.
 
- * String :: Virtua currently only supports UTF-16 encoded Unicode
+ * String :: Wat currently only supports UTF-16 encoded Unicode
    strings.
 
- * Number :: Virtua currently only supports IEEE 754 floating-point
+ * Number :: Wat currently only supports IEEE 754 floating-point
    numbers.
 
  * Vector :: An array of objects.
 
- * Hashtable :: Virtua currently only supports identity hashtables.
+ * Hashtable :: Wat currently only supports identity hashtables.
 
  * Operative :: A combiner that operates directly on its operands.
 
@@ -101,7 +99,7 @@ Examples:
 
 * Combiners
 
-All computations in Virtua are carried out by combiners, of which there
+All computations in Wat are carried out by combiners, of which there
 are two different kinds: operative and applicative.  An operative
 combiner or just operative is a fexpr that receives the current
 lexical environment and acts on its operand tree unevaluated.  An
@@ -500,13 +498,13 @@ Prints a message string to the console and returns it.
 
 Halts evaluation with an object describing the reason (typically an error).
 
-* JavaScript Bridge
+* JavaScript Bridge 
 
 The JavaScript object system is treacherous, so we don't even attempt
-to somehow integrate it with Virtua's.  It is urged to convert JavaScript
-objects to Virtua objects as early as possible with =from-js=, and
-convert Virtua objects to JavaScript objects as late as possible with
-=to-js=.  JavaScript objects may not implement all Virtua object
+to somehow integrate it with Wat's.  It is urged to convert JavaScript
+objects to Wat objects as early as possible with =from-js=, and
+convert Wat objects to JavaScript objects as late as possible with
+=to-js=.  JavaScript objects may not implement all Wat object
 functionality, such as identity hash codes.
 
 ** =js-global <string> → result= [applicative]
@@ -539,13 +537,13 @@ object with the given arguments.
 
 ** =to-js <obj> → jsobj= [applicative]
 
-Tries to convert a Virtua object, such as a string, to a similar
+Tries to convert a Wat object, such as a string, to a similar
 JavaScript object.
  
 ** =from-js <js-obj> → obj= [applicative]
 
 Tries to convert a JavaScript object, such as a string, to a similar
-Virtua object.
+Wat object.
 
 ** =js-callback <cmb> → jsfun= [applicative]
 
@@ -556,7 +554,7 @@ combiner with the arguments the callback received.
 as =setTimeout= and event handlers.  It is assumed that when the
 callback is called, the current fiber has returned.  The combiner is
 therefore applied in a fresh fiber.
-
+ 
 * Debugging Interface
 
 ** =stacktrace → list= [applicative]

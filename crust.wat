@@ -180,6 +180,10 @@
           (set-label! opv (symbol->string name)))
 	(eval (list* def lhs rhs) env))))
 
+(def define-macro
+  (vau ((name . ptree) . body) env
+    (eval (list def name (list macro (list* vau ptree #ign body))) env)))
+
 (define-syntax (define-record-type name (ctor-name . ctor-field-names) pred-name . field-specs) env
   (let* (((type tagger untagger) (make-type))
          (ctor (lambda ctor-args
@@ -207,8 +211,8 @@
          field-specs)
     type))
 
-(define-syntax (dlet dv val . exprs) env
-  (eval (list dlet* dv val (list* lambda () exprs)) env))
+(define-macro (dlet dv val . exprs)
+  (list dlet* dv val (list* lambda () exprs)))
 
 ;; (define-syntax (block name . exprs) env
 ;;   (letrec ((aborter (lambda (val) (throw aborter val))))

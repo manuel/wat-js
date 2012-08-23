@@ -214,9 +214,6 @@
 (define-syntax (dlet dv val . exprs) env
   (eval (list dlet* dv val (list* lambda () exprs)) env))
 
-(define-syntax (coroutine . exprs) env
-  (coroutine* (eval (list* lambda () exprs) env)))
-
 ;; (define-syntax (block name . exprs) env
 ;;   (letrec ((aborter (lambda (val) (throw aborter val))))
 ;;     (eval (list* let (list (list name aborter))

@@ -285,12 +285,12 @@ var wat = (function() {
 	var args = Array.prototype.slice.call(arguments, 1); return obj[name.jsstr].apply(obj, args); }); }
     function to_js(obj) { return (obj && obj.to_js) ? obj.to_js() : obj; }
     Str.prototype.to_js = function() { return this.jsstr; }
-    Num.prototype.to_js = function() { return this.jsnum; }
+    Num.prototype.to_js = function() { return jsnums.toFixnum(this.jsnum); }
     Bool.prototype.to_js = function() { return this === T ? true : false; }
     function from_js(obj) {
 	switch(typeof(obj)) {
 	case "string": return new Str(obj);
-	case "number": return new Num(obj);
+	case "number": return new Num(jsnums.fromFixnum(obj));
 	case "boolean": return obj === true ? T : F;
 	default: return obj;
 	}
@@ -332,13 +332,13 @@ var wat = (function() {
     function str_cat(strings) { return strings.map(function(str) { return str.jsstr; }).join(""); }
     function str_print(str1) { return JSON.stringify(str1.jsstr); }
     function Num(jsnum) { this.jsnum = jsnum; };
-    function num_eql(num1, num2) { return num1.jsnum === num2.jsnum; }
-    function num_lt(num1, num2) { return num1.jsnum < num2.jsnum; }
-    function num_add(num1, num2) { return new Num(num1.jsnum + num2.jsnum); };
-    function num_sub(num1, num2) { return new Num(num1.jsnum - num2.jsnum); };
-    function num_mul(num1, num2) { return new Num(num1.jsnum * num2.jsnum); };
-    function num_div(num1, num2) { return new Num(num1.jsnum / num2.jsnum); };
-    function num_mod(num1, num2) { return new Num(num1.jsnum % num2.jsnum); };
+    function num_eql(num1, num2) { return jsnums.equals(num1.jsnum, num2.jsnum); }
+    function num_lt(num1, num2) { return jsnums.lessThan(num1.jsnum, num2.jsnum); }
+    function num_add(num1, num2) { return new Num(jsnums.add(num1.jsnum, num2.jsnum)); };
+    function num_sub(num1, num2) { return new Num(jsnums.subtract(num1.jsnum, num2.jsnum)); };
+    function num_mul(num1, num2) { return new Num(jsnums.multiply(num1.jsnum, num2.jsnum)); };
+    function num_div(num1, num2) { return new Num(jsnums.divide(num1.jsnum, num2.jsnum)); };
+    function num_mod(num1, num2) { return new Num(jsnums.modulo(num1.jsnum, num2.jsnum)); };
     function Vector(elements) { this.elements = elements; }
     function vector_ref(vector, i) { return vector.elements[i]; }
     function vector_set(vector, i, val) { vector.elements[i] = val; return val; }
@@ -347,8 +347,8 @@ var wat = (function() {
     var VOID = new Void(); var IGN = new Ign(); var NIL = new Nil(); var T = new Bool(); var F = new Bool()
     function str_to_sym(str) { return new Sym(str.jsstr); }
     function sym_to_str(sym) { return new Str(sym.name); }
-    function str_to_num(str) { return new Num(Number(str.jsstr)); }
-    function num_to_str(num) { return new Str(String(num.jsnum)); }
+    function str_to_num(str) { return new Num(jsnums.fromString(str.jsstr)); }
+    function num_to_str(num) { return new Str(num.jsnum.toString()); }
     function IdentityHashtable() { this.entries = Object.create(null); }
     function hashtable_put(tbl, k, v) {
         var hash = String(idhash(k));
@@ -439,7 +439,7 @@ var wat = (function() {
 				var sign = ast[0] ? ast[0] : "";
 				var integral_digits = ast[1]; 
 				var fractional_digits = ast[2] || "";
-				return new Num(Number(sign + integral_digits + fractional_digits)); });
+				return new Num(jsnums.fromString(sign + integral_digits + fractional_digits)); });
     function make_constant_stx(string, constant) { return action(string, function(ast) { return constant; }); }
     var void_stx = make_constant_stx("#void", VOID);
     var ign_stx = make_constant_stx("#ign", IGN);
@@ -485,7 +485,7 @@ var wat = (function() {
 	envbind(e, "label", jswrap(function(type) { return new Str(label(type)); }));
 	envbind(e, "set-label!", jswrap(function(type, name) { set_label(type, name.jsstr); return name; }));
 	envbind(e, "debug-info", jswrap(dbg));
-	envbind(e, "identity-hash-code", jswrap(function(obj) { return new Num(idhash(obj)); }));
+	envbind(e, "identity-hash-code", jswrap(function(obj) { return new Num(jsnums.fromFixnum(idhash(obj))); }));
 	envbind(e, "display", jswrap(log));
 	envbind(e, "log", jswrap(log));
 	envbind(e, "read-from-string", jswrap(function(str) { return array_to_list(parse(str.jsstr)); }));
@@ -506,9 +506,10 @@ var wat = (function() {
 	envbind(e, "string->number", jswrap(str_to_num));
 	envbind(e, "number->string", jswrap(num_to_str));
 	envbind(e, "vector", jswrap(function() { return new Vector(Array.prototype.slice.call(arguments)); }));
-	envbind(e, "vector-ref", jswrap(function(vector, i) { return vector_ref(vector, i.jsnum); }));
-	envbind(e, "vector-set!", jswrap(function(vector, i, val) { return vector_set(vector, i.jsnum, val); }));
-	envbind(e, "vector-length", jswrap(function(vector) { return new Num(vector_length(vector)); }));
+	envbind(e, "vector-ref", jswrap(function(vector, i) { return vector_ref(vector, jsnums.toFixnum(i.jsnum)); }));
+	envbind(e, "vector-set!", jswrap(function(vector, i, val) {
+            return vector_set(vector, jsnums.toFixnum(i.jsnum), val); }));
+	envbind(e, "vector-length", jswrap(function(vector) { return new Num(jsnums.fromFixnum(vector_length(vector))); }));
         envbind(e, "make-identity-hashtable", jswrap(function() { return new IdentityHashtable(); }));
         envbind(e, "hashtable-put!", jswrap(hashtable_put));
         envbind(e, "hashtable-get", jswrap(hashtable_get));
@@ -548,7 +549,6 @@ var WAT_GLOBAL = this;
 // dbg: debugging information
 // e: environment
 // ep: environment parameter
-// fbr: fiber
 // id: identifier
 // num: number
 // o: operand

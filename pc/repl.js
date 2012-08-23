@@ -3,6 +3,7 @@
 // Adapted by mjs
 
 load("jsparse.js");
+load("js-numbers.js");
 load("wat.js");
 
 var wat_env = wat.mkenvcore();

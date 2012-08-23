@@ -38,10 +38,10 @@
   (define *env* (current-environment))
   (define *read-k* #f)
   (define (read)
-    (take-sub-cont *top-level* k (set! *env* *read-k* k)))
+    (take-subcont *top-level* k (set! *env* *read-k* k)))
   (define (input-callback evt)
     (if (num= (from-js (js-prop evt "keyCode")) 13)
-        (push-prompt *top-level* (push-sub-cont *read-k* (read-input)))
+        (push-prompt *top-level* (push-subcont *read-k* (read-input)))
         #void)))
 
 (js-set-prop! (getElementById "input") "onkeypress" (js-callback input-callback))

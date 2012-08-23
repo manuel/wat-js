@@ -1,7 +1,7 @@
-html { font-family: sans; }
-h1, h2, h3, h4, h5, h6, h7, th { font-family: serif; }
+html { font-family: serif; }
+h1, h2, h3, h4, h5, h6, h7, th, dt { font-family: sans; }
 h1 { font-size: 300%; }
-h2 { border-bottom: 3px double black; }
+h2 { border-bottom: 2px solid black; }
 h3 code { padding: .125em .5em; border-radius: .5em; 
 background-color:#eee;
 border-top: 1px solid #ccc; 

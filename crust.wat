@@ -214,11 +214,26 @@
 (define-macro (dlet dv val . exprs)
   (list dlet* dv val (list* lambda () exprs)))
 
-;; (define-syntax (block name . exprs) env
-;;   (letrec ((aborter (lambda (val) (throw aborter val))))
-;;     (eval (list* let (list (list name aborter))
-;;             (list* catch aborter exprs))
-;;           env)))
+(define-macro (unwind-protect protected . cleanup)
+  (list finally protected (list* begin cleanup)))
+
+(define-macro (loop . forms)
+  (list loop1 (list* begin forms)))
+
+(provide (block return-from)
+  (define (call-with-escape fun)
+    (define extent-ended? #f)
+    (define *env* (current-environment))
+    (define (escape val)
+      (if extent-ended?
+          (fail "extent ended")
+          (throw escape val)))
+    (unwind-protect (catch escape (lambda () (fun escape)))
+      (set! *env* extent-ended? #t)))
+  (define-macro (block name . body)
+    (list call-with-escape (list* lambda (list name) body)))
+  (define (return-from esc val) (esc val))
+)
 
 (provide (define-generic define-method)
   (define-syntax (define-generic (name . args) . body) env
@@ -292,19 +307,19 @@
   (display exc)
   (display-stacktrace trace))
 
-(provide (make-prompt push-prompt take-sub-cont push-sub-cont shift)
+(provide (make-prompt push-prompt take-subcont push-subcont shift)
   (def (prompt-type tag-prompt #ign) (make-type))
   (define (make-prompt) (tag-prompt #void))
   (define-syntax (push-prompt p . es) env
     (push-prompt* (eval p env) (eval (list* lambda () es) env)))
-  (define-syntax (take-sub-cont p k . body) env
-    (take-sub-cont* (eval p env) (eval (list* lambda (list k) body) env)))
-  (define-syntax (push-sub-cont k . es) env
-    (push-sub-cont* (eval k env) (eval (list* lambda () es) env)))
+  (define-syntax (take-subcont p k . body) env
+    (take-subcont* (eval p env) (eval (list* lambda (list k) body) env)))
+  (define-syntax (push-subcont k . es) env
+    (push-subcont* (eval k env) (eval (list* lambda () es) env)))
   (define (shift* p f)
-    (take-sub-cont p sk (push-prompt p (f (reifyP p sk)))))
+    (take-subcont p sk (push-prompt p (f (reifyP p sk)))))
   (define (reifyP p sk)
-    (lambda (v) (push-prompt p (push-sub-cont sk v))))
+    (lambda (v) (push-prompt p (push-subcont sk v))))
   (define-syntax (shift p sk . es) env
     (eval (list shift* p (list* lambda (list sk) es)) env))
 )

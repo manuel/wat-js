@@ -469,7 +469,7 @@ var wat = (function() {
 	envbind(e, "vau", new Vau());
 	envbind(e, "eval", wrap(new Eval()));
 	envbind(e, "begin", new Begin());
-        envbind(e, "loop", new Loop());
+        envbind(e, "loop1", new Loop());
         envbind(e, "catch", wrap(new Catch()));
         envbind(e, "throw", wrap(new Throw()));
 	envbind(e, "wrap", jswrap(wrap));
@@ -526,8 +526,8 @@ var wat = (function() {
         envbind(e, "dlet*", wrap(new DLet()));
         envbind(e, "dref", wrap(new DRef()));
         envbind(e, "push-prompt*", wrap(new PushPrompt()));
-        envbind(e, "take-sub-cont*", wrap(new TakeSubcont()));
-        envbind(e, "push-sub-cont*", wrap(new PushSubcont()));
+        envbind(e, "take-subcont*", wrap(new TakeSubcont()));
+        envbind(e, "push-subcont*", wrap(new PushSubcont()));
         envbind(e, "put-method!", jswrap(put_method));
         envbind(e, "find-method", jswrap(find_method));
         envbind(e, "macro", jswrap(function(exp) { return new Macro(exp); }));

@@ -169,15 +169,15 @@
 
 (test-check 'test3-1
   (let ((p (new-prompt)))
-    (+ (push-prompt p (push-prompt p (+ (take-sub-cont p #ign 5) 6)))
+    (+ (push-prompt p (push-prompt p (+ (take-subcont p #ign 5) 6)))
        4))
   9)
 
 (test-check 'test3-2
   (let ((p (new-prompt)))
     (let ((v (push-prompt p
-	       (let* ((v1 (push-prompt p (+ (take-sub-cont p #ign 5) 6)))
-		      (v1 (take-sub-cont p #ign 7)))
+	       (let* ((v1 (push-prompt p (+ (take-subcont p #ign 5) 6)))
+		      (v1 (take-subcont p #ign 7)))
 		 (+ v1 10)))))
       (+ v 20)))
   27)
@@ -185,7 +185,7 @@
 (test-check 'test4
   (let ((p (make-prompt)))
     (+ (push-prompt p
-         (+ (take-sub-cont p sk (push-sub-cont sk 5))
+         (+ (take-subcont p sk (push-subcont sk 5))
 	    7))
        20))
   32)
@@ -194,10 +194,10 @@
   (let ((p1 (new-prompt))
 	(p2 (new-prompt))
 	(push-twice (lambda (sk)
-		      (push-sub-cont sk (push-sub-cont sk 3)))))
+		      (push-subcont sk (push-subcont sk 3)))))
     (+ 10
       (push-prompt p1 (+ 1
-        (push-prompt p2 (take-sub-cont p1 sk (push-twice sk)))))))
+        (push-prompt p2 (take-subcont p1 sk (push-twice sk)))))))
   15)
 
 (test-check 'test7
@@ -206,24 +206,24 @@
 	 (p3 (new-prompt))
 	 (push-twice
 	    (lambda (sk)
-	      (push-sub-cont sk (push-sub-cont sk
-		(take-sub-cont p2 sk2
-		  (push-sub-cont sk2
-		    (push-sub-cont sk2 3))))))))
+	      (push-subcont sk (push-subcont sk
+		(take-subcont p2 sk2
+		  (push-subcont sk2
+		    (push-subcont sk2 3))))))))
     (+ 100
       (push-prompt p1
 	(+ 1
 	  (push-prompt p2
 	    (+ 10
-	      (push-prompt p3 (take-sub-cont p1 sk (push-twice sk)))))))))
+	      (push-prompt p3 (take-subcont p1 sk (push-twice sk)))))))))
   135)
 
 (test-check 'monadic-paper
   (let ((p (make-prompt)))
     (+ 2 (push-prompt p
-            (if (take-sub-cont p k
-                  (+ (push-sub-cont k #f)
-		     (push-sub-cont k #t)))
+            (if (take-subcont p k
+                  (+ (push-subcont k #f)
+		     (push-subcont k #t)))
 		3
 		4))))
   9)
@@ -243,7 +243,7 @@
     (dlet dv 1
       (push-prompt p
         (dlet dv 3
-          (take-sub-cont p k (dref dv))))))
+          (take-subcont p k (dref dv))))))
   1)
 
 (test-check 'ddb-4
@@ -251,8 +251,8 @@
     (dlet dv 1
       (push-prompt p
         (dlet dv 3
-          (take-sub-cont p k
-	    (push-sub-cont k
+          (take-subcont p k
+	    (push-subcont k
 	       (dref dv)))))))
   3)
 

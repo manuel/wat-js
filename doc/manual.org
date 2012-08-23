@@ -1,19 +1,26 @@
 #+AUTHOR: Manuel Simoni
 #+TITLE: Wat Language Manual
 #+EMAIL: msimoni@gmail.com
-#+OPTIONS: toc:t num:nil creator:nil
+#+OPTIONS: toc:2 num:nil creator:nil
 #+STYLE: <link rel="stylesheet" type="text/css" href="stylesheet.css"/>
 
 * Description
 
-/Wat/ is an advanced systems scripting language.  It provides a
-nuanced set of features, such as delimited continuations, resumable
-exceptions, dynamic binding, first-class environments, fexprs, macros,
-generic functions, protocols, and first-class types.
+/Wat/ is a simple yet sophisticated Lisp for scripting interactive
+networked applications.  Wat offers a nuanced set of features in three
+main areas: For control abstraction, Wat combines first-order control
+and resumable exceptions for quotidian control flow with multi-prompt
+delimited continuations for advanced control inversions such as
+cooperative multitasking.  For syntactic abstraction, Wat provides
+lexically-scoped fexprs and first-class lexical environments, as well
+as ordinary memoizing procedural macros for metaprogramming without
+interpretetive overhead.  For data abstraction, Wat provides
+first-class types, fully encapsulated data, protocols, and generic
+functions with single dispatch.
 
 Wat is hosted at <https://github.com/manuel/wat-js>.
 
-This manual assumes familiarity with Kernel and Scheme.
+This manual assumes familiarity with Kernel, Scheme, and Common Lisp.
 
 Sections marked with /NIY/ are not implemented yet.
 
@@ -71,6 +78,12 @@ Wat identifiers are case-sensitive.
  * Applicative :: A combiner that evaluates its operands, yielding an
    arguments list, which it passes to an underlying combiner.
 
+ * Macro :: Macros are used for optimization of syntactic abstraction.
+   When a macro appears as first element of a compound form, the
+   result of the macro will be evaluated instead of the original form.
+   The result of the macro is memoized in the syntax tree, so every
+   macro call is expanded only once, when it is first evaluated.
+
  * Environment :: An environment maps symbols to values.  It may have
    a parent environment in which symbols are looked up if they are not
    found in this environment.
@@ -78,7 +91,8 @@ Wat identifiers are case-sensitive.
  * Type :: A first-class type tag or just type is associated with
    every object.
 
- * Coroutines :: Coroutines are first-class objects.
+ * Continuation :: Continuations are first-class objects, not wrapped
+   in an applicative.
 
 * Pattern Matching
 
@@ -100,7 +114,8 @@ Examples:
 * Combiners
 
 All computations in Wat are carried out by combiners, of which there
-are two different kinds: operative and applicative.  An operative
+are two different kinds: operative and applicative (macros could also
+be viewed as combiners, but are not discussed here).  An operative
 combiner or just operative is a fexpr that receives the current
 lexical environment and acts on its operand tree unevaluated.  An
 applicative combiner or just applicative is a procedure that first
@@ -113,8 +128,8 @@ Examples:
 
 | Combiner                | Operand Tree  | Result                      |
 |-------------------------+---------------+-----------------------------|
-| =(vau x #ign x)=       | (1 (+ 2 3) 4) | (1 (+ 2 3) 4)               |
-| =(vau #ign e e)=       | (1 (+ 2 3) 4) | /<the current environment>/ |
+| =(vau x #ign x)=        | (1 (+ 2 3) 4) | (1 (+ 2 3) 4)               |
+| =(vau #ign e e)=        | (1 (+ 2 3) 4) | /<the current environment>/ |
 | =(wrap (vau x #ign x))= | (1 (+ 2 3) 4) | (1 5 4)                     |
 
 * Bindings
@@ -122,6 +137,28 @@ Examples:
 
 Evaluates the right-hand side, matches the left-hand side against it
 in the current environment, and returns it.
+
+=def= is the fundamental binding operator, others such as =define= and
+=define-syntax= are defined in terms of it.
+
+=def= allows binding multiple values, as well as destructuring.
+
+*** Examples
+
+#+BEGIN_EXAMPLE
+(def x 1)
+x → 1
+(def x 2)
+x → 2
+(def (a b c) (list 1 (list 2) 3))
+a → 1
+b → (2)
+c → 3
+(def (a (b) c) (list 1 (list 2) 3))
+a → 1
+b → 2
+c → 3
+#+END_EXAMPLE
 
 ** =define <lhs> <rhs> → result= [operative]
 
@@ -144,6 +181,20 @@ Scheme-like =define-syntax= with two cases:
    name to an operative with the given parameters, environment
    parameter, and body expressions, returning the operative.
 
+** =define-macro (<name> . <ptree>) . <body>= [operative]
+
+Defines a new macro with the given name, parameter tree, and body.
+
+*** Examples
+
+#+BEGIN_EXAMPLE
+(define-macro (my-let bindings . body)
+  (cons (list* lambda (map car bindings) body)
+        (map cadr bindings)))
+(my-let ((x 1) (y 2))
+  (+ x y)) → 3
+#+END_EXAMPLE
+
 ** =set! <env> <lhs> <rhs> → rhs= [operative]
 
 Updates the left-hand side bindings by matching it against the
@@ -157,6 +208,8 @@ Returns true if a symbol is bound in the environment, false otherwise.
 
 Performs expressions in a new lexical scope and exports only listed
 names to the outer scope.
+
+*** Examples
 
 #+BEGIN_EXAMPLE
 (provide (foo bar)
@@ -180,8 +233,7 @@ Returns the current environment.
 
 ** =eval <expr> <env> → result= [applicative]
 
-Evaluates the expression in the given environment.  The expression is
-evaluated in tail-position.
+Evaluates the expression in the given environment.
 
 ** =quote <form> → form= [operative]
 
@@ -210,7 +262,7 @@ Returns an applicative around an underlying combiner.
 
 Returns the underlying combiner of an applicative.
 
-* Control Flow
+* First-order Control
 ** =begin . <exprs> → result= [operative]
 
 Evaluates expressions from left to right, returning the value of the
@@ -219,36 +271,64 @@ last.  As a special case, =(begin)= returns void.
 ** =if <test> <then> <else> → result= [operative]
 
 Evaluates the test, and if it is false evaluates the else branch,
-otherwise evaluates the then branch.  The branches are evaluated in
-tail position.
+otherwise evaluates the then branch.
 
-** =finally <protected> <cleanup> → result= [operative]
+** =loop . <forms> → |= [operative]
+
+Infinite loop.
+
+** =block <name> . <body> → result= [operative]
+
+Performs body forms with name bound to a one-shot escape continuation
+that can be invoked with =return-from=.
+
+** =return-from <cont> <val> → |= [operative]
+
+Invokes a one-shot escape continuation bound by =block=, passing it
+the given value.
+
+An error is signalled if the continuation's extent has ended.
+
+** =unwind-protect <protected> . <cleanup> → result= [operative]
 
 Executes and returns the value of the protected form.  When control
 exits the protected form, either normally by a return, or abnormally
-through a throw, the cleanup form is executed.  The cleanup form is
-not executed when the protected form is exited by a yield.
+through an escape continuation, the cleanup forms are executed.  The
+cleanup forms are not executed when the protected form is aborted by
+higher-order control.
 
-* Coroutines
-** =coroutine . <exprs> → coro= [applicative]
+* Higher-order Control
 
-Creates a new, not yet running coroutine that will execute the
-expressions when it is resumed.
+These are the control operators from Dybvig, Jones, and Sabry's
+[[http://www.cs.indiana.edu/~dyb/pubs/monadicDC.pdf][/A Monadic
+Framework for Delimited Continuations/]] that are able to express all
+other delimited control operators.
 
-** =yield <val> → result= [applicative]
+** =make-prompt → prompt= [applicative]
 
-Suspends the current coroutine, returning value to the caller.
+Creates a fresh prompt.
 
-** =resume <coro> <val> → result= [applicative]
+** =push-prompt <prompt> . <forms> → result= [applicative]
 
-Passes value into a suspended coroutine, resuming its execution from
-the first expression, or from the last call to =yield=.
+Pushes the continuation-delimiting prompt and executes forms in the
+new continuation.
 
-** =current-coroutine → coro= [applicative]
+** =take-subcont <prompt> <cont> . <forms> → result= [applicative]
 
-Returns the currently executing coroutine.
+Aborts up to and including the prompt, and performs the forms with
+=<cont>= bound to the delimited continuation from the call to
+=take-subcont= up to but not including the prompt.
+
+** =push-subcont <cont> . <forms> → result= [applicative]
+
+Prepends the delimited continuation to the current continuation, and
+performs forms in the new continuation.
 
 * Dynamic Binding
+
+These are the operators from Kiselyov, Shan, and Sabry's
+[[http://okmij.org/ftp/papers/DDBinding.pdf][/Delimited Dynamic Binding/]].
+
 ** =dnew <val> → dynamic= [applicative]
 
 Creates a new dynamically-bound variable with the given initial value.
@@ -308,12 +388,14 @@ Each element of =fields= is of the form:
 
  * =(name accessor-name modifier-name)=.
 
+*** Examples
+
 #+BEGIN_EXAMPLE
-(define-record-type pare
-  (kons kar kdr)
-  pare?
-  (kar kar set-kar!)
-  (kdr kdr set-kdr!))
+(define-record-type Person
+  (make-person name email)
+  person?
+  (name get-name set-name!)
+  (email get-email set-email!))
 #+END_EXAMPLE
 
 * Generic Functions
@@ -326,6 +408,8 @@ type-specific method is found.
 ** =define-method (<name> (<self> <type>) . <args>) . <body> → method= [operative]
 
 Adds a method to a generic function.
+
+*** Examples
 
 #+BEGIN_EXAMPLE
 (define-generic (->number obj))
@@ -557,7 +641,7 @@ therefore applied in a fresh fiber.
  
 * Debugging Interface
 
-** =stacktrace → list= [applicative]
+** =stacktrace → list= [applicative] /NIY/
 
 Returns a list of recent stack frames.
 

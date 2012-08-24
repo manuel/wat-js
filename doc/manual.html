@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-23 20:04:48 CEST"/>
+<meta name="generated" content="2012-08-23 21:47:04 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -115,10 +115,14 @@ lang="en" xml:lang="en">
 <ul>
 <li><a href="#sec-9.1"><code>begin . &lt;exprs&gt; → result</code> [operative] </a></li>
 <li><a href="#sec-9.2"><code>if &lt;test&gt; &lt;then&gt; &lt;else&gt; → result</code> [operative] </a></li>
-<li><a href="#sec-9.3"><code>loop . &lt;forms&gt; → |</code> [operative] </a></li>
-<li><a href="#sec-9.4"><code>block &lt;name&gt; . &lt;body&gt; → result</code> [operative] </a></li>
-<li><a href="#sec-9.5"><code>return-from &lt;cont&gt; &lt;val&gt; → |</code> [operative] </a></li>
-<li><a href="#sec-9.6"><code>unwind-protect &lt;protected&gt; . &lt;cleanup&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-9.3"><code>when &lt;test&gt; . &lt;forms&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-9.4"><code>unless &lt;test&gt; . &lt;forms&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-9.5"><code>loop . &lt;forms&gt; → |</code> [operative] </a></li>
+<li><a href="#sec-9.6"><code>while &lt;test&gt; . &lt;forms&gt; → |</code> [operative] </a></li>
+<li><a href="#sec-9.7"><code>until &lt;test&gt; . &lt;forms&gt; → |</code> [operative] </a></li>
+<li><a href="#sec-9.8"><code>block &lt;name&gt; . &lt;body&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-9.9"><code>return-from &lt;cont&gt; &lt;val&gt; → |</code> [operative] </a></li>
+<li><a href="#sec-9.10"><code>unwind-protect &lt;protected&gt; . &lt;cleanup&gt; → result</code> [operative] </a></li>
 </ul>
 </li>
 <li><a href="#sec-10">Higher-order Control </a>
@@ -266,8 +270,7 @@ cooperative multitasking.  For syntactic abstraction, Wat provides
 lexically-scoped fexprs and first-class lexical environments, as well
 as ordinary memoizing procedural macros for metaprogramming without
 interpretetive overhead.  For data abstraction, Wat provides
-first-class types, fully encapsulated data, protocols, and generic
-functions with single dispatch.
+first-class types, fully encapsulated objects, and generic functions.
 </p>
 <p>
 Wat is hosted at <a href="https://github.com/manuel/wat-js">https://github.com/manuel/wat-js</a>.
@@ -358,8 +361,8 @@ strings.
 
 </dd>
 <dt>Number</dt><dd>
-Wat currently only supports IEEE 754 floating-point
-numbers.
+Wat supports a full Scheme-style numeric tower with
+arbitrary precision numbers.
 
 </dd>
 <dt>Vector</dt><dd>
@@ -845,8 +848,32 @@ otherwise evaluates the then branch.
 </div>
 
 <div id="outline-container-9.3" class="outline-3">
-<h3 id="sec-9.3"><code>loop . &lt;forms&gt; → |</code> [operative] </h3>
+<h3 id="sec-9.3"><code>when &lt;test&gt; . &lt;forms&gt; → result</code> [operative] </h3>
 <div class="outline-text-3" id="text-9.3">
+
+
+<p>
+Evaluates forms if test is true, returns void otherwise.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-9.4" class="outline-3">
+<h3 id="sec-9.4"><code>unless &lt;test&gt; . &lt;forms&gt; → result</code> [operative] </h3>
+<div class="outline-text-3" id="text-9.4">
+
+
+<p>
+Evaluates forms if test is false, returns void otherwise.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-9.5" class="outline-3">
+<h3 id="sec-9.5"><code>loop . &lt;forms&gt; → |</code> [operative] </h3>
+<div class="outline-text-3" id="text-9.5">
 
 
 <p>
@@ -856,9 +883,33 @@ Infinite loop.
 
 </div>
 
-<div id="outline-container-9.4" class="outline-3">
-<h3 id="sec-9.4"><code>block &lt;name&gt; . &lt;body&gt; → result</code> [operative] </h3>
-<div class="outline-text-3" id="text-9.4">
+<div id="outline-container-9.6" class="outline-3">
+<h3 id="sec-9.6"><code>while &lt;test&gt; . &lt;forms&gt; → |</code> [operative] </h3>
+<div class="outline-text-3" id="text-9.6">
+
+
+<p>
+Performs forms while test is true.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-9.7" class="outline-3">
+<h3 id="sec-9.7"><code>until &lt;test&gt; . &lt;forms&gt; → |</code> [operative] </h3>
+<div class="outline-text-3" id="text-9.7">
+
+
+<p>
+Performs forms until test is true.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-9.8" class="outline-3">
+<h3 id="sec-9.8"><code>block &lt;name&gt; . &lt;body&gt; → result</code> [operative] </h3>
+<div class="outline-text-3" id="text-9.8">
 
 
 <p>
@@ -869,9 +920,9 @@ that can be invoked with <code>return-from</code>.
 
 </div>
 
-<div id="outline-container-9.5" class="outline-3">
-<h3 id="sec-9.5"><code>return-from &lt;cont&gt; &lt;val&gt; → |</code> [operative] </h3>
-<div class="outline-text-3" id="text-9.5">
+<div id="outline-container-9.9" class="outline-3">
+<h3 id="sec-9.9"><code>return-from &lt;cont&gt; &lt;val&gt; → |</code> [operative] </h3>
+<div class="outline-text-3" id="text-9.9">
 
 
 <p>
@@ -885,9 +936,9 @@ An error is signalled if the continuation's extent has ended.
 
 </div>
 
-<div id="outline-container-9.6" class="outline-3">
-<h3 id="sec-9.6"><code>unwind-protect &lt;protected&gt; . &lt;cleanup&gt; → result</code> [operative] </h3>
-<div class="outline-text-3" id="text-9.6">
+<div id="outline-container-9.10" class="outline-3">
+<h3 id="sec-9.10"><code>unwind-protect &lt;protected&gt; . &lt;cleanup&gt; → result</code> [operative] </h3>
+<div class="outline-text-3" id="text-9.10">
 
 
 <p>
@@ -1907,7 +1958,7 @@ broken and must not be resumed.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-23 20:04:48 CEST</p>
+<p class="date"> Date: 2012-08-23 21:47:04 CEST</p>
 </div>
 </div>
 </body>

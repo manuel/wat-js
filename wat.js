@@ -403,22 +403,16 @@ var wat = (function() {
     /* Utilities */
     function assert(b) { if (!b) fail("assertion failed"); }
     function fail(err) { throw err; }
-
-    function log(str) {
-        console.log(str);
-        return str;
-    }
-
+    function log(str) { console.log(str); return str; }
     function array_to_list(array, end) {
 	var c = end ? end : NIL; for (var i = array.length; i > 0; i--) c = cons(array[i - 1], c); return c; }
-    function list() { return array_to_list(arguments); }
-    function list_star() {
-        var len = arguments.length;
-	var c = len >= 1 ? arguments[len-1] : NIL; for (var i = len-1; i > 0; i--) c = cons(arguments[i - 1], c); return c; }
     function list_to_array(c) {
 	var res = []; while(c !== NIL) { res.push(car(c)); c = cdr(c); } return res; }
     function reverse_list(list) {
 	var res = NIL; while(list !== NIL) { res = cons(car(list), res); list = cdr(list); } return res; }
+    function list_star() {
+        var len = arguments.length;
+	var c = len >= 1 ? arguments[len-1] : NIL; for (var i = len-1; i > 0; i--) c = cons(arguments[i - 1], c); return c; }
     /***** Parser *****/
     function parse(s) { // Returns array of forms
 	var res = program_stx(ps(s));
@@ -476,7 +470,6 @@ var wat = (function() {
 	envbind(e, "unwrap", jswrap(unwrap));
 	envbind(e, "eq?", jswrap(function (a, b) { return (a === b) ? T : F }));
 	envbind(e, "cons", jswrap(cons));
-	envbind(e, "list", jswrap(list));
 	envbind(e, "list*", jswrap(list_star));
 	envbind(e, "make-environment", jswrap(function (parent) { return new Env(parent); }));
         envbind(e, "defined?", jswrap(function (sym, e) { return (bound(sym, e)) ? T : F }));

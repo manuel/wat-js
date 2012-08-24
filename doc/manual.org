@@ -15,8 +15,7 @@ cooperative multitasking.  For syntactic abstraction, Wat provides
 lexically-scoped fexprs and first-class lexical environments, as well
 as ordinary memoizing procedural macros for metaprogramming without
 interpretetive overhead.  For data abstraction, Wat provides
-first-class types, fully encapsulated data, protocols, and generic
-functions with single dispatch.
+first-class types, fully encapsulated objects, and generic functions.
 
 Wat is hosted at <https://github.com/manuel/wat-js>.
 
@@ -66,8 +65,8 @@ Wat identifiers are case-sensitive.
  * String :: Wat currently only supports UTF-16 encoded Unicode
    strings.
 
- * Number :: Wat currently only supports IEEE 754 floating-point
-   numbers.
+ * Number :: Wat supports a full Scheme-style numeric tower with
+   arbitrary precision numbers.
 
  * Vector :: An array of objects.
 
@@ -273,9 +272,25 @@ last.  As a special case, =(begin)= returns void.
 Evaluates the test, and if it is false evaluates the else branch,
 otherwise evaluates the then branch.
 
+** =when <test> . <forms> → result= [operative]
+
+Evaluates forms if test is true, returns void otherwise.
+
+** =unless <test> . <forms> → result= [operative]
+
+Evaluates forms if test is false, returns void otherwise.
+
 ** =loop . <forms> → |= [operative]
 
 Infinite loop.
+
+** =while <test> . <forms> → |= [operative]
+
+Performs forms while test is true.
+
+** =until <test> . <forms> → |= [operative]
+
+Performs forms until test is true.
 
 ** =block <name> . <body> → result= [operative]
 

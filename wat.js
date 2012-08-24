@@ -27,16 +27,18 @@ var wat = (function() {
             return combine(e, null, null, op, cdr(this));
         }
     };
-    function macroCombine(e, k, f, op, form) {
+    function macroCombine(e, k, f, macro, form) {
+        var cached_macro = form.cached_macro;
         var cache = form.cache;
-        if (cache === undefined) {
-            cache = macroExpand(e, k, f, op, form);
+        if (cached_macro !== macro) {
+            cache = macroExpand(e, k, f, macro, form);
             form.cache = cache;
+            form.cached_macro = macro;
         }
         return evaluate(e, k, f, cache);
     }
-    function macroExpand(e, k, f, op, form) {
-        return combine(e, k, f, op.expander, cdr(form));
+    function macroExpand(e, k, f, macro, form) {
+        return combine(e, k, f, macro.expander, cdr(form));
     }
     function Macro(expander) { this.expander = expander; }
     function isMacro(x) { return x instanceof Macro; }

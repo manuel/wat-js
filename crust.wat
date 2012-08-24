@@ -235,6 +235,16 @@
   (define (return-from esc val) (esc val))
 )
 
+(define-syntax (while test . body) env
+  (block exit
+    (loop
+      (if (eval test env)
+          (eval body env)
+          (return-from exit #void)))))
+
+(define-macro (until test . body)
+  (list* while (list not test) body))
+
 (provide (define-generic define-method)
   (define-syntax (define-generic (name . args) . body) env
     (define str-name (symbol->string name))

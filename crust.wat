@@ -239,7 +239,7 @@
   (block exit
     (loop
       (if (eval test env)
-          (eval body env)
+          (eval (list* begin body) env)
           (return-from exit #void)))))
 
 (define-macro (until test . body)

@@ -8,7 +8,6 @@
   (define-js-method contents)
   (define-js-method find)
   (define-js-method each)
-  (define-js-method each)
 
   (define (run-tests)
     (define *manual* (contents ($ "#manual")))
@@ -19,7 +18,7 @@
 
   (define do-example
     (js-callback (lambda (#ign example)
-                   (define text (from-js (js-prop example "innerText")))
+                   (define text (from-js (js-prop example "textContent")))
                    (define forms (read-from-string text))
                    (eval (list* begin forms) (make-environment examples-environment)))))
 

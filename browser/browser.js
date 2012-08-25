@@ -6,7 +6,7 @@ var watbrowser = (function() {
 	forms = forms.concat(load_file("../crust.wat"));
 	forms = forms.concat(load_file("browser.wat"));
 	forms = forms.concat(load_file("../test.wat"));
-	forms = forms.concat(load_file("testrunner.wat"));
+        forms = forms.concat(load_file("testrunner.wat"));
 	forms = forms.concat(load_file("../repl.wat"));
         start = new Date().getTime();
         wat.eval(wat.array_to_list([new wat.Sym("begin")].concat(forms)), wat_env);

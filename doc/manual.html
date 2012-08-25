@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-25 14:28:23 CEST"/>
+<meta name="generated" content="2012-08-25 21:27:25 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -125,131 +125,139 @@ lang="en" xml:lang="en">
 <li><a href="#sec-9.10"><code>unwind-protect &lt;protected&gt; . &lt;cleanup&gt; → result</code> [operative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-10">Higher-order Control </a>
+<li><a href="#sec-10">Dynamic Binding </a>
 <ul>
-<li><a href="#sec-10.1"><code>make-prompt → prompt</code> [applicative] </a></li>
-<li><a href="#sec-10.2"><code>push-prompt &lt;prompt&gt; . &lt;forms&gt; → result</code> [applicative] </a></li>
-<li><a href="#sec-10.3"><code>take-subcont &lt;prompt&gt; &lt;cont&gt; . &lt;forms&gt; → result</code> [applicative] </a></li>
-<li><a href="#sec-10.4"><code>push-subcont &lt;cont&gt; . &lt;forms&gt; → result</code> [applicative] </a></li>
+<li><a href="#sec-10.1"><code>dnew &lt;val&gt; → dynamic</code> [applicative] </a></li>
+<li><a href="#sec-10.2"><code>dlet &lt;dynamic&gt; &lt;value&gt; . &lt;exprs&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-10.3"><code>dref &lt;dynamic&gt; → value</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-11">Dynamic Binding </a>
+<li><a href="#sec-11">Exceptions and Restarts </a>
 <ul>
-<li><a href="#sec-11.1"><code>dnew &lt;val&gt; → dynamic</code> [applicative] </a></li>
-<li><a href="#sec-11.2"><code>dlet &lt;dynamic&gt; &lt;value&gt; . &lt;exprs&gt; → result</code> [operative] </a></li>
-<li><a href="#sec-11.3"><code>dref &lt;dynamic&gt; → value</code> [applicative] </a></li>
+<li><a href="#sec-11.1"><code>handle &lt;handlers&gt; . &lt;body&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-11.2"><code>catch &lt;handlers&gt; . &lt;body&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-11.3"><code>throw &lt;exc&gt; . &lt;handlers&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-11.4"><code>default-handler &lt;exc&gt; → result</code> [generic] </a></li>
 </ul>
 </li>
-<li><a href="#sec-12">Types </a>
+<li><a href="#sec-12">Higher-order Control </a>
 <ul>
-<li><a href="#sec-12.1"><code>make-type → (type tagger untagger)</code> [applicative] </a></li>
-<li><a href="#sec-12.2"><code>type-of &lt;val&gt; → type</code> [applicative] </a></li>
-<li><a href="#sec-12.3"><code>Void</code>, <code>Ign</code>, <code>Boolean</code>, <code>Nil</code>, <code>Pair</code>, <code>Symbol</code>, <code>String</code>, <code>Number</code>, <code>Applicative</code>, <code>Operative</code>, <code>Environment</code>, <code>Vector</code>, <code>Type</code> [variables] </a></li>
-<li><a href="#sec-12.4"><code>void?</code>, <code>ign?</code>, <code>boolean?</code>, <code>null?</code>, <code>pair?</code>, <code>symbol?</code>, <code>string?</code>, <code>number?</code>, <code>applicative?</code>, <code>operative?</code>, <code>environment?</code>, <code>vector?</code>, <code>type?</code> [applicatives] </a></li>
+<li><a href="#sec-12.1"><code>make-prompt → prompt</code> [applicative] </a></li>
+<li><a href="#sec-12.2"><code>push-prompt &lt;prompt&gt; . &lt;forms&gt; → result</code> [applicative] </a></li>
+<li><a href="#sec-12.3"><code>take-subcont &lt;prompt&gt; &lt;cont&gt; . &lt;forms&gt; → result</code> [applicative] </a></li>
+<li><a href="#sec-12.4"><code>push-subcont &lt;cont&gt; . &lt;forms&gt; → result</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-13">Records </a>
+<li><a href="#sec-13">Types </a>
 <ul>
-<li><a href="#sec-13.1"><code>define-record-type &lt;name&gt; &lt;ctor&gt; &lt;pred&gt; . &lt;fields&gt; → type</code> [operative] </a></li>
+<li><a href="#sec-13.1"><code>make-type → (type tagger untagger)</code> [applicative] </a></li>
+<li><a href="#sec-13.2"><code>type-of &lt;val&gt; → type</code> [applicative] </a></li>
+<li><a href="#sec-13.3"><code>Void</code>, <code>Ign</code>, <code>Boolean</code>, <code>Nil</code>, <code>Pair</code>, <code>Symbol</code>, <code>String</code>, <code>Number</code>, <code>Applicative</code>, <code>Operative</code>, <code>Environment</code>, <code>Vector</code>, <code>Type</code> [variables] </a></li>
+<li><a href="#sec-13.4"><code>void?</code>, <code>ign?</code>, <code>boolean?</code>, <code>null?</code>, <code>pair?</code>, <code>symbol?</code>, <code>string?</code>, <code>number?</code>, <code>applicative?</code>, <code>operative?</code>, <code>environment?</code>, <code>vector?</code>, <code>type?</code> [applicatives] </a></li>
 </ul>
 </li>
-<li><a href="#sec-14">Generic Functions </a>
+<li><a href="#sec-14">Records </a>
 <ul>
-<li><a href="#sec-14.1"><code>define-generic (&lt;name&gt; . &lt;args&gt;) . [&lt;body&gt;] → generic</code> [operative] </a></li>
-<li><a href="#sec-14.2"><code>define-method (&lt;name&gt; (&lt;self&gt; &lt;type&gt;) . &lt;args&gt;) . &lt;body&gt; → method</code> [operative] </a></li>
+<li><a href="#sec-14.1"><code>define-record-type &lt;name&gt; &lt;ctor&gt; &lt;pred&gt; . &lt;fields&gt; → type</code> [operative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-15">Equality </a>
+<li><a href="#sec-15">Generic Functions </a>
 <ul>
-<li><a href="#sec-15.1"><code>= &lt;a&gt; &lt;b&gt; → boolean</code> [generic] </a></li>
-<li><a href="#sec-15.2"><code>/= &lt;a&gt; &lt;b&gt; → boolean</code> [applicative] </a></li>
-<li><a href="#sec-15.3"><code>eq? &lt;a&gt; &lt;b&gt; → boolean</code> [applicative] </a></li>
+<li><a href="#sec-15.1"><code>define-generic (&lt;name&gt; . &lt;args&gt;) . [&lt;body&gt;] → generic</code> [operative] </a></li>
+<li><a href="#sec-15.2"><code>define-method (&lt;name&gt; (&lt;self&gt; &lt;type&gt;) . &lt;args&gt;) . &lt;body&gt; → method</code> [operative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-16">Order </a>
+<li><a href="#sec-16">Equality </a>
 <ul>
-<li><a href="#sec-16.1"><code>&lt; &lt;a&gt; &lt;b&gt; → boolean</code> [generic] </a></li>
-<li><a href="#sec-16.2"><code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code> [applicatives] </a></li>
+<li><a href="#sec-16.1"><code>= &lt;a&gt; &lt;b&gt; → boolean</code> [generic] </a></li>
+<li><a href="#sec-16.2"><code>/= &lt;a&gt; &lt;b&gt; → boolean</code> [applicative] </a></li>
+<li><a href="#sec-16.3"><code>eq? &lt;a&gt; &lt;b&gt; → boolean</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-17">Hashing </a>
+<li><a href="#sec-17">Order </a>
 <ul>
-<li><a href="#sec-17.1"><code>hash-code &lt;obj&gt; → number</code> [generic] </a></li>
-<li><a href="#sec-17.2"><code>identity-hash-code &lt;obj&gt; → number</code> [applicative] </a></li>
+<li><a href="#sec-17.1"><code>&lt; &lt;a&gt; &lt;b&gt; → boolean</code> [generic] </a></li>
+<li><a href="#sec-17.2"><code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code> [applicatives] </a></li>
 </ul>
 </li>
-<li><a href="#sec-18">Conversion </a>
+<li><a href="#sec-18">Hashing </a>
 <ul>
-<li><a href="#sec-18.1"><code>-&gt;string &lt;obj&gt; → string</code> [generic] </a></li>
-<li><a href="#sec-18.2"><code>string-&gt;symbol</code>, <code>symbol-&gt;string</code>, <code>string-&gt;number</code>, <code>number-&gt;string</code> [applicatives] </a></li>
+<li><a href="#sec-18.1"><code>hash-code &lt;obj&gt; → number</code> [generic] </a></li>
+<li><a href="#sec-18.2"><code>identity-hash-code &lt;obj&gt; → number</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-19">Booleans </a>
+<li><a href="#sec-19">Conversion </a>
 <ul>
-<li><a href="#sec-19.1"><code>and</code>, <code>or</code> [operatives] </a></li>
-<li><a href="#sec-19.2"><code>not</code> [applicative] </a></li>
+<li><a href="#sec-19.1"><code>-&gt;string &lt;obj&gt; → string</code> [generic] </a></li>
+<li><a href="#sec-19.2"><code>string-&gt;symbol</code>, <code>symbol-&gt;string</code>, <code>string-&gt;number</code>, <code>number-&gt;string</code> [applicatives] </a></li>
 </ul>
 </li>
-<li><a href="#sec-20">Numbers </a>
+<li><a href="#sec-20">Booleans </a>
 <ul>
-<li><a href="#sec-20.1"><code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>%</code> [applicatives] </a></li>
+<li><a href="#sec-20.1"><code>and</code>, <code>or</code> [operatives] </a></li>
+<li><a href="#sec-20.2"><code>not</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-21">Pairs and Lists </a>
+<li><a href="#sec-21">Numbers </a>
 <ul>
-<li><a href="#sec-21.1"><code>cons &lt;car&gt; &lt;cdr&gt; → cons</code> [applicative] </a></li>
-<li><a href="#sec-21.2"><code>car &lt;pair&gt; → value</code> [applicative] </a></li>
-<li><a href="#sec-21.3"><code>cdr &lt;pair&gt; → value</code> [applicative] </a></li>
-<li><a href="#sec-21.4"><code>caar</code>, <code>cadr</code>, <code>cdar</code>, <code>cddr</code> [applicatives] </a></li>
-<li><a href="#sec-21.5"><code>list . &lt;vals&gt; → list</code> [applicative] </a></li>
-<li><a href="#sec-21.6"><code>list* . &lt;vals&gt; → list</code> [applicative] </a></li>
+<li><a href="#sec-21.1"><code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>%</code> [applicatives] </a></li>
 </ul>
 </li>
-<li><a href="#sec-22">Vectors </a>
+<li><a href="#sec-22">Pairs and Lists </a>
 <ul>
-<li><a href="#sec-22.1"><code>vector . &lt;elements&gt; → vector</code> [applicative] </a></li>
-<li><a href="#sec-22.2"><code>vector-ref &lt;vector&gt; &lt;index&gt; → element</code> [applicative] </a></li>
-<li><a href="#sec-22.3"><code>vector-set! &lt;vector&gt; &lt;index&gt; &lt;element&gt; → element</code> [applicative] </a></li>
-<li><a href="#sec-22.4"><code>vector-length &lt;vector&gt; → number</code> [applicative] </a></li>
+<li><a href="#sec-22.1"><code>cons &lt;car&gt; &lt;cdr&gt; → cons</code> [applicative] </a></li>
+<li><a href="#sec-22.2"><code>car &lt;pair&gt; → value</code> [applicative] </a></li>
+<li><a href="#sec-22.3"><code>cdr &lt;pair&gt; → value</code> [applicative] </a></li>
+<li><a href="#sec-22.4"><code>caar</code>, <code>cadr</code>, <code>cdar</code>, <code>cddr</code> [applicatives] </a></li>
+<li><a href="#sec-22.5"><code>list . &lt;vals&gt; → list</code> [applicative] </a></li>
+<li><a href="#sec-22.6"><code>list* . &lt;vals&gt; → list</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-23">Hashtables </a>
+<li><a href="#sec-23">Vectors </a>
 <ul>
-<li><a href="#sec-23.1"><code>Hashtable</code> [variable], <code>hashtable?</code> [applicative] <i>NIY</i> </a></li>
-<li><a href="#sec-23.2"><code>make-hashtable &lt;hashfn&gt; &lt;eqfn&gt; → hashtable</code> [applicative] <i>NIY</i> </a></li>
-<li><a href="#sec-23.3"><code>make-identity-hashtable → hashtable</code> [applicative] </a></li>
-<li><a href="#sec-23.4"><code>make-generic-hashtable → hashtable</code> [applicative] <i>NIY</i> </a></li>
-<li><a href="#sec-23.5"><code>hashtable-put! &lt;hashtable&gt; &lt;key&gt; &lt;val&gt; → val</code> [applicative] </a></li>
-<li><a href="#sec-23.6"><code>hashtable-get &lt;hashtable&gt; &lt;key&gt; &lt;default&gt; → val</code> [applicative] </a></li>
+<li><a href="#sec-23.1"><code>vector . &lt;elements&gt; → vector</code> [applicative] </a></li>
+<li><a href="#sec-23.2"><code>vector-ref &lt;vector&gt; &lt;index&gt; → element</code> [applicative] </a></li>
+<li><a href="#sec-23.3"><code>vector-set! &lt;vector&gt; &lt;index&gt; &lt;element&gt; → element</code> [applicative] </a></li>
+<li><a href="#sec-23.4"><code>vector-length &lt;vector&gt; → number</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-24">System </a>
+<li><a href="#sec-24">Hashtables </a>
 <ul>
-<li><a href="#sec-24.1"><code>read → form</code> [applicative] </a></li>
-<li><a href="#sec-24.2"><code>display &lt;msg&gt; → msg</code> [applicative] </a></li>
-<li><a href="#sec-24.3"><code>fail &lt;reason&gt; → |</code> [applicative] </a></li>
+<li><a href="#sec-24.1"><code>Hashtable</code> [variable], <code>hashtable?</code> [applicative] <i>NIY</i> </a></li>
+<li><a href="#sec-24.2"><code>make-hashtable &lt;hashfn&gt; &lt;eqfn&gt; → hashtable</code> [applicative] <i>NIY</i> </a></li>
+<li><a href="#sec-24.3"><code>make-identity-hashtable → hashtable</code> [applicative] </a></li>
+<li><a href="#sec-24.4"><code>make-generic-hashtable → hashtable</code> [applicative] <i>NIY</i> </a></li>
+<li><a href="#sec-24.5"><code>hashtable-put! &lt;hashtable&gt; &lt;key&gt; &lt;val&gt; → val</code> [applicative] </a></li>
+<li><a href="#sec-24.6"><code>hashtable-get &lt;hashtable&gt; &lt;key&gt; &lt;default&gt; → val</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-25">JavaScript Bridge </a>
+<li><a href="#sec-25">System </a>
 <ul>
-<li><a href="#sec-25.1"><code>js-global &lt;string&gt; → result</code> [applicative] </a></li>
-<li><a href="#sec-25.2"><code>js-set-global! &lt;string&gt; &lt;val&gt; → val</code> [applicative] </a></li>
-<li><a href="#sec-25.3"><code>js-prop &lt;object&gt; &lt;string&gt; → result</code> [applicative] </a></li>
-<li><a href="#sec-25.4"><code>js-set-prop! &lt;object&gt; &lt;string&gt; &lt;val&gt; → val</code> [applicative] </a></li>
-<li><a href="#sec-25.5"><code>js-function &lt;jsfun&gt; → applicative</code> [applicative] </a></li>
-<li><a href="#sec-25.6"><code>js-method &lt;string&gt; → cmb</code> [applicative] </a></li>
-<li><a href="#sec-25.7"><code>to-js &lt;obj&gt; → jsobj</code> [applicative] </a></li>
-<li><a href="#sec-25.8"><code>from-js &lt;js-obj&gt; → obj</code> [applicative] </a></li>
-<li><a href="#sec-25.9"><code>js-callback &lt;cmb&gt; → jsfun</code> [applicative] </a></li>
-<li><a href="#sec-25.10"><code>define-js-method &lt;name&gt;</code> [operative] </a></li>
+<li><a href="#sec-25.1"><code>read → form</code> [applicative] </a></li>
+<li><a href="#sec-25.2"><code>display &lt;msg&gt; → msg</code> [applicative] </a></li>
+<li><a href="#sec-25.3"><code>fail &lt;reason&gt; → |</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-26">Debugging Interface </a>
+<li><a href="#sec-26">JavaScript Bridge </a>
 <ul>
-<li><a href="#sec-26.1"><code>stacktrace → list</code> [applicative] <i>NIY</i> </a></li>
-<li><a href="#sec-26.2"><code>label &lt;obj&gt; → string</code> [applicative] </a></li>
-<li><a href="#sec-26.3"><code>set-label! &lt;obj&gt; &lt;string&gt; → string</code> [applicative] </a></li>
-<li><a href="#sec-26.4"><code>trap &lt;exc&gt; → |</code> [applicative] <i>NIY</i> </a></li>
+<li><a href="#sec-26.1"><code>js-global &lt;string&gt; → result</code> [applicative] </a></li>
+<li><a href="#sec-26.2"><code>js-set-global! &lt;string&gt; &lt;val&gt; → val</code> [applicative] </a></li>
+<li><a href="#sec-26.3"><code>js-prop &lt;object&gt; &lt;string&gt; → result</code> [applicative] </a></li>
+<li><a href="#sec-26.4"><code>js-set-prop! &lt;object&gt; &lt;string&gt; &lt;val&gt; → val</code> [applicative] </a></li>
+<li><a href="#sec-26.5"><code>js-function &lt;jsfun&gt; → applicative</code> [applicative] </a></li>
+<li><a href="#sec-26.6"><code>js-method &lt;string&gt; → cmb</code> [applicative] </a></li>
+<li><a href="#sec-26.7"><code>to-js &lt;obj&gt; → jsobj</code> [applicative] </a></li>
+<li><a href="#sec-26.8"><code>from-js &lt;js-obj&gt; → obj</code> [applicative] </a></li>
+<li><a href="#sec-26.9"><code>js-callback &lt;cmb&gt; → jsfun</code> [applicative] </a></li>
+<li><a href="#sec-26.10"><code>define-js-method &lt;name&gt;</code> [operative] </a></li>
+</ul>
+</li>
+<li><a href="#sec-27">Debugging Interface </a>
+<ul>
+<li><a href="#sec-27.1"><code>stacktrace → list</code> [applicative] <i>NIY</i> </a></li>
+<li><a href="#sec-27.2"><code>label &lt;obj&gt; → string</code> [applicative] </a></li>
+<li><a href="#sec-27.3"><code>set-label! &lt;obj&gt; &lt;string&gt; → string</code> [applicative] </a></li>
+<li><a href="#sec-27.4"><code>trap &lt;exc&gt; → |</code> [applicative] <i>NIY</i> </a></li>
 </ul>
 </li>
 </ul>
@@ -269,7 +277,7 @@ and resumable exceptions for quotidian control flow with multi-prompt
 delimited continuations for advanced control inversions such as
 cooperative multitasking.  For syntactic abstraction, Wat provides
 lexically-scoped fexprs and first-class lexical environments, as well
-as ordinary memoizing procedural macros for metaprogramming without
+as ordinary procedural macros for metaprogramming without
 interpretetive overhead.  For data abstraction, Wat provides
 first-class types, fully encapsulated objects, and generic functions.
 </p>
@@ -699,8 +707,8 @@ Defines a new macro with the given name, parameter tree, and body.
 
 
 <p>
-Updates the left-hand side bindings by matching it against the
-right-hand side in the given environment.
+Updates the left-hand side by matching it against the right-hand side
+in the given environment.
 </p>
 
 </div>
@@ -965,6 +973,28 @@ Constructs a new compound operative that closes over the current
 environment with the given parameter tree, environment parameter, and
 body expression.
 </p>
+
+</div>
+
+<div id="outline-container-8.1.1" class="outline-4">
+<h4 id="sec-8.1.1">Examples </h4>
+<div class="outline-text-4" id="text-8.1.1">
+
+
+
+
+
+<pre class="example">(define foo (vau (x) #ign x))
+(assert (= '(+ 1 2) (foo (+ 1 2))))
+
+(define bar (vau (x) env (eval x env)))
+(assert (= 3 (bar (+ 1 2))))
+</pre>
+
+
+
+
+</div>
 </div>
 
 </div>
@@ -977,6 +1007,28 @@ body expression.
 <p>
 Creates an applicative combiner, as in Scheme.
 </p>
+
+</div>
+
+<div id="outline-container-8.2.1" class="outline-4">
+<h4 id="sec-8.2.1">Examples </h4>
+<div class="outline-text-4" id="text-8.2.1">
+
+
+
+
+
+<pre class="example">(define foo (lambda (x) (+ x 1)))
+(assert (= 2 (foo 1)))
+
+(define quux (lambda args args))
+(assert (= '(1 2) (quux 1 (+ 1 1))))
+</pre>
+
+
+
+
+</div>
 </div>
 
 </div>
@@ -989,6 +1041,24 @@ Creates an applicative combiner, as in Scheme.
 <p>
 Applies an applicative to an arguments list.
 </p>
+
+</div>
+
+<div id="outline-container-8.3.1" class="outline-4">
+<h4 id="sec-8.3.1">Examples </h4>
+<div class="outline-text-4" id="text-8.3.1">
+
+
+
+
+
+<pre class="example">(assert (= 4 (apply + (list 2 2))))
+</pre>
+
+
+
+
+</div>
 </div>
 
 </div>
@@ -1001,6 +1071,26 @@ Applies an applicative to an arguments list.
 <p>
 Returns an applicative around an underlying combiner.
 </p>
+
+</div>
+
+<div id="outline-container-8.4.1" class="outline-4">
+<h4 id="sec-8.4.1">Examples </h4>
+<div class="outline-text-4" id="text-8.4.1">
+
+
+
+
+
+<pre class="example">(define id (vau (x) #ign x))
+(assert (= '(+ 1 2) (id (+ 1 2))))
+(assert (= 3 ((wrap id) (+ 1 2))))
+</pre>
+
+
+
+
+</div>
 </div>
 
 </div>
@@ -1013,6 +1103,25 @@ Returns an applicative around an underlying combiner.
 <p>
 Returns the underlying combiner of an applicative.
 </p>
+
+</div>
+
+<div id="outline-container-8.5.1" class="outline-4">
+<h4 id="sec-8.5.1">Examples </h4>
+<div class="outline-text-4" id="text-8.5.1">
+
+
+
+
+
+<pre class="example">(define foo (lambda (a b) (+ a b)))
+(assert (= 7 ((unwrap foo) 3 4)))
+</pre>
+
+
+
+
+</div>
 </div>
 </div>
 
@@ -1034,6 +1143,27 @@ Returns the underlying combiner of an applicative.
 Evaluates expressions from left to right, returning the value of the
 last.  As a special case, <code>(begin)</code> returns void.
 </p>
+
+</div>
+
+<div id="outline-container-9.1.1" class="outline-4">
+<h4 id="sec-9.1.1">Examples </h4>
+<div class="outline-text-4" id="text-9.1.1">
+
+
+
+
+
+<pre class="example">(assert (= #void (begin)))
+(assert (= 1 (begin 1)))
+(assert (= 2 (begin 1 2)))
+(assert (= 3 (begin 1 2 3)))
+</pre>
+
+
+
+
+</div>
 </div>
 
 </div>
@@ -1047,6 +1177,26 @@ last.  As a special case, <code>(begin)</code> returns void.
 Evaluates the test, and if it is false evaluates the else branch,
 otherwise evaluates the then branch.
 </p>
+
+</div>
+
+<div id="outline-container-9.2.1" class="outline-4">
+<h4 id="sec-9.2.1">Examples </h4>
+<div class="outline-text-4" id="text-9.2.1">
+
+
+
+
+
+<pre class="example">(assert (= 1 (if #t 1 2)))
+(assert (= 2 (if #f 1 2)))
+(assert (= 1 (if 'foo 1 2)))
+</pre>
+
+
+
+
+</div>
 </div>
 
 </div>
@@ -1059,6 +1209,26 @@ otherwise evaluates the then branch.
 <p>
 Evaluates forms if test is true, returns void otherwise.
 </p>
+
+</div>
+
+<div id="outline-container-9.3.1" class="outline-4">
+<h4 id="sec-9.3.1">Examples </h4>
+<div class="outline-text-4" id="text-9.3.1">
+
+
+
+
+
+<pre class="example">(assert (= 2 (when #t 1 2)))
+(assert (= #void (when #f 1 2)))
+(assert (= 2 (when 'foo 1 2)))
+</pre>
+
+
+
+
+</div>
 </div>
 
 </div>
@@ -1071,6 +1241,26 @@ Evaluates forms if test is true, returns void otherwise.
 <p>
 Evaluates forms if test is false, returns void otherwise.
 </p>
+
+</div>
+
+<div id="outline-container-9.4.1" class="outline-4">
+<h4 id="sec-9.4.1">Examples </h4>
+<div class="outline-text-4" id="text-9.4.1">
+
+
+
+
+
+<pre class="example">(assert (= #void (unless #t 1 2)))
+(assert (= 2 (unless #f 1 2)))
+(assert (= #void (unless 'foo 1 2)))
+</pre>
+
+
+
+
+</div>
 </div>
 
 </div>
@@ -1083,6 +1273,31 @@ Evaluates forms if test is false, returns void otherwise.
 <p>
 Infinite loop.
 </p>
+
+</div>
+
+<div id="outline-container-9.5.1" class="outline-4">
+<h4 id="sec-9.5.1">Examples </h4>
+<div class="outline-text-4" id="text-9.5.1">
+
+
+
+
+
+<pre class="example">(assert
+  (= 11
+     (block exit 
+       (define x 0)
+       (loop
+         (set! (current-environment) x (+ x 1))
+         (when (&gt; x 10)
+           (return-from exit x))))))
+</pre>
+
+
+
+
+</div>
 </div>
 
 </div>
@@ -1095,6 +1310,27 @@ Infinite loop.
 <p>
 Performs forms while test is true.
 </p>
+
+</div>
+
+<div id="outline-container-9.6.1" class="outline-4">
+<h4 id="sec-9.6.1">Examples </h4>
+<div class="outline-text-4" id="text-9.6.1">
+
+
+
+
+
+<pre class="example">(define x 0)
+(while (&lt;= x 10)
+  (set! (current-environment) x (+ x 1)))
+(assert (= x 11))
+</pre>
+
+
+
+
+</div>
 </div>
 
 </div>
@@ -1107,6 +1343,27 @@ Performs forms while test is true.
 <p>
 Performs forms until test is true.
 </p>
+
+</div>
+
+<div id="outline-container-9.7.1" class="outline-4">
+<h4 id="sec-9.7.1">Examples </h4>
+<div class="outline-text-4" id="text-9.7.1">
+
+
+
+
+
+<pre class="example">(define x 0)
+(until (&gt; x 10)
+  (set! (current-environment) x (+ x 1)))
+(assert (= x 11))
+</pre>
+
+
+
+
+</div>
 </div>
 
 </div>
@@ -1120,6 +1377,31 @@ Performs forms until test is true.
 Performs body forms with name bound to a one-shot escape continuation
 that can be invoked with <code>return-from</code>.
 </p>
+
+</div>
+
+<div id="outline-container-9.8.1" class="outline-4">
+<h4 id="sec-9.8.1">Examples </h4>
+<div class="outline-text-4" id="text-9.8.1">
+
+
+
+
+
+<pre class="example">(assert (= #void (block foo)))
+(assert (= 1 (block foo 1)))
+(assert (= 2 (block foo 1 2)))
+(assert (= 3 (block foo 1 (return-from foo 3) 2)))
+
+(assert (= 3 (block ret
+               (for-each (lambda (x) (when (= 1 (/ x 3)) (return-from ret x)))
+                         '(1 2 3 4 5)))))
+</pre>
+
+
+
+
+</div>
 </div>
 
 </div>
@@ -1152,14 +1434,197 @@ through an escape continuation, the cleanup forms are executed.  The
 cleanup forms are not executed when the protected form is aborted by
 higher-order control.
 </p>
+
+</div>
+
+<div id="outline-container-9.10.1" class="outline-4">
+<h4 id="sec-9.10.1">Examples </h4>
+<div class="outline-text-4" id="text-9.10.1">
+
+
+
+
+
+<pre class="example">(assert (= 1 (unwind-protect 1)))
+(assert (= 1 (unwind-protect 1 2)))
+(assert (= 1 (unwind-protect 1 2 3)))
+
+(define env (current-environment))
+
+(define x #f)
+(assert (= 1 (unwind-protect 1 (set! env x #t))))
+(assert (= #t x))
+</pre>
+
+
+
+
+</div>
 </div>
 </div>
 
 </div>
 
 <div id="outline-container-10" class="outline-2">
-<h2 id="sec-10">Higher-order Control </h2>
+<h2 id="sec-10">Dynamic Binding </h2>
 <div class="outline-text-2" id="text-10">
+
+
+<p>
+These are the operators from Kiselyov, Shan, and Sabry's
+<a href="http://okmij.org/ftp/papers/DDBinding.pdf"><i>Delimited Dynamic Binding</i></a>.
+</p>
+
+</div>
+
+<div id="outline-container-10.1" class="outline-3">
+<h3 id="sec-10.1"><code>dnew &lt;val&gt; → dynamic</code> [applicative] </h3>
+<div class="outline-text-3" id="text-10.1">
+
+
+<p>
+Creates a new dynamically-bound variable with the given initial value.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-10.2" class="outline-3">
+<h3 id="sec-10.2"><code>dlet &lt;dynamic&gt; &lt;value&gt; . &lt;exprs&gt; → result</code> [operative] </h3>
+<div class="outline-text-3" id="text-10.2">
+
+
+<p>
+Performs expressions with the dynamic variable bound to the value.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-10.3" class="outline-3">
+<h3 id="sec-10.3"><code>dref &lt;dynamic&gt; → value</code> [applicative] </h3>
+<div class="outline-text-3" id="text-10.3">
+
+
+<p>
+Retrieves the dynamically-bound value of a dynamic variable.
+</p>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-11" class="outline-2">
+<h2 id="sec-11">Exceptions and Restarts </h2>
+<div class="outline-text-2" id="text-11">
+
+
+
+</div>
+
+<div id="outline-container-11.1" class="outline-3">
+<h3 id="sec-11.1"><code>handle &lt;handlers&gt; . &lt;body&gt; → result</code> [operative] </h3>
+<div class="outline-text-3" id="text-11.1">
+
+
+<p>
+Each handler is of the form <code>(&lt;type&gt; (&lt;var&gt;) . &lt;handler-body&gt;)</code>.
+Handlers are matched against a thrown exception from left to right.
+If a thrown exception is of the given type, then the handler body
+expressions will be executed with the variable bound to the exception.
+</p>
+<p>
+A handler may handle the exception by performing a nonlocal transfer
+of control.  If the handler normally returns, the search for a handler
+will continue up the stack.  If no handler is found, the
+<code>default-handler</code> generic function is called on the exception.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-11.2" class="outline-3">
+<h3 id="sec-11.2"><code>catch &lt;handlers&gt; . &lt;body&gt; → result</code> [operative] </h3>
+<div class="outline-text-3" id="text-11.2">
+
+
+<p>
+Like <code>handle</code>, but unwinds the stack before executing handler, and
+simply returns the result of evaluating the handler body.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-11.3" class="outline-3">
+<h3 id="sec-11.3"><code>throw &lt;exc&gt; . &lt;handlers&gt; → result</code> [operative] </h3>
+<div class="outline-text-3" id="text-11.3">
+
+
+<p>
+Throws an exception and optionally provides restarts that an exception
+handler may use to continue computation.  Restarts are installed as if
+by <code>catch</code>, i.e. when a restart is invoked, the stack is unwound and
+the result of the handler is returned.
+</p>
+
+</div>
+
+<div id="outline-container-11.3.1" class="outline-4">
+<h4 id="sec-11.3.1">Examples </h4>
+<div class="outline-text-4" id="text-11.3.1">
+
+
+
+
+
+<pre class="example">;; (define-record-type Div-by-Zero-Exception
+;;   (make-div-by-zero-exception)
+;;   #ign)
+;; (define-record-type Use-Value-Restart
+;;   (make-use-value-restart associated-exception value)
+;;   #ign
+;;   (associated-exception associated-exception)
+;;   (value value))
+;;
+;; (define (my-compute number divisor)
+;;   (let ((div (if (= 0 divisor)
+;;                  (throw (make-div-by-zero-exception)
+;;                    (Use-Value-Restart (r) (value r)))
+;;                  divisor)))
+;;     (/ number divisor)))
+;;
+;; (assert 
+;;   (= (handle (my-compute 12 0)
+;;        (Div-by-Zero-Exception (dbz) (throw (make-use-value-restart dbz 3))))
+;;      4))
+</pre>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-11.4" class="outline-3">
+<h3 id="sec-11.4"><code>default-handler &lt;exc&gt; → result</code> [generic] </h3>
+<div class="outline-text-3" id="text-11.4">
+
+
+<p>
+Called on an exception when no handler is found, or when all found
+handlers returned normally.
+</p>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-12" class="outline-2">
+<h2 id="sec-12">Higher-order Control </h2>
+<div class="outline-text-2" id="text-12">
 
 
 <p>
@@ -1170,9 +1635,9 @@ other delimited control operators.
 
 </div>
 
-<div id="outline-container-10.1" class="outline-3">
-<h3 id="sec-10.1"><code>make-prompt → prompt</code> [applicative] </h3>
-<div class="outline-text-3" id="text-10.1">
+<div id="outline-container-12.1" class="outline-3">
+<h3 id="sec-12.1"><code>make-prompt → prompt</code> [applicative] </h3>
+<div class="outline-text-3" id="text-12.1">
 
 
 <p>
@@ -1182,9 +1647,9 @@ Creates a fresh prompt.
 
 </div>
 
-<div id="outline-container-10.2" class="outline-3">
-<h3 id="sec-10.2"><code>push-prompt &lt;prompt&gt; . &lt;forms&gt; → result</code> [applicative] </h3>
-<div class="outline-text-3" id="text-10.2">
+<div id="outline-container-12.2" class="outline-3">
+<h3 id="sec-12.2"><code>push-prompt &lt;prompt&gt; . &lt;forms&gt; → result</code> [applicative] </h3>
+<div class="outline-text-3" id="text-12.2">
 
 
 <p>
@@ -1195,9 +1660,9 @@ new continuation.
 
 </div>
 
-<div id="outline-container-10.3" class="outline-3">
-<h3 id="sec-10.3"><code>take-subcont &lt;prompt&gt; &lt;cont&gt; . &lt;forms&gt; → result</code> [applicative] </h3>
-<div class="outline-text-3" id="text-10.3">
+<div id="outline-container-12.3" class="outline-3">
+<h3 id="sec-12.3"><code>take-subcont &lt;prompt&gt; &lt;cont&gt; . &lt;forms&gt; → result</code> [applicative] </h3>
+<div class="outline-text-3" id="text-12.3">
 
 
 <p>
@@ -1209,9 +1674,9 @@ Aborts up to and including the prompt, and performs the forms with
 
 </div>
 
-<div id="outline-container-10.4" class="outline-3">
-<h3 id="sec-10.4"><code>push-subcont &lt;cont&gt; . &lt;forms&gt; → result</code> [applicative] </h3>
-<div class="outline-text-3" id="text-10.4">
+<div id="outline-container-12.4" class="outline-3">
+<h3 id="sec-12.4"><code>push-subcont &lt;cont&gt; . &lt;forms&gt; → result</code> [applicative] </h3>
+<div class="outline-text-3" id="text-12.4">
 
 
 <p>
@@ -1221,9 +1686,9 @@ performs forms in the new continuation.
 
 </div>
 
-<div id="outline-container-10.4.1" class="outline-4">
-<h4 id="sec-10.4.1">Examples </h4>
-<div class="outline-text-4" id="text-10.4.1">
+<div id="outline-container-12.4.1" class="outline-4">
+<h4 id="sec-12.4.1">Examples </h4>
+<div class="outline-text-4" id="text-12.4.1">
 
 
 
@@ -1249,65 +1714,16 @@ performs forms in the new continuation.
 
 </div>
 
-<div id="outline-container-11" class="outline-2">
-<h2 id="sec-11">Dynamic Binding </h2>
-<div class="outline-text-2" id="text-11">
-
-
-<p>
-These are the operators from Kiselyov, Shan, and Sabry's
-<a href="http://okmij.org/ftp/papers/DDBinding.pdf"><i>Delimited Dynamic Binding</i></a>.
-</p>
-
-</div>
-
-<div id="outline-container-11.1" class="outline-3">
-<h3 id="sec-11.1"><code>dnew &lt;val&gt; → dynamic</code> [applicative] </h3>
-<div class="outline-text-3" id="text-11.1">
-
-
-<p>
-Creates a new dynamically-bound variable with the given initial value.
-</p>
-</div>
-
-</div>
-
-<div id="outline-container-11.2" class="outline-3">
-<h3 id="sec-11.2"><code>dlet &lt;dynamic&gt; &lt;value&gt; . &lt;exprs&gt; → result</code> [operative] </h3>
-<div class="outline-text-3" id="text-11.2">
-
-
-<p>
-Performs expressions with the dynamic variable bound to the value.
-</p>
-</div>
-
-</div>
-
-<div id="outline-container-11.3" class="outline-3">
-<h3 id="sec-11.3"><code>dref &lt;dynamic&gt; → value</code> [applicative] </h3>
-<div class="outline-text-3" id="text-11.3">
-
-
-<p>
-Retrieves the dynamically-bound value of a dynamic variable.
-</p>
-</div>
-</div>
-
-</div>
-
-<div id="outline-container-12" class="outline-2">
-<h2 id="sec-12">Types </h2>
-<div class="outline-text-2" id="text-12">
+<div id="outline-container-13" class="outline-2">
+<h2 id="sec-13">Types </h2>
+<div class="outline-text-2" id="text-13">
 
 
 </div>
 
-<div id="outline-container-12.1" class="outline-3">
-<h3 id="sec-12.1"><code>make-type → (type tagger untagger)</code> [applicative] </h3>
-<div class="outline-text-3" id="text-12.1">
+<div id="outline-container-13.1" class="outline-3">
+<h3 id="sec-13.1"><code>make-type → (type tagger untagger)</code> [applicative] </h3>
+<div class="outline-text-3" id="text-13.1">
 
 
 <p>
@@ -1336,9 +1752,9 @@ the tagger and returns its value.
 
 </div>
 
-<div id="outline-container-12.2" class="outline-3">
-<h3 id="sec-12.2"><code>type-of &lt;val&gt; → type</code> [applicative] </h3>
-<div class="outline-text-3" id="text-12.2">
+<div id="outline-container-13.2" class="outline-3">
+<h3 id="sec-13.2"><code>type-of &lt;val&gt; → type</code> [applicative] </h3>
+<div class="outline-text-3" id="text-13.2">
 
 
 <p>
@@ -1349,9 +1765,9 @@ objects or tagged objects.
 
 </div>
 
-<div id="outline-container-12.3" class="outline-3">
-<h3 id="sec-12.3"><code>Void</code>, <code>Ign</code>, <code>Boolean</code>, <code>Nil</code>, <code>Pair</code>, <code>Symbol</code>, <code>String</code>, <code>Number</code>, <code>Applicative</code>, <code>Operative</code>, <code>Environment</code>, <code>Vector</code>, <code>Type</code> [variables] </h3>
-<div class="outline-text-3" id="text-12.3">
+<div id="outline-container-13.3" class="outline-3">
+<h3 id="sec-13.3"><code>Void</code>, <code>Ign</code>, <code>Boolean</code>, <code>Nil</code>, <code>Pair</code>, <code>Symbol</code>, <code>String</code>, <code>Number</code>, <code>Applicative</code>, <code>Operative</code>, <code>Environment</code>, <code>Vector</code>, <code>Type</code> [variables] </h3>
+<div class="outline-text-3" id="text-13.3">
 
 
 <p>
@@ -1361,9 +1777,9 @@ Type constants for built-in types.
 
 </div>
 
-<div id="outline-container-12.4" class="outline-3">
-<h3 id="sec-12.4"><code>void?</code>, <code>ign?</code>, <code>boolean?</code>, <code>null?</code>, <code>pair?</code>, <code>symbol?</code>, <code>string?</code>, <code>number?</code>, <code>applicative?</code>, <code>operative?</code>, <code>environment?</code>, <code>vector?</code>, <code>type?</code> [applicatives] </h3>
-<div class="outline-text-3" id="text-12.4">
+<div id="outline-container-13.4" class="outline-3">
+<h3 id="sec-13.4"><code>void?</code>, <code>ign?</code>, <code>boolean?</code>, <code>null?</code>, <code>pair?</code>, <code>symbol?</code>, <code>string?</code>, <code>number?</code>, <code>applicative?</code>, <code>operative?</code>, <code>environment?</code>, <code>vector?</code>, <code>type?</code> [applicatives] </h3>
+<div class="outline-text-3" id="text-13.4">
 
 
 <p>
@@ -1374,16 +1790,16 @@ Type predicates for built-in types.
 
 </div>
 
-<div id="outline-container-13" class="outline-2">
-<h2 id="sec-13">Records </h2>
-<div class="outline-text-2" id="text-13">
+<div id="outline-container-14" class="outline-2">
+<h2 id="sec-14">Records </h2>
+<div class="outline-text-2" id="text-14">
 
 
 </div>
 
-<div id="outline-container-13.1" class="outline-3">
-<h3 id="sec-13.1"><code>define-record-type &lt;name&gt; &lt;ctor&gt; &lt;pred&gt; . &lt;fields&gt; → type</code> [operative] </h3>
-<div class="outline-text-3" id="text-13.1">
+<div id="outline-container-14.1" class="outline-3">
+<h3 id="sec-14.1"><code>define-record-type &lt;name&gt; &lt;ctor&gt; &lt;pred&gt; . &lt;fields&gt; → type</code> [operative] </h3>
+<div class="outline-text-3" id="text-14.1">
 
 
 <p>
@@ -1415,9 +1831,9 @@ Each element of <code>fields</code> is of the form:
 
 </div>
 
-<div id="outline-container-13.1.1" class="outline-4">
-<h4 id="sec-13.1.1">Examples </h4>
-<div class="outline-text-4" id="text-13.1.1">
+<div id="outline-container-14.1.1" class="outline-4">
+<h4 id="sec-14.1.1">Examples </h4>
+<div class="outline-text-4" id="text-14.1.1">
 
 
 
@@ -1439,16 +1855,16 @@ Each element of <code>fields</code> is of the form:
 
 </div>
 
-<div id="outline-container-14" class="outline-2">
-<h2 id="sec-14">Generic Functions </h2>
-<div class="outline-text-2" id="text-14">
+<div id="outline-container-15" class="outline-2">
+<h2 id="sec-15">Generic Functions </h2>
+<div class="outline-text-2" id="text-15">
 
 
 </div>
 
-<div id="outline-container-14.1" class="outline-3">
-<h3 id="sec-14.1"><code>define-generic (&lt;name&gt; . &lt;args&gt;) . [&lt;body&gt;] → generic</code> [operative] </h3>
-<div class="outline-text-3" id="text-14.1">
+<div id="outline-container-15.1" class="outline-3">
+<h3 id="sec-15.1"><code>define-generic (&lt;name&gt; . &lt;args&gt;) . [&lt;body&gt;] → generic</code> [operative] </h3>
+<div class="outline-text-3" id="text-15.1">
 
 
 <p>
@@ -1460,9 +1876,9 @@ type-specific method is found.
 
 </div>
 
-<div id="outline-container-14.2" class="outline-3">
-<h3 id="sec-14.2"><code>define-method (&lt;name&gt; (&lt;self&gt; &lt;type&gt;) . &lt;args&gt;) . &lt;body&gt; → method</code> [operative] </h3>
-<div class="outline-text-3" id="text-14.2">
+<div id="outline-container-15.2" class="outline-3">
+<h3 id="sec-15.2"><code>define-method (&lt;name&gt; (&lt;self&gt; &lt;type&gt;) . &lt;args&gt;) . &lt;body&gt; → method</code> [operative] </h3>
+<div class="outline-text-3" id="text-15.2">
 
 
 <p>
@@ -1471,9 +1887,9 @@ Adds a method to a generic function.
 
 </div>
 
-<div id="outline-container-14.2.1" class="outline-4">
-<h4 id="sec-14.2.1">Examples </h4>
-<div class="outline-text-4" id="text-14.2.1">
+<div id="outline-container-15.2.1" class="outline-4">
+<h4 id="sec-15.2.1">Examples </h4>
+<div class="outline-text-4" id="text-15.2.1">
 
 
 
@@ -1497,16 +1913,16 @@ Adds a method to a generic function.
 
 </div>
 
-<div id="outline-container-15" class="outline-2">
-<h2 id="sec-15">Equality </h2>
-<div class="outline-text-2" id="text-15">
+<div id="outline-container-16" class="outline-2">
+<h2 id="sec-16">Equality </h2>
+<div class="outline-text-2" id="text-16">
 
 
 </div>
 
-<div id="outline-container-15.1" class="outline-3">
-<h3 id="sec-15.1"><code>= &lt;a&gt; &lt;b&gt; → boolean</code> [generic] </h3>
-<div class="outline-text-3" id="text-15.1">
+<div id="outline-container-16.1" class="outline-3">
+<h3 id="sec-16.1"><code>= &lt;a&gt; &lt;b&gt; → boolean</code> [generic] </h3>
+<div class="outline-text-3" id="text-16.1">
 
 
 <p>
@@ -1535,9 +1951,9 @@ Two strings are equal if they contain the same code points.
 
 </div>
 
-<div id="outline-container-15.2" class="outline-3">
-<h3 id="sec-15.2"><code>/= &lt;a&gt; &lt;b&gt; → boolean</code> [applicative] </h3>
-<div class="outline-text-3" id="text-15.2">
+<div id="outline-container-16.2" class="outline-3">
+<h3 id="sec-16.2"><code>/= &lt;a&gt; &lt;b&gt; → boolean</code> [applicative] </h3>
+<div class="outline-text-3" id="text-16.2">
 
 
 <p>
@@ -1547,9 +1963,9 @@ Inequality predicate, defined in terms of <code>=</code>.
 
 </div>
 
-<div id="outline-container-15.3" class="outline-3">
-<h3 id="sec-15.3"><code>eq? &lt;a&gt; &lt;b&gt; → boolean</code> [applicative] </h3>
-<div class="outline-text-3" id="text-15.3">
+<div id="outline-container-16.3" class="outline-3">
+<h3 id="sec-16.3"><code>eq? &lt;a&gt; &lt;b&gt; → boolean</code> [applicative] </h3>
+<div class="outline-text-3" id="text-16.3">
 
 
 <p>
@@ -1567,16 +1983,16 @@ used instead.
 
 </div>
 
-<div id="outline-container-16" class="outline-2">
-<h2 id="sec-16">Order </h2>
-<div class="outline-text-2" id="text-16">
+<div id="outline-container-17" class="outline-2">
+<h2 id="sec-17">Order </h2>
+<div class="outline-text-2" id="text-17">
 
 
 </div>
 
-<div id="outline-container-16.1" class="outline-3">
-<h3 id="sec-16.1"><code>&lt; &lt;a&gt; &lt;b&gt; → boolean</code> [generic] </h3>
-<div class="outline-text-3" id="text-16.1">
+<div id="outline-container-17.1" class="outline-3">
+<h3 id="sec-17.1"><code>&lt; &lt;a&gt; &lt;b&gt; → boolean</code> [generic] </h3>
+<div class="outline-text-3" id="text-17.1">
 
 
 <p>
@@ -1586,9 +2002,9 @@ Generic binary comparison function.  A method is defined for numbers.
 
 </div>
 
-<div id="outline-container-16.2" class="outline-3">
-<h3 id="sec-16.2"><code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code> [applicatives] </h3>
-<div class="outline-text-3" id="text-16.2">
+<div id="outline-container-17.2" class="outline-3">
+<h3 id="sec-17.2"><code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code> [applicatives] </h3>
+<div class="outline-text-3" id="text-17.2">
 
 
 <p>
@@ -1599,16 +2015,16 @@ Binary comparison functions defined in terms of <code>&lt;</code> and <code>=</c
 
 </div>
 
-<div id="outline-container-17" class="outline-2">
-<h2 id="sec-17">Hashing </h2>
-<div class="outline-text-2" id="text-17">
+<div id="outline-container-18" class="outline-2">
+<h2 id="sec-18">Hashing </h2>
+<div class="outline-text-2" id="text-18">
 
 
 </div>
 
-<div id="outline-container-17.1" class="outline-3">
-<h3 id="sec-17.1"><code>hash-code &lt;obj&gt; → number</code> [generic] </h3>
-<div class="outline-text-3" id="text-17.1">
+<div id="outline-container-18.1" class="outline-3">
+<h3 id="sec-18.1"><code>hash-code &lt;obj&gt; → number</code> [generic] </h3>
+<div class="outline-text-3" id="text-18.1">
 
 
 <p>
@@ -1625,9 +2041,9 @@ have different generic hash codes, they cannot be generically equal.
 
 </div>
 
-<div id="outline-container-17.2" class="outline-3">
-<h3 id="sec-17.2"><code>identity-hash-code &lt;obj&gt; → number</code> [applicative] </h3>
-<div class="outline-text-3" id="text-17.2">
+<div id="outline-container-18.2" class="outline-3">
+<h3 id="sec-18.2"><code>identity-hash-code &lt;obj&gt; → number</code> [applicative] </h3>
+<div class="outline-text-3" id="text-18.2">
 
 
 <p>
@@ -1640,16 +2056,16 @@ objects have the same identity hash code.
 
 </div>
 
-<div id="outline-container-18" class="outline-2">
-<h2 id="sec-18">Conversion </h2>
-<div class="outline-text-2" id="text-18">
+<div id="outline-container-19" class="outline-2">
+<h2 id="sec-19">Conversion </h2>
+<div class="outline-text-2" id="text-19">
 
 
 </div>
 
-<div id="outline-container-18.1" class="outline-3">
-<h3 id="sec-18.1"><code>-&gt;string &lt;obj&gt; → string</code> [generic] </h3>
-<div class="outline-text-3" id="text-18.1">
+<div id="outline-container-19.1" class="outline-3">
+<h3 id="sec-19.1"><code>-&gt;string &lt;obj&gt; → string</code> [generic] </h3>
+<div class="outline-text-3" id="text-19.1">
 
 
 <p>
@@ -1660,25 +2076,25 @@ Methods are defined for all built-in types.
 
 </div>
 
-<div id="outline-container-18.2" class="outline-3">
-<h3 id="sec-18.2"><code>string-&gt;symbol</code>, <code>symbol-&gt;string</code>, <code>string-&gt;number</code>, <code>number-&gt;string</code> [applicatives] </h3>
-<div class="outline-text-3" id="text-18.2">
+<div id="outline-container-19.2" class="outline-3">
+<h3 id="sec-19.2"><code>string-&gt;symbol</code>, <code>symbol-&gt;string</code>, <code>string-&gt;number</code>, <code>number-&gt;string</code> [applicatives] </h3>
+<div class="outline-text-3" id="text-19.2">
 
 </div>
 </div>
 
 </div>
 
-<div id="outline-container-19" class="outline-2">
-<h2 id="sec-19">Booleans </h2>
-<div class="outline-text-2" id="text-19">
+<div id="outline-container-20" class="outline-2">
+<h2 id="sec-20">Booleans </h2>
+<div class="outline-text-2" id="text-20">
 
 
 </div>
 
-<div id="outline-container-19.1" class="outline-3">
-<h3 id="sec-19.1"><code>and</code>, <code>or</code> [operatives] </h3>
-<div class="outline-text-3" id="text-19.1">
+<div id="outline-container-20.1" class="outline-3">
+<h3 id="sec-20.1"><code>and</code>, <code>or</code> [operatives] </h3>
+<div class="outline-text-3" id="text-20.1">
 
 
 <p>
@@ -1688,9 +2104,9 @@ Short-circuiting binary logical connectives.
 
 </div>
 
-<div id="outline-container-19.2" class="outline-3">
-<h3 id="sec-19.2"><code>not</code> [applicative] </h3>
-<div class="outline-text-3" id="text-19.2">
+<div id="outline-container-20.2" class="outline-3">
+<h3 id="sec-20.2"><code>not</code> [applicative] </h3>
+<div class="outline-text-3" id="text-20.2">
 
 
 <p>
@@ -1701,16 +2117,17 @@ Unary logical connective.
 
 </div>
 
-<div id="outline-container-20" class="outline-2">
-<h2 id="sec-20">Numbers </h2>
-<div class="outline-text-2" id="text-20">
+<div id="outline-container-21" class="outline-2">
+<h2 id="sec-21">Numbers </h2>
+<div class="outline-text-2" id="text-21">
+
 
 
 </div>
 
-<div id="outline-container-20.1" class="outline-3">
-<h3 id="sec-20.1"><code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>%</code> [applicatives] </h3>
-<div class="outline-text-3" id="text-20.1">
+<div id="outline-container-21.1" class="outline-3">
+<h3 id="sec-21.1"><code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>%</code> [applicatives] </h3>
+<div class="outline-text-3" id="text-21.1">
 
 
 <p>
@@ -1722,17 +2139,17 @@ division, and modulo.
 
 </div>
 
-<div id="outline-container-21" class="outline-2">
-<h2 id="sec-21">Pairs and Lists </h2>
-<div class="outline-text-2" id="text-21">
+<div id="outline-container-22" class="outline-2">
+<h2 id="sec-22">Pairs and Lists </h2>
+<div class="outline-text-2" id="text-22">
 
 
 
 </div>
 
-<div id="outline-container-21.1" class="outline-3">
-<h3 id="sec-21.1"><code>cons &lt;car&gt; &lt;cdr&gt; → cons</code> [applicative] </h3>
-<div class="outline-text-3" id="text-21.1">
+<div id="outline-container-22.1" class="outline-3">
+<h3 id="sec-22.1"><code>cons &lt;car&gt; &lt;cdr&gt; → cons</code> [applicative] </h3>
+<div class="outline-text-3" id="text-22.1">
 
 
 <p>
@@ -1742,9 +2159,9 @@ Creates a new cons with the given car and cdr.
 
 </div>
 
-<div id="outline-container-21.2" class="outline-3">
-<h3 id="sec-21.2"><code>car &lt;pair&gt; → value</code> [applicative] </h3>
-<div class="outline-text-3" id="text-21.2">
+<div id="outline-container-22.2" class="outline-3">
+<h3 id="sec-22.2"><code>car &lt;pair&gt; → value</code> [applicative] </h3>
+<div class="outline-text-3" id="text-22.2">
 
 
 <p>
@@ -1754,9 +2171,9 @@ Contents of the Address part of Register.
 
 </div>
 
-<div id="outline-container-21.3" class="outline-3">
-<h3 id="sec-21.3"><code>cdr &lt;pair&gt; → value</code> [applicative] </h3>
-<div class="outline-text-3" id="text-21.3">
+<div id="outline-container-22.3" class="outline-3">
+<h3 id="sec-22.3"><code>cdr &lt;pair&gt; → value</code> [applicative] </h3>
+<div class="outline-text-3" id="text-22.3">
 
 
 <p>
@@ -1766,9 +2183,9 @@ Contents of the Decrement part of Register.
 
 </div>
 
-<div id="outline-container-21.4" class="outline-3">
-<h3 id="sec-21.4"><code>caar</code>, <code>cadr</code>, <code>cdar</code>, <code>cddr</code> [applicatives] </h3>
-<div class="outline-text-3" id="text-21.4">
+<div id="outline-container-22.4" class="outline-3">
+<h3 id="sec-22.4"><code>caar</code>, <code>cadr</code>, <code>cdar</code>, <code>cddr</code> [applicatives] </h3>
+<div class="outline-text-3" id="text-22.4">
 
 
 <p>
@@ -1778,9 +2195,9 @@ Combinations of <code>car</code> and <code>cdr</code>, e.g. <code>(cadr x)</code
 
 </div>
 
-<div id="outline-container-21.5" class="outline-3">
-<h3 id="sec-21.5"><code>list . &lt;vals&gt; → list</code> [applicative] </h3>
-<div class="outline-text-3" id="text-21.5">
+<div id="outline-container-22.5" class="outline-3">
+<h3 id="sec-22.5"><code>list . &lt;vals&gt; → list</code> [applicative] </h3>
+<div class="outline-text-3" id="text-22.5">
 
 
 <p>
@@ -1790,9 +2207,9 @@ Constructs a nil-terminated list containing the values.
 
 </div>
 
-<div id="outline-container-21.6" class="outline-3">
-<h3 id="sec-21.6"><code>list* . &lt;vals&gt; → list</code> [applicative] </h3>
-<div class="outline-text-3" id="text-21.6">
+<div id="outline-container-22.6" class="outline-3">
+<h3 id="sec-22.6"><code>list* . &lt;vals&gt; → list</code> [applicative] </h3>
+<div class="outline-text-3" id="text-22.6">
 
 
 <p>
@@ -1803,16 +2220,16 @@ Constructs a list of the values, terminated by the last value.
 
 </div>
 
-<div id="outline-container-22" class="outline-2">
-<h2 id="sec-22">Vectors </h2>
-<div class="outline-text-2" id="text-22">
+<div id="outline-container-23" class="outline-2">
+<h2 id="sec-23">Vectors </h2>
+<div class="outline-text-2" id="text-23">
 
 
 </div>
 
-<div id="outline-container-22.1" class="outline-3">
-<h3 id="sec-22.1"><code>vector . &lt;elements&gt; → vector</code> [applicative] </h3>
-<div class="outline-text-3" id="text-22.1">
+<div id="outline-container-23.1" class="outline-3">
+<h3 id="sec-23.1"><code>vector . &lt;elements&gt; → vector</code> [applicative] </h3>
+<div class="outline-text-3" id="text-23.1">
 
 
 <p>
@@ -1822,9 +2239,9 @@ Creates a new vector with the given elements.
 
 </div>
 
-<div id="outline-container-22.2" class="outline-3">
-<h3 id="sec-22.2"><code>vector-ref &lt;vector&gt; &lt;index&gt; → element</code> [applicative] </h3>
-<div class="outline-text-3" id="text-22.2">
+<div id="outline-container-23.2" class="outline-3">
+<h3 id="sec-23.2"><code>vector-ref &lt;vector&gt; &lt;index&gt; → element</code> [applicative] </h3>
+<div class="outline-text-3" id="text-23.2">
 
 
 <p>
@@ -1834,9 +2251,9 @@ Returns the vector's element at the given index.
 
 </div>
 
-<div id="outline-container-22.3" class="outline-3">
-<h3 id="sec-22.3"><code>vector-set! &lt;vector&gt; &lt;index&gt; &lt;element&gt; → element</code> [applicative] </h3>
-<div class="outline-text-3" id="text-22.3">
+<div id="outline-container-23.3" class="outline-3">
+<h3 id="sec-23.3"><code>vector-set! &lt;vector&gt; &lt;index&gt; &lt;element&gt; → element</code> [applicative] </h3>
+<div class="outline-text-3" id="text-23.3">
 
 
 <p>
@@ -1846,9 +2263,9 @@ Updates the vector's element at the given index and returns it.
 
 </div>
 
-<div id="outline-container-22.4" class="outline-3">
-<h3 id="sec-22.4"><code>vector-length &lt;vector&gt; → number</code> [applicative] </h3>
-<div class="outline-text-3" id="text-22.4">
+<div id="outline-container-23.4" class="outline-3">
+<h3 id="sec-23.4"><code>vector-length &lt;vector&gt; → number</code> [applicative] </h3>
+<div class="outline-text-3" id="text-23.4">
 
 
 <p>
@@ -1859,16 +2276,16 @@ Returns the number of elements in the vector.
 
 </div>
 
-<div id="outline-container-23" class="outline-2">
-<h2 id="sec-23">Hashtables </h2>
-<div class="outline-text-2" id="text-23">
+<div id="outline-container-24" class="outline-2">
+<h2 id="sec-24">Hashtables </h2>
+<div class="outline-text-2" id="text-24">
 
 
 </div>
 
-<div id="outline-container-23.1" class="outline-3">
-<h3 id="sec-23.1"><code>Hashtable</code> [variable], <code>hashtable?</code> [applicative] <i>NIY</i> </h3>
-<div class="outline-text-3" id="text-23.1">
+<div id="outline-container-24.1" class="outline-3">
+<h3 id="sec-24.1"><code>Hashtable</code> [variable], <code>hashtable?</code> [applicative] <i>NIY</i> </h3>
+<div class="outline-text-3" id="text-24.1">
 
 
 <p>
@@ -1878,9 +2295,9 @@ Hashtable type and type predicate.
 
 </div>
 
-<div id="outline-container-23.2" class="outline-3">
-<h3 id="sec-23.2"><code>make-hashtable &lt;hashfn&gt; &lt;eqfn&gt; → hashtable</code> [applicative] <i>NIY</i> </h3>
-<div class="outline-text-3" id="text-23.2">
+<div id="outline-container-24.2" class="outline-3">
+<h3 id="sec-24.2"><code>make-hashtable &lt;hashfn&gt; &lt;eqfn&gt; → hashtable</code> [applicative] <i>NIY</i> </h3>
+<div class="outline-text-3" id="text-24.2">
 
 
 <p>
@@ -1890,9 +2307,9 @@ Creates a new hashtable with the given hash function and equality function.
 
 </div>
 
-<div id="outline-container-23.3" class="outline-3">
-<h3 id="sec-23.3"><code>make-identity-hashtable → hashtable</code> [applicative] </h3>
-<div class="outline-text-3" id="text-23.3">
+<div id="outline-container-24.3" class="outline-3">
+<h3 id="sec-24.3"><code>make-identity-hashtable → hashtable</code> [applicative] </h3>
+<div class="outline-text-3" id="text-24.3">
 
 
 <p>
@@ -1903,9 +2320,9 @@ equality function.
 
 </div>
 
-<div id="outline-container-23.4" class="outline-3">
-<h3 id="sec-23.4"><code>make-generic-hashtable → hashtable</code> [applicative] <i>NIY</i> </h3>
-<div class="outline-text-3" id="text-23.4">
+<div id="outline-container-24.4" class="outline-3">
+<h3 id="sec-24.4"><code>make-generic-hashtable → hashtable</code> [applicative] <i>NIY</i> </h3>
+<div class="outline-text-3" id="text-24.4">
 
 
 <p>
@@ -1916,9 +2333,9 @@ Creates a new hashtable with <code>hash-code</code> as hash function and
 
 </div>
 
-<div id="outline-container-23.5" class="outline-3">
-<h3 id="sec-23.5"><code>hashtable-put! &lt;hashtable&gt; &lt;key&gt; &lt;val&gt; → val</code> [applicative] </h3>
-<div class="outline-text-3" id="text-23.5">
+<div id="outline-container-24.5" class="outline-3">
+<h3 id="sec-24.5"><code>hashtable-put! &lt;hashtable&gt; &lt;key&gt; &lt;val&gt; → val</code> [applicative] </h3>
+<div class="outline-text-3" id="text-24.5">
 
 
 <p>
@@ -1928,9 +2345,9 @@ Associates key with value in hashtable.
 
 </div>
 
-<div id="outline-container-23.6" class="outline-3">
-<h3 id="sec-23.6"><code>hashtable-get &lt;hashtable&gt; &lt;key&gt; &lt;default&gt; → val</code> [applicative] </h3>
-<div class="outline-text-3" id="text-23.6">
+<div id="outline-container-24.6" class="outline-3">
+<h3 id="sec-24.6"><code>hashtable-get &lt;hashtable&gt; &lt;key&gt; &lt;default&gt; → val</code> [applicative] </h3>
+<div class="outline-text-3" id="text-24.6">
 
 
 <p>
@@ -1942,16 +2359,16 @@ found.
 
 </div>
 
-<div id="outline-container-24" class="outline-2">
-<h2 id="sec-24">System </h2>
-<div class="outline-text-2" id="text-24">
+<div id="outline-container-25" class="outline-2">
+<h2 id="sec-25">System </h2>
+<div class="outline-text-2" id="text-25">
 
 
 </div>
 
-<div id="outline-container-24.1" class="outline-3">
-<h3 id="sec-24.1"><code>read → form</code> [applicative] </h3>
-<div class="outline-text-3" id="text-24.1">
+<div id="outline-container-25.1" class="outline-3">
+<h3 id="sec-25.1"><code>read → form</code> [applicative] </h3>
+<div class="outline-text-3" id="text-25.1">
 
 
 <p>
@@ -1961,9 +2378,9 @@ Reads a form from the console and returns it.
 
 </div>
 
-<div id="outline-container-24.2" class="outline-3">
-<h3 id="sec-24.2"><code>display &lt;msg&gt; → msg</code> [applicative] </h3>
-<div class="outline-text-3" id="text-24.2">
+<div id="outline-container-25.2" class="outline-3">
+<h3 id="sec-25.2"><code>display &lt;msg&gt; → msg</code> [applicative] </h3>
+<div class="outline-text-3" id="text-25.2">
 
 
 <p>
@@ -1973,9 +2390,9 @@ Prints a message string to the console and returns it.
 
 </div>
 
-<div id="outline-container-24.3" class="outline-3">
-<h3 id="sec-24.3"><code>fail &lt;reason&gt; → |</code> [applicative] </h3>
-<div class="outline-text-3" id="text-24.3">
+<div id="outline-container-25.3" class="outline-3">
+<h3 id="sec-25.3"><code>fail &lt;reason&gt; → |</code> [applicative] </h3>
+<div class="outline-text-3" id="text-25.3">
 
 
 <p>
@@ -1986,9 +2403,9 @@ Halts evaluation with an object describing the reason (typically an error).
 
 </div>
 
-<div id="outline-container-25" class="outline-2">
-<h2 id="sec-25">JavaScript Bridge </h2>
-<div class="outline-text-2" id="text-25">
+<div id="outline-container-26" class="outline-2">
+<h2 id="sec-26">JavaScript Bridge </h2>
+<div class="outline-text-2" id="text-26">
 
 
 <p>
@@ -2002,9 +2419,9 @@ functionality, such as identity hash codes.
 
 </div>
 
-<div id="outline-container-25.1" class="outline-3">
-<h3 id="sec-25.1"><code>js-global &lt;string&gt; → result</code> [applicative] </h3>
-<div class="outline-text-3" id="text-25.1">
+<div id="outline-container-26.1" class="outline-3">
+<h3 id="sec-26.1"><code>js-global &lt;string&gt; → result</code> [applicative] </h3>
+<div class="outline-text-3" id="text-26.1">
 
 
 <p>
@@ -2014,9 +2431,9 @@ Returns value of JavaScript global variable with given name.
 
 </div>
 
-<div id="outline-container-25.2" class="outline-3">
-<h3 id="sec-25.2"><code>js-set-global! &lt;string&gt; &lt;val&gt; → val</code> [applicative] </h3>
-<div class="outline-text-3" id="text-25.2">
+<div id="outline-container-26.2" class="outline-3">
+<h3 id="sec-26.2"><code>js-set-global! &lt;string&gt; &lt;val&gt; → val</code> [applicative] </h3>
+<div class="outline-text-3" id="text-26.2">
 
 
 <p>
@@ -2026,9 +2443,9 @@ Updates value of JavaScript global variable with given name and returns it.
 
 </div>
 
-<div id="outline-container-25.3" class="outline-3">
-<h3 id="sec-25.3"><code>js-prop &lt;object&gt; &lt;string&gt; → result</code> [applicative] </h3>
-<div class="outline-text-3" id="text-25.3">
+<div id="outline-container-26.3" class="outline-3">
+<h3 id="sec-26.3"><code>js-prop &lt;object&gt; &lt;string&gt; → result</code> [applicative] </h3>
+<div class="outline-text-3" id="text-26.3">
 
 
 <p>
@@ -2038,9 +2455,9 @@ Returns value of JavaScript member variable with given name of object.
 
 </div>
 
-<div id="outline-container-25.4" class="outline-3">
-<h3 id="sec-25.4"><code>js-set-prop! &lt;object&gt; &lt;string&gt; &lt;val&gt; → val</code> [applicative] </h3>
-<div class="outline-text-3" id="text-25.4">
+<div id="outline-container-26.4" class="outline-3">
+<h3 id="sec-26.4"><code>js-set-prop! &lt;object&gt; &lt;string&gt; &lt;val&gt; → val</code> [applicative] </h3>
+<div class="outline-text-3" id="text-26.4">
 
 
 <p>
@@ -2051,9 +2468,9 @@ and returns it.
 
 </div>
 
-<div id="outline-container-25.5" class="outline-3">
-<h3 id="sec-25.5"><code>js-function &lt;jsfun&gt; → applicative</code> [applicative] </h3>
-<div class="outline-text-3" id="text-25.5">
+<div id="outline-container-26.5" class="outline-3">
+<h3 id="sec-26.5"><code>js-function &lt;jsfun&gt; → applicative</code> [applicative] </h3>
+<div class="outline-text-3" id="text-26.5">
 
 
 <p>
@@ -2064,9 +2481,9 @@ function with the arguments it received.
 
 </div>
 
-<div id="outline-container-25.6" class="outline-3">
-<h3 id="sec-25.6"><code>js-method &lt;string&gt; → cmb</code> [applicative] </h3>
-<div class="outline-text-3" id="text-25.6">
+<div id="outline-container-26.6" class="outline-3">
+<h3 id="sec-26.6"><code>js-method &lt;string&gt; → cmb</code> [applicative] </h3>
+<div class="outline-text-3" id="text-26.6">
 
 
 <p>
@@ -2078,9 +2495,9 @@ object with the given arguments.
 
 </div>
 
-<div id="outline-container-25.7" class="outline-3">
-<h3 id="sec-25.7"><code>to-js &lt;obj&gt; → jsobj</code> [applicative] </h3>
-<div class="outline-text-3" id="text-25.7">
+<div id="outline-container-26.7" class="outline-3">
+<h3 id="sec-26.7"><code>to-js &lt;obj&gt; → jsobj</code> [applicative] </h3>
+<div class="outline-text-3" id="text-26.7">
 
 
 <p>
@@ -2091,9 +2508,9 @@ JavaScript object.
 
 </div>
 
-<div id="outline-container-25.8" class="outline-3">
-<h3 id="sec-25.8"><code>from-js &lt;js-obj&gt; → obj</code> [applicative] </h3>
-<div class="outline-text-3" id="text-25.8">
+<div id="outline-container-26.8" class="outline-3">
+<h3 id="sec-26.8"><code>from-js &lt;js-obj&gt; → obj</code> [applicative] </h3>
+<div class="outline-text-3" id="text-26.8">
 
 
 <p>
@@ -2104,9 +2521,9 @@ Wat object.
 
 </div>
 
-<div id="outline-container-25.9" class="outline-3">
-<h3 id="sec-25.9"><code>js-callback &lt;cmb&gt; → jsfun</code> [applicative] </h3>
-<div class="outline-text-3" id="text-25.9">
+<div id="outline-container-26.9" class="outline-3">
+<h3 id="sec-26.9"><code>js-callback &lt;cmb&gt; → jsfun</code> [applicative] </h3>
+<div class="outline-text-3" id="text-26.9">
 
 
 <p>
@@ -2117,9 +2534,9 @@ combiner with the arguments the callback received.
 
 </div>
 
-<div id="outline-container-25.10" class="outline-3">
-<h3 id="sec-25.10"><code>define-js-method &lt;name&gt;</code> [operative] </h3>
-<div class="outline-text-3" id="text-25.10">
+<div id="outline-container-26.10" class="outline-3">
+<h3 id="sec-26.10"><code>define-js-method &lt;name&gt;</code> [operative] </h3>
+<div class="outline-text-3" id="text-26.10">
 
 <p><code>(define-js-method &lt;name&gt;)</code> is equivalent to <code>(define &lt;name&gt; (js-method (symbol-&gt;string &lt;name&gt;)))</code>.
 </p></div>
@@ -2127,17 +2544,17 @@ combiner with the arguments the callback received.
 
 </div>
 
-<div id="outline-container-26" class="outline-2">
-<h2 id="sec-26">Debugging Interface </h2>
-<div class="outline-text-2" id="text-26">
+<div id="outline-container-27" class="outline-2">
+<h2 id="sec-27">Debugging Interface </h2>
+<div class="outline-text-2" id="text-27">
 
 
 
 </div>
 
-<div id="outline-container-26.1" class="outline-3">
-<h3 id="sec-26.1"><code>stacktrace → list</code> [applicative] <i>NIY</i> </h3>
-<div class="outline-text-3" id="text-26.1">
+<div id="outline-container-27.1" class="outline-3">
+<h3 id="sec-27.1"><code>stacktrace → list</code> [applicative] <i>NIY</i> </h3>
+<div class="outline-text-3" id="text-27.1">
 
 
 <p>
@@ -2147,9 +2564,9 @@ Returns a list of recent stack frames.
 
 </div>
 
-<div id="outline-container-26.2" class="outline-3">
-<h3 id="sec-26.2"><code>label &lt;obj&gt; → string</code> [applicative] </h3>
-<div class="outline-text-3" id="text-26.2">
+<div id="outline-container-27.2" class="outline-3">
+<h3 id="sec-27.2"><code>label &lt;obj&gt; → string</code> [applicative] </h3>
+<div class="outline-text-3" id="text-27.2">
 
 
 <p>
@@ -2159,9 +2576,9 @@ Returns the descriptive label of an object.
 
 </div>
 
-<div id="outline-container-26.3" class="outline-3">
-<h3 id="sec-26.3"><code>set-label! &lt;obj&gt; &lt;string&gt; → string</code> [applicative] </h3>
-<div class="outline-text-3" id="text-26.3">
+<div id="outline-container-27.3" class="outline-3">
+<h3 id="sec-27.3"><code>set-label! &lt;obj&gt; &lt;string&gt; → string</code> [applicative] </h3>
+<div class="outline-text-3" id="text-27.3">
 
 
 <p>
@@ -2171,9 +2588,9 @@ Updates the descriptive label of an object.
 
 </div>
 
-<div id="outline-container-26.4" class="outline-3">
-<h3 id="sec-26.4"><code>trap &lt;exc&gt; → |</code> [applicative] <i>NIY</i> </h3>
-<div class="outline-text-3" id="text-26.4">
+<div id="outline-container-27.4" class="outline-3">
+<h3 id="sec-27.4"><code>trap &lt;exc&gt; → |</code> [applicative] <i>NIY</i> </h3>
+<div class="outline-text-3" id="text-27.4">
 
 
 <p>
@@ -2191,7 +2608,7 @@ broken and must not be resumed.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-25 14:28:23 CEST</p>
+<p class="date"> Date: 2012-08-25 21:27:25 CEST</p>
 </div>
 </div>
 </body>

@@ -146,17 +146,24 @@ in the current environment, and returns it.
 
 #+BEGIN_EXAMPLE
 (def x 1)
-x → 1
+(assert (= x 1))
+
 (def x 2)
-x → 2
+(assert (= x 2))
+
 (def (a b c) (list 1 (list 2) 3))
-a → 1
-b → (2)
-c → 3
+(assert (= a 1))
+(assert (= b '(2)))
+(assert (= c 3))
+
 (def (a (b) c) (list 1 (list 2) 3))
-a → 1
-b → 2
-c → 3
+(assert (= a 1))
+(assert (= b 2))
+(assert (= c 3))
+
+(def (a . rest) (list 1 (list 2) 3))
+(assert (= a 1))
+(assert (= rest '((2) 3)))
 #+END_EXAMPLE
 
 ** =define <lhs> <rhs> → result= [operative]
@@ -191,7 +198,7 @@ Defines a new macro with the given name, parameter tree, and body.
   (cons (list* lambda (map car bindings) body)
         (map cadr bindings)))
 (my-let ((x 1) (y 2))
-  (+ x y)) → 3
+  (+ x y))
 #+END_EXAMPLE
 
 ** =set! <env> <lhs> <rhs> → rhs= [operative]
@@ -216,9 +223,9 @@ names to the outer scope.
   (def bar 2)
   (def quux 3)
 )
-foo → 1
-bar → 2
-quux → error: unbound variable
+;foo → 1
+;bar → 2
+;quux → error: unbound variable
 #+END_EXAMPLE
 
 * Evaluation and Environments
@@ -649,11 +656,9 @@ Wat object.
 Returns a JS function that, when called, will apply the provided
 combiner with the arguments the callback received.
 
-=js-callback= is intended for use with JS asynchronous functions such
-as =setTimeout= and event handlers.  It is assumed that when the
-callback is called, the current fiber has returned.  The combiner is
-therefore applied in a fresh fiber.
- 
+** =define-js-method <name>= [operative]
+=(define-js-method <name>)= is equivalent to =(define <name>
+(js-method (symbol->string <name>)))=.
 * Debugging Interface
 
 ** =stacktrace → list= [applicative] /NIY/

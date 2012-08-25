@@ -270,6 +270,8 @@
   (define-builtin-= Number num=)
   (define-builtin-= String str=)
   (define-builtin-= Symbol (lambda (a b) (= (symbol->string a) (symbol->string b))))
+  (define-method (= (a Nil) b) (null? b))
+  (define-method (= (a Pair) b) (and (pair? b) (and (= (car a) (car b)) (= (cdr a) (cdr b)))))
   (define (/= a b) (not (= a b)))
 )
 
@@ -286,7 +288,7 @@
 )
 
 (provide (->string)
-  (define-generic (->string obj) (strcat "#[" (label obj) "]"))
+  (define-generic (->string obj) (strcat "#{" (label obj) "}"))
   (define-method (->string (obj Void)) "#void")
   (define-method (->string (obj Ign)) "#ign")
   (define-method (->string (obj Boolean)) (if obj "#t" "#f"))
@@ -334,3 +336,6 @@
     (eval (list shift* p (list* lambda (list sk) es)) env))
 )
 
+(define-syntax (define-js-method name) env
+  (define method (js-method (symbol->string name)))
+  (eval (list def name (lambda args (from-js (apply method (map to-js args))))) env))

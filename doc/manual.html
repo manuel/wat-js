@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-25 04:16:24 CEST"/>
+<meta name="generated" content="2012-08-25 14:28:23 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -569,6 +569,38 @@ returning the applicative.
 
 </li>
 </ul>
+
+</div>
+
+<div id="outline-container-6.2.1" class="outline-4">
+<h4 id="sec-6.2.1">Examples </h4>
+<div class="outline-text-4" id="text-6.2.1">
+
+
+
+
+
+<pre class="example">(define foo 1)
+(assert (= foo 1))
+
+(define foo 2)
+(assert (= foo 2))
+
+(define (bar) 12)
+(assert (= (bar) 12))
+
+(define (bar x y) (+ x y))
+(assert (= (bar 1 2) 3))
+
+(define (times number . rest)
+  (map (lambda (x) (* number x)) rest))
+(assert (= (times 3 1 2 3 4) '(3 6 9 12)))
+</pre>
+
+
+
+
+</div>
 </div>
 
 </div>
@@ -594,6 +626,30 @@ parameter, and body expressions, returning the operative.
 
 </li>
 </ul>
+
+</div>
+
+<div id="outline-container-6.3.1" class="outline-4">
+<h4 id="sec-6.3.1">Examples </h4>
+<div class="outline-text-4" id="text-6.3.1">
+
+
+
+
+
+<pre class="example">(define-syntax my-quote (vau (x) #ign x))
+(assert (= (my-quote foo) 'foo))
+
+(define-syntax (my-when test . exprs) env
+  (if (eval test env) (eval (list* begin exprs) env) #void))
+(assert (= (my-when #t 1 2 3) 3))
+(assert (= (my-when #f 1 2 3) #void))
+</pre>
+
+
+
+
+</div>
 </div>
 
 </div>
@@ -620,8 +676,13 @@ Defines a new macro with the given name, parameter tree, and body.
 <pre class="example">(define-macro (my-let bindings . body)
   (cons (list* lambda (map car bindings) body)
         (map cadr bindings)))
-(my-let ((x 1) (y 2))
-  (+ x y))
+(assert (= 3 (my-let ((x 1) (y 2))
+               (+ x y))))
+
+(define-macro (my-when test . exprs)
+  (list if test (list* begin exprs) #void))
+(assert (= (my-when #t 1 2 3) 3))
+(assert (= (my-when #f 1 2 3) #void))
 </pre>
 
 
@@ -641,6 +702,34 @@ Defines a new macro with the given name, parameter tree, and body.
 Updates the left-hand side bindings by matching it against the
 right-hand side in the given environment.
 </p>
+
+</div>
+
+<div id="outline-container-6.5.1" class="outline-4">
+<h4 id="sec-6.5.1">Examples </h4>
+<div class="outline-text-4" id="text-6.5.1">
+
+
+
+
+
+<pre class="example">(define x 1)
+(define x 2)
+
+(set! (current-environment) x 3)
+(set! (current-environment) y 4)
+(assert (= x 3))
+(assert (= y 4))
+
+(set! (current-environment) (x y) (list y x))
+(assert (= x 4))
+(assert (= y 3))
+</pre>
+
+
+
+
+</div>
 </div>
 
 </div>
@@ -653,6 +742,26 @@ right-hand side in the given environment.
 <p>
 Returns true if a symbol is bound in the environment, false otherwise.
 </p>
+
+</div>
+
+<div id="outline-container-6.6.1" class="outline-4">
+<h4 id="sec-6.6.1">Examples </h4>
+<div class="outline-text-4" id="text-6.6.1">
+
+
+
+
+
+<pre class="example">(define x 1)
+(assert (defined? 'x (current-environment)))
+(assert (not (defined? 'y (current-environment))))
+</pre>
+
+
+
+
+</div>
 </div>
 
 </div>
@@ -678,13 +787,13 @@ names to the outer scope.
 
 
 <pre class="example">(provide (foo bar)
-  (def foo 1)
-  (def bar 2)
-  (def quux 3)
+  (define foo 1)
+  (define bar 2)
+  (define quux 3)
 )
-;foo → 1
-;bar → 2
-;quux → error: unbound variable
+(assert (= 1 foo))
+(assert (= 2 bar))
+(assert (not (defined? 'quux (current-environment))))
 </pre>
 
 
@@ -711,6 +820,33 @@ names to the outer scope.
 <p>
 Creates a new empty environment with the given optional parent.
 </p>
+
+</div>
+
+<div id="outline-container-7.1.1" class="outline-4">
+<h4 id="sec-7.1.1">Examples </h4>
+<div class="outline-text-4" id="text-7.1.1">
+
+
+
+
+
+<pre class="example">(define e (make-environment))
+(eval (list define 'x 1) e)
+(assert (= 1 (eval 'x e)))
+
+(define f (make-environment e))
+(assert (= 1 (eval 'x f)))
+
+(eval (list define 'x 2) f)
+(assert (= 1 (eval 'x e)))
+(assert (= 2 (eval 'x f)))
+</pre>
+
+
+
+
+</div>
 </div>
 
 </div>
@@ -723,6 +859,30 @@ Creates a new empty environment with the given optional parent.
 <p>
 Returns the current environment.
 </p>
+
+</div>
+
+<div id="outline-container-7.2.1" class="outline-4">
+<h4 id="sec-7.2.1">Examples </h4>
+<div class="outline-text-4" id="text-7.2.1">
+
+
+
+
+
+<pre class="example">(define x 1)
+(assert (=  1 (eval 'x (current-environment))))
+
+(define (foo)
+  (let ((y 2))
+    (current-environment)))
+(assert (= 2 (eval 'y (foo))))
+</pre>
+
+
+
+
+</div>
 </div>
 
 </div>
@@ -735,6 +895,24 @@ Returns the current environment.
 <p>
 Evaluates the expression in the given environment.
 </p>
+
+</div>
+
+<div id="outline-container-7.3.1" class="outline-4">
+<h4 id="sec-7.3.1">Examples </h4>
+<div class="outline-text-4" id="text-7.3.1">
+
+
+
+
+
+<pre class="example">(assert (= 4 (eval (list + 2 2) (current-environment))))
+</pre>
+
+
+
+
+</div>
 </div>
 
 </div>
@@ -747,6 +925,24 @@ Evaluates the expression in the given environment.
 <p>
 Returns form unevaluated.
 </p>
+
+</div>
+
+<div id="outline-container-7.4.1" class="outline-4">
+<h4 id="sec-7.4.1">Examples </h4>
+<div class="outline-text-4" id="text-7.4.1">
+
+
+
+
+
+<pre class="example">(assert (= '+ (car (quote (+ 2 2)))))
+</pre>
+
+
+
+
+</div>
 </div>
 </div>
 
@@ -1022,6 +1218,32 @@ Aborts up to and including the prompt, and performs the forms with
 Prepends the delimited continuation to the current continuation, and
 performs forms in the new continuation.
 </p>
+
+</div>
+
+<div id="outline-container-10.4.1" class="outline-4">
+<h4 id="sec-10.4.1">Examples </h4>
+<div class="outline-text-4" id="text-10.4.1">
+
+
+
+
+
+<pre class="example">(assert
+  (= (let ((p (make-prompt)))
+       (+ 2 (push-prompt p
+              (if (take-subcont p k
+                    (+ (push-subcont k #f)
+                       (push-subcont k #t)))
+                  3
+                  4))))
+     9))
+</pre>
+
+
+
+
+</div>
 </div>
 </div>
 
@@ -1969,7 +2191,7 @@ broken and must not be resumed.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-25 04:16:24 CEST</p>
+<p class="date"> Date: 2012-08-25 14:28:23 CEST</p>
 </div>
 </div>
 </body>

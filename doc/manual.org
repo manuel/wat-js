@@ -176,6 +176,26 @@ Scheme-like =define= with two cases:
    applicative with the given parameters and body expressions,
    returning the applicative.
 
+*** Examples
+
+#+BEGIN_EXAMPLE
+(define foo 1)
+(assert (= foo 1))
+
+(define foo 2)
+(assert (= foo 2))
+
+(define (bar) 12)
+(assert (= (bar) 12))
+
+(define (bar x y) (+ x y))
+(assert (= (bar 1 2) 3))
+
+(define (times number . rest)
+  (map (lambda (x) (* number x)) rest))
+(assert (= (times 3 1 2 3 4) '(3 6 9 12)))
+#+END_EXAMPLE
+
 ** =define-syntax <lhs> <rhs> → result= [operative]
 
 Scheme-like =define-syntax= with two cases:
@@ -187,6 +207,18 @@ Scheme-like =define-syntax= with two cases:
    name to an operative with the given parameters, environment
    parameter, and body expressions, returning the operative.
 
+*** Examples
+
+#+BEGIN_EXAMPLE
+(define-syntax my-quote (vau (x) #ign x))
+(assert (= (my-quote foo) 'foo))
+
+(define-syntax (my-when test . exprs) env
+  (if (eval test env) (eval (list* begin exprs) env) #void))
+(assert (= (my-when #t 1 2 3) 3))
+(assert (= (my-when #f 1 2 3) #void))
+#+END_EXAMPLE
+
 ** =define-macro (<name> . <ptree>) . <body>= [operative]
 
 Defines a new macro with the given name, parameter tree, and body.
@@ -197,8 +229,13 @@ Defines a new macro with the given name, parameter tree, and body.
 (define-macro (my-let bindings . body)
   (cons (list* lambda (map car bindings) body)
         (map cadr bindings)))
-(my-let ((x 1) (y 2))
-  (+ x y))
+(assert (= 3 (my-let ((x 1) (y 2))
+               (+ x y))))
+
+(define-macro (my-when test . exprs)
+  (list if test (list* begin exprs) #void))
+(assert (= (my-when #t 1 2 3) 3))
+(assert (= (my-when #f 1 2 3) #void))
 #+END_EXAMPLE
 
 ** =set! <env> <lhs> <rhs> → rhs= [operative]
@@ -206,9 +243,33 @@ Defines a new macro with the given name, parameter tree, and body.
 Updates the left-hand side bindings by matching it against the
 right-hand side in the given environment.
 
+*** Examples
+
+#+BEGIN_EXAMPLE
+(define x 1)
+(define x 2)
+
+(set! (current-environment) x 3)
+(set! (current-environment) y 4)
+(assert (= x 3))
+(assert (= y 4))
+
+(set! (current-environment) (x y) (list y x))
+(assert (= x 4))
+(assert (= y 3))
+#+END_EXAMPLE
+
 ** =defined? <sym> <env> → boolean= [applicative]
 
 Returns true if a symbol is bound in the environment, false otherwise.
+
+*** Examples
+
+#+BEGIN_EXAMPLE
+(define x 1)
+(assert (defined? 'x (current-environment)))
+(assert (not (defined? 'y (current-environment))))
+#+END_EXAMPLE
 
 ** =provide <names> . <exprs> → result= [operative]
 
@@ -219,13 +280,13 @@ names to the outer scope.
 
 #+BEGIN_EXAMPLE
 (provide (foo bar)
-  (def foo 1)
-  (def bar 2)
-  (def quux 3)
+  (define foo 1)
+  (define bar 2)
+  (define quux 3)
 )
-;foo → 1
-;bar → 2
-;quux → error: unbound variable
+(assert (= 1 foo))
+(assert (= 2 bar))
+(assert (not (defined? 'quux (current-environment))))
 #+END_EXAMPLE
 
 * Evaluation and Environments
@@ -233,17 +294,56 @@ names to the outer scope.
 
 Creates a new empty environment with the given optional parent.
 
+*** Examples
+
+#+BEGIN_EXAMPLE
+(define e (make-environment))
+(eval (list define 'x 1) e)
+(assert (= 1 (eval 'x e)))
+
+(define f (make-environment e))
+(assert (= 1 (eval 'x f)))
+
+(eval (list define 'x 2) f)
+(assert (= 1 (eval 'x e)))
+(assert (= 2 (eval 'x f)))
+#+END_EXAMPLE
+
 ** =current-environment → environment= [applicative]
 
 Returns the current environment.
+
+*** Examples
+
+#+BEGIN_EXAMPLE
+(define x 1)
+(assert (=  1 (eval 'x (current-environment))))
+
+(define (foo)
+  (let ((y 2))
+    (current-environment)))
+(assert (= 2 (eval 'y (foo))))
+#+END_EXAMPLE
 
 ** =eval <expr> <env> → result= [applicative]
 
 Evaluates the expression in the given environment.
 
+*** Examples
+
+#+BEGIN_EXAMPLE
+(assert (= 4 (eval (list + 2 2) (current-environment))))
+#+END_EXAMPLE
+
 ** =quote <form> → form= [operative]
 
 Returns form unevaluated.
+
+*** Examples
+
+#+BEGIN_EXAMPLE
+(assert (= '+ (car (quote (+ 2 2)))))
+#+END_EXAMPLE
 
 * Combiners
 ** =vau <ptree> <envp> <body> → operative= [operative]
@@ -345,6 +445,20 @@ Aborts up to and including the prompt, and performs the forms with
 
 Prepends the delimited continuation to the current continuation, and
 performs forms in the new continuation.
+
+*** Examples
+
+#+BEGIN_EXAMPLE
+(assert
+  (= (let ((p (make-prompt)))
+       (+ 2 (push-prompt p
+              (if (take-subcont p k
+                    (+ (push-subcont k #f)
+                       (push-subcont k #t)))
+                  3
+                  4))))
+     9))
+#+END_EXAMPLE
 
 * Dynamic Binding
 

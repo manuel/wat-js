@@ -11,7 +11,7 @@ var watbrowser = (function() {
         start = new Date().getTime();
         wat.eval(wat.array_to_list([new wat.Sym("begin")].concat(forms)), wat_env);
         elapsed = new Date().getTime() - start;
-        console_log("Evaluation time " + elapsed + "ms");
+        console_log("Total evaluation time " + elapsed + "ms");
     }
 
     function load_file(path) {
@@ -21,15 +21,11 @@ var watbrowser = (function() {
 	req.open("GET", path + "?" + Math.random(), false);
 	req.send(null);
 	if(req.status == 200) {
-	    //        try {
             var start = new Date().getTime();
             var forms = wat.parse(req.responseText);
             var elapsed = new Date().getTime() - start;
             console_log("Parse time " + elapsed + "ms");
             return forms;
-	    //        } catch(e) {
-	    //            wat_console_log("ERROR: " + e);
-	    //        }
 	} else {
             throw("XHR error: " + req.status);
 	}

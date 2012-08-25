@@ -270,7 +270,6 @@
   (define-builtin-= Number num=)
   (define-builtin-= String str=)
   (define-builtin-= Symbol (lambda (a b) (= (symbol->string a) (symbol->string b))))
-  (define-method (= (a Nil) b) (null? b))
   (define-method (= (a Pair) b) (and (pair? b) (and (= (car a) (car b)) (= (cdr a) (cdr b)))))
   (define (/= a b) (not (= a b)))
 )

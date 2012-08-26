@@ -6,16 +6,19 @@
 
 * Description
 
-/Wat/ is a simple yet sophisticated Lisp for scripting interactive
-networked applications.  Wat offers a nuanced set of features in three
-main areas: For control abstraction, Wat combines first-order control
-and resumable exceptions for quotidian control flow with multi-prompt
-delimited continuations for advanced control inversions such as
-cooperative multitasking.  For syntactic abstraction, Wat provides
-lexically-scoped fexprs and first-class lexical environments, as well
-as ordinary procedural macros for metaprogramming without
-interpretetive overhead.  For data abstraction, Wat provides
-first-class types, fully encapsulated objects, and generic functions.
+/Wat/ is an ultra-lightweight, advanced, and practical Lisp for
+JavaScript, in which everything is first-class: syntax, control, and
+data.  Syntax is based on lexically-scoped fexprs and first-class
+environments, subsuming ordinary procedures and hygienic macros.
+Control is based on delimited continuations, subsuming all
+computational effects such as lightweight threads and monads.  Data
+uses first-class types that allow generic programming over built-in as
+well as user-defined types.  The language is rounded out with Common
+Lisp features such as restartable exceptions, dynamically-bound
+variables, a numerical tower, preprocessing macros, and common data
+structures such as hashtables.  The Wat runtime is implemented in only
+500 lines of JavaScript and evaluates the prelude and a REPL written
+in Wat in under 50ms in common JavaScript interpreters.
 
 Wat is hosted at <https://github.com/manuel/wat-js>.
 
@@ -346,7 +349,7 @@ Returns form unevaluated.
 #+END_EXAMPLE
 
 * Combiners
-** =vau <ptree> <envp> <body> → operative= [operative]
+** =vau <ptree> <envp> . <body> → operative= [operative]
 
 Constructs a new compound operative that closes over the current
 environment with the given parameter tree, environment parameter, and
@@ -553,12 +556,10 @@ higher-order control.
 
 * Dynamic Binding
 
-These are the operators from Kiselyov, Shan, and Sabry's
-[[http://okmij.org/ftp/papers/DDBinding.pdf][/Delimited Dynamic Binding/]].
-
 ** =dnew <val> → dynamic= [applicative]
 
-Creates a new dynamically-bound variable with the given initial value.
+Creates a new dynamically-bound variable with the given global value,
+which will be used when there is no dynamic binding.
 
 ** =dlet <dynamic> <value> . <exprs> → result= [operative]
 
@@ -566,33 +567,65 @@ Performs expressions with the dynamic variable bound to the value.
 
 ** =dref <dynamic> → value= [applicative]
 
-Retrieves the dynamically-bound value of a dynamic variable.
+Retrieves the value of a dynamic variable.
 
 * Exceptions and Restarts
 
+Wat's exception handling is based on the condition system of Common
+Lisp.  Foremost is the ability to continue at the point of an
+exception by invoking a restart.
+
 ** =handle <handlers> . <body> → result= [operative]
 
-Each handler is of the form =(<type> (<var>) . <handler-body>)=.
-Handlers are matched against a thrown exception from left to right.
-If a thrown exception is of the given type, then the handler body
-expressions will be executed with the variable bound to the exception.
+=handle= establishes exception handlers for the duration of the
+evaluation of the body forms.  When one of the handlers matches a
+thrown exception, it will be called on the stack - i.e. the stack is
+not unwound.
+
+Each handler is of the form =(<type-or-pred> (<var>)
+. <handler-body>)=, where =<type-or-pred>= may either be a type or
+predicate.  Handlers are matched against a thrown exception from left
+to right.  If a thrown exception is of the given type or matches the
+given predicate, then the =<handler-body>= expressions will be
+executed with the variable =<var>= bound to the exception.
 
 A handler may handle the exception by performing a nonlocal transfer
 of control.  If the handler normally returns, the search for a handler
 will continue up the stack.  If no handler is found, the
 =default-handler= generic function is called on the exception.
 
+While a handler body is executed, the current handlers are those that
+were established at the time =handle= was called.  This is analogous
+to Common Lisp's [[http://www.nhplace.com/kent/Papers/Condition-Handling-2001.html][condition firewall]].
+
 ** =catch <handlers> . <body> → result= [operative]
 
 Like =handle=, but unwinds the stack before executing handler, and
-simply returns the result of evaluating the handler body.
+simply returns the result of evaluating the handler body.  The handler
+may rethrow the exception.
+
+** =default-handler <exc> → result= [generic]
+
+Called on an exception when no handler is found, or when all found
+handlers returned normally.
 
 ** =throw <exc> . <handlers> → result= [operative]
 
 Throws an exception and optionally provides restarts that an exception
 handler may use to continue computation.  Restarts are installed as if
 by =catch=, i.e. when a restart is invoked, the stack is unwound and
-the result of the handler is returned.
+the result of the handler is returned.  =throw= only returns normally
+if one of its restarts is invoked, otherwise it always enters the
+debugger or crashes the program.
+
+** =invoke-restart <restart> → result= [operative]
+
+** =compute-restarts <exception> → list= [operative]
+
+** =associated-exception <restart> → exc= [generic]
+
+Returns the associated exception of a restart.  Associated exceptions
+are a mechanism for ensuring that 
 
 *** Examples
 
@@ -618,11 +651,6 @@ the result of the handler is returned.
 ;;        (Div-by-Zero-Exception (dbz) (throw (make-use-value-restart dbz 3))))
 ;;      4))
 #+END_EXAMPLE
-
-** =default-handler <exc> → result= [generic]
-
-Called on an exception when no handler is found, or when all found
-handlers returned normally.
 
 * Higher-order Control
 

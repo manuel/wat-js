@@ -1,12 +1,15 @@
 html { font-family: serif; }
-h1, h2, h3, h4, h5, h6, h7, th, dt { font-family: sans; }
+h1, h2, h4, h5, h6, h7, th, dt { font-family: sans; }
 h1 { font-size: 300%; }
 h2 { border-bottom: 2px solid black; }
-h3 code { padding: .125em .5em; border-radius: .5em; 
-background-color:#eee;
-border-top: 1px solid #ccc; 
-border-right: 1px solid #ccc; 
-border-bottom: 1px solid #333; 
-border-left: 1px solid #333; 
+h3 { font-family: serif; }
+h3 code {
+color: #000;
+font-weight: bold;
+padding: .125em .5em;
+border-radius: .5em; 
+background-color: #fff;
+border: 1px solid #000; 
 }
 a:link, a:visited, a:hover { text-decoration: none; }
+.example { border-width: 0; background-color: #fff; border-radius: .5em; color: #333; padding: 0; }

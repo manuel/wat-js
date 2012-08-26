@@ -13,7 +13,7 @@ and resumable exceptions for quotidian control flow with multi-prompt
 delimited continuations for advanced control inversions such as
 cooperative multitasking.  For syntactic abstraction, Wat provides
 lexically-scoped fexprs and first-class lexical environments, as well
-as ordinary memoizing procedural macros for metaprogramming without
+as ordinary procedural macros for metaprogramming without
 interpretetive overhead.  For data abstraction, Wat provides
 first-class types, fully encapsulated objects, and generic functions.
 
@@ -146,17 +146,24 @@ in the current environment, and returns it.
 
 #+BEGIN_EXAMPLE
 (def x 1)
-x → 1
+(assert (= x 1))
+
 (def x 2)
-x → 2
+(assert (= x 2))
+
 (def (a b c) (list 1 (list 2) 3))
-a → 1
-b → (2)
-c → 3
+(assert (= a 1))
+(assert (= b '(2)))
+(assert (= c 3))
+
 (def (a (b) c) (list 1 (list 2) 3))
-a → 1
-b → 2
-c → 3
+(assert (= a 1))
+(assert (= b 2))
+(assert (= c 3))
+
+(def (a . rest) (list 1 (list 2) 3))
+(assert (= a 1))
+(assert (= rest '((2) 3)))
 #+END_EXAMPLE
 
 ** =define <lhs> <rhs> → result= [operative]
@@ -169,6 +176,26 @@ Scheme-like =define= with two cases:
    applicative with the given parameters and body expressions,
    returning the applicative.
 
+*** Examples
+
+#+BEGIN_EXAMPLE
+(define foo 1)
+(assert (= foo 1))
+
+(define foo 2)
+(assert (= foo 2))
+
+(define (bar) 12)
+(assert (= (bar) 12))
+
+(define (bar x y) (+ x y))
+(assert (= (bar 1 2) 3))
+
+(define (times number . rest)
+  (map (lambda (x) (* number x)) rest))
+(assert (= (times 3 1 2 3 4) '(3 6 9 12)))
+#+END_EXAMPLE
+
 ** =define-syntax <lhs> <rhs> → result= [operative]
 
 Scheme-like =define-syntax= with two cases:
@@ -180,6 +207,18 @@ Scheme-like =define-syntax= with two cases:
    name to an operative with the given parameters, environment
    parameter, and body expressions, returning the operative.
 
+*** Examples
+
+#+BEGIN_EXAMPLE
+(define-syntax my-quote (vau (x) #ign x))
+(assert (= (my-quote foo) 'foo))
+
+(define-syntax (my-when test . exprs) env
+  (if (eval test env) (eval (list* begin exprs) env) #void))
+(assert (= (my-when #t 1 2 3) 3))
+(assert (= (my-when #f 1 2 3) #void))
+#+END_EXAMPLE
+
 ** =define-macro (<name> . <ptree>) . <body>= [operative]
 
 Defines a new macro with the given name, parameter tree, and body.
@@ -190,18 +229,47 @@ Defines a new macro with the given name, parameter tree, and body.
 (define-macro (my-let bindings . body)
   (cons (list* lambda (map car bindings) body)
         (map cadr bindings)))
-(my-let ((x 1) (y 2))
-  (+ x y)) → 3
+(assert (= 3 (my-let ((x 1) (y 2))
+               (+ x y))))
+
+(define-macro (my-when test . exprs)
+  (list if test (list* begin exprs) #void))
+(assert (= (my-when #t 1 2 3) 3))
+(assert (= (my-when #f 1 2 3) #void))
 #+END_EXAMPLE
 
 ** =set! <env> <lhs> <rhs> → rhs= [operative]
 
-Updates the left-hand side bindings by matching it against the
-right-hand side in the given environment.
+Updates the left-hand side by matching it against the right-hand side
+in the given environment.
+
+*** Examples
+
+#+BEGIN_EXAMPLE
+(define x 1)
+(define x 2)
+
+(set! (current-environment) x 3)
+(set! (current-environment) y 4)
+(assert (= x 3))
+(assert (= y 4))
+
+(set! (current-environment) (x y) (list y x))
+(assert (= x 4))
+(assert (= y 3))
+#+END_EXAMPLE
 
 ** =defined? <sym> <env> → boolean= [applicative]
 
 Returns true if a symbol is bound in the environment, false otherwise.
+
+*** Examples
+
+#+BEGIN_EXAMPLE
+(define x 1)
+(assert (defined? 'x (current-environment)))
+(assert (not (defined? 'y (current-environment))))
+#+END_EXAMPLE
 
 ** =provide <names> . <exprs> → result= [operative]
 
@@ -212,13 +280,13 @@ names to the outer scope.
 
 #+BEGIN_EXAMPLE
 (provide (foo bar)
-  (def foo 1)
-  (def bar 2)
-  (def quux 3)
+  (define foo 1)
+  (define bar 2)
+  (define quux 3)
 )
-foo → 1
-bar → 2
-quux → error: unbound variable
+(assert (= 1 foo))
+(assert (= 2 bar))
+(assert (not (defined? 'quux (current-environment))))
 #+END_EXAMPLE
 
 * Evaluation and Environments
@@ -226,17 +294,56 @@ quux → error: unbound variable
 
 Creates a new empty environment with the given optional parent.
 
+*** Examples
+
+#+BEGIN_EXAMPLE
+(define e (make-environment))
+(eval (list define 'x 1) e)
+(assert (= 1 (eval 'x e)))
+
+(define f (make-environment e))
+(assert (= 1 (eval 'x f)))
+
+(eval (list define 'x 2) f)
+(assert (= 1 (eval 'x e)))
+(assert (= 2 (eval 'x f)))
+#+END_EXAMPLE
+
 ** =current-environment → environment= [applicative]
 
 Returns the current environment.
+
+*** Examples
+
+#+BEGIN_EXAMPLE
+(define x 1)
+(assert (=  1 (eval 'x (current-environment))))
+
+(define (foo)
+  (let ((y 2))
+    (current-environment)))
+(assert (= 2 (eval 'y (foo))))
+#+END_EXAMPLE
 
 ** =eval <expr> <env> → result= [applicative]
 
 Evaluates the expression in the given environment.
 
+*** Examples
+
+#+BEGIN_EXAMPLE
+(assert (= 4 (eval (list + 2 2) (current-environment))))
+#+END_EXAMPLE
+
 ** =quote <form> → form= [operative]
 
 Returns form unevaluated.
+
+*** Examples
+
+#+BEGIN_EXAMPLE
+(assert (= '+ (car (quote (+ 2 2)))))
+#+END_EXAMPLE
 
 * Combiners
 ** =vau <ptree> <envp> <body> → operative= [operative]
@@ -245,21 +352,62 @@ Constructs a new compound operative that closes over the current
 environment with the given parameter tree, environment parameter, and
 body expression.
 
+*** Examples
+
+#+BEGIN_EXAMPLE
+(define foo (vau (x) #ign x))
+(assert (= '(+ 1 2) (foo (+ 1 2))))
+
+(define bar (vau (x) env (eval x env)))
+(assert (= 3 (bar (+ 1 2))))
+#+END_EXAMPLE
+
 ** =lambda <ptree> . <exprs> → applicative= [operative]
 
 Creates an applicative combiner, as in Scheme.
 
+*** Examples
+
+#+BEGIN_EXAMPLE
+(define foo (lambda (x) (+ x 1)))
+(assert (= 2 (foo 1)))
+
+(define quux (lambda args args))
+(assert (= '(1 2) (quux 1 (+ 1 1))))
+#+END_EXAMPLE
+    
 ** =apply <apv> <args> → result= [applicative]
 
 Applies an applicative to an arguments list.
+
+*** Examples
+
+#+BEGIN_EXAMPLE
+(assert (= 4 (apply + (list 2 2))))
+#+END_EXAMPLE
 
 ** =wrap <cmb> → applicative= [applicative]
 
 Returns an applicative around an underlying combiner.
 
+*** Examples
+
+#+BEGIN_EXAMPLE
+(define id (vau (x) #ign x))
+(assert (= '(+ 1 2) (id (+ 1 2))))
+(assert (= 3 ((wrap id) (+ 1 2))))
+#+END_EXAMPLE
+
 ** =unwrap <cmb> → combiner= [applicative]
 
 Returns the underlying combiner of an applicative.
+
+*** Examples
+
+#+BEGIN_EXAMPLE
+(define foo (lambda (a b) (+ a b)))
+(assert (= 7 ((unwrap foo) 3 4)))
+#+END_EXAMPLE
 
 * First-order Control
 ** =begin . <exprs> → result= [operative]
@@ -267,35 +415,112 @@ Returns the underlying combiner of an applicative.
 Evaluates expressions from left to right, returning the value of the
 last.  As a special case, =(begin)= returns void.
 
+*** Examples
+
+#+BEGIN_EXAMPLE
+(assert (= #void (begin)))
+(assert (= 1 (begin 1)))
+(assert (= 2 (begin 1 2)))
+(assert (= 3 (begin 1 2 3)))
+#+END_EXAMPLE
+
 ** =if <test> <then> <else> → result= [operative]
 
 Evaluates the test, and if it is false evaluates the else branch,
 otherwise evaluates the then branch.
 
+*** Examples
+
+#+BEGIN_EXAMPLE
+(assert (= 1 (if #t 1 2)))
+(assert (= 2 (if #f 1 2)))
+(assert (= 1 (if 'foo 1 2)))
+#+END_EXAMPLE
+
 ** =when <test> . <forms> → result= [operative]
 
 Evaluates forms if test is true, returns void otherwise.
+
+*** Examples
+
+#+BEGIN_EXAMPLE
+(assert (= 2 (when #t 1 2)))
+(assert (= #void (when #f 1 2)))
+(assert (= 2 (when 'foo 1 2)))
+#+END_EXAMPLE
 
 ** =unless <test> . <forms> → result= [operative]
 
 Evaluates forms if test is false, returns void otherwise.
 
+*** Examples
+
+#+BEGIN_EXAMPLE
+(assert (= #void (unless #t 1 2)))
+(assert (= 2 (unless #f 1 2)))
+(assert (= #void (unless 'foo 1 2)))
+#+END_EXAMPLE
+
 ** =loop . <forms> → |= [operative]
 
 Infinite loop.
+
+*** Examples
+
+#+BEGIN_EXAMPLE
+(assert
+  (= 11
+     (block exit 
+       (define x 0)
+       (loop
+         (set! (current-environment) x (+ x 1))
+         (when (> x 10)
+           (return-from exit x))))))
+#+END_EXAMPLE
 
 ** =while <test> . <forms> → |= [operative]
 
 Performs forms while test is true.
 
+*** Examples
+
+#+BEGIN_EXAMPLE
+(define x 0)
+(while (<= x 10)
+  (set! (current-environment) x (+ x 1)))
+(assert (= x 11))
+#+END_EXAMPLE
+
 ** =until <test> . <forms> → |= [operative]
 
 Performs forms until test is true.
+
+*** Examples
+
+#+BEGIN_EXAMPLE
+(define x 0)
+(until (> x 10)
+  (set! (current-environment) x (+ x 1)))
+(assert (= x 11))
+#+END_EXAMPLE
 
 ** =block <name> . <body> → result= [operative]
 
 Performs body forms with name bound to a one-shot escape continuation
 that can be invoked with =return-from=.
+
+*** Examples
+
+#+BEGIN_EXAMPLE
+(assert (= #void (block foo)))
+(assert (= 1 (block foo 1)))
+(assert (= 2 (block foo 1 2)))
+(assert (= 3 (block foo 1 (return-from foo 3) 2)))
+
+(assert (= 3 (block ret
+               (for-each (lambda (x) (when (= 1 (/ x 3)) (return-from ret x)))
+                         '(1 2 3 4 5)))))
+#+END_EXAMPLE
 
 ** =return-from <cont> <val> → |= [operative]
 
@@ -311,6 +536,93 @@ exits the protected form, either normally by a return, or abnormally
 through an escape continuation, the cleanup forms are executed.  The
 cleanup forms are not executed when the protected form is aborted by
 higher-order control.
+
+*** Examples
+
+#+BEGIN_EXAMPLE
+(assert (= 1 (unwind-protect 1)))
+(assert (= 1 (unwind-protect 1 2)))
+(assert (= 1 (unwind-protect 1 2 3)))
+
+(define env (current-environment))
+
+(define x #f)
+(assert (= 1 (unwind-protect 1 (set! env x #t))))
+(assert (= #t x))
+#+END_EXAMPLE
+
+* Dynamic Binding
+
+These are the operators from Kiselyov, Shan, and Sabry's
+[[http://okmij.org/ftp/papers/DDBinding.pdf][/Delimited Dynamic Binding/]].
+
+** =dnew <val> → dynamic= [applicative]
+
+Creates a new dynamically-bound variable with the given initial value.
+
+** =dlet <dynamic> <value> . <exprs> → result= [operative]
+
+Performs expressions with the dynamic variable bound to the value.
+
+** =dref <dynamic> → value= [applicative]
+
+Retrieves the dynamically-bound value of a dynamic variable.
+
+* Exceptions and Restarts
+
+** =handle <handlers> . <body> → result= [operative]
+
+Each handler is of the form =(<type> (<var>) . <handler-body>)=.
+Handlers are matched against a thrown exception from left to right.
+If a thrown exception is of the given type, then the handler body
+expressions will be executed with the variable bound to the exception.
+
+A handler may handle the exception by performing a nonlocal transfer
+of control.  If the handler normally returns, the search for a handler
+will continue up the stack.  If no handler is found, the
+=default-handler= generic function is called on the exception.
+
+** =catch <handlers> . <body> → result= [operative]
+
+Like =handle=, but unwinds the stack before executing handler, and
+simply returns the result of evaluating the handler body.
+
+** =throw <exc> . <handlers> → result= [operative]
+
+Throws an exception and optionally provides restarts that an exception
+handler may use to continue computation.  Restarts are installed as if
+by =catch=, i.e. when a restart is invoked, the stack is unwound and
+the result of the handler is returned.
+
+*** Examples
+
+#+BEGIN_EXAMPLE
+;; (define-record-type Div-by-Zero-Exception
+;;   (make-div-by-zero-exception)
+;;   #ign)
+;; (define-record-type Use-Value-Restart
+;;   (make-use-value-restart associated-exception value)
+;;   #ign
+;;   (associated-exception associated-exception)
+;;   (value value))
+;;
+;; (define (my-compute number divisor)
+;;   (let ((div (if (= 0 divisor)
+;;                  (throw (make-div-by-zero-exception)
+;;                    (Use-Value-Restart (r) (value r)))
+;;                  divisor)))
+;;     (/ number divisor)))
+;;
+;; (assert 
+;;   (= (handle (my-compute 12 0)
+;;        (Div-by-Zero-Exception (dbz) (throw (make-use-value-restart dbz 3))))
+;;      4))
+#+END_EXAMPLE
+
+** =default-handler <exc> → result= [generic]
+
+Called on an exception when no handler is found, or when all found
+handlers returned normally.
 
 * Higher-order Control
 
@@ -339,22 +651,19 @@ Aborts up to and including the prompt, and performs the forms with
 Prepends the delimited continuation to the current continuation, and
 performs forms in the new continuation.
 
-* Dynamic Binding
+*** Examples
 
-These are the operators from Kiselyov, Shan, and Sabry's
-[[http://okmij.org/ftp/papers/DDBinding.pdf][/Delimited Dynamic Binding/]].
-
-** =dnew <val> → dynamic= [applicative]
-
-Creates a new dynamically-bound variable with the given initial value.
-
-** =dlet <dynamic> <value> . <exprs> → result= [operative]
-
-Performs expressions with the dynamic variable bound to the value.
-
-** =dref <dynamic> → value= [applicative]
-
-Retrieves the dynamically-bound value of a dynamic variable.
+#+BEGIN_EXAMPLE
+(assert
+  (= (let ((p (make-prompt)))
+       (+ 2 (push-prompt p
+              (if (take-subcont p k
+                    (+ (push-subcont k #f)
+                       (push-subcont k #t)))
+                  3
+                  4))))
+     9))
+#+END_EXAMPLE
 
 * Types
 ** =make-type → (type tagger untagger)= [applicative]
@@ -508,6 +817,7 @@ Short-circuiting binary logical connectives.
 Unary logical connective.
 
 * Numbers
+
 ** =+=, =-=, =*=, =/=, =%= [applicatives]
 
 The binary applicatives for addition, subtraction, multiplication,
@@ -649,11 +959,9 @@ Wat object.
 Returns a JS function that, when called, will apply the provided
 combiner with the arguments the callback received.
 
-=js-callback= is intended for use with JS asynchronous functions such
-as =setTimeout= and event handlers.  It is assumed that when the
-callback is called, the current fiber has returned.  The combiner is
-therefore applied in a fresh fiber.
- 
+** =define-js-method <name>= [operative]
+=(define-js-method <name>)= is equivalent to =(define <name>
+(js-method (symbol->string <name>)))=.
 * Debugging Interface
 
 ** =stacktrace → list= [applicative] /NIY/

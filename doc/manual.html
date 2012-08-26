@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-25 21:27:25 CEST"/>
+<meta name="generated" content="2012-08-27 01:25:38 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -104,7 +104,7 @@ lang="en" xml:lang="en">
 </li>
 <li><a href="#sec-8">Combiners </a>
 <ul>
-<li><a href="#sec-8.1"><code>vau &lt;ptree&gt; &lt;envp&gt; &lt;body&gt; → operative</code> [operative] </a></li>
+<li><a href="#sec-8.1"><code>vau &lt;ptree&gt; &lt;envp&gt; . &lt;body&gt; → operative</code> [operative] </a></li>
 <li><a href="#sec-8.2"><code>lambda &lt;ptree&gt; . &lt;exprs&gt; → applicative</code> [operative] </a></li>
 <li><a href="#sec-8.3"><code>apply &lt;apv&gt; &lt;args&gt; → result</code> [applicative] </a></li>
 <li><a href="#sec-8.4"><code>wrap &lt;cmb&gt; → applicative</code> [applicative] </a></li>
@@ -136,8 +136,11 @@ lang="en" xml:lang="en">
 <ul>
 <li><a href="#sec-11.1"><code>handle &lt;handlers&gt; . &lt;body&gt; → result</code> [operative] </a></li>
 <li><a href="#sec-11.2"><code>catch &lt;handlers&gt; . &lt;body&gt; → result</code> [operative] </a></li>
-<li><a href="#sec-11.3"><code>throw &lt;exc&gt; . &lt;handlers&gt; → result</code> [operative] </a></li>
-<li><a href="#sec-11.4"><code>default-handler &lt;exc&gt; → result</code> [generic] </a></li>
+<li><a href="#sec-11.3"><code>default-handler &lt;exc&gt; → result</code> [generic] </a></li>
+<li><a href="#sec-11.4"><code>throw &lt;exc&gt; . &lt;handlers&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-11.5"><code>invoke-restart &lt;restart&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-11.6"><code>compute-restarts &lt;exception&gt; → list</code> [operative] </a></li>
+<li><a href="#sec-11.7"><code>associated-exception &lt;restart&gt; → exc</code> [generic] </a></li>
 </ul>
 </li>
 <li><a href="#sec-12">Higher-order Control </a>
@@ -270,16 +273,19 @@ lang="en" xml:lang="en">
 
 
 <p>
-<i>Wat</i> is a simple yet sophisticated Lisp for scripting interactive
-networked applications.  Wat offers a nuanced set of features in three
-main areas: For control abstraction, Wat combines first-order control
-and resumable exceptions for quotidian control flow with multi-prompt
-delimited continuations for advanced control inversions such as
-cooperative multitasking.  For syntactic abstraction, Wat provides
-lexically-scoped fexprs and first-class lexical environments, as well
-as ordinary procedural macros for metaprogramming without
-interpretetive overhead.  For data abstraction, Wat provides
-first-class types, fully encapsulated objects, and generic functions.
+<i>Wat</i> is an ultra-lightweight, advanced, and practical Lisp for
+JavaScript, in which everything is first-class: syntax, control, and
+data.  Syntax is based on lexically-scoped fexprs and first-class
+environments, subsuming ordinary procedures and hygienic macros.
+Control is based on delimited continuations, subsuming all
+computational effects such as lightweight threads and monads.  Data
+uses first-class types that allow generic programming over built-in as
+well as user-defined types.  The language is rounded out with Common
+Lisp features such as restartable exceptions, dynamically-bound
+variables, a numerical tower, preprocessing macros, and common data
+structures such as hashtables.  The Wat runtime is implemented in only
+500 lines of JavaScript and evaluates the prelude and a REPL written
+in Wat in under 50ms in common JavaScript interpreters.
 </p>
 <p>
 Wat is hosted at <a href="https://github.com/manuel/wat-js">https://github.com/manuel/wat-js</a>.
@@ -964,7 +970,7 @@ Returns form unevaluated.
 </div>
 
 <div id="outline-container-8.1" class="outline-3">
-<h3 id="sec-8.1"><code>vau &lt;ptree&gt; &lt;envp&gt; &lt;body&gt; → operative</code> [operative] </h3>
+<h3 id="sec-8.1"><code>vau &lt;ptree&gt; &lt;envp&gt; . &lt;body&gt; → operative</code> [operative] </h3>
 <div class="outline-text-3" id="text-8.1">
 
 
@@ -1470,10 +1476,6 @@ higher-order control.
 <div class="outline-text-2" id="text-10">
 
 
-<p>
-These are the operators from Kiselyov, Shan, and Sabry's
-<a href="http://okmij.org/ftp/papers/DDBinding.pdf"><i>Delimited Dynamic Binding</i></a>.
-</p>
 
 </div>
 
@@ -1483,7 +1485,8 @@ These are the operators from Kiselyov, Shan, and Sabry's
 
 
 <p>
-Creates a new dynamically-bound variable with the given initial value.
+Creates a new dynamically-bound variable with the given global value,
+which will be used when there is no dynamic binding.
 </p>
 </div>
 
@@ -1507,7 +1510,7 @@ Performs expressions with the dynamic variable bound to the value.
 
 
 <p>
-Retrieves the dynamically-bound value of a dynamic variable.
+Retrieves the value of a dynamic variable.
 </p>
 </div>
 </div>
@@ -1519,6 +1522,11 @@ Retrieves the dynamically-bound value of a dynamic variable.
 <div class="outline-text-2" id="text-11">
 
 
+<p>
+Wat's exception handling is based on the condition system of Common
+Lisp.  Foremost is the ability to continue at the point of an
+exception by invoking a restart.
+</p>
 
 </div>
 
@@ -1528,16 +1536,28 @@ Retrieves the dynamically-bound value of a dynamic variable.
 
 
 <p>
-Each handler is of the form <code>(&lt;type&gt; (&lt;var&gt;) . &lt;handler-body&gt;)</code>.
-Handlers are matched against a thrown exception from left to right.
-If a thrown exception is of the given type, then the handler body
-expressions will be executed with the variable bound to the exception.
+<code>handle</code> establishes exception handlers for the duration of the
+evaluation of the body forms.  When one of the handlers matches a
+thrown exception, it will be called on the stack - i.e. the stack is
+not unwound.
+</p>
+<p>
+Each handler is of the form <code>(&lt;type-or-pred&gt; (&lt;var&gt;) . &lt;handler-body&gt;)</code>, where <code>&lt;type-or-pred&gt;</code> may either be a type or
+predicate.  Handlers are matched against a thrown exception from left
+to right.  If a thrown exception is of the given type or matches the
+given predicate, then the <code>&lt;handler-body&gt;</code> expressions will be
+executed with the variable <code>&lt;var&gt;</code> bound to the exception.
 </p>
 <p>
 A handler may handle the exception by performing a nonlocal transfer
 of control.  If the handler normally returns, the search for a handler
 will continue up the stack.  If no handler is found, the
 <code>default-handler</code> generic function is called on the exception.
+</p>
+<p>
+While a handler body is executed, the current handlers are those that
+were established at the time <code>handle</code> was called.  This is analogous
+to Common Lisp's <a href="http://www.nhplace.com/kent/Papers/Condition-Handling-2001.html">condition firewall</a>.
 </p>
 </div>
 
@@ -1550,29 +1570,76 @@ will continue up the stack.  If no handler is found, the
 
 <p>
 Like <code>handle</code>, but unwinds the stack before executing handler, and
-simply returns the result of evaluating the handler body.
+simply returns the result of evaluating the handler body.  The handler
+may rethrow the exception.
 </p>
 </div>
 
 </div>
 
 <div id="outline-container-11.3" class="outline-3">
-<h3 id="sec-11.3"><code>throw &lt;exc&gt; . &lt;handlers&gt; → result</code> [operative] </h3>
+<h3 id="sec-11.3"><code>default-handler &lt;exc&gt; → result</code> [generic] </h3>
 <div class="outline-text-3" id="text-11.3">
+
+
+<p>
+Called on an exception when no handler is found, or when all found
+handlers returned normally.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-11.4" class="outline-3">
+<h3 id="sec-11.4"><code>throw &lt;exc&gt; . &lt;handlers&gt; → result</code> [operative] </h3>
+<div class="outline-text-3" id="text-11.4">
 
 
 <p>
 Throws an exception and optionally provides restarts that an exception
 handler may use to continue computation.  Restarts are installed as if
 by <code>catch</code>, i.e. when a restart is invoked, the stack is unwound and
-the result of the handler is returned.
+the result of the handler is returned.  <code>throw</code> only returns normally
+if one of its restarts is invoked, otherwise it always enters the
+debugger or crashes the program.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-11.5" class="outline-3">
+<h3 id="sec-11.5"><code>invoke-restart &lt;restart&gt; → result</code> [operative] </h3>
+<div class="outline-text-3" id="text-11.5">
+
+
+</div>
+
+</div>
+
+<div id="outline-container-11.6" class="outline-3">
+<h3 id="sec-11.6"><code>compute-restarts &lt;exception&gt; → list</code> [operative] </h3>
+<div class="outline-text-3" id="text-11.6">
+
+
+</div>
+
+</div>
+
+<div id="outline-container-11.7" class="outline-3">
+<h3 id="sec-11.7"><code>associated-exception &lt;restart&gt; → exc</code> [generic] </h3>
+<div class="outline-text-3" id="text-11.7">
+
+
+<p>
+Returns the associated exception of a restart.  Associated exceptions
+are a mechanism for ensuring that 
 </p>
 
 </div>
 
-<div id="outline-container-11.3.1" class="outline-4">
-<h4 id="sec-11.3.1">Examples </h4>
-<div class="outline-text-4" id="text-11.3.1">
+<div id="outline-container-11.7.1" class="outline-4">
+<h4 id="sec-11.7.1">Examples </h4>
+<div class="outline-text-4" id="text-11.7.1">
 
 
 
@@ -1604,19 +1671,6 @@ the result of the handler is returned.
 
 
 </div>
-</div>
-
-</div>
-
-<div id="outline-container-11.4" class="outline-3">
-<h3 id="sec-11.4"><code>default-handler &lt;exc&gt; → result</code> [generic] </h3>
-<div class="outline-text-3" id="text-11.4">
-
-
-<p>
-Called on an exception when no handler is found, or when all found
-handlers returned normally.
-</p>
 </div>
 </div>
 
@@ -2608,7 +2662,7 @@ broken and must not be resumed.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-25 21:27:25 CEST</p>
+<p class="date"> Date: 2012-08-27 01:25:38 CEST</p>
 </div>
 </div>
 </body>

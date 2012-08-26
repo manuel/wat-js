@@ -1,13 +1,18 @@
 * Wat Programming Language
 
-/Wat/ is an ultra-lightweight dialect of Lisp, specifically Kernel, in
-which everything is first-class: syntax, control, and data.  Syntax is
-based on lexically-scoped fexprs and first-class environments,
-subsuming ordinary procedures and hygienic macros.  Control is based
-on delimited continuations and tail-call elimination, subsuming all
-computational effects.  Data uses a dynamic type-tagging system that
-allows generic programming over built-in as well as user-defined data
-types.
+/Wat/ is an ultra-lightweight, advanced, and practical Lisp for
+JavaScript, in which everything is first-class: syntax, control, and
+data.  Syntax is based on lexically-scoped fexprs and first-class
+environments, subsuming ordinary procedures and hygienic macros.
+Control is based on delimited continuations, subsuming all
+computational effects such as lightweight threads and monads.  Data
+uses first-class types that allow generic programming over built-in as
+well as user-defined types.  The language is rounded out with Common
+Lisp features such as restartable exceptions, dynamically-bound
+variables, a numerical tower, preprocessing macros, and common data
+structures such as hashtables.  The Wat runtime is implemented in only
+500 lines of JavaScript and evaluates the prelude and a REPL written
+in Wat in under 50ms in common JavaScript interpreters.
 
 The Wat Language Manual is online at
 <http://manuel.github.com/wat-js/doc/manual.html>.
@@ -21,18 +26,10 @@ Try Wat online with a rudimentary REPL at
 
 Execute =./wat=.  (Requires SpiderMonkey command-line JS interpreter.)
 
-** About =wat-js=
-
-=wat-js= is an inefficient but tractable interpreter for Wat written
-in JavaScript.  Its architecture is inspired by Tony Garnock-Jones'
-[[https://github.com/tonyg/js-vau][js-vau]].  For parsing, it uses Chris Double's [[https://github.com/doublec/jsparse][jsparse]].  The file
-=crust.wat= (re-)uses code from John Shutt's [[http://web.cs.wpi.edu/~jshutt/kernel.html][SINK]], Oleg Kiselyov,
-Chung-chieh Shan, and Amr Sabry's [[http://okmij.org/ftp/Computation/dynamic-binding.html][Delimited Dynamic Binding]], and Oleg
-Kiselyov's [[http://okmij.org/ftp/continuations/implementations.html#dynamic-wind][Delimited continuations do dynamic-wind]].  The
-implementation of metacontinuations follows R. Kent Dybvig, Simon
-Peyton Jones, and Amr Sabry's [[http://www.cs.indiana.edu/~dyb/pubs/monadicDC.pdf][A Monadic Framework for Delimited
-Continuations]].
-
 ** Licensing
 
 =wat-js= is released under the MIT License.
+
+** Current Status
+
+Wat is actively being developed by Manuel Simoni (msimoni@gmail.com).

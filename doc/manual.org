@@ -575,7 +575,7 @@ Wat's exception handling is based on the condition system of Common
 Lisp.  Foremost is the ability to continue at the point of an
 exception by invoking a restart.
 
-** =handle <handlers> . <body> → result= [operative]
+** =handle <handlers> . <body> → result= [operative] /NIY/
 
 =handle= establishes exception handlers for the duration of the
 evaluation of the body forms.  When one of the handlers matches a
@@ -598,18 +598,18 @@ While a handler body is executed, the current handlers are those that
 were established at the time =handle= was called.  This is analogous
 to Common Lisp's [[http://www.nhplace.com/kent/Papers/Condition-Handling-2001.html][condition firewall]].
 
-** =catch <handlers> . <body> → result= [operative]
+** =catch <handlers> . <body> → result= [operative] /NIY/
 
 Like =handle=, but unwinds the stack before executing handler, and
 simply returns the result of evaluating the handler body.  The handler
 may rethrow the exception.
 
-** =default-handler <exc> → result= [generic]
+** =default-handler <exc> → result= [generic]  /NIY/
 
 Called on an exception when no handler is found, or when all found
 handlers returned normally.
 
-** =throw <exc> . <handlers> → result= [operative]
+** =throw <exc> . <handlers> → result= [operative] /NIY/
 
 Throws an exception and optionally provides restarts that an exception
 handler may use to continue computation.  Restarts are installed as if
@@ -618,14 +618,11 @@ the result of the handler is returned.  =throw= only returns normally
 if one of its restarts is invoked, otherwise it always enters the
 debugger or crashes the program.
 
-** =invoke-restart <restart> → result= [operative]
+** =invoke-restart <restart> → result= [operative] /NIY/
 
-** =compute-restarts <exception> → list= [operative]
+** =compute-restarts <exception> → list= [operative] /NIY/
 
-** =associated-exception <restart> → exc= [generic]
-
-Returns the associated exception of a restart.  Associated exceptions
-are a mechanism for ensuring that 
+** =associated-exception <restart> → exc= [generic] /NIY/
 
 *** Examples
 

@@ -875,6 +875,13 @@ division, and modulo.
 Turns some objects into a number.  Methods are defined for strings and
 symbols, which are parsed as numbers.
 
+*** Examples
+
+#+BEGIN_EXAMPLE
+(assert (= 3.55 (->number 3.55)))
+(assert (= 3.55 (->number "3.55")))
+#+END_EXAMPLE
+
 * Strings
 
 ** =->string <obj> → string= [generic]

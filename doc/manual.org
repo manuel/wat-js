@@ -14,11 +14,12 @@ Control is based on delimited continuations, subsuming all
 computational effects such as lightweight threads and monads.  Data
 uses first-class types that allow generic programming over built-in as
 well as user-defined types.  The language is rounded out with Common
-Lisp features such as restartable exceptions, dynamically-bound
-variables, a numerical tower, preprocessing macros, and common data
-structures such as hashtables.  The Wat runtime is implemented in only
-500 lines of JavaScript and evaluates the prelude and a REPL written
-in Wat in under 50ms in common JavaScript interpreters.
+Lisp features such as generic functions, restartable exceptions,
+dynamically-bound variables, a numerical tower, preprocessing macros,
+and common data structures such as hashtables.  The Wat runtime is
+implemented in only 500 lines of JavaScript and evaluates the prelude
+and a REPL written in Wat in under 50ms in common JavaScript
+interpreters.
 
 Wat is hosted at <https://github.com/manuel/wat-js>.
 
@@ -134,7 +135,7 @@ Examples:
 | =(vau #ign e e)=        | (1 (+ 2 3) 4) | /<the current environment>/ |
 | =(wrap (vau x #ign x))= | (1 (+ 2 3) 4) | (1 5 4)                     |
 
-* Bindings
+* Bindings and Environments
 ** =def <lhs> <rhs> → rhs= [operative]
 
 Evaluates the right-hand side, matches the left-hand side against it
@@ -276,8 +277,8 @@ Returns true if a symbol is bound in the environment, false otherwise.
 
 ** =provide <names> . <exprs> → result= [operative]
 
-Performs expressions in a new lexical scope and exports only listed
-names to the outer scope.
+Performs expressions in a new environment and exports only listed
+names to the outer environment.
 
 *** Examples
 
@@ -292,7 +293,6 @@ names to the outer scope.
 (assert (not (defined? 'quux (current-environment))))
 #+END_EXAMPLE
 
-* Evaluation and Environments
 ** =make-environment [<parent>] → environment= [applicative]
 
 Creates a new empty environment with the given optional parent.
@@ -328,27 +328,7 @@ Returns the current environment.
 (assert (= 2 (eval 'y (foo))))
 #+END_EXAMPLE
 
-** =eval <expr> <env> → result= [applicative]
-
-Evaluates the expression in the given environment.
-
-*** Examples
-
-#+BEGIN_EXAMPLE
-(assert (= 4 (eval (list + 2 2) (current-environment))))
-#+END_EXAMPLE
-
-** =quote <form> → form= [operative]
-
-Returns form unevaluated.
-
-*** Examples
-
-#+BEGIN_EXAMPLE
-(assert (= '+ (car (quote (+ 2 2)))))
-#+END_EXAMPLE
-
-* Combiners
+* Combiners and Evaluation
 ** =vau <ptree> <envp> . <body> → operative= [operative]
 
 Constructs a new compound operative that closes over the current
@@ -379,6 +359,16 @@ Creates an applicative combiner, as in Scheme.
 (assert (= '(1 2) (quux 1 (+ 1 1))))
 #+END_EXAMPLE
     
+** =eval <expr> <env> → result= [applicative]
+
+Evaluates the expression in the given environment.
+
+*** Examples
+
+#+BEGIN_EXAMPLE
+(assert (= 4 (eval (list + 2 2) (current-environment))))
+#+END_EXAMPLE
+
 ** =apply <apv> <args> → result= [applicative]
 
 Applies an applicative to an arguments list.
@@ -387,6 +377,16 @@ Applies an applicative to an arguments list.
 
 #+BEGIN_EXAMPLE
 (assert (= 4 (apply + (list 2 2))))
+#+END_EXAMPLE
+
+** =quote <form> → form= [operative]
+
+Returns form unevaluated.
+
+*** Examples
+
+#+BEGIN_EXAMPLE
+(assert (= '+ (car (quote (+ 2 2)))))
 #+END_EXAMPLE
 
 ** =wrap <cmb> → applicative= [applicative]
@@ -573,32 +573,34 @@ Retrieves the value of a dynamic variable.
 
 Wat's exception handling is based on the condition system of Common
 Lisp.  Foremost is the ability to continue at the point of an
-exception by invoking a restart.
+exception by invoking a restart handler.
 
-** =handle <handlers> . <body> → result= [operative] /NIY/
+** =handle <body> . <handlers> → result= [operative] /NIY/
 
 =handle= establishes exception handlers for the duration of the
-evaluation of the body forms.  When one of the handlers matches a
+evaluation of the body form.  When one of the handlers matches a
 thrown exception, it will be called on the stack - i.e. the stack is
 not unwound.
 
-Each handler is of the form =(<type-or-pred> (<var>)
-. <handler-body>)=, where =<type-or-pred>= may either be a type or
-predicate.  Handlers are matched against a thrown exception from left
-to right.  If a thrown exception is of the given type or matches the
-given predicate, then the =<handler-body>= expressions will be
-executed with the variable =<var>= bound to the exception.
+Each handler is of the form =(<type> (<var>) . <handler-body>)=.
+Handlers are matched against a thrown exception from left to right.
+If a thrown exception is of the given type, then the =<handler-body>=
+expressions will be executed with the variable =<var>= bound to the
+exception.
 
 A handler may handle the exception by performing a nonlocal transfer
-of control.  If the handler normally returns, the search for a handler
-will continue up the stack.  If no handler is found, the
-=default-handler= generic function is called on the exception.
+of control explicitly with =return-from=, or implicitly with
+e.g. =invoke-restart=.  If the handler normally returns, the search
+for a handler continues up the stack to the next outer =handle= or
+=catch=.  If one of the handlers of a =handle= form matches an
+exception, no other handler of that form will be tried if it returns
+normally.  If no handler is found, the =default-handler= generic
+function is called on the exception.
 
 While a handler body is executed, the current handlers are those that
 were established at the time =handle= was called.  This is analogous
 to Common Lisp's [[http://www.nhplace.com/kent/Papers/Condition-Handling-2001.html][condition firewall]].
-
-** =catch <handlers> . <body> → result= [operative] /NIY/
+** =catch <body> . <handlers> → result= [operative] /NIY/
 
 Like =handle=, but unwinds the stack before executing handler, and
 simply returns the result of evaluating the handler body.  The handler
@@ -611,18 +613,46 @@ handlers returned normally.
 
 ** =throw <exc> . <handlers> → result= [operative] /NIY/
 
-Throws an exception and optionally provides restarts that an exception
-handler may use to continue computation.  Restarts are installed as if
-by =catch=, i.e. when a restart is invoked, the stack is unwound and
-the result of the handler is returned.  =throw= only returns normally
-if one of its restarts is invoked, otherwise it always enters the
-debugger or crashes the program.
+Throws an exception and optionally binds restart handlers that an
+exception handler may use to continue computation.  Restart handlers
+are installed as if by =catch=, i.e. when a restart is invoked, the
+stack is unwound and the result of the restart handler is returned.
+=throw= only returns normally if one of its restart handlers is
+invoked, otherwise it always enters the debugger or crashes the
+program.  The restart handlers are associated with the thrown
+exception, and only match invoked restarts whose
+=associated-exception= is the thrown exception.
 
-** =invoke-restart <restart> → result= [operative] /NIY/
+** =restart-bind <body> . <handlers> → result= [operative] /NIY/
 
-** =compute-restarts <exception> → list= [operative] /NIY/
+Executes a body form with restart handlers in effect.  Restart
+handlers are installed as if by =catch=, i.e. when a restart is
+invoked, the stack is unwound and the result of the restart handler is
+returned.  If any condition happens during evaluation of the body, the
+restart handlers will be effective as per =compute-restarts=.  This is
+unlike the restart handlers bound by a =throw=, which are associated
+with the thrown exception.  Restart handlers bound by =restart-bind=
+are not associated with any exception.
+
+** =invoke-restart <restart> → result= [applicative] /NIY/
+
+Searches the stack for a restart handler established by a =throw= or
+=restart-bind= that matches the restart, unwinds, and evaluates the
+handler body.  If no restart handler is found, an exception is thrown.
+
+** =compute-restarts <exception> → list= [applicative] /NIY/
+
+Returns a list of restart handlers that are effective for the given
+exception.  Restart handlers bound by =restart-bind= are effective for
+any exception, whereas restart handlers bound by =throw= are only
+effective for the thrown exception.
 
 ** =associated-exception <restart> → exc= [generic] /NIY/
+
+A restart intended for a restart handler established by =throw= must
+have the thrown exception as associated exception.  Its type should
+implement a method for this generic function that returns the
+restart's associated exception.
 
 *** Examples
 
@@ -630,22 +660,23 @@ debugger or crashes the program.
 ;; (define-record-type Div-by-Zero-Exception
 ;;   (make-div-by-zero-exception)
 ;;   #ign)
+
 ;; (define-record-type Use-Value-Restart
-;;   (make-use-value-restart associated-exception value)
+;;   (make-use-value-restart value associated-exception)
 ;;   #ign
-;;   (associated-exception associated-exception)
-;;   (value value))
-;;
+;;   (value value)
+;;   (associated-exception associated-exception))
+
 ;; (define (my-compute number divisor)
 ;;   (let ((div (if (= 0 divisor)
 ;;                  (throw (make-div-by-zero-exception)
 ;;                    (Use-Value-Restart (r) (value r)))
 ;;                  divisor)))
-;;     (/ number divisor)))
-;;
+;;     (/ number div)))
+
 ;; (assert 
 ;;   (= (handle (my-compute 12 0)
-;;        (Div-by-Zero-Exception (dbz) (throw (make-use-value-restart dbz 3))))
+;;        (Div-by-Zero-Exception (dbz) (invoke-restart (make-use-value-restart 3 dbz))))
 ;;      4))
 #+END_EXAMPLE
 
@@ -718,7 +749,7 @@ Type constants for built-in types.
 
 Type predicates for built-in types.
 
-* Records
+* Record Types
 ** =define-record-type <name> <ctor> <pred> . <fields> → type= [operative]
 
 Defines a new record type with the given name.
@@ -747,7 +778,7 @@ Each element of =fields= is of the form:
   (email get-email set-email!))
 #+END_EXAMPLE
 
-* Generic Functions
+* Generic Functions and Methods
 ** =define-generic (<name> . <args>) . [<body>] → generic= [operative]
 
 Defines a new generic function.  If the optional body expressions are
@@ -770,7 +801,7 @@ Adds a method to a generic function.
   (string->number (symbol->string self)))
 #+END_EXAMPLE
 
-* Equality
+* Common Generic Functionality
 ** @<code>= <a> <b> → boolean@</code> [generic]
 
 Generic equality predicate.  Different types may attach different
@@ -799,7 +830,6 @@ the same" are guaranteed to be =eq?=, it can be confusing.  The
 generic equality predicate @<code>=@</code> should almost always be
 used instead.
 
-* Order
 ** =< <a> <b> → boolean= [generic]
 
 Generic binary comparison function.  A method is defined for numbers.
@@ -808,7 +838,6 @@ Generic binary comparison function.  A method is defined for numbers.
 
 Binary comparison functions defined in terms of =<= and @<code>=@</code>.
 
-* Hashing
 ** =hash-code <obj> → number= [generic]
 
 Generic hash function.  Different types may attach different methods
@@ -825,13 +854,6 @@ Returns the system-determined identity hash code of the object, which
 is equal if two objects are =eq?=.  It is unlikely that two different
 objects have the same identity hash code.
 
-* Conversion
-** =->string <obj> → string= [generic]
-
-Generic string conversion function.  Turns any object into a string.
-Methods are defined for all built-in types.
-
-** =string->symbol=, =symbol->string=, =string->number=, =number->string= [applicatives]
 * Booleans
 ** =and=, =or= [operatives]
 
@@ -847,6 +869,18 @@ Unary logical connective.
 
 The binary applicatives for addition, subtraction, multiplication,
 division, and modulo.
+
+** =->number <obj> → number= [generic]
+
+Turns some objects into a number.  Methods are defined for strings and
+symbols, which are parsed as numbers.
+
+* Strings
+
+** =->string <obj> → string= [generic]
+
+Turns any object into a string.  Methods are defined for all built-in
+types.
 
 * Pairs and Lists
 
@@ -987,25 +1021,3 @@ combiner with the arguments the callback received.
 ** =define-js-method <name>= [operative]
 =(define-js-method <name>)= is equivalent to =(define <name>
 (js-method (symbol->string <name>)))=.
-* Debugging Interface
-
-** =stacktrace → list= [applicative] /NIY/
-
-Returns a list of recent stack frames.
-
-** =label <obj> → string= [applicative]
-
-Returns the descriptive label of an object.
-
-** =set-label! <obj> <string> → string= [applicative]
-
-Updates the descriptive label of an object.
-
-** =trap <exc> → |= [applicative] /NIY/
-
-If an applicative named =trap= is defined in the top-level
-environment, it will be called when an error (such as variable
-unbound) happens during evaluation.
-
-The trap should abort to a known good continuation, the current one is
-broken and must not be resumed.

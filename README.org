@@ -8,11 +8,12 @@ Control is based on delimited continuations, subsuming all
 computational effects such as lightweight threads and monads.  Data
 uses first-class types that allow generic programming over built-in as
 well as user-defined types.  The language is rounded out with Common
-Lisp features such as restartable exceptions, dynamically-bound
-variables, a numerical tower, preprocessing macros, and common data
-structures such as hashtables.  The Wat runtime is implemented in only
-500 lines of JavaScript and evaluates the prelude and a REPL written
-in Wat in under 50ms in common JavaScript interpreters.
+Lisp features such as generic functions, restartable exceptions,
+dynamically-bound variables, a numerical tower, preprocessing macros,
+and common data structures such as hashtables.  The Wat runtime is
+implemented in only 500 lines of JavaScript and evaluates the prelude
+and a REPL written in Wat in under 50ms in common JavaScript
+interpreters.
 
 The Wat Language Manual is online at
 <http://manuel.github.com/wat-js/doc/manual.html>.

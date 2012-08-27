@@ -309,6 +309,13 @@
   (define-method (->string (obj Vector)) "#[Vector]")
 )
 
+(provide (->number)
+  (define-generic (->number obj))
+  (define-method (->number (obj Number)) obj)
+  (define-method (->number (obj String)) (string->number obj))
+  (define-method (->number (obj Symbol)) (string->number (symbol->string obj)))
+)
+
 (define (display-stacktrace trace)
   (for-each (lambda (frame) (display (->string frame))) trace))
 

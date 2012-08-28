@@ -1057,7 +1057,7 @@ with =to-js= and the result is transformed to Wat with =from-js=.
 * Examples
 ** Error Monad
 
-Error monad from Filinski's [[http://www.diku.dk/~andrzej/papers/RM.ps.gz][/Representing Monads/]]  This shows that
+Error monad from Filinski's [[http://www.diku.dk/~andrzej/papers/RM.ps.gz][/Representing Monads/]].  This shows that
 delimited continuations allow us to write monadic code - in direct
 style.
 

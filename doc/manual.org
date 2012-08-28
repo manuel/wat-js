@@ -714,6 +714,17 @@ performs forms in the new continuation.
      9))
 #+END_EXAMPLE
 
+** =shift <prompt> <cont> . <forms> → result=
+
+Like =take-subcont= with these differences:
+
+ * The continuation is represented as an applicative, not a
+   first-class continuation.
+
+ * Immediately restores prompt around body forms.
+
+ * When continuation is invoked, it first pushes the prompt.
+
 * Types
 ** =make-type → (type tagger untagger)= [applicative]
 
@@ -1021,3 +1032,55 @@ combiner with the arguments the callback received.
 ** =define-js-method <name>= [operative]
 =(define-js-method <name>)= is equivalent to =(define <name>
 (js-method (symbol->string <name>)))=.
+* Examples
+** Error Monad
+
+Error monad from Filinski's [[http://www.diku.dk/~andrzej/papers/RM.ps.gz][/Representing Monads/]]  This shows that
+delimited continuations allow us to write monadic code - in direct
+style.
+
+#+BEGIN_EXAMPLE
+(define *default-prompt* (make-prompt))
+
+(define (reflect m) (shift *default-prompt* k (ext k m)))
+
+(define (reify t) (push-prompt *default-prompt* (unit (t))))
+
+(define-record-type Success
+  (make-success a)
+  success?
+  (a get-success))
+
+(define-record-type Error
+  (make-error a)
+  error?
+  (a get-error))
+
+(define (unit a) (make-success a))
+
+(define (ext f m)
+  (cond ((success? m) (f (get-success m)))
+        ((error? m) m)
+        (#t (fail "type error"))))
+  
+(define (myraise e) (reflect (make-error e)))
+
+(define (myhandle t h)
+  (let ((m (reify t)))
+    (cond ((success? m) (get-success m))
+          ((error? m) (h (get-error m)))
+          (#t (fail "type error")))))
+
+(define (monadic* t)
+  (myhandle (lambda () (t))
+            (lambda (s) s)))
+
+(define-macro (monadic . exprs)
+  (list monadic* (list* lambda () exprs)))
+
+;; Monadic code in direct style:
+
+(assert (= 3 (monadic (+ 1 2))))
+
+(assert (= #f (monadic (+ 1 (+ 3 (myraise #f))))))
+#+END_EXAMPLE

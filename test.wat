@@ -256,36 +256,3 @@
 	       (dref dv)))))))
   3)
 
-;; Error monad from Filinski's "Representing Monads"
-(provide ()
-  (define *default-prompt* (make-prompt))
-  (define (reflect m) (shift *default-prompt* k (ext k m)))
-  (define (reify t) (push-prompt *default-prompt* (unit (t))))
-  (define-record-type Success
-    (make-success a)
-    success?
-    (a get-success))
-  (define-record-type Error
-    (make-error a)
-    error?
-    (a get-error))
-  (define (unit a) (make-success a))
-  (define (ext f m)
-    (cond ((success? m) (f (get-success m)))
-          ((error? m) m)
-          (#t (fail "type error"))))
-  
-  (define (myraise e) (reflect (make-error e)))
-  (define (myhandle t h)
-    (let ((m (reify t)))
-      (cond ((success? m) (get-success m))
-            ((error? m) (h (get-error m)))
-            (#t (fail "type error")))))
-
-  (define (show t)
-    (myhandle (lambda () (t))
-              (lambda (s) s)))
-
-  (assert (= 3 (show (lambda () (+ 1 2)))))
-  (assert (= #f (show (lambda () (+ 1 (+ 3 (myraise #f)))))))
-)

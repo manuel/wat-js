@@ -22,7 +22,7 @@
                    (define forms (read-from-string text))
                    (eval (list* begin forms) (make-environment examples-environment)))))
 
-  (display "Running manual examples...")
+  (display "Running test suite...")
   (run-tests)
 
 )

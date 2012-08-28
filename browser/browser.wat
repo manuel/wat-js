@@ -29,8 +29,9 @@
     (lambda (x y) (m *window* x y))))
 
 (define (read-input)
-  (let ((res (list* 'begin (read-from-string (from-js (js-prop (getElementById "input") "value"))))))
-    (display (strcat "USER> " (from-js (js-prop (getElementById "input") "value"))))
+  (let* ((input (from-js (js-prop (getElementById "input") "value")))
+         (res (list* 'begin (read-from-string input))))
+    (display (strcat "USER> " input))
     (js-set-prop! (getElementById "input") "value" (to-js ""))
     res))
 

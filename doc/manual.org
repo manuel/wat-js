@@ -1029,13 +1029,35 @@ Wat object.
 Returns a JS function that, when called, will apply the provided
 combiner with the arguments the callback received.
 
+** =define-js-function <name>= [operative]
+
+Defines name as an applicative that when called with parameters will
+invoke the named JavaScript method of the object with the parameters
+and return the result.  Arguments of the applicative are transformed
+to JS with =to-js= and the result of the method is transformed to Wat
+with =from-js=.
+
 ** =define-js-method <name>= [operative]
-=(define-js-method <name>)= is equivalent to =(define <name>
-(js-method (symbol->string <name>)))=.
+
+Defines name as an applicative that when called on an object and
+arguments will invoke the named JavaScript method of the object with
+the arguments and return the result.  Arguments are transformed to JS
+with =to-js= and the result is transformed to Wat with =from-js=.
+
+*** Examples
+
+#+BEGIN_EXAMPLE
+(define-js-method toString)
+(assert (= "foo" (toString "foo")))
+(assert (= "12" (toString 12)))
+(assert (= "true" (toString #t)))
+(assert (= "false" (toString #f)))
+#+END_EXAMPLE
+
 * Examples
 ** Error Monad
 
-Error monad from Filinski's [[http://www.diku.dk/~andrzej/papers/RM.ps.gz][/Representing Monads/]]  This shows that
+Error monad from Filinski's [[http://www.diku.dk/~andrzej/papers/RM.ps.gz][/Representing Monads/]].  This shows that
 delimited continuations allow us to write monadic code - in direct
 style.
 

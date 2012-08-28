@@ -8,8 +8,8 @@ color: #000;
 font-weight: bold;
 padding: .125em .5em;
 border-radius: .5em; 
-background-color: #fff;
-border: 1px solid #000; 
+border: 1px solid #000;
+background-color: #fff; 
 }
 a:link, a:visited, a:hover { text-decoration: none; }
 .example { border-width: 0; background-color: #fff; border-radius: .5em; color: #333; padding: 0; }

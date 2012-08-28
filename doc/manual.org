@@ -379,16 +379,6 @@ Applies an applicative to an arguments list.
 (assert (= 4 (apply + (list 2 2))))
 #+END_EXAMPLE
 
-** =quote <form> → form= [operative]
-
-Returns form unevaluated.
-
-*** Examples
-
-#+BEGIN_EXAMPLE
-(assert (= '+ (car (quote (+ 2 2)))))
-#+END_EXAMPLE
-
 ** =wrap <cmb> → applicative= [applicative]
 
 Returns an applicative around an underlying combiner.
@@ -410,6 +400,16 @@ Returns the underlying combiner of an applicative.
 #+BEGIN_EXAMPLE
 (define foo (lambda (a b) (+ a b)))
 (assert (= 7 ((unwrap foo) 3 4)))
+#+END_EXAMPLE
+
+** =quote <form> → form= [operative]
+
+Returns form unevaluated.
+
+*** Examples
+
+#+BEGIN_EXAMPLE
+(assert (= '+ (car (quote (+ 2 2)))))
 #+END_EXAMPLE
 
 * First-order Control
@@ -569,7 +569,7 @@ Performs expressions with the dynamic variable bound to the value.
 
 Retrieves the value of a dynamic variable.
 
-* Exceptions and Restarts
+* Exception Handling
 
 Wat's exception handling is based on the condition system of Common
 Lisp.  Foremost is the ability to continue at the point of an
@@ -606,11 +606,6 @@ Like =handle=, but unwinds the stack before executing handler, and
 simply returns the result of evaluating the handler body.  The handler
 may rethrow the exception.
 
-** =default-handler <exc> → result= [generic]  /NIY/
-
-Called on an exception when no handler is found, or when all found
-handlers returned normally.
-
 ** =throw <exc> . <handlers> → result= [operative] /NIY/
 
 Throws an exception and optionally binds restart handlers that an
@@ -623,29 +618,27 @@ program.  The restart handlers are associated with the thrown
 exception, and only match invoked restarts whose
 =associated-exception= is the thrown exception.
 
+** =default-handler <exc> → result= [generic]  /NIY/
+
+Called on an exception when no handler is found, or when all found
+handlers returned normally.
+
 ** =restart-bind <body> . <handlers> → result= [operative] /NIY/
 
 Executes a body form with restart handlers in effect.  Restart
 handlers are installed as if by =catch=, i.e. when a restart is
 invoked, the stack is unwound and the result of the restart handler is
 returned.  If any condition happens during evaluation of the body, the
-restart handlers will be effective as per =compute-restarts=.  This is
-unlike the restart handlers bound by a =throw=, which are associated
-with the thrown exception.  Restart handlers bound by =restart-bind=
-are not associated with any exception.
+restart handlers will be effective.  This is unlike the restart
+handlers bound by a =throw=, which are associated with the thrown
+exception.  Restart handlers bound by =restart-bind= are not
+associated with any exception.
 
 ** =invoke-restart <restart> → result= [applicative] /NIY/
 
 Searches the stack for a restart handler established by a =throw= or
 =restart-bind= that matches the restart, unwinds, and evaluates the
 handler body.  If no restart handler is found, an exception is thrown.
-
-** =compute-restarts <exception> → list= [applicative] /NIY/
-
-Returns a list of restart handlers that are effective for the given
-exception.  Restart handlers bound by =restart-bind= are effective for
-any exception, whereas restart handlers bound by =throw= are only
-effective for the thrown exception.
 
 ** =associated-exception <restart> → exc= [generic] /NIY/
 
@@ -820,16 +813,6 @@ Methods for the following types are predefined:
 
 Inequality predicate, defined in terms of @<code>=@</code>.
 
-** =eq? <a> <b> → boolean= [applicative]
-
-Returns true if the two values are pointer identical, false otherwise.
-
-Note: it is advised against using =eq?= except in special
-circumstances.  Because not even symbols or small numbers that "are
-the same" are guaranteed to be =eq?=, it can be confusing.  The
-generic equality predicate @<code>=@</code> should almost always be
-used instead.
-
 ** =< <a> <b> → boolean= [generic]
 
 Generic binary comparison function.  A method is defined for numbers.
@@ -847,12 +830,6 @@ back to =identity-hash-code=.
 If two objects are generically equal by @<code>=@</code>, their
 generic hash codes must be equal, too.  Conversely, if two objects
 have different generic hash codes, they cannot be generically equal.
-
-** =identity-hash-code <obj> → number= [applicative]
-
-Returns the system-determined identity hash code of the object, which
-is equal if two objects are =eq?=.  It is unlikely that two different
-objects have the same identity hash code.
 
 * Booleans
 ** =and=, =or= [operatives]
@@ -961,6 +938,22 @@ Returns value associated with key from hash, or default value if not
 found.
 
 * System
+** =eq? <a> <b> → boolean= [applicative]
+
+Returns true if the two values are pointer identical, false otherwise.
+
+Note: it is advised against using =eq?= except in special
+circumstances.  Because not even symbols or small numbers that "are
+the same" are guaranteed to be =eq?=, it can be confusing.  The
+generic equality predicate @<code>=@</code> should almost always be
+used instead.
+
+** =identity-hash-code <obj> → number= [applicative]
+
+Returns the system-determined identity hash code of the object, which
+is equal if two objects are =eq?=.  It is unlikely that two different
+objects have the same identity hash code.
+
 ** =read → form= [applicative]
 
 Reads a form from the console and returns it.

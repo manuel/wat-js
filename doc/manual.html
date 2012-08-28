@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-28 01:27:42 CEST"/>
+<meta name="generated" content="2012-08-28 01:37:45 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -102,9 +102,9 @@ lang="en" xml:lang="en">
 <li><a href="#sec-7.2"><code>lambda &lt;ptree&gt; . &lt;exprs&gt; → applicative</code> [operative] </a></li>
 <li><a href="#sec-7.3"><code>eval &lt;expr&gt; &lt;env&gt; → result</code> [applicative] </a></li>
 <li><a href="#sec-7.4"><code>apply &lt;apv&gt; &lt;args&gt; → result</code> [applicative] </a></li>
-<li><a href="#sec-7.5"><code>quote &lt;form&gt; → form</code> [operative] </a></li>
-<li><a href="#sec-7.6"><code>wrap &lt;cmb&gt; → applicative</code> [applicative] </a></li>
-<li><a href="#sec-7.7"><code>unwrap &lt;cmb&gt; → combiner</code> [applicative] </a></li>
+<li><a href="#sec-7.5"><code>wrap &lt;cmb&gt; → applicative</code> [applicative] </a></li>
+<li><a href="#sec-7.6"><code>unwrap &lt;cmb&gt; → combiner</code> [applicative] </a></li>
+<li><a href="#sec-7.7"><code>quote &lt;form&gt; → form</code> [operative] </a></li>
 </ul>
 </li>
 <li><a href="#sec-8">First-order Control </a>
@@ -128,16 +128,15 @@ lang="en" xml:lang="en">
 <li><a href="#sec-9.3"><code>dref &lt;dynamic&gt; → value</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-10">Exceptions and Restarts </a>
+<li><a href="#sec-10">Exception Handling </a>
 <ul>
 <li><a href="#sec-10.1"><code>handle &lt;body&gt; . &lt;handlers&gt; → result</code> [operative] <i>NIY</i> </a></li>
 <li><a href="#sec-10.2"><code>catch &lt;body&gt; . &lt;handlers&gt; → result</code> [operative] <i>NIY</i> </a></li>
-<li><a href="#sec-10.3"><code>default-handler &lt;exc&gt; → result</code> [generic]  <i>NIY</i> </a></li>
-<li><a href="#sec-10.4"><code>throw &lt;exc&gt; . &lt;handlers&gt; → result</code> [operative] <i>NIY</i> </a></li>
+<li><a href="#sec-10.3"><code>throw &lt;exc&gt; . &lt;handlers&gt; → result</code> [operative] <i>NIY</i> </a></li>
+<li><a href="#sec-10.4"><code>default-handler &lt;exc&gt; → result</code> [generic]  <i>NIY</i> </a></li>
 <li><a href="#sec-10.5"><code>restart-bind &lt;body&gt; . &lt;handlers&gt; → result</code> [operative] <i>NIY</i> </a></li>
 <li><a href="#sec-10.6"><code>invoke-restart &lt;restart&gt; → result</code> [applicative] <i>NIY</i> </a></li>
-<li><a href="#sec-10.7"><code>compute-restarts &lt;exception&gt; → list</code> [applicative] <i>NIY</i> </a></li>
-<li><a href="#sec-10.8"><code>associated-exception &lt;restart&gt; → exc</code> [generic] <i>NIY</i> </a></li>
+<li><a href="#sec-10.7"><code>associated-exception &lt;restart&gt; → exc</code> [generic] <i>NIY</i> </a></li>
 </ul>
 </li>
 <li><a href="#sec-11">Higher-order Control </a>
@@ -171,11 +170,9 @@ lang="en" xml:lang="en">
 <ul>
 <li><a href="#sec-15.1"><code>= &lt;a&gt; &lt;b&gt; → boolean</code> [generic] </a></li>
 <li><a href="#sec-15.2"><code>/= &lt;a&gt; &lt;b&gt; → boolean</code> [applicative] </a></li>
-<li><a href="#sec-15.3"><code>eq? &lt;a&gt; &lt;b&gt; → boolean</code> [applicative] </a></li>
-<li><a href="#sec-15.4"><code>&lt; &lt;a&gt; &lt;b&gt; → boolean</code> [generic] </a></li>
-<li><a href="#sec-15.5"><code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code> [applicatives] </a></li>
-<li><a href="#sec-15.6"><code>hash-code &lt;obj&gt; → number</code> [generic] </a></li>
-<li><a href="#sec-15.7"><code>identity-hash-code &lt;obj&gt; → number</code> [applicative] </a></li>
+<li><a href="#sec-15.3"><code>&lt; &lt;a&gt; &lt;b&gt; → boolean</code> [generic] </a></li>
+<li><a href="#sec-15.4"><code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code> [applicatives] </a></li>
+<li><a href="#sec-15.5"><code>hash-code &lt;obj&gt; → number</code> [generic] </a></li>
 </ul>
 </li>
 <li><a href="#sec-16">Booleans </a>
@@ -225,9 +222,11 @@ lang="en" xml:lang="en">
 </li>
 <li><a href="#sec-22">System </a>
 <ul>
-<li><a href="#sec-22.1"><code>read → form</code> [applicative] </a></li>
-<li><a href="#sec-22.2"><code>display &lt;msg&gt; → msg</code> [applicative] </a></li>
-<li><a href="#sec-22.3"><code>fail &lt;reason&gt; → |</code> [applicative] </a></li>
+<li><a href="#sec-22.1"><code>eq? &lt;a&gt; &lt;b&gt; → boolean</code> [applicative] </a></li>
+<li><a href="#sec-22.2"><code>identity-hash-code &lt;obj&gt; → number</code> [applicative] </a></li>
+<li><a href="#sec-22.3"><code>read → form</code> [applicative] </a></li>
+<li><a href="#sec-22.4"><code>display &lt;msg&gt; → msg</code> [applicative] </a></li>
+<li><a href="#sec-22.5"><code>fail &lt;reason&gt; → |</code> [applicative] </a></li>
 </ul>
 </li>
 <li><a href="#sec-23">JavaScript Bridge </a>
@@ -1014,38 +1013,8 @@ Applies an applicative to an arguments list.
 </div>
 
 <div id="outline-container-7.5" class="outline-3">
-<h3 id="sec-7.5"><code>quote &lt;form&gt; → form</code> [operative] </h3>
+<h3 id="sec-7.5"><code>wrap &lt;cmb&gt; → applicative</code> [applicative] </h3>
 <div class="outline-text-3" id="text-7.5">
-
-
-<p>
-Returns form unevaluated.
-</p>
-
-</div>
-
-<div id="outline-container-7.5.1" class="outline-4">
-<h4 id="sec-7.5.1">Examples </h4>
-<div class="outline-text-4" id="text-7.5.1">
-
-
-
-
-
-<pre class="example">(assert (= '+ (car (quote (+ 2 2)))))
-</pre>
-
-
-
-
-</div>
-</div>
-
-</div>
-
-<div id="outline-container-7.6" class="outline-3">
-<h3 id="sec-7.6"><code>wrap &lt;cmb&gt; → applicative</code> [applicative] </h3>
-<div class="outline-text-3" id="text-7.6">
 
 
 <p>
@@ -1054,9 +1023,9 @@ Returns an applicative around an underlying combiner.
 
 </div>
 
-<div id="outline-container-7.6.1" class="outline-4">
-<h4 id="sec-7.6.1">Examples </h4>
-<div class="outline-text-4" id="text-7.6.1">
+<div id="outline-container-7.5.1" class="outline-4">
+<h4 id="sec-7.5.1">Examples </h4>
+<div class="outline-text-4" id="text-7.5.1">
 
 
 
@@ -1075,13 +1044,44 @@ Returns an applicative around an underlying combiner.
 
 </div>
 
-<div id="outline-container-7.7" class="outline-3">
-<h3 id="sec-7.7"><code>unwrap &lt;cmb&gt; → combiner</code> [applicative] </h3>
-<div class="outline-text-3" id="text-7.7">
+<div id="outline-container-7.6" class="outline-3">
+<h3 id="sec-7.6"><code>unwrap &lt;cmb&gt; → combiner</code> [applicative] </h3>
+<div class="outline-text-3" id="text-7.6">
 
 
 <p>
 Returns the underlying combiner of an applicative.
+</p>
+
+</div>
+
+<div id="outline-container-7.6.1" class="outline-4">
+<h4 id="sec-7.6.1">Examples </h4>
+<div class="outline-text-4" id="text-7.6.1">
+
+
+
+
+
+<pre class="example">(define foo (lambda (a b) (+ a b)))
+(assert (= 7 ((unwrap foo) 3 4)))
+</pre>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-7.7" class="outline-3">
+<h3 id="sec-7.7"><code>quote &lt;form&gt; → form</code> [operative] </h3>
+<div class="outline-text-3" id="text-7.7">
+
+
+<p>
+Returns form unevaluated.
 </p>
 
 </div>
@@ -1094,8 +1094,7 @@ Returns the underlying combiner of an applicative.
 
 
 
-<pre class="example">(define foo (lambda (a b) (+ a b)))
-(assert (= 7 ((unwrap foo) 3 4)))
+<pre class="example">(assert (= '+ (car (quote (+ 2 2)))))
 </pre>
 
 
@@ -1492,7 +1491,7 @@ Retrieves the value of a dynamic variable.
 </div>
 
 <div id="outline-container-10" class="outline-2">
-<h2 id="sec-10">Exceptions and Restarts </h2>
+<h2 id="sec-10">Exception Handling </h2>
 <div class="outline-text-2" id="text-10">
 
 
@@ -1555,21 +1554,8 @@ may rethrow the exception.
 </div>
 
 <div id="outline-container-10.3" class="outline-3">
-<h3 id="sec-10.3"><code>default-handler &lt;exc&gt; → result</code> [generic]  <i>NIY</i> </h3>
+<h3 id="sec-10.3"><code>throw &lt;exc&gt; . &lt;handlers&gt; → result</code> [operative] <i>NIY</i> </h3>
 <div class="outline-text-3" id="text-10.3">
-
-
-<p>
-Called on an exception when no handler is found, or when all found
-handlers returned normally.
-</p>
-</div>
-
-</div>
-
-<div id="outline-container-10.4" class="outline-3">
-<h3 id="sec-10.4"><code>throw &lt;exc&gt; . &lt;handlers&gt; → result</code> [operative] <i>NIY</i> </h3>
-<div class="outline-text-3" id="text-10.4">
 
 
 <p>
@@ -1587,6 +1573,19 @@ exception, and only match invoked restarts whose
 
 </div>
 
+<div id="outline-container-10.4" class="outline-3">
+<h3 id="sec-10.4"><code>default-handler &lt;exc&gt; → result</code> [generic]  <i>NIY</i> </h3>
+<div class="outline-text-3" id="text-10.4">
+
+
+<p>
+Called on an exception when no handler is found, or when all found
+handlers returned normally.
+</p>
+</div>
+
+</div>
+
 <div id="outline-container-10.5" class="outline-3">
 <h3 id="sec-10.5"><code>restart-bind &lt;body&gt; . &lt;handlers&gt; → result</code> [operative] <i>NIY</i> </h3>
 <div class="outline-text-3" id="text-10.5">
@@ -1597,10 +1596,10 @@ Executes a body form with restart handlers in effect.  Restart
 handlers are installed as if by <code>catch</code>, i.e. when a restart is
 invoked, the stack is unwound and the result of the restart handler is
 returned.  If any condition happens during evaluation of the body, the
-restart handlers will be effective as per <code>compute-restarts</code>.  This is
-unlike the restart handlers bound by a <code>throw</code>, which are associated
-with the thrown exception.  Restart handlers bound by <code>restart-bind</code>
-are not associated with any exception.
+restart handlers will be effective.  This is unlike the restart
+handlers bound by a <code>throw</code>, which are associated with the thrown
+exception.  Restart handlers bound by <code>restart-bind</code> are not
+associated with any exception.
 </p>
 </div>
 
@@ -1621,23 +1620,8 @@ handler body.  If no restart handler is found, an exception is thrown.
 </div>
 
 <div id="outline-container-10.7" class="outline-3">
-<h3 id="sec-10.7"><code>compute-restarts &lt;exception&gt; → list</code> [applicative] <i>NIY</i> </h3>
+<h3 id="sec-10.7"><code>associated-exception &lt;restart&gt; → exc</code> [generic] <i>NIY</i> </h3>
 <div class="outline-text-3" id="text-10.7">
-
-
-<p>
-Returns a list of restart handlers that are effective for the given
-exception.  Restart handlers bound by <code>restart-bind</code> are effective for
-any exception, whereas restart handlers bound by <code>throw</code> are only
-effective for the thrown exception.
-</p>
-</div>
-
-</div>
-
-<div id="outline-container-10.8" class="outline-3">
-<h3 id="sec-10.8"><code>associated-exception &lt;restart&gt; → exc</code> [generic] <i>NIY</i> </h3>
-<div class="outline-text-3" id="text-10.8">
 
 
 <p>
@@ -1649,9 +1633,9 @@ restart's associated exception.
 
 </div>
 
-<div id="outline-container-10.8.1" class="outline-4">
-<h4 id="sec-10.8.1">Examples </h4>
-<div class="outline-text-4" id="text-10.8.1">
+<div id="outline-container-10.7.1" class="outline-4">
+<h4 id="sec-10.7.1">Examples </h4>
+<div class="outline-text-4" id="text-10.7.1">
 
 
 
@@ -2031,27 +2015,8 @@ Inequality predicate, defined in terms of <code>=</code>.
 </div>
 
 <div id="outline-container-15.3" class="outline-3">
-<h3 id="sec-15.3"><code>eq? &lt;a&gt; &lt;b&gt; → boolean</code> [applicative] </h3>
+<h3 id="sec-15.3"><code>&lt; &lt;a&gt; &lt;b&gt; → boolean</code> [generic] </h3>
 <div class="outline-text-3" id="text-15.3">
-
-
-<p>
-Returns true if the two values are pointer identical, false otherwise.
-</p>
-<p>
-Note: it is advised against using <code>eq?</code> except in special
-circumstances.  Because not even symbols or small numbers that "are
-the same" are guaranteed to be <code>eq?</code>, it can be confusing.  The
-generic equality predicate <code>=</code> should almost always be
-used instead.
-</p>
-</div>
-
-</div>
-
-<div id="outline-container-15.4" class="outline-3">
-<h3 id="sec-15.4"><code>&lt; &lt;a&gt; &lt;b&gt; → boolean</code> [generic] </h3>
-<div class="outline-text-3" id="text-15.4">
 
 
 <p>
@@ -2061,9 +2026,9 @@ Generic binary comparison function.  A method is defined for numbers.
 
 </div>
 
-<div id="outline-container-15.5" class="outline-3">
-<h3 id="sec-15.5"><code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code> [applicatives] </h3>
-<div class="outline-text-3" id="text-15.5">
+<div id="outline-container-15.4" class="outline-3">
+<h3 id="sec-15.4"><code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code> [applicatives] </h3>
+<div class="outline-text-3" id="text-15.4">
 
 
 <p>
@@ -2073,9 +2038,9 @@ Binary comparison functions defined in terms of <code>&lt;</code> and <code>=</c
 
 </div>
 
-<div id="outline-container-15.6" class="outline-3">
-<h3 id="sec-15.6"><code>hash-code &lt;obj&gt; → number</code> [generic] </h3>
-<div class="outline-text-3" id="text-15.6">
+<div id="outline-container-15.5" class="outline-3">
+<h3 id="sec-15.5"><code>hash-code &lt;obj&gt; → number</code> [generic] </h3>
+<div class="outline-text-3" id="text-15.5">
 
 
 <p>
@@ -2087,20 +2052,6 @@ back to <code>identity-hash-code</code>.
 If two objects are generically equal by <code>=</code>, their
 generic hash codes must be equal, too.  Conversely, if two objects
 have different generic hash codes, they cannot be generically equal.
-</p>
-</div>
-
-</div>
-
-<div id="outline-container-15.7" class="outline-3">
-<h3 id="sec-15.7"><code>identity-hash-code &lt;obj&gt; → number</code> [applicative] </h3>
-<div class="outline-text-3" id="text-15.7">
-
-
-<p>
-Returns the system-determined identity hash code of the object, which
-is equal if two objects are <code>eq?</code>.  It is unlikely that two different
-objects have the same identity hash code.
 </p>
 </div>
 </div>
@@ -2443,8 +2394,41 @@ found.
 </div>
 
 <div id="outline-container-22.1" class="outline-3">
-<h3 id="sec-22.1"><code>read → form</code> [applicative] </h3>
+<h3 id="sec-22.1"><code>eq? &lt;a&gt; &lt;b&gt; → boolean</code> [applicative] </h3>
 <div class="outline-text-3" id="text-22.1">
+
+
+<p>
+Returns true if the two values are pointer identical, false otherwise.
+</p>
+<p>
+Note: it is advised against using <code>eq?</code> except in special
+circumstances.  Because not even symbols or small numbers that "are
+the same" are guaranteed to be <code>eq?</code>, it can be confusing.  The
+generic equality predicate <code>=</code> should almost always be
+used instead.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-22.2" class="outline-3">
+<h3 id="sec-22.2"><code>identity-hash-code &lt;obj&gt; → number</code> [applicative] </h3>
+<div class="outline-text-3" id="text-22.2">
+
+
+<p>
+Returns the system-determined identity hash code of the object, which
+is equal if two objects are <code>eq?</code>.  It is unlikely that two different
+objects have the same identity hash code.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-22.3" class="outline-3">
+<h3 id="sec-22.3"><code>read → form</code> [applicative] </h3>
+<div class="outline-text-3" id="text-22.3">
 
 
 <p>
@@ -2454,9 +2438,9 @@ Reads a form from the console and returns it.
 
 </div>
 
-<div id="outline-container-22.2" class="outline-3">
-<h3 id="sec-22.2"><code>display &lt;msg&gt; → msg</code> [applicative] </h3>
-<div class="outline-text-3" id="text-22.2">
+<div id="outline-container-22.4" class="outline-3">
+<h3 id="sec-22.4"><code>display &lt;msg&gt; → msg</code> [applicative] </h3>
+<div class="outline-text-3" id="text-22.4">
 
 
 <p>
@@ -2466,9 +2450,9 @@ Prints a message string to the console and returns it.
 
 </div>
 
-<div id="outline-container-22.3" class="outline-3">
-<h3 id="sec-22.3"><code>fail &lt;reason&gt; → |</code> [applicative] </h3>
-<div class="outline-text-3" id="text-22.3">
+<div id="outline-container-22.5" class="outline-3">
+<h3 id="sec-22.5"><code>fail &lt;reason&gt; → |</code> [applicative] </h3>
+<div class="outline-text-3" id="text-22.5">
 
 
 <p>
@@ -2622,7 +2606,7 @@ combiner with the arguments the callback received.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-28 01:27:42 CEST</p>
+<p class="date"> Date: 2012-08-28 01:37:45 CEST</p>
 </div>
 </div>
 </body>

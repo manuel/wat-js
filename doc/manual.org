@@ -464,6 +464,27 @@ Evaluates forms if test is false, returns void otherwise.
 (assert (= #void (unless 'foo 1 2)))
 #+END_EXAMPLE
 
+** =cond . <clauses> → result= [operative]
+
+Performs multiple tests.  Each clause is of the form =(<test>
+. <body>)=.  Clauses are performed from left to right by evaluating
+each clause's test expression until one is not false.  This clause's
+body forms are then evaluated and returned.  There is no =else= as in
+Scheme, instead =#t= should be used for a default clause.  As a
+special case, =(cond)= returns void.
+
+*** Examples
+
+#+BEGIN_EXAMPLE
+(define (my-number-type x)
+  (cond ((< x 0) 'negative)
+        ((> x 0) 'positive)
+        (#t 'zero)))
+(assert (= 'negative (my-number-type -1)))
+(assert (= 'positive (my-number-type 1)))
+(assert (= 'zero (my-number-type 0)))
+#+END_EXAMPLE
+
 ** =loop . <forms> → |= [operative]
 
 Infinite loop.
@@ -525,12 +546,18 @@ that can be invoked with =return-from=.
                          '(1 2 3 4 5)))))
 #+END_EXAMPLE
 
-** =return-from <cont> <val> → |= [operative]
+** =return-from <cont> . [<val>] → |= [operative]
 
 Invokes a one-shot escape continuation bound by =block=, passing it
-the given value.
+the given value, or void if no value is given.
 
 An error is signalled if the continuation's extent has ended.
+
+*** Examples
+
+#+BEGIN_EXAMPLE
+;(assert (= #void (block foo (return-from foo) 1 2)))
+#+END_EXAMPLE
 
 ** =unwind-protect <protected> . <cleanup> → result= [operative]
 
@@ -716,7 +743,7 @@ performs forms in the new continuation.
 
 ** =shift <prompt> <cont> . <forms> → result=
 
-Like =take-subcont= with these differences:
+Wrapper around =take-subcont= with these differences:
 
  * The continuation is represented as an applicative, not a
    first-class continuation.
@@ -948,6 +975,17 @@ Associates key with value in hashtable.
 Returns value associated with key from hash, or default value if not
 found.
 
+* Options
+** =some <value> → option= [applicative]
+** =none= [variable]
+** =if-option (<name> <option>) <then> . [<else>] → result= [operative]
+*** Examples
+#+BEGIN_EXAMPLE
+(define x-opt (some 12))
+(assert (= (if-option (x x-opt) x 0) 12))
+(define x-opt none)
+(assert (= (if-option (x x-opt) x 0) 0))
+#+END_EXAMPLE
 * System
 ** =eq? <a> <b> → boolean= [applicative]
 

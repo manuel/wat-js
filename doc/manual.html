@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-29 12:16:10 CEST"/>
+<meta name="generated" content="2012-08-29 12:27:20 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -113,12 +113,13 @@ lang="en" xml:lang="en">
 <li><a href="#sec-8.2"><code>if &lt;test&gt; &lt;then&gt; &lt;else&gt; → result</code> [operative] </a></li>
 <li><a href="#sec-8.3"><code>when &lt;test&gt; . &lt;forms&gt; → result</code> [operative] </a></li>
 <li><a href="#sec-8.4"><code>unless &lt;test&gt; . &lt;forms&gt; → result</code> [operative] </a></li>
-<li><a href="#sec-8.5"><code>loop . &lt;forms&gt; → |</code> [operative] </a></li>
-<li><a href="#sec-8.6"><code>while &lt;test&gt; . &lt;forms&gt; → |</code> [operative] </a></li>
-<li><a href="#sec-8.7"><code>until &lt;test&gt; . &lt;forms&gt; → |</code> [operative] </a></li>
-<li><a href="#sec-8.8"><code>block &lt;name&gt; . &lt;body&gt; → result</code> [operative] </a></li>
-<li><a href="#sec-8.9"><code>return-from &lt;cont&gt; . [&lt;val&gt;] → |</code> [operative] </a></li>
-<li><a href="#sec-8.10"><code>unwind-protect &lt;protected&gt; . &lt;cleanup&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-8.5"><code>cond . &lt;clauses&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-8.6"><code>loop . &lt;forms&gt; → |</code> [operative] </a></li>
+<li><a href="#sec-8.7"><code>while &lt;test&gt; . &lt;forms&gt; → |</code> [operative] </a></li>
+<li><a href="#sec-8.8"><code>until &lt;test&gt; . &lt;forms&gt; → |</code> [operative] </a></li>
+<li><a href="#sec-8.9"><code>block &lt;name&gt; . &lt;body&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-8.10"><code>return-from &lt;cont&gt; . [&lt;val&gt;] → |</code> [operative] </a></li>
+<li><a href="#sec-8.11"><code>unwind-protect &lt;protected&gt; . &lt;cleanup&gt; → result</code> [operative] </a></li>
 </ul>
 </li>
 <li><a href="#sec-9">Dynamic Binding </a>
@@ -1259,8 +1260,48 @@ Evaluates forms if test is false, returns void otherwise.
 </div>
 
 <div id="outline-container-8.5" class="outline-3">
-<h3 id="sec-8.5"><code>loop . &lt;forms&gt; → |</code> [operative] </h3>
+<h3 id="sec-8.5"><code>cond . &lt;clauses&gt; → result</code> [operative] </h3>
 <div class="outline-text-3" id="text-8.5">
+
+
+<p>
+Performs multiple tests.  Each clause is of the form <code>(&lt;test&gt; . &lt;body&gt;)</code>.  Clauses are performed from left to right by evaluating
+each clause's test expression until one is not false.  This clause's
+body forms are then evaluated and returned.  There is no <code>else</code> as in
+Scheme, instead <code>#t</code> should be used for a default clause.  As a
+special case, <code>(cond)</code> returns void.
+</p>
+
+</div>
+
+<div id="outline-container-8.5.1" class="outline-4">
+<h4 id="sec-8.5.1">Examples </h4>
+<div class="outline-text-4" id="text-8.5.1">
+
+
+
+
+
+<pre class="example">(define (my-number-type x)
+  (cond ((&lt; x 0) 'negative)
+        ((&gt; x 0) 'positive)
+        (#t 'zero)))
+(assert (= 'negative (my-number-type -1)))
+(assert (= 'positive (my-number-type 1)))
+(assert (= 'zero (my-number-type 0)))
+</pre>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-8.6" class="outline-3">
+<h3 id="sec-8.6"><code>loop . &lt;forms&gt; → |</code> [operative] </h3>
+<div class="outline-text-3" id="text-8.6">
 
 
 <p>
@@ -1269,9 +1310,9 @@ Infinite loop.
 
 </div>
 
-<div id="outline-container-8.5.1" class="outline-4">
-<h4 id="sec-8.5.1">Examples </h4>
-<div class="outline-text-4" id="text-8.5.1">
+<div id="outline-container-8.6.1" class="outline-4">
+<h4 id="sec-8.6.1">Examples </h4>
+<div class="outline-text-4" id="text-8.6.1">
 
 
 
@@ -1295,9 +1336,9 @@ Infinite loop.
 
 </div>
 
-<div id="outline-container-8.6" class="outline-3">
-<h3 id="sec-8.6"><code>while &lt;test&gt; . &lt;forms&gt; → |</code> [operative] </h3>
-<div class="outline-text-3" id="text-8.6">
+<div id="outline-container-8.7" class="outline-3">
+<h3 id="sec-8.7"><code>while &lt;test&gt; . &lt;forms&gt; → |</code> [operative] </h3>
+<div class="outline-text-3" id="text-8.7">
 
 
 <p>
@@ -1306,9 +1347,9 @@ Performs forms while test is true.
 
 </div>
 
-<div id="outline-container-8.6.1" class="outline-4">
-<h4 id="sec-8.6.1">Examples </h4>
-<div class="outline-text-4" id="text-8.6.1">
+<div id="outline-container-8.7.1" class="outline-4">
+<h4 id="sec-8.7.1">Examples </h4>
+<div class="outline-text-4" id="text-8.7.1">
 
 
 
@@ -1328,9 +1369,9 @@ Performs forms while test is true.
 
 </div>
 
-<div id="outline-container-8.7" class="outline-3">
-<h3 id="sec-8.7"><code>until &lt;test&gt; . &lt;forms&gt; → |</code> [operative] </h3>
-<div class="outline-text-3" id="text-8.7">
+<div id="outline-container-8.8" class="outline-3">
+<h3 id="sec-8.8"><code>until &lt;test&gt; . &lt;forms&gt; → |</code> [operative] </h3>
+<div class="outline-text-3" id="text-8.8">
 
 
 <p>
@@ -1339,9 +1380,9 @@ Performs forms until test is true.
 
 </div>
 
-<div id="outline-container-8.7.1" class="outline-4">
-<h4 id="sec-8.7.1">Examples </h4>
-<div class="outline-text-4" id="text-8.7.1">
+<div id="outline-container-8.8.1" class="outline-4">
+<h4 id="sec-8.8.1">Examples </h4>
+<div class="outline-text-4" id="text-8.8.1">
 
 
 
@@ -1361,9 +1402,9 @@ Performs forms until test is true.
 
 </div>
 
-<div id="outline-container-8.8" class="outline-3">
-<h3 id="sec-8.8"><code>block &lt;name&gt; . &lt;body&gt; → result</code> [operative] </h3>
-<div class="outline-text-3" id="text-8.8">
+<div id="outline-container-8.9" class="outline-3">
+<h3 id="sec-8.9"><code>block &lt;name&gt; . &lt;body&gt; → result</code> [operative] </h3>
+<div class="outline-text-3" id="text-8.9">
 
 
 <p>
@@ -1373,9 +1414,9 @@ that can be invoked with <code>return-from</code>.
 
 </div>
 
-<div id="outline-container-8.8.1" class="outline-4">
-<h4 id="sec-8.8.1">Examples </h4>
-<div class="outline-text-4" id="text-8.8.1">
+<div id="outline-container-8.9.1" class="outline-4">
+<h4 id="sec-8.9.1">Examples </h4>
+<div class="outline-text-4" id="text-8.9.1">
 
 
 
@@ -1399,9 +1440,9 @@ that can be invoked with <code>return-from</code>.
 
 </div>
 
-<div id="outline-container-8.9" class="outline-3">
-<h3 id="sec-8.9"><code>return-from &lt;cont&gt; . [&lt;val&gt;] → |</code> [operative] </h3>
-<div class="outline-text-3" id="text-8.9">
+<div id="outline-container-8.10" class="outline-3">
+<h3 id="sec-8.10"><code>return-from &lt;cont&gt; . [&lt;val&gt;] → |</code> [operative] </h3>
+<div class="outline-text-3" id="text-8.10">
 
 
 <p>
@@ -1414,9 +1455,9 @@ An error is signalled if the continuation's extent has ended.
 
 </div>
 
-<div id="outline-container-8.9.1" class="outline-4">
-<h4 id="sec-8.9.1">Examples </h4>
-<div class="outline-text-4" id="text-8.9.1">
+<div id="outline-container-8.10.1" class="outline-4">
+<h4 id="sec-8.10.1">Examples </h4>
+<div class="outline-text-4" id="text-8.10.1">
 
 
 
@@ -1433,9 +1474,9 @@ An error is signalled if the continuation's extent has ended.
 
 </div>
 
-<div id="outline-container-8.10" class="outline-3">
-<h3 id="sec-8.10"><code>unwind-protect &lt;protected&gt; . &lt;cleanup&gt; → result</code> [operative] </h3>
-<div class="outline-text-3" id="text-8.10">
+<div id="outline-container-8.11" class="outline-3">
+<h3 id="sec-8.11"><code>unwind-protect &lt;protected&gt; . &lt;cleanup&gt; → result</code> [operative] </h3>
+<div class="outline-text-3" id="text-8.11">
 
 
 <p>
@@ -1448,9 +1489,9 @@ higher-order control.
 
 </div>
 
-<div id="outline-container-8.10.1" class="outline-4">
-<h4 id="sec-8.10.1">Examples </h4>
-<div class="outline-text-4" id="text-8.10.1">
+<div id="outline-container-8.11.1" class="outline-4">
+<h4 id="sec-8.11.1">Examples </h4>
+<div class="outline-text-4" id="text-8.11.1">
 
 
 
@@ -2832,7 +2873,7 @@ style.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-29 12:16:10 CEST</p>
+<p class="date"> Date: 2012-08-29 12:27:20 CEST</p>
 </div>
 </div>
 </body>

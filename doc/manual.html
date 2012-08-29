@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-28 23:19:43 CEST"/>
+<meta name="generated" content="2012-08-29 06:17:42 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -221,33 +221,40 @@ lang="en" xml:lang="en">
 <li><a href="#sec-21.6"><code>hashtable-get &lt;hashtable&gt; &lt;key&gt; &lt;default&gt; → val</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-22">System </a>
+<li><a href="#sec-22">Options </a>
 <ul>
-<li><a href="#sec-22.1"><code>eq? &lt;a&gt; &lt;b&gt; → boolean</code> [applicative] </a></li>
-<li><a href="#sec-22.2"><code>identity-hash-code &lt;obj&gt; → number</code> [applicative] </a></li>
-<li><a href="#sec-22.3"><code>read → form</code> [applicative] </a></li>
-<li><a href="#sec-22.4"><code>display &lt;msg&gt; → msg</code> [applicative] </a></li>
-<li><a href="#sec-22.5"><code>fail &lt;reason&gt; → |</code> [applicative] </a></li>
+<li><a href="#sec-22.1"><code>some &lt;value&gt; → option</code> [applicative] </a></li>
+<li><a href="#sec-22.2"><code>none</code> [variable] </a></li>
+<li><a href="#sec-22.3"><code>if-option (&lt;name&gt; &lt;option&gt;) &lt;then&gt; . [&lt;else&gt;] → result</code> [operative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-23">JavaScript Bridge </a>
+<li><a href="#sec-23">System </a>
 <ul>
-<li><a href="#sec-23.1"><code>js-global &lt;string&gt; → result</code> [applicative] </a></li>
-<li><a href="#sec-23.2"><code>js-set-global! &lt;string&gt; &lt;val&gt; → val</code> [applicative] </a></li>
-<li><a href="#sec-23.3"><code>js-prop &lt;object&gt; &lt;string&gt; → result</code> [applicative] </a></li>
-<li><a href="#sec-23.4"><code>js-set-prop! &lt;object&gt; &lt;string&gt; &lt;val&gt; → val</code> [applicative] </a></li>
-<li><a href="#sec-23.5"><code>js-function &lt;jsfun&gt; → applicative</code> [applicative] </a></li>
-<li><a href="#sec-23.6"><code>js-method &lt;string&gt; → cmb</code> [applicative] </a></li>
-<li><a href="#sec-23.7"><code>to-js &lt;obj&gt; → jsobj</code> [applicative] </a></li>
-<li><a href="#sec-23.8"><code>from-js &lt;js-obj&gt; → obj</code> [applicative] </a></li>
-<li><a href="#sec-23.9"><code>js-callback &lt;cmb&gt; → jsfun</code> [applicative] </a></li>
-<li><a href="#sec-23.10"><code>define-js-function &lt;name&gt;</code> [operative] </a></li>
-<li><a href="#sec-23.11"><code>define-js-method &lt;name&gt;</code> [operative] </a></li>
+<li><a href="#sec-23.1"><code>eq? &lt;a&gt; &lt;b&gt; → boolean</code> [applicative] </a></li>
+<li><a href="#sec-23.2"><code>identity-hash-code &lt;obj&gt; → number</code> [applicative] </a></li>
+<li><a href="#sec-23.3"><code>read → form</code> [applicative] </a></li>
+<li><a href="#sec-23.4"><code>display &lt;msg&gt; → msg</code> [applicative] </a></li>
+<li><a href="#sec-23.5"><code>fail &lt;reason&gt; → |</code> [applicative] </a></li>
 </ul>
 </li>
-<li><a href="#sec-24">Examples </a>
+<li><a href="#sec-24">JavaScript Bridge </a>
 <ul>
-<li><a href="#sec-24.1">Error Monad </a></li>
+<li><a href="#sec-24.1"><code>js-global &lt;string&gt; → result</code> [applicative] </a></li>
+<li><a href="#sec-24.2"><code>js-set-global! &lt;string&gt; &lt;val&gt; → val</code> [applicative] </a></li>
+<li><a href="#sec-24.3"><code>js-prop &lt;object&gt; &lt;string&gt; → result</code> [applicative] </a></li>
+<li><a href="#sec-24.4"><code>js-set-prop! &lt;object&gt; &lt;string&gt; &lt;val&gt; → val</code> [applicative] </a></li>
+<li><a href="#sec-24.5"><code>js-function &lt;jsfun&gt; → applicative</code> [applicative] </a></li>
+<li><a href="#sec-24.6"><code>js-method &lt;string&gt; → cmb</code> [applicative] </a></li>
+<li><a href="#sec-24.7"><code>to-js &lt;obj&gt; → jsobj</code> [applicative] </a></li>
+<li><a href="#sec-24.8"><code>from-js &lt;js-obj&gt; → obj</code> [applicative] </a></li>
+<li><a href="#sec-24.9"><code>js-callback &lt;cmb&gt; → jsfun</code> [applicative] </a></li>
+<li><a href="#sec-24.10"><code>define-js-function &lt;name&gt;</code> [operative] </a></li>
+<li><a href="#sec-24.11"><code>define-js-method &lt;name&gt;</code> [operative] </a></li>
+</ul>
+</li>
+<li><a href="#sec-25">Examples </a>
+<ul>
+<li><a href="#sec-25.1">Error Monad </a></li>
 </ul>
 </li>
 </ul>
@@ -1777,7 +1784,7 @@ performs forms in the new continuation.
 
 
 <p>
-Like <code>take-subcont</code> with these differences:
+Wrapper around <code>take-subcont</code> with these differences:
 </p>
 <ul>
 <li>
@@ -2421,15 +2428,66 @@ found.
 </div>
 
 <div id="outline-container-22" class="outline-2">
-<h2 id="sec-22">System </h2>
+<h2 id="sec-22">Options </h2>
 <div class="outline-text-2" id="text-22">
 
 
 </div>
 
 <div id="outline-container-22.1" class="outline-3">
-<h3 id="sec-22.1"><code>eq? &lt;a&gt; &lt;b&gt; → boolean</code> [applicative] </h3>
+<h3 id="sec-22.1"><code>some &lt;value&gt; → option</code> [applicative] </h3>
 <div class="outline-text-3" id="text-22.1">
+
+</div>
+
+</div>
+
+<div id="outline-container-22.2" class="outline-3">
+<h3 id="sec-22.2"><code>none</code> [variable] </h3>
+<div class="outline-text-3" id="text-22.2">
+
+</div>
+
+</div>
+
+<div id="outline-container-22.3" class="outline-3">
+<h3 id="sec-22.3"><code>if-option (&lt;name&gt; &lt;option&gt;) &lt;then&gt; . [&lt;else&gt;] → result</code> [operative] </h3>
+<div class="outline-text-3" id="text-22.3">
+
+
+</div>
+
+<div id="outline-container-22.3.1" class="outline-4">
+<h4 id="sec-22.3.1">Examples </h4>
+<div class="outline-text-4" id="text-22.3.1">
+
+
+
+
+<pre class="example">(define x-opt (some 12))
+(assert (= (if-option (x x-opt) x 0) 12))
+(define x-opt none)
+(assert (= (if-option (x x-opt) x 0) 0))
+</pre>
+
+
+
+</div>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-23" class="outline-2">
+<h2 id="sec-23">System </h2>
+<div class="outline-text-2" id="text-23">
+
+
+</div>
+
+<div id="outline-container-23.1" class="outline-3">
+<h3 id="sec-23.1"><code>eq? &lt;a&gt; &lt;b&gt; → boolean</code> [applicative] </h3>
+<div class="outline-text-3" id="text-23.1">
 
 
 <p>
@@ -2446,9 +2504,9 @@ used instead.
 
 </div>
 
-<div id="outline-container-22.2" class="outline-3">
-<h3 id="sec-22.2"><code>identity-hash-code &lt;obj&gt; → number</code> [applicative] </h3>
-<div class="outline-text-3" id="text-22.2">
+<div id="outline-container-23.2" class="outline-3">
+<h3 id="sec-23.2"><code>identity-hash-code &lt;obj&gt; → number</code> [applicative] </h3>
+<div class="outline-text-3" id="text-23.2">
 
 
 <p>
@@ -2460,9 +2518,9 @@ objects have the same identity hash code.
 
 </div>
 
-<div id="outline-container-22.3" class="outline-3">
-<h3 id="sec-22.3"><code>read → form</code> [applicative] </h3>
-<div class="outline-text-3" id="text-22.3">
+<div id="outline-container-23.3" class="outline-3">
+<h3 id="sec-23.3"><code>read → form</code> [applicative] </h3>
+<div class="outline-text-3" id="text-23.3">
 
 
 <p>
@@ -2472,9 +2530,9 @@ Reads a form from the console and returns it.
 
 </div>
 
-<div id="outline-container-22.4" class="outline-3">
-<h3 id="sec-22.4"><code>display &lt;msg&gt; → msg</code> [applicative] </h3>
-<div class="outline-text-3" id="text-22.4">
+<div id="outline-container-23.4" class="outline-3">
+<h3 id="sec-23.4"><code>display &lt;msg&gt; → msg</code> [applicative] </h3>
+<div class="outline-text-3" id="text-23.4">
 
 
 <p>
@@ -2484,9 +2542,9 @@ Prints a message string to the console and returns it.
 
 </div>
 
-<div id="outline-container-22.5" class="outline-3">
-<h3 id="sec-22.5"><code>fail &lt;reason&gt; → |</code> [applicative] </h3>
-<div class="outline-text-3" id="text-22.5">
+<div id="outline-container-23.5" class="outline-3">
+<h3 id="sec-23.5"><code>fail &lt;reason&gt; → |</code> [applicative] </h3>
+<div class="outline-text-3" id="text-23.5">
 
 
 <p>
@@ -2497,9 +2555,9 @@ Halts evaluation with an object describing the reason (typically an error).
 
 </div>
 
-<div id="outline-container-23" class="outline-2">
-<h2 id="sec-23">JavaScript Bridge </h2>
-<div class="outline-text-2" id="text-23">
+<div id="outline-container-24" class="outline-2">
+<h2 id="sec-24">JavaScript Bridge </h2>
+<div class="outline-text-2" id="text-24">
 
 
 <p>
@@ -2513,9 +2571,9 @@ functionality, such as identity hash codes.
 
 </div>
 
-<div id="outline-container-23.1" class="outline-3">
-<h3 id="sec-23.1"><code>js-global &lt;string&gt; → result</code> [applicative] </h3>
-<div class="outline-text-3" id="text-23.1">
+<div id="outline-container-24.1" class="outline-3">
+<h3 id="sec-24.1"><code>js-global &lt;string&gt; → result</code> [applicative] </h3>
+<div class="outline-text-3" id="text-24.1">
 
 
 <p>
@@ -2525,9 +2583,9 @@ Returns value of JavaScript global variable with given name.
 
 </div>
 
-<div id="outline-container-23.2" class="outline-3">
-<h3 id="sec-23.2"><code>js-set-global! &lt;string&gt; &lt;val&gt; → val</code> [applicative] </h3>
-<div class="outline-text-3" id="text-23.2">
+<div id="outline-container-24.2" class="outline-3">
+<h3 id="sec-24.2"><code>js-set-global! &lt;string&gt; &lt;val&gt; → val</code> [applicative] </h3>
+<div class="outline-text-3" id="text-24.2">
 
 
 <p>
@@ -2537,9 +2595,9 @@ Updates value of JavaScript global variable with given name and returns it.
 
 </div>
 
-<div id="outline-container-23.3" class="outline-3">
-<h3 id="sec-23.3"><code>js-prop &lt;object&gt; &lt;string&gt; → result</code> [applicative] </h3>
-<div class="outline-text-3" id="text-23.3">
+<div id="outline-container-24.3" class="outline-3">
+<h3 id="sec-24.3"><code>js-prop &lt;object&gt; &lt;string&gt; → result</code> [applicative] </h3>
+<div class="outline-text-3" id="text-24.3">
 
 
 <p>
@@ -2549,9 +2607,9 @@ Returns value of JavaScript member variable with given name of object.
 
 </div>
 
-<div id="outline-container-23.4" class="outline-3">
-<h3 id="sec-23.4"><code>js-set-prop! &lt;object&gt; &lt;string&gt; &lt;val&gt; → val</code> [applicative] </h3>
-<div class="outline-text-3" id="text-23.4">
+<div id="outline-container-24.4" class="outline-3">
+<h3 id="sec-24.4"><code>js-set-prop! &lt;object&gt; &lt;string&gt; &lt;val&gt; → val</code> [applicative] </h3>
+<div class="outline-text-3" id="text-24.4">
 
 
 <p>
@@ -2562,9 +2620,9 @@ and returns it.
 
 </div>
 
-<div id="outline-container-23.5" class="outline-3">
-<h3 id="sec-23.5"><code>js-function &lt;jsfun&gt; → applicative</code> [applicative] </h3>
-<div class="outline-text-3" id="text-23.5">
+<div id="outline-container-24.5" class="outline-3">
+<h3 id="sec-24.5"><code>js-function &lt;jsfun&gt; → applicative</code> [applicative] </h3>
+<div class="outline-text-3" id="text-24.5">
 
 
 <p>
@@ -2575,9 +2633,9 @@ function with the arguments it received.
 
 </div>
 
-<div id="outline-container-23.6" class="outline-3">
-<h3 id="sec-23.6"><code>js-method &lt;string&gt; → cmb</code> [applicative] </h3>
-<div class="outline-text-3" id="text-23.6">
+<div id="outline-container-24.6" class="outline-3">
+<h3 id="sec-24.6"><code>js-method &lt;string&gt; → cmb</code> [applicative] </h3>
+<div class="outline-text-3" id="text-24.6">
 
 
 <p>
@@ -2589,9 +2647,9 @@ object with the given arguments.
 
 </div>
 
-<div id="outline-container-23.7" class="outline-3">
-<h3 id="sec-23.7"><code>to-js &lt;obj&gt; → jsobj</code> [applicative] </h3>
-<div class="outline-text-3" id="text-23.7">
+<div id="outline-container-24.7" class="outline-3">
+<h3 id="sec-24.7"><code>to-js &lt;obj&gt; → jsobj</code> [applicative] </h3>
+<div class="outline-text-3" id="text-24.7">
 
 
 <p>
@@ -2602,9 +2660,9 @@ JavaScript object.
 
 </div>
 
-<div id="outline-container-23.8" class="outline-3">
-<h3 id="sec-23.8"><code>from-js &lt;js-obj&gt; → obj</code> [applicative] </h3>
-<div class="outline-text-3" id="text-23.8">
+<div id="outline-container-24.8" class="outline-3">
+<h3 id="sec-24.8"><code>from-js &lt;js-obj&gt; → obj</code> [applicative] </h3>
+<div class="outline-text-3" id="text-24.8">
 
 
 <p>
@@ -2615,9 +2673,9 @@ Wat object.
 
 </div>
 
-<div id="outline-container-23.9" class="outline-3">
-<h3 id="sec-23.9"><code>js-callback &lt;cmb&gt; → jsfun</code> [applicative] </h3>
-<div class="outline-text-3" id="text-23.9">
+<div id="outline-container-24.9" class="outline-3">
+<h3 id="sec-24.9"><code>js-callback &lt;cmb&gt; → jsfun</code> [applicative] </h3>
+<div class="outline-text-3" id="text-24.9">
 
 
 <p>
@@ -2628,9 +2686,9 @@ combiner with the arguments the callback received.
 
 </div>
 
-<div id="outline-container-23.10" class="outline-3">
-<h3 id="sec-23.10"><code>define-js-function &lt;name&gt;</code> [operative] </h3>
-<div class="outline-text-3" id="text-23.10">
+<div id="outline-container-24.10" class="outline-3">
+<h3 id="sec-24.10"><code>define-js-function &lt;name&gt;</code> [operative] </h3>
+<div class="outline-text-3" id="text-24.10">
 
 
 <p>
@@ -2644,9 +2702,9 @@ with <code>from-js</code>.
 
 </div>
 
-<div id="outline-container-23.11" class="outline-3">
-<h3 id="sec-23.11"><code>define-js-method &lt;name&gt;</code> [operative] </h3>
-<div class="outline-text-3" id="text-23.11">
+<div id="outline-container-24.11" class="outline-3">
+<h3 id="sec-24.11"><code>define-js-method &lt;name&gt;</code> [operative] </h3>
+<div class="outline-text-3" id="text-24.11">
 
 
 <p>
@@ -2658,9 +2716,9 @@ with <code>to-js</code> and the result is transformed to Wat with <code>from-js<
 
 </div>
 
-<div id="outline-container-23.11.1" class="outline-4">
-<h4 id="sec-23.11.1">Examples </h4>
-<div class="outline-text-4" id="text-23.11.1">
+<div id="outline-container-24.11.1" class="outline-4">
+<h4 id="sec-24.11.1">Examples </h4>
+<div class="outline-text-4" id="text-24.11.1">
 
 
 
@@ -2682,16 +2740,16 @@ with <code>to-js</code> and the result is transformed to Wat with <code>from-js<
 
 </div>
 
-<div id="outline-container-24" class="outline-2">
-<h2 id="sec-24">Examples </h2>
-<div class="outline-text-2" id="text-24">
+<div id="outline-container-25" class="outline-2">
+<h2 id="sec-25">Examples </h2>
+<div class="outline-text-2" id="text-25">
 
 
 </div>
 
-<div id="outline-container-24.1" class="outline-3">
-<h3 id="sec-24.1">Error Monad </h3>
-<div class="outline-text-3" id="text-24.1">
+<div id="outline-container-25.1" class="outline-3">
+<h3 id="sec-25.1">Error Monad </h3>
+<div class="outline-text-3" id="text-25.1">
 
 
 <p>
@@ -2756,7 +2814,7 @@ style.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-28 23:19:43 CEST</p>
+<p class="date"> Date: 2012-08-29 06:17:42 CEST</p>
 </div>
 </div>
 </body>

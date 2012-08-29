@@ -716,7 +716,7 @@ performs forms in the new continuation.
 
 ** =shift <prompt> <cont> . <forms> → result=
 
-Like =take-subcont= with these differences:
+Wrapper around =take-subcont= with these differences:
 
  * The continuation is represented as an applicative, not a
    first-class continuation.
@@ -948,6 +948,17 @@ Associates key with value in hashtable.
 Returns value associated with key from hash, or default value if not
 found.
 
+* Options
+** =some <value> → option= [applicative]
+** =none= [variable]
+** =if-option (<name> <option>) <then> . [<else>] → result= [operative]
+*** Examples
+#+BEGIN_EXAMPLE
+(define x-opt (some 12))
+(assert (= (if-option (x x-opt) x 0) 12))
+(define x-opt none)
+(assert (= (if-option (x x-opt) x 0) 0))
+#+END_EXAMPLE
 * System
 ** =eq? <a> <b> → boolean= [applicative]
 

@@ -345,3 +345,19 @@
 (define-syntax (define-js-method name) env
   (define method (js-method (symbol->string name)))
   (eval (list def name (lambda args (from-js (apply method (map to-js args))))) env))
+
+(provide (Option some none if-option)
+  (define-record-type Option
+    (make-option supplied? value)
+    option?
+    (supplied? supplied?)
+    (value value))
+  (define (some a) (make-option #t a))
+  (define none (make-option #f #void))
+  (define-syntax (if-option (name option) then . else) env
+    (let ((o (eval option env)))
+      (if (supplied? o)
+          (eval (list let (list (list name (value o))) then) env)
+          (unless (null? else)
+            (eval (car else) env)))))
+)

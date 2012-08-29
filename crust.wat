@@ -361,3 +361,8 @@
           (unless (null? else)
             (eval (car else) env)))))
 )
+
+(define-record-type Blocking
+  (make-blocking)
+  blocking?)
+

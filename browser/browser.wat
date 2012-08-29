@@ -39,7 +39,9 @@
   (define *env* (current-environment))
   (define *read-k* none)
   (define (read)
-    (take-subcont *top-level* k (set! *env* *read-k* (some k))))
+    (take-subcont *top-level* k
+      (set! *env* *read-k* (some k))
+      (make-blocking)))
   (define (input-callback evt)
     (if (num= (from-js (js-prop evt "keyCode")) 13)
         (push-prompt *top-level* (push-subcont (if-option (k *read-k*) k (fail "no continuation")) (read-input)))

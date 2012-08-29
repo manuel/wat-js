@@ -232,7 +232,7 @@
       (set! *env* extent-ended? #t)))
   (define-macro (block name . body)
     (list call-with-escape (list* lambda (list name) body)))
-  (define (return-from esc val) (esc val))
+  (define (return-from esc . val) (esc (if (null? val) #void (car val))))
 )
 
 (define-syntax (while test . body) env

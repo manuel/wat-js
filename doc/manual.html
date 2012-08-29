@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-29 06:17:42 CEST"/>
+<meta name="generated" content="2012-08-29 12:16:10 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -117,7 +117,7 @@ lang="en" xml:lang="en">
 <li><a href="#sec-8.6"><code>while &lt;test&gt; . &lt;forms&gt; → |</code> [operative] </a></li>
 <li><a href="#sec-8.7"><code>until &lt;test&gt; . &lt;forms&gt; → |</code> [operative] </a></li>
 <li><a href="#sec-8.8"><code>block &lt;name&gt; . &lt;body&gt; → result</code> [operative] </a></li>
-<li><a href="#sec-8.9"><code>return-from &lt;cont&gt; &lt;val&gt; → |</code> [operative] </a></li>
+<li><a href="#sec-8.9"><code>return-from &lt;cont&gt; . [&lt;val&gt;] → |</code> [operative] </a></li>
 <li><a href="#sec-8.10"><code>unwind-protect &lt;protected&gt; . &lt;cleanup&gt; → result</code> [operative] </a></li>
 </ul>
 </li>
@@ -1400,17 +1400,35 @@ that can be invoked with <code>return-from</code>.
 </div>
 
 <div id="outline-container-8.9" class="outline-3">
-<h3 id="sec-8.9"><code>return-from &lt;cont&gt; &lt;val&gt; → |</code> [operative] </h3>
+<h3 id="sec-8.9"><code>return-from &lt;cont&gt; . [&lt;val&gt;] → |</code> [operative] </h3>
 <div class="outline-text-3" id="text-8.9">
 
 
 <p>
 Invokes a one-shot escape continuation bound by <code>block</code>, passing it
-the given value.
+the given value, or void if no value is given.
 </p>
 <p>
 An error is signalled if the continuation's extent has ended.
 </p>
+
+</div>
+
+<div id="outline-container-8.9.1" class="outline-4">
+<h4 id="sec-8.9.1">Examples </h4>
+<div class="outline-text-4" id="text-8.9.1">
+
+
+
+
+
+<pre class="example">;(assert (= #void (block foo (return-from foo) 1 2)))
+</pre>
+
+
+
+
+</div>
 </div>
 
 </div>
@@ -2814,7 +2832,7 @@ style.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-29 06:17:42 CEST</p>
+<p class="date"> Date: 2012-08-29 12:16:10 CEST</p>
 </div>
 </div>
 </body>

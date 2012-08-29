@@ -525,12 +525,18 @@ that can be invoked with =return-from=.
                          '(1 2 3 4 5)))))
 #+END_EXAMPLE
 
-** =return-from <cont> <val> → |= [operative]
+** =return-from <cont> . [<val>] → |= [operative]
 
 Invokes a one-shot escape continuation bound by =block=, passing it
-the given value.
+the given value, or void if no value is given.
 
 An error is signalled if the continuation's extent has ended.
+
+*** Examples
+
+#+BEGIN_EXAMPLE
+;(assert (= #void (block foo (return-from foo) 1 2)))
+#+END_EXAMPLE
 
 ** =unwind-protect <protected> . <cleanup> → result= [operative]
 

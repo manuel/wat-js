@@ -220,6 +220,17 @@
 (define-macro (loop . forms)
   (list loop1 (list* begin forms)))
 
+(define-syntax (dotimes (var times . optional-result-form) . exprs) env
+  (define wrapped-exprs (list* begin exprs))
+  (define evaled-times (eval times env))
+  (define result-form (if (null? optional-result-form) #void (car optional-result-form)))
+  (let ((subenv (make-environment env)))
+    (eval (list def var 0) subenv)
+    (while (< (eval var subenv) evaled-times)
+      (eval wrapped-exprs subenv)
+      (eval (list def var (+ 1 (eval var subenv))) subenv))
+    (eval result-form subenv)))
+
 (provide (block return-from)
   (define (call-with-escape fun)
     (define extent-ended? #f)

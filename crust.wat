@@ -238,8 +238,8 @@
     (define (escape val)
       (if extent-ended?
           (fail "extent ended")
-          (throw escape val)))
-    (unwind-protect (catch escape (lambda () (fun escape)))
+          (throw* escape val)))
+    (unwind-protect (catch* escape (lambda () (fun escape)))
       (set! *env* extent-ended? #t)))
   (define-macro (block name . body)
     (list call-with-escape (list* lambda (list name) body)))
@@ -370,6 +370,26 @@
           (eval (list let (list (list name (value o))) then) env)
           (unless (null? else)
             (eval (car else) env)))))
+)
+
+(provide (handle
+          catch
+          throw
+          default-handler
+          restart-bind
+          invoke-restart
+          associated-exception)
+  ;; API
+  (define-syntax (handle body . handler-specs) env)
+  (define-syntax (catch body . handler-specs) env)
+  (define-syntax (throw exc . handler-specs) env)
+  (define-generic (default-handler exc) #void)
+  (define-syntax (restart-bind body . handler-specs) env)
+  (define (invoke-restart rst))
+  (define-generic (associated-exception rst) none)
+  ;; Implementation
+  (define *current-exception-handler-set* (dnew none))
+  (define *current-restart-handler-set* (dnew none))
 )
 
 (define-record-type Blocking

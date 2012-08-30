@@ -470,8 +470,8 @@ var wat = (function() {
 	envbind(e, "eval", wrap(new Eval()));
 	envbind(e, "begin", new Begin());
         envbind(e, "loop1", new Loop());
-        envbind(e, "catch", wrap(new Catch()));
-        envbind(e, "throw", wrap(new Throw()));
+        envbind(e, "catch*", wrap(new Catch()));
+        envbind(e, "throw*", wrap(new Throw()));
 	envbind(e, "wrap", jswrap(wrap));
 	envbind(e, "unwrap", jswrap(unwrap));
 	envbind(e, "eq?", jswrap(function (a, b) { return (a === b) ? T : F }));

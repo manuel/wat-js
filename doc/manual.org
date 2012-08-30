@@ -663,15 +663,16 @@ exception handler may use to continue computation.  Restart handlers
 are installed as if by =catch=, i.e. when a restart is invoked, the
 stack is unwound and the result of the restart handler is returned.
 =throw= only returns normally if one of its restart handlers is
-invoked, otherwise it always enters the debugger or crashes the
-program.  The restart handlers are associated with the thrown
-exception, and only match invoked restarts whose
-=associated-exception= is the thrown exception.
+invoked, otherwise it always invokes the debugger.  The restart
+handlers are associated with the thrown exception, and only match
+invoked restarts whose =associated-exception= is the thrown exception.
 
 ** =default-handler <exc> → result= [generic]  /NIY/
 
 Called on an exception when no handler is found, or when all found
-handlers returned normally.
+handlers returned normally.  Different exception types may define
+different methods.  The default is to do nothing, which will cause
+=throw= to invoke the debugger.
 
 ** =restart-bind <body> . <handlers> → result= [operative] /NIY/
 
@@ -682,7 +683,9 @@ returned.  If any condition happens during evaluation of the body, the
 restart handlers will be effective.  This is unlike the restart
 handlers bound by a =throw=, which are associated with the thrown
 exception.  Restart handlers bound by =restart-bind= are not
-associated with any exception.
+associated with any exception, and are therefore effective during
+handling of any exception during the =restart-bind=-form dynamic
+extent.
 
 ** =invoke-restart <restart> → result= [applicative] /NIY/
 
@@ -690,12 +693,14 @@ Searches the stack for a restart handler established by a =throw= or
 =restart-bind= that matches the restart, unwinds, and evaluates the
 handler body.  If no restart handler is found, an exception is thrown.
 
-** =associated-exception <restart> → exc= [generic] /NIY/
+** =associated-exception <restart> → option= [generic] /NIY/
 
 A restart intended for a restart handler established by =throw= must
 have the thrown exception as associated exception.  Its type should
 implement a method for this generic function that returns the
-restart's associated exception.
+restart's associated exception.  The associated exception is an option
+type; it is =none= if there is no associated exception, and =(some
+<exc>)= for an associated exception.
 
 *** Examples
 

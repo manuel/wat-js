@@ -1038,6 +1038,11 @@ Prints a message string to the console and returns it.
 
 Halts evaluation with an object describing the reason (typically an error).
 
+** =current-milliseconds → number= [applicative]
+
+Returns the current milliseconds, for some implementation-specific
+value of "current milliseconds".
+
 * JavaScript Bridge 
 
 The JavaScript object system is treacherous, so we don't even attempt

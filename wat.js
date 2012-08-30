@@ -409,6 +409,7 @@ var wat = (function() {
     function assert(b) { if (!b) fail("assertion failed"); }
     function fail(err) { throw err; }
     function log(str) { console.log(str); return str; }
+    function currentMilliseconds() { return new Num(new Date().getTime()); }
     function array_to_list(array, end) {
 	var c = end ? end : NIL; for (var i = array.length; i > 0; i--) c = cons(array[i - 1], c); return c; }
     function list_to_array(c) {
@@ -531,6 +532,7 @@ var wat = (function() {
         envbind(e, "put-method!", jswrap(put_method));
         envbind(e, "find-method", jswrap(find_method));
         envbind(e, "macro", jswrap(function(exp) { return new Macro(exp); }));
+        envbind(e, "current-milliseconds", jswrap(currentMilliseconds));
 	return e;
     }
     /***** API *****/

@@ -1043,6 +1043,11 @@ Halts evaluation with an object describing the reason (typically an error).
 Returns the current milliseconds, for some implementation-specific
 value of "current milliseconds".
 
+** =time . exprs → number= [operative]
+
+Performs expressions and returns their result, displaying
+implementation-specific timing information.
+
 * JavaScript Bridge 
 
 The JavaScript object system is treacherous, so we don't even attempt

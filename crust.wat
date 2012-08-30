@@ -326,15 +326,6 @@
   (define-method (->number (obj Symbol)) (string->number (symbol->string obj)))
 )
 
-(define (display-stacktrace trace)
-  (for-each (lambda (frame) (display (->string frame))) trace))
-
-(define (trap exc)
-  (define trace (stacktrace))
-  (display "ERROR")
-  (display exc)
-  (display-stacktrace trace))
-
 (provide (make-prompt push-prompt take-subcont push-subcont shift)
   (def (prompt-type tag-prompt #ign) (make-type))
   (define (make-prompt) (tag-prompt #void))

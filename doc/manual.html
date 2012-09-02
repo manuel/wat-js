@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-09-02 14:49:50 CEST"/>
+<meta name="generated" content="2012-09-02 14:53:31 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -1508,7 +1508,9 @@ An error is signalled if the continuation's extent has ended.
 
 
 
-<pre class="example">;(assert (= #void (block foo (return-from foo) 1 2)))
+<pre class="example">(assert (= #void (block foo (return-from foo))))
+(assert (= 33 (block foo (return-from foo 33))))
+(assert (= 33 (block foo (return-from foo 33) 1 2 3)))
 </pre>
 
 
@@ -2914,7 +2916,7 @@ style.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-09-02 14:49:50 CEST</p>
+<p class="date"> Date: 2012-09-02 14:53:31 CEST</p>
 </div>
 </div>
 </body>

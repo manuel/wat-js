@@ -579,7 +579,9 @@ An error is signalled if the continuation's extent has ended.
 *** Examples
 
 #+BEGIN_EXAMPLE
-;(assert (= #void (block foo (return-from foo) 1 2)))
+(assert (= #void (block foo (return-from foo))))
+(assert (= 33 (block foo (return-from foo 33))))
+(assert (= 33 (block foo (return-from foo 33) 1 2 3)))
 #+END_EXAMPLE
 
 ** =unwind-protect <protected> . <cleanup> → result= [operative]

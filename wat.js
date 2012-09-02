@@ -11,20 +11,26 @@ var wat = (function() {
     function evaluate(e, k, f, x) { if (x && x.wat_eval) return x.wat_eval(e, k, f); else return x; }
     Sym.prototype.wat_eval = function(e, k, f) { return lookup(e, this); };
     Cons.prototype.wat_eval = function(e, k, f) {
-        if (isResume(k)) {
-            var op = resume(k, f);
-        } else {
-            var op = evaluate(e, null, null, car(this));
-        }
-        if (isSuspend(op)) {
-            var that = this;
-            pushResume(op, function(k, f) { return that.wat_eval(e, k, f); });
-            return op;
-        }
-        if (isMacro(op)) {
-            return macroCombine(e, null, null, op, this);
-        } else {
-            return combine(e, null, null, op, cdr(this));
+        var oldStack = STACK;
+        STACK = cons(this, oldStack);
+        try {
+            if (isResume(k)) {
+                var op = resume(k, f);
+            } else {
+                var op = evaluate(e, null, null, car(this));
+            }
+            if (isSuspend(op)) {
+                var that = this;
+                pushResume(op, function(k, f) { return that.wat_eval(e, k, f); });
+                return op;
+            }
+            if (isMacro(op)) {
+                return macroCombine(e, null, null, op, this);
+            } else {
+                return combine(e, null, null, op, cdr(this));
+            }
+        } finally {
+            STACK = oldStack;
         }
     };
     function macroCombine(e, k, f, macro, form) {
@@ -76,7 +82,13 @@ var wat = (function() {
             pushResume(args, function(k, f) { return that.combine(e, k, f, o); })
             return args;
         }
-        return this.cmb.combine(e, null, null, args);
+        var oldStack = STACK;
+        STACK = cons(cons(this, args), STACK);
+        try {
+            return this.cmb.combine(e, null, null, args);
+        } finally {
+            STACK = oldStack;
+        }
     };
     function evalArgs(e, k, f, todo, done) {
 	if (todo === NIL) { return reverse_list(done); }
@@ -316,7 +328,7 @@ var wat = (function() {
     function Env(parent) { this.bindings = Object.create(parent ? parent.bindings : null); }
     function lookup(e, sym) { var val = e.bindings[sym.name]; return (val !== undefined) ? val : fail("unbound: " + sym.name); }
     function bind(e, lhs, rhs) { lhs.match(e, rhs); return rhs; }
-    Sym.prototype.match = function(e, rhs) { if (rhs === undefined) fail("undefined: " + this.name); 
+    Sym.prototype.match = function(e, rhs) { if (rhs === undefined) fail("trying to match against undefined: " + this.name); 
                                              e.bindings[this.name] = rhs; };
     Cons.prototype.match = function(e, rhs) { car(this).match(e, car(rhs)); cdr(this).match(e, cdr(rhs)); };
     Nil.prototype.match = function(e, rhs) { if (rhs !== NIL) fail("NIL expected"); };
@@ -420,6 +432,7 @@ var wat = (function() {
     function list_star() {
         var len = arguments.length;
 	var c = len >= 1 ? arguments[len-1] : NIL; for (var i = len-1; i > 0; i--) c = cons(arguments[i - 1], c); return c; }
+    var STACK = NIL;
     /***** Parser *****/
     function parse(s) { // Returns array of forms
 	var res = program_stx(ps(s));
@@ -534,6 +547,7 @@ var wat = (function() {
         envbind(e, "find-method", jswrap(find_method));
         envbind(e, "macro", jswrap(function(exp) { return new Macro(exp); }));
         envbind(e, "current-milliseconds", jswrap(currentMilliseconds));
+        envbind(e, "stacktrace", jswrap(function() { return STACK; }));
 	return e;
     }
     /***** API *****/

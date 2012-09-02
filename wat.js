@@ -277,7 +277,7 @@ var wat = (function() {
     function JSFun(jsfun) { this.jsfun = jsfun; }
     JSFun.prototype.combine = function(e, k, f, o) { return this.jsfun.apply(null, list_to_array(o)); };
     function jswrap(jsfun) { return wrap(new JSFun(jsfun)); }
-    function JSOBJ() {}
+    function JSOBJ() {};
     function js_global(name) { return js_prop(WAT_GLOBAL, name); }
     function js_set_global(name, val) { return js_set_prop(WAT_GLOBAL, name, val); }
     function js_prop(obj, name) { assert(type_of(name) === Str.prototype.wat_type); return obj[name.jsstr]; }
@@ -316,7 +316,8 @@ var wat = (function() {
     function Env(parent) { this.bindings = Object.create(parent ? parent.bindings : null); }
     function lookup(e, sym) { var val = e.bindings[sym.name]; return (val !== undefined) ? val : fail("unbound: " + sym.name); }
     function bind(e, lhs, rhs) { lhs.match(e, rhs); return rhs; }
-    Sym.prototype.match = function(e, rhs) { e.bindings[this.name] = rhs; };
+    Sym.prototype.match = function(e, rhs) { if (rhs === undefined) fail("undefined: " + this.name); 
+                                             e.bindings[this.name] = rhs; };
     Cons.prototype.match = function(e, rhs) { car(this).match(e, car(rhs)); cdr(this).match(e, cdr(rhs)); };
     Nil.prototype.match = function(e, rhs) { if (rhs !== NIL) fail("NIL expected"); };
     Ign.prototype.match = function(e, rhs) {};

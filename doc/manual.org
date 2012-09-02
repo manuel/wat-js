@@ -648,8 +648,10 @@ normally.  If no handler is found, the =default-handler= generic
 function is called on the exception.
 
 While a handler body is executed, the current handlers are those that
-were established at the time =handle= was called.  This is analogous
-to Common Lisp's [[http://www.nhplace.com/kent/Papers/Condition-Handling-2001.html][condition firewall]].
+were established at the time =handle= was called.  In other words,
+while the /call/ stack is not unwound when a handler is called, the
+/handler/ stack is unwound.  This is analogous to Common Lisp's
+[[http://www.nhplace.com/kent/Papers/Condition-Handling-2001.html][condition firewall]].
 ** =catch <body> . <handlers> → result= [operative] /NIY/
 
 Like =handle=, but unwinds the stack before executing handler, and
@@ -705,27 +707,7 @@ type; it is =none= if there is no associated exception, and =(some
 *** Examples
 
 #+BEGIN_EXAMPLE
-;; (define-record-type Div-by-Zero-Exception
-;;   (make-div-by-zero-exception)
-;;   #ign)
-
-;; (define-record-type Use-Value-Restart
-;;   (make-use-value-restart value associated-exception)
-;;   #ign
-;;   (value value)
-;;   (associated-exception associated-exception))
-
-;; (define (my-compute number divisor)
-;;   (let ((div (if (= 0 divisor)
-;;                  (throw (make-div-by-zero-exception)
-;;                    (Use-Value-Restart (r) (value r)))
-;;                  divisor)))
-;;     (/ number div)))
-
-;; (assert 
-;;   (= (handle (my-compute 12 0)
-;;        (Div-by-Zero-Exception (dbz) (invoke-restart (make-use-value-restart 3 dbz))))
-;;      4))
+(assert (= 1 (handle 1)))
 #+END_EXAMPLE
 
 * Higher-order Control
@@ -1010,9 +992,9 @@ found.
 *** Examples
 #+BEGIN_EXAMPLE
 (define x-opt (some 12))
-(assert (= (if-option (x x-opt) x 0) 12))
+(assert (= 12 (if-option (x x-opt) x 0)))
 (define x-opt none)
-(assert (= (if-option (x x-opt) x 0) 0))
+(assert (= 0 (if-option (x x-opt) x 0)))
 #+END_EXAMPLE
 * System
 ** =eq? <a> <b> → boolean= [applicative]
@@ -1104,14 +1086,6 @@ Wat object.
 
 Returns a JS function that, when called, will apply the provided
 combiner with the arguments the callback received.
-
-** =define-js-function <name>= [operative]
-
-Defines name as an applicative that when called with parameters will
-invoke the named JavaScript method of the object with the parameters
-and return the result.  Arguments of the applicative are transformed
-to JS with =to-js= and the result of the method is transformed to Wat
-with =from-js=.
 
 ** =define-js-method <name>= [operative]
 

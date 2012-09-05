@@ -6,8 +6,7 @@ load("jsparse.js");
 load("js-numbers.js");
 load("wat.js");
 
-var wat_env = wat.mkenvcore();
-
+var wat = Wat();
 var console = { log: print };
 
 function wat_console_log(string) {
@@ -21,7 +20,7 @@ function wat_eval(str) {
     wat_console_log("Parse time " + elapsed + "ms");
     start = new Date().getTime();
     for (var i = 0; i < forms.length; i++) {
-        var result = wat.eval(forms[i], wat_env);
+        var result = wat.eval(forms[i]);
     }
     elapsed = new Date().getTime() - start;
     wat_console_log("Evaluation time " + elapsed + "ms");

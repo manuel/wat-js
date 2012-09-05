@@ -1,7 +1,7 @@
-var wat = (function() {
+function Wat() {
     /***** Evaluation *****/
     /* Fibers */
-    function run(x, e) { return evaluate(e, null, null, x); }
+    function run(x) { return evaluate(envcore, null, null, x); }
     function Suspension(prompt, handler) { this.prompt = prompt; this.handler = handler; this.resumption = null; }
     function isSuspend(x) { return x instanceof Suspension; }
     function Resumption(fun, next) { this.fun = fun; this.next = next; }
@@ -552,12 +552,10 @@ var wat = (function() {
         envbind(e, "stacktrace", jswrap(function() { return STACK; }));
 	return e;
     }
+    var envcore = mkenvcore();
     /***** API *****/
-    return {
-	"eval": run,
-	"mkenvcore": mkenvcore, "parse": parse, "Sym": Sym, "array_to_list": array_to_list,
-    };
-}());
+    return { "eval": run, "parse": parse, "Sym": Sym, "array_to_list": array_to_list };
+}
 var WAT_GLOBAL = this;
 // Abbreviations:
 // apv: applicative combiner

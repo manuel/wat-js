@@ -40,12 +40,13 @@
   (define *read-k* none)
   (define (read)
     (take-subcont *top-level* k
-      (set! *env* *read-k* (some k))
-      (make-blocking)))
+      (set! *env* *read-k* (some k))))
   (define (input-callback evt)
     (if (num= (from-js (js-prop evt "keyCode")) 13)
-        (push-prompt *top-level* (push-subcont (if-option (k *read-k*) k (fail "no continuation")) (read-input)))
-        #void)))
+        (push-prompt *top-level*
+          (push-subcont (if-option (k *read-k*) k (fail "no continuation")) (read-input)))
+        #void))
+)
 
 (js-set-prop! (getElementById "input") "onkeypress" (js-callback input-callback))
 

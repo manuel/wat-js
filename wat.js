@@ -135,12 +135,14 @@ var wat = (function() {
         if (kdr === NIL) return res; else return begin(e, null, null, kdr);
     }
     Loop.prototype.combine = function(e, k, f, o) {
+        var first = true; // only resume once
         while (true) {
-            if (isResume(k)) {
+            if (first && isResume(k)) {
                 var res = resume(k, f);
             } else {
                 var res = evaluate(e, null, null, elt(o, 0));
             }
+            first = false;
             if (isSuspend(res)) {
                 pushResume(res, function(k, f) { return Loop.prototype.combine(e, k, f, o); });
                 return res;

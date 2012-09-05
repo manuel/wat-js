@@ -482,10 +482,6 @@
 
 )
 
-(define-record-type Blocking
-  (make-blocking)
-  blocking?)
-
 (define-syntax (time . exprs) env
   (let* ((ms (current-milliseconds))
          (res (eval (list* begin exprs) env)))

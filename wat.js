@@ -4,34 +4,42 @@ function Wat() {
     function run(x) { return evaluate(envcore, null, null, x); }
     function Suspension(prompt, handler) { this.prompt = prompt; this.handler = handler; this.resumption = null; }
     function isSuspend(x) { return x instanceof Suspension; }
-    function Resumption(fun, next) { this.fun = fun; this.next = next; }
+    function Resumption(fun, next, dbginfo) {
+        this.fun = fun; this.next = next; this.dbginfo = dbginfo ? dbginfo : VOID;
+    }
     function isResume(x) { return x instanceof Resumption; }
-    function pushResume(susp, fun) { susp.resumption = new Resumption(fun, susp.resumption); }
+    function pushResume(susp, fun, dbginfo) {
+        susp.resumption = new Resumption(fun, susp.resumption, dbginfo);
+    }
     function resume(resumption, f) { return resumption.fun(resumption.next, f); }
-    function evaluate(e, k, f, x) { if (x && x.wat_eval) return x.wat_eval(e, k, f); else return x; }
+    function evaluate(e, k, f, x) {
+        try {
+            if (x && x.wat_eval) return x.wat_eval(e, k, f); else return x;
+        } catch(exc) {
+            return handleException(exc);
+        }
+    }
+    function handleException(exc) {
+        if (exc instanceof Exc) throw exc;
+        else fail(exc);
+    }
     Sym.prototype.wat_eval = function(e, k, f) { return lookup(e, this); };
     Cons.prototype.wat_eval = function(e, k, f) {
-        // var oldStack = STACK;
-        // STACK = cons(this, oldStack);
-        // try {
-            if (isResume(k)) {
-                var op = resume(k, f);
-            } else {
-                var op = evaluate(e, null, null, car(this));
-            }
-            if (isSuspend(op)) {
-                var that = this;
-                pushResume(op, function(k, f) { return that.wat_eval(e, k, f); });
-                return op;
-            }
-            if (isMacro(op)) {
-                return macroCombine(e, null, null, op, this);
-            } else {
-                return combine(e, null, null, op, cdr(this));
-            }
-        // } finally {
-        //     STACK = oldStack;
-        // }
+        if (isResume(k)) {
+            var op = resume(k, f);
+        } else {
+            var op = evaluate(e, null, null, car(this));
+        }
+        if (isSuspend(op)) {
+            var that = this;
+            pushResume(op, function(k, f) { return that.wat_eval(e, k, f); }, that);
+            return op;
+        }
+        if (isMacro(op)) {
+            return macroCombine(e, null, null, op, this);
+        } else {
+            return combine(e, null, null, op, cdr(this));
+        }
     };
     function macroCombine(e, k, f, macro, form) {
         var cached_macro = form.cached_macro;
@@ -56,14 +64,18 @@ function Wat() {
             var val = evaluate(e, null, null, elt(o, 1));
         }
         if (isSuspend(val)) {
-            pushResume(val, function(k, f) { return Def.prototype.combine(e, k, f, o); });
+            pushResume(val, function(k, f) { return Def.prototype.combine(e, k, f, o); }, cons(this,o));
             return val;
         }
         return bind(e, elt(o, 0), val);
     };
     /* Operative & Applicative Combiners */
     function combine(e, k, f, cmb, o) {
-        return cmb.combine ? cmb.combine(e, k, f, o) : fail("not a combiner");
+        try{
+            return cmb.combine ? cmb.combine(e, k, f, o) : fail("not a combiner");
+        } catch(exc) {
+            return handleException(exc);
+        }
     }
     function Opv(p, ep, x, e) { this.p = p; this.ep = ep; this.x = x; this.e = e; }
     function Apv(cmb) { this.cmb = cmb; }; function wrap(cmb) { return new Apv(cmb); }; function unwrap(apv) { return apv.cmb; }
@@ -79,16 +91,10 @@ function Wat() {
         }
         if (isSuspend(args)) {
             var that = this;
-            pushResume(args, function(k, f) { return that.combine(e, k, f, o); })
+            pushResume(args, function(k, f) { return that.combine(e, k, f, o); }, cons(this, o));
             return args;
         }
-        // var oldStack = STACK;
-        // STACK = cons(cons(this, args), STACK);
-        // try {
-            return this.cmb.combine(e, null, null, args);
-        // } finally {
-        //     STACK = oldStack;
-        // }
+        return this.cmb.combine(e, null, null, args);
     };
     function evalArgs(e, k, f, todo, done) {
 	if (todo === NIL) { return reverse_list(done); }
@@ -114,7 +120,7 @@ function Wat() {
             var test = evaluate(e, null, null, elt(o, 0));
         }
         if (isSuspend(test)) {
-            pushResume(test, function(k, f) { return If.prototype.combine(e, k, f, o); });
+            pushResume(test, function(k, f) { return If.prototype.combine(e, k, f, o); }, cons(this,o));
             return test;
         }
         return evaluate(e, null, null, (test === F) ? elt(o, 2) : elt(o, 1));
@@ -144,7 +150,7 @@ function Wat() {
             }
             first = false;
             if (isSuspend(res)) {
-                pushResume(res, function(k, f) { return Loop.prototype.combine(e, k, f, o); });
+                pushResume(res, function(k, f) { return Loop.prototype.combine(e, k, f, o); }, cons(this,o));
                 return res;
             }
         }
@@ -166,7 +172,7 @@ function Wat() {
             }
         }
         if (isSuspend(res)) {
-            pushResume(res, function(k, f) { return Catch.prototype.combine(e, k, f, o); });
+            pushResume(res, function(k, f) { return Catch.prototype.combine(e, k, f, o); }, cons(this,o));
             return res;
         } else {
             return res;
@@ -188,7 +194,7 @@ function Wat() {
                 var res = evaluate(e, null, null, prot);
             }
             if (isSuspend(res)) {
-                pushResume(res, function(k, f) { return Finally.prototype.combine(e, k, f, o); });
+                pushResume(res, function(k, f) { return Finally.prototype.combine(e, k, f, o); }, cons(this,o));
             }
         } finally {
             if (isSuspend(res)) {
@@ -230,7 +236,7 @@ function Wat() {
                 var res = combine(e, null, null, th, NIL);
             }
             if (isSuspend(res)) {
-                pushResume(res, function(k, f) { return DLet.prototype.combine(e, k, f, o); });
+                pushResume(res, function(k, f) { return DLet.prototype.combine(e, k, f, o); }, cons(this,o));
                 return res;
             } else {
                 return res;
@@ -258,7 +264,7 @@ function Wat() {
                 var handler = res.handler;
                 return combine(e, null, null, handler, cons(resumption, NIL));
             } else {
-                pushResume(res, function(k, f) { return PushPrompt.prototype.combine(e, k, f, o); });
+                pushResume(res, function(k, f) { return PushPrompt.prototype.combine(e, k, f, o); }, cons(this,o));
                 return res;
             }
         } else {
@@ -269,7 +275,7 @@ function Wat() {
         var prompt = elt(o, 0);
         var handler = elt(o, 1);
         var susp = new Suspension(prompt, handler);
-        pushResume(susp, function(k, f) { return combine(e, null, null, f, NIL); });
+        pushResume(susp, function(k, f) { return combine(e, null, null, f, NIL); }, cons(this, o));
         return susp;
     };
     PushSubcont.prototype.combine = function(e, k, f, o) {
@@ -281,7 +287,7 @@ function Wat() {
             var res = resume(thek, thef);
         }
         if (isSuspend(res)) {
-            pushResume(res, function(k, f) { return PushSubcont.prototype.combine(e, k, f, o); });
+            pushResume(res, function(k, f) { return PushSubcont.prototype.combine(e, k, f, o); }, cons(this,o));
             return res;
         } else {
             return res;
@@ -434,7 +440,6 @@ function Wat() {
     function list_star() {
         var len = arguments.length;
 	var c = len >= 1 ? arguments[len-1] : NIL; for (var i = len-1; i > 0; i--) c = cons(arguments[i - 1], c); return c; }
-    var STACK = NIL;
     /***** Parser *****/
     function parse(s) { // Returns array of forms
 	var res = program_stx(ps(s));

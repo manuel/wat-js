@@ -117,8 +117,7 @@ Examples:
 * Combiners
 
 All computations in Wat are carried out by combiners, of which there
-are two different kinds: operative and applicative (macros could also
-be viewed as combiners, but are not discussed here).  An operative
+are two different kinds: operative and applicative.  An operative
 combiner or just operative is a fexpr that receives the current
 lexical environment and acts on its operand tree unevaluated.  An
 applicative combiner or just applicative is a procedure that first
@@ -134,6 +133,14 @@ Examples:
 | =(vau x #ign x)=        | (1 (+ 2 3) 4) | (1 (+ 2 3) 4)               |
 | =(vau #ign e e)=        | (1 (+ 2 3) 4) | /<the current environment>/ |
 | =(wrap (vau x #ign x))= | (1 (+ 2 3) 4) | (1 5 4)                     |
+
+* Macros
+
+In addition to applicative and operative combiners, Wat also has
+macros as an optimization mechanism.  Very common forms that are never
+redefined, such as =let=, shouldn't suffer from the interpretetive
+overhead of operatives.  Macros are an extra-linguistic mechanism and
+should thus be used with care and only if performance is paramount.
 
 * Bindings and Environments
 ** =def <lhs> <rhs> → rhs= [operative]

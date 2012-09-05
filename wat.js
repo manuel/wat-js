@@ -415,7 +415,6 @@ function Wat() {
         else return "JS " + obj.toString();
     }
     function set_label(type, name) { type.wat_label = name; }
-    function dbg(obj) { return obj.dbg ? obj.dbg : VOID; }
     function put_method(type, name, method) { type[name.jsstr] = method; return method; }
     function find_method(type, name, deflt) {
         var method = type[name.jsstr];
@@ -537,7 +536,6 @@ function Wat() {
 	envbind(e, "type-of", jswrap(type_of));
 	envbind(e, "label", jswrap(function(type) { return new Str(label(type)); }));
 	envbind(e, "set-label!", jswrap(function(type, name) { set_label(type, name.jsstr); return name; }));
-	envbind(e, "debug-info", jswrap(dbg));
 	envbind(e, "identity-hash-code", jswrap(function(obj) { return new Num(jsnums.fromFixnum(idhash(obj))); }));
 	envbind(e, "display", jswrap(log));
 	envbind(e, "log", jswrap(log));
@@ -600,7 +598,6 @@ var WAT_GLOBAL = this;
 // arg: argument
 // cmb: combiner
 // cmt: comment
-// dbg: debugging information
 // e: environment
 // ep: environment parameter
 // id: identifier

@@ -1084,6 +1084,10 @@ JavaScript object.
 Tries to convert a JavaScript object, such as a string, to a similar
 Wat object.
 
+** =js-null= [constant]
+
+The JavaScript null value.
+
 ** =js-callback <cmb> → jsfun= [applicative]
 
 Returns a JS function that, when called, will apply the provided

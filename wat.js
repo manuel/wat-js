@@ -11,9 +11,9 @@ function Wat() {
     function evaluate(e, k, f, x) { if (x && x.wat_eval) return x.wat_eval(e, k, f); else return x; }
     Sym.prototype.wat_eval = function(e, k, f) { return lookup(e, this); };
     Cons.prototype.wat_eval = function(e, k, f) {
-        var oldStack = STACK;
-        STACK = cons(this, oldStack);
-        try {
+        // var oldStack = STACK;
+        // STACK = cons(this, oldStack);
+        // try {
             if (isResume(k)) {
                 var op = resume(k, f);
             } else {
@@ -29,9 +29,9 @@ function Wat() {
             } else {
                 return combine(e, null, null, op, cdr(this));
             }
-        } finally {
-            STACK = oldStack;
-        }
+        // } finally {
+        //     STACK = oldStack;
+        // }
     };
     function macroCombine(e, k, f, macro, form) {
         var cached_macro = form.cached_macro;
@@ -82,13 +82,13 @@ function Wat() {
             pushResume(args, function(k, f) { return that.combine(e, k, f, o); })
             return args;
         }
-        var oldStack = STACK;
-        STACK = cons(cons(this, args), STACK);
-        try {
+        // var oldStack = STACK;
+        // STACK = cons(cons(this, args), STACK);
+        // try {
             return this.cmb.combine(e, null, null, args);
-        } finally {
-            STACK = oldStack;
-        }
+        // } finally {
+        //     STACK = oldStack;
+        // }
     };
     function evalArgs(e, k, f, todo, done) {
 	if (todo === NIL) { return reverse_list(done); }
@@ -477,7 +477,11 @@ function Wat() {
 				  quote_stx, compound_stx, id_stx, string_stx, cmt_stx));
     var program_stx = whitespace(repeat0(choice(x_stx, whitespace_stx))); // HACK!
     /***** Core Environment *****/
-    function envbind(e, name, val) { bind(e, new Sym(name), val); set_label(val, name); }
+    function envbind(e, name, val) {
+        bind(e, new Sym(name), val);
+        if (val)
+            set_label(val, name);
+    }
     function mkenvcore() {
 	var e = new Env();
 	envbind(e, "def", new Def());
@@ -538,6 +542,7 @@ function Wat() {
 	envbind(e, "from-js", jswrap(from_js));
 	envbind(e, "js-callback", wrap(new JSCallback()));
 	envbind(e, "js-array-to-list", jswrap(array_to_list));
+        envbind(e, "js-null", null);
         envbind(e, "finally", new Finally());
         envbind(e, "dnew", wrap(new DNew()));
         envbind(e, "dlet*", wrap(new DLet()));
@@ -549,7 +554,6 @@ function Wat() {
         envbind(e, "find-method", jswrap(find_method));
         envbind(e, "macro", jswrap(function(exp) { return new Macro(exp); }));
         envbind(e, "current-milliseconds", jswrap(currentMilliseconds));
-        envbind(e, "stacktrace", jswrap(function() { return STACK; }));
 	return e;
     }
     var envcore = mkenvcore();

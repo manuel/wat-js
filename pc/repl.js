@@ -32,6 +32,7 @@ function wat_load_file(path) {
 }
 
 wat_load_file("../crust.wat");
+wat_load_file("../dirtyjs.wat");
 wat_load_file("pc.wat");
 arguments.forEach(wat_load_file);
 wat_load_file("../repl.wat");

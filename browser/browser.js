@@ -5,6 +5,7 @@ var watbrowser = (function() {
     function init() {
         var forms = [];
 	forms = forms.concat(load_file("../crust.wat"));
+	forms = forms.concat(load_file("../dirtyjs.wat"));
 	forms = forms.concat(load_file("browser.wat"));
 	forms = forms.concat(load_file("../test.wat"));
         forms = forms.concat(load_file("testrunner.wat"));

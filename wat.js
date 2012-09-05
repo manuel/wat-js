@@ -21,7 +21,14 @@ function Wat() {
     }
     function handleException(exc) {
         if (exc instanceof Exc) throw exc;
-        else fail(exc);
+        else {
+            var wat_throw = lookup0(envcore, new Sym("throw"));
+            if (wat_throw) {
+                return combine(envcore, null, null, wat_throw, cons(exc, NIL));
+            } else {
+                console.log("fail");
+            }
+        }
     }
     Sym.prototype.wat_eval = function(e, k, f) { return lookup(e, this); };
     Cons.prototype.wat_eval = function(e, k, f) {
@@ -71,7 +78,7 @@ function Wat() {
     };
     /* Operative & Applicative Combiners */
     function combine(e, k, f, cmb, o) {
-        try{
+        try {
             return cmb.combine ? cmb.combine(e, k, f, o) : fail("not a combiner");
         } catch(exc) {
             return handleException(exc);
@@ -334,7 +341,8 @@ function Wat() {
     function cdr(cons) { assert(type_of(cons) === Cons.prototype.wat_type); return cons.cdr; }
     function elt(cons, i) { return (i === 0) ? car(cons) : elt(cdr(cons), i - 1); }
     function Env(parent) { this.bindings = Object.create(parent ? parent.bindings : null); }
-    function lookup(e, sym) { var val = e.bindings[sym.name]; return (val !== undefined) ? val : fail("unbound: " + sym.name); }
+    function lookup0(e, sym) { return e.bindings[sym.name]; }
+    function lookup(e, sym) { var val = lookup0(e, sym); return (val !== undefined) ? val : fail("unbound: " + sym.name); }
     function bind(e, lhs, rhs) { lhs.match(e, rhs); return rhs; }
     Sym.prototype.match = function(e, rhs) { if (rhs === undefined) fail("trying to match against undefined: " + this.name); 
                                              e.bindings[this.name] = rhs; };

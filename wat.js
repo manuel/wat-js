@@ -424,8 +424,37 @@ function Wat() {
     function init_types(typenames) {
         typenames.map(function (typename) { var type = new Type(); set_label(type, typename);
                                             eval(typename).prototype.wat_type = type; }); }
-    init_types(["Opv", "Apv", "Def", "Vau", "If", "Eval", "JSFun", "JSOBJ",
-		"Sym", "Cons", "Env", "Str", "Num", "Vector", "Void", "Ign", "Nil", "Bool", "Type"]);
+    init_types([
+        "Apv",
+        "Bool",
+        "Catch",
+        "Cons",
+        "DLet",
+        "DNew",
+        "DRef",
+        "Def",
+        "Env",
+        "Eval",
+        "IdentityHashtable",
+        "If",
+        "Ign",
+        "JSFun",
+        "JSOBJ",
+        "Loop",
+        "Macro",
+        "Nil",
+        "Num",
+        "Opv",
+        "Resumption",
+        "Str",
+        "Suspension",
+        "Sym",
+        "Throw",
+        "Type",
+        "Vau",
+        "Vector",
+        "Void",
+    ]);
     /* Utilities */
     function assert(b) { if (!b) fail("assertion failed"); }
     function fail(err) { throw err; }

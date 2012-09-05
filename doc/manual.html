@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-29 12:27:20 CEST"/>
+<meta name="generated" content="2012-09-02 14:53:31 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -117,9 +117,10 @@ lang="en" xml:lang="en">
 <li><a href="#sec-8.6"><code>loop . &lt;forms&gt; → |</code> [operative] </a></li>
 <li><a href="#sec-8.7"><code>while &lt;test&gt; . &lt;forms&gt; → |</code> [operative] </a></li>
 <li><a href="#sec-8.8"><code>until &lt;test&gt; . &lt;forms&gt; → |</code> [operative] </a></li>
-<li><a href="#sec-8.9"><code>block &lt;name&gt; . &lt;body&gt; → result</code> [operative] </a></li>
-<li><a href="#sec-8.10"><code>return-from &lt;cont&gt; . [&lt;val&gt;] → |</code> [operative] </a></li>
-<li><a href="#sec-8.11"><code>unwind-protect &lt;protected&gt; . &lt;cleanup&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-8.9"><code>dotimes (&lt;var&gt; &lt;count&gt; [&lt;result-form&gt;]) . &lt;forms&gt;</code> [operative] </a></li>
+<li><a href="#sec-8.10"><code>block &lt;name&gt; . &lt;body&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-8.11"><code>return-from &lt;cont&gt; . [&lt;val&gt;] → |</code> [operative] </a></li>
+<li><a href="#sec-8.12"><code>unwind-protect &lt;protected&gt; . &lt;cleanup&gt; → result</code> [operative] </a></li>
 </ul>
 </li>
 <li><a href="#sec-9">Dynamic Binding </a>
@@ -137,7 +138,7 @@ lang="en" xml:lang="en">
 <li><a href="#sec-10.4"><code>default-handler &lt;exc&gt; → result</code> [generic]  <i>NIY</i> </a></li>
 <li><a href="#sec-10.5"><code>restart-bind &lt;body&gt; . &lt;handlers&gt; → result</code> [operative] <i>NIY</i> </a></li>
 <li><a href="#sec-10.6"><code>invoke-restart &lt;restart&gt; → result</code> [applicative] <i>NIY</i> </a></li>
-<li><a href="#sec-10.7"><code>associated-exception &lt;restart&gt; → exc</code> [generic] <i>NIY</i> </a></li>
+<li><a href="#sec-10.7"><code>associated-exception &lt;restart&gt; → option</code> [generic] <i>NIY</i> </a></li>
 </ul>
 </li>
 <li><a href="#sec-11">Higher-order Control </a>
@@ -236,6 +237,8 @@ lang="en" xml:lang="en">
 <li><a href="#sec-23.3"><code>read → form</code> [applicative] </a></li>
 <li><a href="#sec-23.4"><code>display &lt;msg&gt; → msg</code> [applicative] </a></li>
 <li><a href="#sec-23.5"><code>fail &lt;reason&gt; → |</code> [applicative] </a></li>
+<li><a href="#sec-23.6"><code>current-milliseconds → number</code> [applicative] </a></li>
+<li><a href="#sec-23.7"><code>time . exprs → number</code> [operative] </a></li>
 </ul>
 </li>
 <li><a href="#sec-24">JavaScript Bridge </a>
@@ -249,8 +252,7 @@ lang="en" xml:lang="en">
 <li><a href="#sec-24.7"><code>to-js &lt;obj&gt; → jsobj</code> [applicative] </a></li>
 <li><a href="#sec-24.8"><code>from-js &lt;js-obj&gt; → obj</code> [applicative] </a></li>
 <li><a href="#sec-24.9"><code>js-callback &lt;cmb&gt; → jsfun</code> [applicative] </a></li>
-<li><a href="#sec-24.10"><code>define-js-function &lt;name&gt;</code> [operative] </a></li>
-<li><a href="#sec-24.11"><code>define-js-method &lt;name&gt;</code> [operative] </a></li>
+<li><a href="#sec-24.10"><code>define-js-method &lt;name&gt;</code> [operative] </a></li>
 </ul>
 </li>
 <li><a href="#sec-25">Examples </a>
@@ -1403,8 +1405,51 @@ Performs forms until test is true.
 </div>
 
 <div id="outline-container-8.9" class="outline-3">
-<h3 id="sec-8.9"><code>block &lt;name&gt; . &lt;body&gt; → result</code> [operative] </h3>
+<h3 id="sec-8.9"><code>dotimes (&lt;var&gt; &lt;count&gt; [&lt;result-form&gt;]) . &lt;forms&gt;</code> [operative] </h3>
 <div class="outline-text-3" id="text-8.9">
+
+
+<p>
+Performs body forms repeatedly with the variable bound to integers
+from 0 up to but not including the count.  If a result form is
+specified, its result will be returned, void otherwise.
+</p>
+
+</div>
+
+<div id="outline-container-8.9.1" class="outline-4">
+<h4 id="sec-8.9.1">Examples </h4>
+<div class="outline-text-4" id="text-8.9.1">
+
+
+
+
+
+<pre class="example">(define x 0)
+(define env (current-environment))
+(dotimes (i 10)
+  (set! env x (+ x 1)))
+(assert (= 10 x))
+
+(assert (= 140 (dotimes (i 20 (* i 7)))))
+
+(assert (= #void (dotimes (i 0))))
+(assert (= #void (dotimes (i 0 #void))))
+(assert (= 1 (dotimes (i 1 i))))
+(assert (= #void (dotimes (i 1))))
+</pre>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-8.10" class="outline-3">
+<h3 id="sec-8.10"><code>block &lt;name&gt; . &lt;body&gt; → result</code> [operative] </h3>
+<div class="outline-text-3" id="text-8.10">
 
 
 <p>
@@ -1414,9 +1459,9 @@ that can be invoked with <code>return-from</code>.
 
 </div>
 
-<div id="outline-container-8.9.1" class="outline-4">
-<h4 id="sec-8.9.1">Examples </h4>
-<div class="outline-text-4" id="text-8.9.1">
+<div id="outline-container-8.10.1" class="outline-4">
+<h4 id="sec-8.10.1">Examples </h4>
+<div class="outline-text-4" id="text-8.10.1">
 
 
 
@@ -1440,9 +1485,9 @@ that can be invoked with <code>return-from</code>.
 
 </div>
 
-<div id="outline-container-8.10" class="outline-3">
-<h3 id="sec-8.10"><code>return-from &lt;cont&gt; . [&lt;val&gt;] → |</code> [operative] </h3>
-<div class="outline-text-3" id="text-8.10">
+<div id="outline-container-8.11" class="outline-3">
+<h3 id="sec-8.11"><code>return-from &lt;cont&gt; . [&lt;val&gt;] → |</code> [operative] </h3>
+<div class="outline-text-3" id="text-8.11">
 
 
 <p>
@@ -1455,15 +1500,17 @@ An error is signalled if the continuation's extent has ended.
 
 </div>
 
-<div id="outline-container-8.10.1" class="outline-4">
-<h4 id="sec-8.10.1">Examples </h4>
-<div class="outline-text-4" id="text-8.10.1">
+<div id="outline-container-8.11.1" class="outline-4">
+<h4 id="sec-8.11.1">Examples </h4>
+<div class="outline-text-4" id="text-8.11.1">
 
 
 
 
 
-<pre class="example">;(assert (= #void (block foo (return-from foo) 1 2)))
+<pre class="example">(assert (= #void (block foo (return-from foo))))
+(assert (= 33 (block foo (return-from foo 33))))
+(assert (= 33 (block foo (return-from foo 33) 1 2 3)))
 </pre>
 
 
@@ -1474,9 +1521,9 @@ An error is signalled if the continuation's extent has ended.
 
 </div>
 
-<div id="outline-container-8.11" class="outline-3">
-<h3 id="sec-8.11"><code>unwind-protect &lt;protected&gt; . &lt;cleanup&gt; → result</code> [operative] </h3>
-<div class="outline-text-3" id="text-8.11">
+<div id="outline-container-8.12" class="outline-3">
+<h3 id="sec-8.12"><code>unwind-protect &lt;protected&gt; . &lt;cleanup&gt; → result</code> [operative] </h3>
+<div class="outline-text-3" id="text-8.12">
 
 
 <p>
@@ -1489,9 +1536,9 @@ higher-order control.
 
 </div>
 
-<div id="outline-container-8.11.1" class="outline-4">
-<h4 id="sec-8.11.1">Examples </h4>
-<div class="outline-text-4" id="text-8.11.1">
+<div id="outline-container-8.12.1" class="outline-4">
+<h4 id="sec-8.12.1">Examples </h4>
+<div class="outline-text-4" id="text-8.12.1">
 
 
 
@@ -1606,8 +1653,10 @@ function is called on the exception.
 </p>
 <p>
 While a handler body is executed, the current handlers are those that
-were established at the time <code>handle</code> was called.  This is analogous
-to Common Lisp's <a href="http://www.nhplace.com/kent/Papers/Condition-Handling-2001.html">condition firewall</a>.
+were established at the time <code>handle</code> was called.  In other words,
+while the <i>call</i> stack is not unwound when a handler is called, the
+<i>handler</i> stack is unwound.  This is analogous to Common Lisp's
+<a href="http://www.nhplace.com/kent/Papers/Condition-Handling-2001.html">condition firewall</a>.
 </p></div>
 
 </div>
@@ -1637,10 +1686,9 @@ exception handler may use to continue computation.  Restart handlers
 are installed as if by <code>catch</code>, i.e. when a restart is invoked, the
 stack is unwound and the result of the restart handler is returned.
 <code>throw</code> only returns normally if one of its restart handlers is
-invoked, otherwise it always enters the debugger or crashes the
-program.  The restart handlers are associated with the thrown
-exception, and only match invoked restarts whose
-<code>associated-exception</code> is the thrown exception.
+invoked, otherwise it always invokes the debugger.  The restart
+handlers are associated with the thrown exception, and only match
+invoked restarts whose <code>associated-exception</code> is the thrown exception.
 </p>
 </div>
 
@@ -1653,7 +1701,9 @@ exception, and only match invoked restarts whose
 
 <p>
 Called on an exception when no handler is found, or when all found
-handlers returned normally.
+handlers returned normally.  Different exception types may define
+different methods.  The default is to do nothing, which will cause
+<code>throw</code> to invoke the debugger.
 </p>
 </div>
 
@@ -1672,7 +1722,9 @@ returned.  If any condition happens during evaluation of the body, the
 restart handlers will be effective.  This is unlike the restart
 handlers bound by a <code>throw</code>, which are associated with the thrown
 exception.  Restart handlers bound by <code>restart-bind</code> are not
-associated with any exception.
+associated with any exception, and are therefore effective during
+handling of any exception during the <code>restart-bind</code>-form dynamic
+extent.
 </p>
 </div>
 
@@ -1693,7 +1745,7 @@ handler body.  If no restart handler is found, an exception is thrown.
 </div>
 
 <div id="outline-container-10.7" class="outline-3">
-<h3 id="sec-10.7"><code>associated-exception &lt;restart&gt; → exc</code> [generic] <i>NIY</i> </h3>
+<h3 id="sec-10.7"><code>associated-exception &lt;restart&gt; → option</code> [generic] <i>NIY</i> </h3>
 <div class="outline-text-3" id="text-10.7">
 
 
@@ -1701,7 +1753,8 @@ handler body.  If no restart handler is found, an exception is thrown.
 A restart intended for a restart handler established by <code>throw</code> must
 have the thrown exception as associated exception.  Its type should
 implement a method for this generic function that returns the
-restart's associated exception.
+restart's associated exception.  The associated exception is an option
+type; it is <code>none</code> if there is no associated exception, and <code>(some &lt;exc&gt;)</code> for an associated exception.
 </p>
 
 </div>
@@ -1714,27 +1767,7 @@ restart's associated exception.
 
 
 
-<pre class="example">;; (define-record-type Div-by-Zero-Exception
-;;   (make-div-by-zero-exception)
-;;   #ign)
-
-;; (define-record-type Use-Value-Restart
-;;   (make-use-value-restart value associated-exception)
-;;   #ign
-;;   (value value)
-;;   (associated-exception associated-exception))
-
-;; (define (my-compute number divisor)
-;;   (let ((div (if (= 0 divisor)
-;;                  (throw (make-div-by-zero-exception)
-;;                    (Use-Value-Restart (r) (value r)))
-;;                  divisor)))
-;;     (/ number div)))
-
-;; (assert 
-;;   (= (handle (my-compute 12 0)
-;;        (Div-by-Zero-Exception (dbz) (invoke-restart (make-use-value-restart 3 dbz))))
-;;      4))
+<pre class="example">(assert (= 1 (handle 1)))
 </pre>
 
 
@@ -2524,9 +2557,9 @@ found.
 
 
 <pre class="example">(define x-opt (some 12))
-(assert (= (if-option (x x-opt) x 0) 12))
+(assert (= 12 (if-option (x x-opt) x 0)))
 (define x-opt none)
-(assert (= (if-option (x x-opt) x 0) 0))
+(assert (= 0 (if-option (x x-opt) x 0)))
 </pre>
 
 
@@ -2608,6 +2641,32 @@ Prints a message string to the console and returns it.
 
 <p>
 Halts evaluation with an object describing the reason (typically an error).
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-23.6" class="outline-3">
+<h3 id="sec-23.6"><code>current-milliseconds → number</code> [applicative] </h3>
+<div class="outline-text-3" id="text-23.6">
+
+
+<p>
+Returns the current milliseconds, for some implementation-specific
+value of "current milliseconds".
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-23.7" class="outline-3">
+<h3 id="sec-23.7"><code>time . exprs → number</code> [operative] </h3>
+<div class="outline-text-3" id="text-23.7">
+
+
+<p>
+Performs expressions and returns their result, displaying
+implementation-specific timing information.
 </p>
 </div>
 </div>
@@ -2746,24 +2805,8 @@ combiner with the arguments the callback received.
 </div>
 
 <div id="outline-container-24.10" class="outline-3">
-<h3 id="sec-24.10"><code>define-js-function &lt;name&gt;</code> [operative] </h3>
+<h3 id="sec-24.10"><code>define-js-method &lt;name&gt;</code> [operative] </h3>
 <div class="outline-text-3" id="text-24.10">
-
-
-<p>
-Defines name as an applicative that when called with parameters will
-invoke the named JavaScript method of the object with the parameters
-and return the result.  Arguments of the applicative are transformed
-to JS with <code>to-js</code> and the result of the method is transformed to Wat
-with <code>from-js</code>.
-</p>
-</div>
-
-</div>
-
-<div id="outline-container-24.11" class="outline-3">
-<h3 id="sec-24.11"><code>define-js-method &lt;name&gt;</code> [operative] </h3>
-<div class="outline-text-3" id="text-24.11">
 
 
 <p>
@@ -2775,9 +2818,9 @@ with <code>to-js</code> and the result is transformed to Wat with <code>from-js<
 
 </div>
 
-<div id="outline-container-24.11.1" class="outline-4">
-<h4 id="sec-24.11.1">Examples </h4>
-<div class="outline-text-4" id="text-24.11.1">
+<div id="outline-container-24.10.1" class="outline-4">
+<h4 id="sec-24.10.1">Examples </h4>
+<div class="outline-text-4" id="text-24.10.1">
 
 
 
@@ -2873,7 +2916,7 @@ style.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-08-29 12:27:20 CEST</p>
+<p class="date"> Date: 2012-09-02 14:53:31 CEST</p>
 </div>
 </div>
 </body>

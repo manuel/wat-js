@@ -184,6 +184,9 @@
   (vau ((name . ptree) . body) env
     (eval (list def name (list macro (list* vau ptree #ign body))) env)))
 
+(define (instance? obj type)
+  (eq? (type-of obj) type))
+
 (define-syntax (define-record-type name (ctor-name . ctor-field-names) pred-name . field-specs) env
   (let* (((type tagger untagger) (make-type))
          (ctor (lambda ctor-args
@@ -220,6 +223,17 @@
 (define-macro (loop . forms)
   (list loop1 (list* begin forms)))
 
+(define-syntax (dotimes (var times . optional-result-form) . exprs) env
+  (define wrapped-exprs (list* begin exprs))
+  (define evaled-times (eval times env))
+  (define result-form (if (null? optional-result-form) #void (car optional-result-form)))
+  (let ((subenv (make-environment env)))
+    (eval (list def var 0) subenv)
+    (while (< (eval var subenv) evaled-times)
+      (eval wrapped-exprs subenv)
+      (eval (list def var (+ 1 (eval var subenv))) subenv))
+    (eval result-form subenv)))
+
 (provide (block return-from)
   (define (call-with-escape fun)
     (define extent-ended? #f)
@@ -227,8 +241,8 @@
     (define (escape val)
       (if extent-ended?
           (fail "extent ended")
-          (throw escape val)))
-    (unwind-protect (catch escape (lambda () (fun escape)))
+          (throw* escape val)))
+    (unwind-protect (catch* escape (lambda () (fun escape)))
       (set! *env* extent-ended? #t)))
   (define-macro (block name . body)
     (list call-with-escape (list* lambda (list name) body)))
@@ -286,20 +300,13 @@
   (define-generic (hash-code obj) (identity-hash-code obj))
 )
 
-(provide (->string)
+(provide (->string pair->string)
   (define-generic (->string obj) (strcat "#{" (label obj) "}"))
   (define-method (->string (obj Void)) "#void")
   (define-method (->string (obj Ign)) "#ign")
   (define-method (->string (obj Boolean)) (if obj "#t" "#f"))
   (define-method (->string (obj Nil)) "()")
-  (define-method (->string (obj Pair))
-    (define (pair->string (kar . kdr))
-      (if (null? kdr)
-          (->string kar)
-          (if (pair? kdr)
-              (strcat (->string kar) " " (pair->string kdr))
-              (strcat (->string kar) " . " (->string kdr)))))
-    (strcat "(" (pair->string obj) ")"))
+  (define-method (->string (obj Pair)) (strcat "(" (pair->string obj) ")"))
   (define-method (->string (obj Symbol)) (symbol->string obj))
   (define-method (->string (obj String)) (str-print obj))
   (define-method (->string (obj Number)) (number->string obj))
@@ -307,6 +314,12 @@
   (define-method (->string (obj Operative)) (strcat "#[Operative " (label obj) "]"))
   (define-method (->string (obj Environment)) "#[Environment]")
   (define-method (->string (obj Vector)) "#[Vector]")
+  (define (pair->string (kar . kdr))
+    (if (null? kdr)
+        (->string kar)
+        (if (pair? kdr)
+            (strcat (->string kar) " " (pair->string kdr))
+            (strcat (->string kar) " . " (->string kdr)))))
 )
 
 (provide (->number)
@@ -315,15 +328,6 @@
   (define-method (->number (obj String)) (string->number obj))
   (define-method (->number (obj Symbol)) (string->number (symbol->string obj)))
 )
-
-(define (display-stacktrace trace)
-  (for-each (lambda (frame) (display (->string frame))) trace))
-
-(define (trap exc)
-  (define trace (stacktrace))
-  (display "ERROR")
-  (display exc)
-  (display-stacktrace trace))
 
 (provide (make-prompt push-prompt take-subcont push-subcont shift)
   (def (prompt-type tag-prompt #ign) (make-type))
@@ -362,7 +366,124 @@
             (eval (car else) env)))))
 )
 
-(define-record-type Blocking
-  (make-blocking)
-  blocking?)
+(provide (handle catch throw default-handler
+          restart-bind invoke-restart associated-exception
+          Error make-error)
 
+  (define-record-type Handler-set
+    (construct-handler-set handlers parent)
+    handler-set?
+    (handlers get-handlers)
+    (parent get-parent))
+
+  (define-record-type Handler
+    (construct-handler pred thunk)
+    handler?
+    (pred get-pred)
+    (thunk get-thunk))
+
+  (def (Handlers-hack hack-tag hack-untag) (make-type))
+
+  (define *handler-set* (dnew none))
+
+  (define *restart-set* (dnew none))
+
+  (define (make-handler-set handler-specs parent env)
+    (construct-handler-set (hack-tag (map (lambda (handler-spec)
+                                            (make-handler handler-spec env))
+                                          handler-specs))
+                           parent))
+
+  (define (make-handler (type-spec (var) . body) env)
+    (let* ((type (eval type-spec env))
+           (pred (lambda (exc) (instance? exc type)))
+           (thunk (eval (list* lambda (list var) body) env)))
+      (construct-handler pred thunk)))
+
+  (define-syntax (handle body . handler-specs) env
+    (dlet *handler-set* (some (make-handler-set handler-specs (dref *handler-set*) env))
+      (eval body env)))
+  
+  (define (make-restart-set handler-specs parent associated-exception env)
+    (construct-handler-set (hack-tag (map (lambda (handler-spec)
+                                            (make-restart-handler handler-spec associated-exception env))
+                                          handler-specs))
+                           parent))
+  
+  (define (make-restart-handler (type-spec (var) . body) associated-exception env)
+    (let* ((type (eval type-spec env))
+           (pred (lambda (exc)
+                     (and (instance? exc type)
+                          (if-option (ae associated-exception)
+                            (= ae exc)
+                            #t))))
+           (thunk (eval (list* lambda (list var) body) env)))
+      (construct-handler pred thunk)))
+
+  (define-syntax (throw exc-spec . handler-specs) env
+    (let ((exc (eval exc-spec env)))
+      (dlet *restart-set* (some (make-restart-set handler-specs (dref *restart-set*) (some exc) env))
+        (signal *handler-set* exc)
+        (fail exc))))
+
+  (define (signal handler-set-dynvar exc)    
+
+    (define (signal-handler-set handler-set-dynvar hs exc)
+      (block done
+        (for-each (lambda (h)
+                    (when ((get-pred h) exc)
+                      (return-from done
+                        (dlet handler-set-dynvar (get-parent hs)
+                          ((get-thunk h) exc)))))
+                  (hack-untag (get-handlers hs))))
+      (if-option (parent (get-parent hs))
+        (signal-handler-set handler-set-dynvar parent exc)
+        (default-handler exc)))
+
+    (if-option (hs (dref handler-set-dynvar))
+      (signal-handler-set handler-set-dynvar hs exc)
+      (default-handler exc)))
+
+  (define (make-unwinding-wrapper core-form)
+    (vau (body . handler-specs) env
+      (block normal-return
+        ((block error-return
+           (eval (list* core-form (list return-from normal-return body)
+                        (map (lambda (handler-spec)
+                               (let (((type var . exprs) handler-spec))
+                                 (list type var (list return-from error-return
+                                                      (list* lambda () exprs)))))
+                             handler-specs))
+                 env))))))
+
+  (define catch (make-unwinding-wrapper handle))
+
+  (define-generic (default-handler exc) #void)
+
+  (define-record-type Control-error
+    (make-control-error)
+    #ign)
+
+  (define-syntax (restart-bind* body . handler-specs) env
+    (dlet *restart-set* (some (make-restart-set handler-specs (dref *restart-set*) none env))
+      (eval body env)
+      (throw (make-control-error))))
+
+  (define restart-bind (make-unwinding-wrapper restart-bind*))
+    
+  (define (invoke-restart rst)
+    (signal *restart-set* rst))
+
+  (define-generic (associated-exception rst) none)
+
+  (define-record-type Error
+    (make-error)
+    #ign)
+
+)
+
+(define-syntax (time . exprs) env
+  (let* ((ms (current-milliseconds))
+         (res (eval (list* begin exprs) env)))
+    (display (strcat "TIME " (->string (- (current-milliseconds) ms)) "ms " (pair->string exprs)))
+    res))

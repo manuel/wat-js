@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-09-05 20:43:05 CEST"/>
+<meta name="generated" content="2012-09-06 19:44:55 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -1806,6 +1806,11 @@ These are the control operators from Dybvig, Jones, and Sabry's
 <a href="http://www.cs.indiana.edu/~dyb/pubs/monadicDC.pdf"><i>A Monadic Framework for Delimited Continuations</i></a> that are able to express all
 other delimited control operators.
 </p>
+<p>
+Note that capturing a continuation whose stack includes alien code
+that is not specially written to cooperate with Wat's suspension and
+resumption system will lead to undefined behavior.
+</p>
 
 </div>
 
@@ -2945,7 +2950,7 @@ style.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-09-05 20:43:05 CEST</p>
+<p class="date"> Date: 2012-09-06 19:44:55 CEST</p>
 </div>
 </div>
 </body>

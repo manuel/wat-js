@@ -726,6 +726,10 @@ These are the control operators from Dybvig, Jones, and Sabry's
 Framework for Delimited Continuations/]] that are able to express all
 other delimited control operators.
 
+Note that capturing a continuation whose stack includes alien code
+that is not specially written to cooperate with Wat's suspension and
+resumption system will lead to undefined behavior.
+
 ** =make-prompt → prompt= [applicative]
 
 Creates a fresh prompt.

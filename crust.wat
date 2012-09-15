@@ -187,35 +187,6 @@
 (define (instance? obj type)
   (eq? (type-of obj) type))
 
-(define-syntax (define-record-type name (ctor-name . ctor-field-names) pred-name . field-specs) env
-  (let* (((type tagger untagger) (make-type))
-         (ctor (lambda ctor-args
-                 (let ((fields-dict (make-string-hashtable)))
-                   (map2 (lambda (field-name arg)
-                           (string-hashtable-put! fields-dict (symbol->string field-name) arg))
-                         ctor-field-names
-                         ctor-args)
-                   (tagger fields-dict))))
-         (pred (lambda (obj) (eq? (type-of obj) type))))
-    (eval (list def (list name ctor-name pred-name) (list list type ctor pred)) env)
-    (set-label! type (symbol->string name))
-    (map (lambda (field-spec)
-           (let (((name accessor-name . opt) field-spec))
-             (eval (list def accessor-name
-                         (lambda (obj)
-                           (let ((fields-dict (untagger obj)))
-                             (string-hashtable-get fields-dict (symbol->string name)))))
-                   env)
-             (unless (null? opt)
-               (let (((modifier-name) opt))
-                 (eval (list def modifier-name
-                             (lambda (obj new-val)
-                               (let ((fields-dict (untagger obj)))
-                                 (string-hashtable-put! fields-dict (symbol->string name) new-val))))
-                       env)))))
-         field-specs)
-    type))
-
 (define-macro (dlet dv val . exprs)
   (list dlet* dv val (list* lambda () exprs)))
 
@@ -276,6 +247,37 @@
     (define method (eval (list* lambda (list* self args) body) env))
     (put-method! (eval type env) (symbol->string name) method))
 )
+
+(define-syntax (define-record-type name (ctor-name . ctor-field-names) pred-name . field-specs) env
+  (let* (((type tagger untagger) (make-type))
+         (ctor (lambda ctor-args
+                 (let ((fields-dict (make-string-hashtable)))
+                   (map2 (lambda (field-name arg)
+                           (string-hashtable-put! fields-dict (symbol->string field-name) arg))
+                         ctor-field-names
+                         ctor-args)
+                   (tagger fields-dict))))
+         (pred (lambda (obj) (eq? (type-of obj) type))))
+    (eval (list def (list name ctor-name pred-name) (list list type ctor pred)) env)
+    (set-label! type (symbol->string name))
+    (map (lambda (field-spec)
+           (let (((name accessor-name . opt) field-spec))
+             (unless (defined? accessor-name env)
+               (eval (list define-generic (list accessor-name)) env))
+             (put-method! type (symbol->string accessor-name)
+                          (lambda (obj)
+                            (let ((fields-dict (untagger obj)))
+                              (string-hashtable-get fields-dict (symbol->string name)))))
+             (unless (null? opt)
+               (let (((modifier-name) opt))
+                 (unless (defined? modifier-name env)
+                   (eval (list define-generic (list modifier-name)) env))
+                 (put-method! type (symbol->string modifier-name)
+                              (lambda (obj new-val)
+                                (let ((fields-dict (untagger obj)))
+                                  (string-hashtable-put! fields-dict (symbol->string name) new-val))))))))
+         field-specs)
+    type))
 
 (provide (= /=)
   (define-generic (= a b) (eq? a b))
@@ -366,122 +368,6 @@
           (eval (list let (list (list name (value o))) then) env)
           (unless (null? else)
             (eval (car else) env)))))
-)
-
-(provide (handle catch throw default-handler
-          restart-bind invoke-restart associated-exception
-          Error make-error)
-
-  (define-record-type Handler-set
-    (construct-handler-set handlers parent)
-    handler-set?
-    (handlers get-handlers)
-    (parent get-parent))
-
-  (define-record-type Handler
-    (construct-handler pred thunk)
-    handler?
-    (pred get-pred)
-    (thunk get-thunk))
-
-  (def (Handlers-hack hack-tag hack-untag) (make-type))
-
-  (define *handler-set* (dnew none))
-
-  (define *restart-set* (dnew none))
-
-  (define (make-handler-set handler-specs parent env)
-    (construct-handler-set (hack-tag (map (lambda (handler-spec)
-                                            (make-handler handler-spec env))
-                                          handler-specs))
-                           parent))
-
-  (define (make-handler (type-spec (var) . body) env)
-    (let* ((type (eval type-spec env))
-           (pred (lambda (exc) (instance? exc type)))
-           (thunk (eval (list* lambda (list var) body) env)))
-      (construct-handler pred thunk)))
-
-  (define-syntax (handle body . handler-specs) env
-    (dlet *handler-set* (some (make-handler-set handler-specs (dref *handler-set*) env))
-      (eval body env)))
-  
-  (define (make-restart-set handler-specs parent associated-exception env)
-    (construct-handler-set (hack-tag (map (lambda (handler-spec)
-                                            (make-restart-handler handler-spec associated-exception env))
-                                          handler-specs))
-                           parent))
-  
-  (define (make-restart-handler (type-spec (var) . body) associated-exception env)
-    (let* ((type (eval type-spec env))
-           (pred (lambda (exc)
-                     (and (instance? exc type)
-                          (if-option (ae associated-exception)
-                            (= ae exc)
-                            #t))))
-           (thunk (eval (list* lambda (list var) body) env)))
-      (construct-handler pred thunk)))
-
-  (define-syntax (throw exc-spec . handler-specs) env
-    (let ((exc (eval exc-spec env)))
-      (dlet *restart-set* (some (make-restart-set handler-specs (dref *restart-set*) (some exc) env))
-        (signal *handler-set* exc)
-        (fail exc))))
-
-  (define (signal handler-set-dynvar exc)    
-
-    (define (signal-handler-set handler-set-dynvar hs exc)
-      (block done
-        (for-each (lambda (h)
-                    (when ((get-pred h) exc)
-                      (return-from done
-                        (dlet handler-set-dynvar (get-parent hs)
-                          ((get-thunk h) exc)))))
-                  (hack-untag (get-handlers hs))))
-      (if-option (parent (get-parent hs))
-        (signal-handler-set handler-set-dynvar parent exc)
-        (default-handler exc)))
-
-    (if-option (hs (dref handler-set-dynvar))
-      (signal-handler-set handler-set-dynvar hs exc)
-      (default-handler exc)))
-
-  (define (make-unwinding-wrapper core-form)
-    (vau (body . handler-specs) env
-      (block normal-return
-        ((block error-return
-           (eval (list* core-form (list return-from normal-return body)
-                        (map (lambda (handler-spec)
-                               (let (((type var . exprs) handler-spec))
-                                 (list type var (list return-from error-return
-                                                      (list* lambda () exprs)))))
-                             handler-specs))
-                 env))))))
-
-  (define catch (make-unwinding-wrapper handle))
-
-  (define-generic (default-handler exc) #void)
-
-  (define-record-type Control-error
-    (make-control-error)
-    #ign)
-
-  (define-syntax (restart-bind* body . handler-specs) env
-    (dlet *restart-set* (some (make-restart-set handler-specs (dref *restart-set*) none env))
-      (eval body env)
-      (throw (make-control-error))))
-
-  (define restart-bind (make-unwinding-wrapper restart-bind*))
-    
-  (define (invoke-restart rst)
-    (signal *restart-set* rst))
-
-  (define-generic (associated-exception rst) none)
-
-  (define-record-type Error
-    (make-error)
-    #ign)
-
 )
 
 (define-syntax (time . exprs) env

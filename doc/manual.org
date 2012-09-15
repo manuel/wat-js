@@ -817,14 +817,25 @@ Each element of =fields= is of the form:
 
  * =(name accessor-name modifier-name)=.
 
+Accessors and modifiers are generic functions.
+
 *** Examples
 
 #+BEGIN_EXAMPLE
-(define-record-type Person
-  (make-person name email)
-  person?
-  (name get-name set-name!)
-  (email get-email set-email!))
+(define-record-type Point
+  (make-point x y)
+  point?
+  (x get-x set-x!)
+  (y get-y set-y!))
+
+(define p1 (make-point 1 2))
+(assert (point? p1))
+(assert (= 1 (get-x p1)))
+(assert (= 2 (get-y p1)))
+(set-x! p1 3)
+(set-y! p1 4)
+(assert (= 3 (get-x p1)))
+(assert (= 4 (get-y p1)))
 #+END_EXAMPLE
 
 * Generic Functions and Methods

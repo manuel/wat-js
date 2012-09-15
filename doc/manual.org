@@ -501,29 +501,6 @@ Performs forms until test is true.
 (assert (= x 11))
 #+END_EXAMPLE
 
-** =dotimes (<var> <count> [<result-form>]) . <forms>= [operative]
-
-Performs body forms repeatedly with the variable bound to integers
-from 0 up to but not including the count.  If a result form is
-specified, its result will be returned, void otherwise.
-
-*** Examples
-
-#+BEGIN_EXAMPLE
-(define x 0)
-(define env (current-environment))
-(dotimes (i 10)
-  (set! env x (+ x 1)))
-(assert (= 10 x))
-
-(assert (= 140 (dotimes (i 20 (* i 7)))))
-
-(assert (= #void (dotimes (i 0))))
-(assert (= #void (dotimes (i 0 #void))))
-(assert (= 1 (dotimes (i 1 i))))
-(assert (= #void (dotimes (i 1))))
-#+END_EXAMPLE
-
 ** =block <name> . <body> → result= [operative]
 
 Performs body forms with name bound to a one-shot escape continuation
@@ -817,14 +794,25 @@ Each element of =fields= is of the form:
 
  * =(name accessor-name modifier-name)=.
 
+Accessors and modifiers are generic functions.
+
 *** Examples
 
 #+BEGIN_EXAMPLE
-(define-record-type Person
-  (make-person name email)
-  person?
-  (name get-name set-name!)
-  (email get-email set-email!))
+(define-record-type Point
+  (make-point x y)
+  point?
+  (x get-x set-x!)
+  (y get-y set-y!))
+
+(define p1 (make-point 1 2))
+(assert (point? p1))
+(assert (= 1 (get-x p1)))
+(assert (= 2 (get-y p1)))
+(set-x! p1 3)
+(set-y! p1 4)
+(assert (= 3 (get-x p1)))
+(assert (= 4 (get-y p1)))
 #+END_EXAMPLE
 
 * Generic Functions and Methods

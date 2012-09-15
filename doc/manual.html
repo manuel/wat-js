@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-09-15 19:43:27 CEST"/>
+<meta name="generated" content="2012-09-15 21:19:51 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -116,10 +116,9 @@ lang="en" xml:lang="en">
 <li><a href="#sec-8.6"><code>loop . &lt;forms&gt; → |</code> [operative] </a></li>
 <li><a href="#sec-8.7"><code>while &lt;test&gt; . &lt;forms&gt; → |</code> [operative] </a></li>
 <li><a href="#sec-8.8"><code>until &lt;test&gt; . &lt;forms&gt; → |</code> [operative] </a></li>
-<li><a href="#sec-8.9"><code>dotimes (&lt;var&gt; &lt;count&gt; [&lt;result-form&gt;]) . &lt;forms&gt;</code> [operative] </a></li>
-<li><a href="#sec-8.10"><code>block &lt;name&gt; . &lt;body&gt; → result</code> [operative] </a></li>
-<li><a href="#sec-8.11"><code>return-from &lt;cont&gt; . [&lt;val&gt;] → |</code> [operative] </a></li>
-<li><a href="#sec-8.12"><code>unwind-protect &lt;protected&gt; . &lt;cleanup&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-8.9"><code>block &lt;name&gt; . &lt;body&gt; → result</code> [operative] </a></li>
+<li><a href="#sec-8.10"><code>return-from &lt;cont&gt; . [&lt;val&gt;] → |</code> [operative] </a></li>
+<li><a href="#sec-8.11"><code>unwind-protect &lt;protected&gt; . &lt;cleanup&gt; → result</code> [operative] </a></li>
 </ul>
 </li>
 <li><a href="#sec-9">Dynamic Binding </a>
@@ -1357,51 +1356,8 @@ Performs forms until test is true.
 </div>
 
 <div id="outline-container-8.9" class="outline-3">
-<h3 id="sec-8.9"><code>dotimes (&lt;var&gt; &lt;count&gt; [&lt;result-form&gt;]) . &lt;forms&gt;</code> [operative] </h3>
+<h3 id="sec-8.9"><code>block &lt;name&gt; . &lt;body&gt; → result</code> [operative] </h3>
 <div class="outline-text-3" id="text-8.9">
-
-
-<p>
-Performs body forms repeatedly with the variable bound to integers
-from 0 up to but not including the count.  If a result form is
-specified, its result will be returned, void otherwise.
-</p>
-
-</div>
-
-<div id="outline-container-8.9.1" class="outline-4">
-<h4 id="sec-8.9.1">Examples </h4>
-<div class="outline-text-4" id="text-8.9.1">
-
-
-
-
-
-<pre class="example">(define x 0)
-(define env (current-environment))
-(dotimes (i 10)
-  (set! env x (+ x 1)))
-(assert (= 10 x))
-
-(assert (= 140 (dotimes (i 20 (* i 7)))))
-
-(assert (= #void (dotimes (i 0))))
-(assert (= #void (dotimes (i 0 #void))))
-(assert (= 1 (dotimes (i 1 i))))
-(assert (= #void (dotimes (i 1))))
-</pre>
-
-
-
-
-</div>
-</div>
-
-</div>
-
-<div id="outline-container-8.10" class="outline-3">
-<h3 id="sec-8.10"><code>block &lt;name&gt; . &lt;body&gt; → result</code> [operative] </h3>
-<div class="outline-text-3" id="text-8.10">
 
 
 <p>
@@ -1411,9 +1367,9 @@ that can be invoked with <code>return-from</code>.
 
 </div>
 
-<div id="outline-container-8.10.1" class="outline-4">
-<h4 id="sec-8.10.1">Examples </h4>
-<div class="outline-text-4" id="text-8.10.1">
+<div id="outline-container-8.9.1" class="outline-4">
+<h4 id="sec-8.9.1">Examples </h4>
+<div class="outline-text-4" id="text-8.9.1">
 
 
 
@@ -1437,9 +1393,9 @@ that can be invoked with <code>return-from</code>.
 
 </div>
 
-<div id="outline-container-8.11" class="outline-3">
-<h3 id="sec-8.11"><code>return-from &lt;cont&gt; . [&lt;val&gt;] → |</code> [operative] </h3>
-<div class="outline-text-3" id="text-8.11">
+<div id="outline-container-8.10" class="outline-3">
+<h3 id="sec-8.10"><code>return-from &lt;cont&gt; . [&lt;val&gt;] → |</code> [operative] </h3>
+<div class="outline-text-3" id="text-8.10">
 
 
 <p>
@@ -1452,9 +1408,9 @@ An error is signalled if the continuation's extent has ended.
 
 </div>
 
-<div id="outline-container-8.11.1" class="outline-4">
-<h4 id="sec-8.11.1">Examples </h4>
-<div class="outline-text-4" id="text-8.11.1">
+<div id="outline-container-8.10.1" class="outline-4">
+<h4 id="sec-8.10.1">Examples </h4>
+<div class="outline-text-4" id="text-8.10.1">
 
 
 
@@ -1473,9 +1429,9 @@ An error is signalled if the continuation's extent has ended.
 
 </div>
 
-<div id="outline-container-8.12" class="outline-3">
-<h3 id="sec-8.12"><code>unwind-protect &lt;protected&gt; . &lt;cleanup&gt; → result</code> [operative] </h3>
-<div class="outline-text-3" id="text-8.12">
+<div id="outline-container-8.11" class="outline-3">
+<h3 id="sec-8.11"><code>unwind-protect &lt;protected&gt; . &lt;cleanup&gt; → result</code> [operative] </h3>
+<div class="outline-text-3" id="text-8.11">
 
 
 <p>
@@ -1488,9 +1444,9 @@ higher-order control.
 
 </div>
 
-<div id="outline-container-8.12.1" class="outline-4">
-<h4 id="sec-8.12.1">Examples </h4>
-<div class="outline-text-4" id="text-8.12.1">
+<div id="outline-container-8.11.1" class="outline-4">
+<h4 id="sec-8.11.1">Examples </h4>
+<div class="outline-text-4" id="text-8.11.1">
 
 
 
@@ -2001,6 +1957,9 @@ Each element of <code>fields</code> is of the form:
 </li>
 </ul>
 
+<p>Accessors and modifiers are generic functions.
+</p>
+
 </div>
 
 <div id="outline-container-13.1.1" class="outline-4">
@@ -2011,11 +1970,20 @@ Each element of <code>fields</code> is of the form:
 
 
 
-<pre class="example">(define-record-type Person
-  (make-person name email)
-  person?
-  (name get-name set-name!)
-  (email get-email set-email!))
+<pre class="example">(define-record-type Point
+  (make-point x y)
+  point?
+  (x get-x set-x!)
+  (y get-y set-y!))
+
+(define p1 (make-point 1 2))
+(assert (point? p1))
+(assert (= 1 (get-x p1)))
+(assert (= 2 (get-y p1)))
+(set-x! p1 3)
+(set-y! p1 4)
+(assert (= 3 (get-x p1)))
+(assert (= 4 (get-y p1)))
 </pre>
 
 
@@ -2928,7 +2896,7 @@ style.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-09-15 19:43:27 CEST</p>
+<p class="date"> Date: 2012-09-15 21:19:51 CEST</p>
 </div>
 </div>
 </body>

@@ -15,11 +15,10 @@ computational effects such as lightweight threads and monads.  Data
 uses first-class types that allow generic programming over built-in as
 well as user-defined types.  The language is rounded out with Common
 Lisp features such as generic functions, restartable exceptions,
-dynamically-bound variables, a numerical tower, preprocessing macros,
-and common data structures such as hashtables.  The Wat runtime is
-implemented in only 500 lines of JavaScript and evaluates the prelude
-and a REPL written in Wat in under 50ms in common JavaScript
-interpreters.
+dynamically-bound variables, a numerical tower, and common data
+structures such as hashtables.  The Wat runtime is implemented in only
+500 lines of JavaScript and evaluates the prelude and a REPL written
+in Wat in under 50ms in common JavaScript interpreters.
 
 Wat is hosted at <https://github.com/manuel/wat-js>.
 
@@ -81,12 +80,6 @@ Wat identifiers are case-sensitive.
  * Applicative :: A combiner that evaluates its operands, yielding an
    arguments list, which it passes to an underlying combiner.
 
- * Macro :: Macros are used for optimization of syntactic abstraction.
-   When a macro appears as first element of a compound form, the
-   result of the macro will be evaluated instead of the original form.
-   The result of the macro is memoized in the syntax tree, so every
-   macro call is expanded only once, when it is first evaluated.
-
  * Environment :: An environment maps symbols to values.  It may have
    a parent environment in which symbols are looked up if they are not
    found in this environment.
@@ -133,14 +126,6 @@ Examples:
 | =(vau x #ign x)=        | (1 (+ 2 3) 4) | (1 (+ 2 3) 4)               |
 | =(vau #ign e e)=        | (1 (+ 2 3) 4) | /<the current environment>/ |
 | =(wrap (vau x #ign x))= | (1 (+ 2 3) 4) | (1 5 4)                     |
-
-* Macros
-
-In addition to applicative and operative combiners, Wat also has
-macros as an optimization mechanism.  Very common forms that are never
-redefined, such as =let=, shouldn't suffer from the interpretetive
-overhead of operatives.  Macros are an extra-linguistic mechanism and
-should thus be used with care and only if performance is paramount.
 
 * Bindings and Environments
 ** =def <lhs> <rhs> → rhs= [operative]
@@ -226,25 +211,6 @@ Scheme-like =define-syntax= with two cases:
 
 (define-syntax (my-when test . exprs) env
   (if (eval test env) (eval (list* begin exprs) env) #void))
-(assert (= (my-when #t 1 2 3) 3))
-(assert (= (my-when #f 1 2 3) #void))
-#+END_EXAMPLE
-
-** =define-macro (<name> . <ptree>) . <body>= [operative]
-
-Defines a new macro with the given name, parameter tree, and body.
-
-*** Examples
-
-#+BEGIN_EXAMPLE
-(define-macro (my-let bindings . body)
-  (cons (list* lambda (map car bindings) body)
-        (map cadr bindings)))
-(assert (= 3 (my-let ((x 1) (y 2))
-               (+ x y))))
-
-(define-macro (my-when test . exprs)
-  (list if test (list* begin exprs) #void))
 (assert (= (my-when #t 1 2 3) 3))
 (assert (= (my-when #f 1 2 3) #void))
 #+END_EXAMPLE
@@ -1197,8 +1163,8 @@ style.
   (myhandle (lambda () (t))
             (lambda (s) s)))
 
-(define-macro (monadic . exprs)
-  (list monadic* (list* lambda () exprs)))
+(define-syntax (monadic . exprs) env
+  (eval (list monadic* (list* lambda () exprs)) env))
 
 ;; Monadic code in direct style:
 

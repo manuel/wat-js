@@ -13,22 +13,7 @@ function Wat() {
     }
     function resume(resumption, f) { return resumption.fun(resumption.next, f); }
     function evaluate(e, k, f, x) {
-        try {
-            if (x && x.wat_eval) return x.wat_eval(e, k, f); else return x;
-        } catch(exc) {
-            return handleException(exc);
-        }
-    }
-    function handleException(exc) {
-        if (exc instanceof Exc) throw exc;
-        else {
-            var wat_throw = lookup0(envcore, new Sym("throw"));
-            if (wat_throw) {
-                return combine(envcore, null, null, wat_throw, cons(exc, NIL));
-            } else {
-                console.log("fail");
-            }
-        }
+        if (x && x.wat_eval) return x.wat_eval(e, k, f); else return x;
     }
     Sym.prototype.wat_eval = function(e, k, f) { return lookup(e, this); };
     Cons.prototype.wat_eval = function(e, k, f) {
@@ -78,11 +63,7 @@ function Wat() {
     };
     /* Operative & Applicative Combiners */
     function combine(e, k, f, cmb, o) {
-        try {
-            return cmb.combine ? cmb.combine(e, k, f, o) : fail("not a combiner");
-        } catch(exc) {
-            return handleException(exc);
-        }
+        return cmb.combine ? cmb.combine(e, k, f, o) : fail("not a combiner");
     }
     function Opv(p, ep, x, e) { this.p = p; this.ep = ep; this.x = x; this.e = e; }
     function Apv(cmb) { this.cmb = cmb; }; function wrap(cmb) { return new Apv(cmb); }; function unwrap(apv) { return apv.cmb; }

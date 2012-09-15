@@ -190,9 +190,9 @@
 (define-syntax (define-record-type name (ctor-name . ctor-field-names) pred-name . field-specs) env
   (let* (((type tagger untagger) (make-type))
          (ctor (lambda ctor-args
-                 (let ((fields-dict (make-environment)))
+                 (let ((fields-dict (make-string-hashtable)))
                    (map2 (lambda (field-name arg)
-                           (eval (list def field-name arg) fields-dict))
+                           (string-hashtable-put! fields-dict (symbol->string field-name) arg))
                          ctor-field-names
                          ctor-args)
                    (tagger fields-dict))))
@@ -201,15 +201,17 @@
     (set-label! type (symbol->string name))
     (map (lambda (field-spec)
            (let (((name accessor-name . opt) field-spec))
-             (eval (list def accessor-name (lambda (obj)
-                                             (let ((fields-dict (untagger obj)))
-                                               (eval name fields-dict))))
+             (eval (list def accessor-name
+                         (lambda (obj)
+                           (let ((fields-dict (untagger obj)))
+                             (string-hashtable-get fields-dict (symbol->string name)))))
                    env)
              (unless (null? opt)
                (let (((modifier-name) opt))
-                 (eval (list def modifier-name (lambda (obj new-val)
-                                                 (let ((fields-dict (untagger obj)))
-                                                   (eval (list def name new-val) fields-dict))))
+                 (eval (list def modifier-name
+                             (lambda (obj new-val)
+                               (let ((fields-dict (untagger obj)))
+                                 (string-hashtable-put! fields-dict (symbol->string name) new-val))))
                        env)))))
          field-specs)
     type))

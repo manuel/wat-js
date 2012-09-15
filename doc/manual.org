@@ -1013,16 +1013,20 @@ Creates a new hashtable with the given hash function and equality function.
 Creates a new hashtable with =identity-hash-code= as hash function and =eq?= as
 equality function.
 
+** =make-string-hashtable → hashtable= [applicative]
+
+Creates a new hashtable that only supports strings as keys.
+
 ** =make-generic-hashtable → hashtable= [applicative] /NIY/
 
 Creates a new hashtable with =hash-code= as hash function and
 @<code>=@</code> as equality function.
 
-** =hashtable-put! <hashtable> <key> <val> → val= [applicative]
+** =hashtable-put! <hashtable> <key> <val> → val= [applicative] /NIY/
 
 Associates key with value in hashtable.
 
-** =hashtable-get <hashtable> <key> <default> → val= [applicative]
+** =hashtable-get <hashtable> <key> <default> → val= [applicative] /NIY/
 
 Returns value associated with key from hash, or default value if not
 found.

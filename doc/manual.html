@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-09-06 19:44:55 CEST"/>
+<meta name="generated" content="2012-09-15 13:49:17 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -1781,10 +1781,41 @@ type; it is <code>none</code> if there is no associated exception, and <code>(so
 <div class="outline-text-4" id="text-11.7.1">
 
 
+<p>
+This contrived example is commented because the exception handling
+system isn't implemented yet.
+</p>
+<p>
+It shows how the function <code>my-compute-something</code> handles the case of a
+division by zero.  If the <code>divisor</code> argument is zero, it throws a
+<code>Div-by-Zero-Exception</code>, and associates a <code>Use-Value-Restart</code> with it.
+This means that the handler of the exception may continue execution
+with <code>invoke-restart</code>, as is shown at the end of the example.
+</p>
 
 
 
-<pre class="example">(assert (= 1 (handle 1)))
+<pre class="example">;; (define-record-type Div-by-Zero-Exception
+;;   (make-div-by-zero-exception)
+;;   #ign)
+;;
+;; (define-record-type Use-Value-Restart
+;;   (make-use-value-restart value associated-exception)
+;;   #ign
+;;   (value value)
+;;   (associated-exception associated-exception))
+;;
+;; (define (my-compute-something number divisor)
+;;   (let ((div (if (= 0 divisor)
+;;                  (throw (make-div-by-zero-exception)
+;;                    (Use-Value-Restart (r) (value r)))
+;;                  divisor)))
+;;     (/ number div)))
+;;
+;; (assert 
+;;   (= (handle (my-compute-something 12 0)
+;;        (Div-by-Zero-Exception (dbz) (invoke-restart (make-use-value-restart 3 dbz))))
+;;      4))
 </pre>
 
 
@@ -2950,7 +2981,7 @@ style.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-09-06 19:44:55 CEST</p>
+<p class="date"> Date: 2012-09-15 13:49:17 CEST</p>
 </div>
 </div>
 </body>

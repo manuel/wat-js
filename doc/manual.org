@@ -715,8 +715,37 @@ type; it is =none= if there is no associated exception, and =(some
 
 *** Examples
 
+This contrived example is commented because the exception handling
+system isn't implemented yet.
+
+It shows how the function =my-compute-something= handles the case of a
+division by zero.  If the =divisor= argument is zero, it throws a
+=Div-by-Zero-Exception=, and associates a =Use-Value-Restart= with it.
+This means that the handler of the exception may continue execution
+with =invoke-restart=, as is shown at the end of the example.
+
 #+BEGIN_EXAMPLE
-(assert (= 1 (handle 1)))
+;; (define-record-type Div-by-Zero-Exception
+;;   (make-div-by-zero-exception)
+;;   #ign)
+;;
+;; (define-record-type Use-Value-Restart
+;;   (make-use-value-restart value associated-exception)
+;;   #ign
+;;   (value value)
+;;   (associated-exception associated-exception))
+;;
+;; (define (my-compute-something number divisor)
+;;   (let ((div (if (= 0 divisor)
+;;                  (throw (make-div-by-zero-exception)
+;;                    (Use-Value-Restart (r) (value r)))
+;;                  divisor)))
+;;     (/ number div)))
+;;
+;; (assert 
+;;   (= (handle (my-compute-something 12 0)
+;;        (Div-by-Zero-Exception (dbz) (invoke-restart (make-use-value-restart 3 dbz))))
+;;      4))
 #+END_EXAMPLE
 
 * Higher-order Control

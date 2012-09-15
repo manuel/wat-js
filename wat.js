@@ -13,22 +13,7 @@ function Wat() {
     }
     function resume(resumption, f) { return resumption.fun(resumption.next, f); }
     function evaluate(e, k, f, x) {
-        try {
-            if (x && x.wat_eval) return x.wat_eval(e, k, f); else return x;
-        } catch(exc) {
-            return handleException(exc);
-        }
-    }
-    function handleException(exc) {
-        if (exc instanceof Exc) throw exc;
-        else {
-            var wat_throw = lookup0(envcore, new Sym("throw"));
-            if (wat_throw) {
-                return combine(envcore, null, null, wat_throw, cons(exc, NIL));
-            } else {
-                console.log("fail");
-            }
-        }
+        if (x && x.wat_eval) return x.wat_eval(e, k, f); else return x;
     }
     Sym.prototype.wat_eval = function(e, k, f) { return lookup(e, this); };
     Cons.prototype.wat_eval = function(e, k, f) {
@@ -78,11 +63,7 @@ function Wat() {
     };
     /* Operative & Applicative Combiners */
     function combine(e, k, f, cmb, o) {
-        try {
-            return cmb.combine ? cmb.combine(e, k, f, o) : fail("not a combiner");
-        } catch(exc) {
-            return handleException(exc);
-        }
+        return cmb.combine ? cmb.combine(e, k, f, o) : fail("not a combiner");
     }
     function Opv(p, ep, x, e) { this.p = p; this.ep = ep; this.x = x; this.e = e; }
     function Apv(cmb) { this.cmb = cmb; }; function wrap(cmb) { return new Apv(cmb); }; function unwrap(apv) { return apv.cmb; }
@@ -381,7 +362,7 @@ function Wat() {
     function str_to_num(str) { return new Num(jsnums.fromString(str.jsstr)); }
     function num_to_str(num) { return new Str(num.jsnum.toString()); }
     function IdentityHashtable() { this.entries = Object.create(null); }
-    function hashtable_put(tbl, k, v) {
+    function identity_hashtable_put(tbl, k, v) {
         var hash = String(idhash(k));
         var bucket = tbl.entries[hash];
         if (bucket === undefined) {
@@ -397,7 +378,7 @@ function Wat() {
         bucket.push([k, v]);
         return v;
     }
-    function hashtable_get(tbl, k, def) {
+    function identity_hashtable_get(tbl, k, def) {
         var hash = String(idhash(k));
         var bucket = tbl.entries[hash];
         if (bucket === undefined) {
@@ -408,6 +389,17 @@ function Wat() {
                 return bucket[i][1];
         }
         return def;
+    }
+    function StringHashtable() { this.entries = Object.create(null); }
+    function string_hashtable_put(tbl, k, v) {
+        assert(k.jsstr !== undefined);
+        tbl.entries[k.jsstr] = v;
+        return v;
+    }
+    function string_hashtable_get(tbl, k, def) {
+        assert(k.jsstr !== undefined);
+        var v = tbl.entries[k.jsstr];
+        return (v !== undefined) ? v : def;
     }
     /* Types */
     function Type() {};
@@ -570,8 +562,11 @@ function Wat() {
             return vector_set(vector, jsnums.toFixnum(i.jsnum), val); }));
 	envbind(e, "vector-length", jswrap(function(vector) { return new Num(jsnums.fromFixnum(vector_length(vector))); }));
         envbind(e, "make-identity-hashtable", jswrap(function() { return new IdentityHashtable(); }));
-        envbind(e, "hashtable-put!", jswrap(hashtable_put));
-        envbind(e, "hashtable-get", jswrap(hashtable_get));
+        envbind(e, "identity-hashtable-put!", jswrap(identity_hashtable_put));
+        envbind(e, "identity-hashtable-get", jswrap(identity_hashtable_get));
+        envbind(e, "make-string-hashtable", jswrap(function() { return new StringHashtable(); }));
+        envbind(e, "string-hashtable-put!", jswrap(string_hashtable_put));
+        envbind(e, "string-hashtable-get", jswrap(string_hashtable_get));
 	envbind(e, "js-global", jswrap(js_global));
 	envbind(e, "js-set-global!", jswrap(js_set_global));
 	envbind(e, "js-prop", jswrap(js_prop));

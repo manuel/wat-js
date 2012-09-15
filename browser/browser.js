@@ -1,15 +1,17 @@
 var watbrowser = (function() {
+    
+    var wat = Wat();
 
     function init() {
-	wat_env = wat.mkenvcore();
         var forms = [];
 	forms = forms.concat(load_file("../crust.wat"));
+	forms = forms.concat(load_file("../dirtyjs.wat"));
 	forms = forms.concat(load_file("browser.wat"));
-//	forms = forms.concat(load_file("../test.wat"));
-//        forms = forms.concat(load_file("testrunner.wat"));
+	forms = forms.concat(load_file("../test.wat"));
+        forms = forms.concat(load_file("testrunner.wat"));
 	forms = forms.concat(load_file("../repl.wat"));
         start = new Date().getTime();
-        wat.eval(wat.array_to_list([new wat.Sym("begin")].concat(forms)), wat_env);
+        wat.eval(wat.array_to_list([new wat.Sym("begin")].concat(forms)));
         elapsed = new Date().getTime() - start;
         console_log("Total evaluation time " + elapsed + "ms");
     }

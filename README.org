@@ -27,10 +27,11 @@ Try Wat online with a rudimentary REPL at
 
 Execute =./wat=.  (Requires SpiderMonkey command-line JS interpreter.)
 
+** Current Status
+
+Wat is actively being developed by Manuel Simoni (msimoni@gmail.com)
+and currently only for the brave.
+
 ** Licensing
 
 =wat-js= is released under the MIT License.
-
-** Current Status
-
-Wat is actively being developed by Manuel Simoni (msimoni@gmail.com).

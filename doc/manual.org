@@ -127,7 +127,7 @@ Examples:
 | =(vau #ign e e)=        | (1 (+ 2 3) 4) | /<the current environment>/ |
 | =(wrap (vau x #ign x))= | (1 (+ 2 3) 4) | (1 5 4)                     |
 
-* Bindings and Environments
+* Bindings
 ** =def <lhs> <rhs> → rhs= [operative]
 
 Evaluates the right-hand side, matches the left-hand side against it
@@ -213,6 +213,29 @@ Scheme-like =define-syntax= with two cases:
   (if (eval test env) (eval (list* begin exprs) env) #void))
 (assert (= (my-when #t 1 2 3) 3))
 (assert (= (my-when #f 1 2 3) #void))
+#+END_EXAMPLE
+
+** =let <bindings> . <body> → result= [operative]
+
+Usual Scheme =let=.
+
+*** Examples
+
+#+BEGIN_EXAMPLE
+(assert (= 3 (let ((x 1) (y 2)) (+ x y))))
+#+END_EXAMPLE
+
+** =let* <bindings> . <body> → result= [operative]
+
+Usual Scheme =let*=.
+
+=letrec= and =letrec*= are not provided because their effect can be
+obtained with a sequence of =define= expressions.
+
+*** Examples
+
+#+BEGIN_EXAMPLE
+(assert (= 3 (let* ((x 1) (y (+ x 1))) (+ x y))))
 #+END_EXAMPLE
 
 ** =set! <env> <lhs> <rhs> → rhs= [operative]
@@ -301,7 +324,7 @@ Returns the current environment.
 (assert (= 2 (eval 'y (foo))))
 #+END_EXAMPLE
 
-* Combiners and Evaluation
+* Evaluation
 ** =vau <ptree> <envp> . <body> → operative= [operative]
 
 Constructs a new compound operative that closes over the current
@@ -519,7 +542,7 @@ that can be invoked with =return-from=.
                          '(1 2 3 4 5)))))
 #+END_EXAMPLE
 
-** =return-from <cont> . [<val>] → |= [operative]
+** =return-from <cont> [<val>] → |= [operative]
 
 Invokes a one-shot escape continuation bound by =block=, passing it
 the given value, or void if no value is given.
@@ -706,18 +729,18 @@ resumption system will lead to undefined behavior.
 
 Creates a fresh prompt.
 
-** =push-prompt <prompt> . <forms> → result= [applicative]
+** =push-prompt <prompt> . <forms> → result= [operative]
 
 Pushes the continuation-delimiting prompt and executes forms in the
 new continuation.
 
-** =take-subcont <prompt> <cont> . <forms> → result= [applicative]
+** =take-subcont <prompt> <cont> . <forms> → result= [operative]
 
 Aborts up to and including the prompt, and performs the forms with
 =<cont>= bound to the delimited continuation from the call to
 =take-subcont= up to but not including the prompt.
 
-** =push-subcont <cont> . <forms> → result= [applicative]
+** =push-subcont <cont> . <forms> → result= [operative]
 
 Prepends the delimited continuation to the current continuation, and
 performs forms in the new continuation.
@@ -736,7 +759,7 @@ performs forms in the new continuation.
      9))
 #+END_EXAMPLE
 
-** =shift <prompt> <cont> . <forms> → result=
+** =shift <prompt> <cont> . <forms> → result= [operative]
 
 Wrapper around =take-subcont= with these differences:
 
@@ -988,7 +1011,7 @@ found.
 * Options
 ** =some <value> → option= [applicative]
 ** =none= [variable]
-** =if-option (<name> <option>) <then> . [<else>] → result= [operative]
+** =if-option (<name> <option>) <then> [<else>] → result= [operative]
 *** Examples
 #+BEGIN_EXAMPLE
 (define x-opt (some 12))

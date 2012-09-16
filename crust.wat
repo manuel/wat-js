@@ -109,14 +109,6 @@
                      (list (car bindings))
                      (list* let* (cdr bindings) body))))))
 
-(def letrec
-  (macro (vau (bindings . body) #ign
-           (list* let ()
-                  (list def
-                        (map car bindings)
-                        (list* list (map cadr bindings)))
-                  body))))
-
 (def apply
   (lambda (appv arg . opt)
     (eval (cons (unwrap appv) arg)

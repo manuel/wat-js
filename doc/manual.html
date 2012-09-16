@@ -7,7 +7,7 @@ lang="en" xml:lang="en">
 <title>Wat Language Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-09-16 17:24:05 CEST"/>
+<meta name="generated" content="2012-09-16 17:29:12 CEST"/>
 <meta name="author" content="Manuel Simoni"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -666,6 +666,24 @@ parameter, and body expressions, returning the operative.
 <p>
 Usual Scheme <code>let</code>.
 </p>
+
+</div>
+
+<div id="outline-container-6.4.1" class="outline-4">
+<h4 id="sec-6.4.1">Examples </h4>
+<div class="outline-text-4" id="text-6.4.1">
+
+
+
+
+
+<pre class="example">(assert (= 3 (let ((x 1) (y 2)) (+ x y))))
+</pre>
+
+
+
+
+</div>
 </div>
 
 </div>
@@ -682,6 +700,24 @@ Usual Scheme <code>let*</code>.
 <code>letrec</code> and <code>letrec*</code> are not provided because their effect can be
 obtained with a sequence of <code>define</code> expressions.
 </p>
+
+</div>
+
+<div id="outline-container-6.5.1" class="outline-4">
+<h4 id="sec-6.5.1">Examples </h4>
+<div class="outline-text-4" id="text-6.5.1">
+
+
+
+
+
+<pre class="example">(assert (= 3 (let* ((x 1) (y (+ x 1))) (+ x y))))
+</pre>
+
+
+
+
+</div>
 </div>
 
 </div>
@@ -2926,7 +2962,7 @@ style.
 <p class="author"> Author: Manuel Simoni
 <a href="mailto:msimoni@gmail.com">&lt;msimoni@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2012-09-16 17:24:05 CEST</p>
+<p class="date"> Date: 2012-09-16 17:29:12 CEST</p>
 </div>
 </div>
 </body>

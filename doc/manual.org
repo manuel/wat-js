@@ -219,12 +219,24 @@ Scheme-like =define-syntax= with two cases:
 
 Usual Scheme =let=.
 
+*** Examples
+
+#+BEGIN_EXAMPLE
+(assert (= 3 (let ((x 1) (y 2)) (+ x y))))
+#+END_EXAMPLE
+
 ** =let* <bindings> . <body> → result= [operative]
 
 Usual Scheme =let*=.
 
 =letrec= and =letrec*= are not provided because their effect can be
 obtained with a sequence of =define= expressions.
+
+*** Examples
+
+#+BEGIN_EXAMPLE
+(assert (= 3 (let* ((x 1) (y (+ x 1))) (+ x y))))
+#+END_EXAMPLE
 
 ** =set! <env> <lhs> <rhs> → rhs= [operative]
 

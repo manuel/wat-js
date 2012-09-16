@@ -127,7 +127,7 @@ Examples:
 | =(vau #ign e e)=        | (1 (+ 2 3) 4) | /<the current environment>/ |
 | =(wrap (vau x #ign x))= | (1 (+ 2 3) 4) | (1 5 4)                     |
 
-* Bindings and Environments
+* Bindings
 ** =def <lhs> <rhs> → rhs= [operative]
 
 Evaluates the right-hand side, matches the left-hand side against it
@@ -215,6 +215,17 @@ Scheme-like =define-syntax= with two cases:
 (assert (= (my-when #f 1 2 3) #void))
 #+END_EXAMPLE
 
+** =let <bindings> . <body> → result= [operative]
+
+Usual Scheme =let=.
+
+** =let* <bindings> . <body> → result= [operative]
+
+Usual Scheme =let*=.
+
+=letrec= and =letrec*= are not provided because their effect can be
+obtained with a sequence of =define= expressions.
+
 ** =set! <env> <lhs> <rhs> → rhs= [operative]
 
 Updates the left-hand side by matching it against the right-hand side
@@ -301,7 +312,7 @@ Returns the current environment.
 (assert (= 2 (eval 'y (foo))))
 #+END_EXAMPLE
 
-* Combiners and Evaluation
+* Evaluation
 ** =vau <ptree> <envp> . <body> → operative= [operative]
 
 Constructs a new compound operative that closes over the current

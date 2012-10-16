@@ -28,8 +28,7 @@ Execute =./wat=.  (Requires SpiderMonkey command-line JS interpreter.)
 
 ** Current Status
 
-Wat is actively being developed by Manuel Simoni (msimoni@gmail.com)
-and currently only for the brave.
+Check out Wat's successor, [[https://github.com/manuel/taf][Taf]].
 
 ** Licensing
 

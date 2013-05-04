@@ -1,21 +1,24 @@
 function Wat() {
     /***** Evaluation *****/
-    /* Fibers */
     function run(x) { return evaluate(envcore, null, null, x); }
-    function Suspension(prompt, handler) { this.prompt = prompt; this.handler = handler; this.resumption = null; }
+    /* Continuations */
+    function Suspension(prompt, handler) {
+        this.prompt = prompt; this.handler = handler; this.resumption = null; }
     function isSuspend(x) { return x instanceof Suspension; }
-    function Resumption(fun, next, dbginfo) {
-        this.fun = fun; this.next = next; this.dbginfo = dbginfo ? dbginfo : VOID;
-    }
+    function Resumption(fun, next, dbg) {
+        this.fun = fun; this.next = next; this.dbg = dbg ? dbg : VOID; }
     function isResume(x) { return x instanceof Resumption; }
-    function pushResume(susp, fun, dbginfo) {
-        susp.resumption = new Resumption(fun, susp.resumption, dbginfo);
-    }
-    function resume(resumption, f) { return resumption.fun(resumption.next, f); }
+    function pushResume(susp, fun, dbg) {
+        susp.resumption = new Resumption(fun, susp.resumption, dbg); }
+    function resume(resumption, f) {
+        return resumption.fun(resumption.next, f); }
+    /* Evaluation Core */
     function evaluate(e, k, f, x) {
-        if (x && x.wat_eval) return x.wat_eval(e, k, f); else return x;
-    }
-    Sym.prototype.wat_eval = function(e, k, f) { return lookup(e, this); };
+        if (x && x.wat_eval) return x.wat_eval(e, k, f); else return x; }
+    function Sym(name) { this.name = name; }
+    Sym.prototype.wat_eval = function(e, k, f) {
+        return lookup(e, this.name); };
+    function Cons(car, cdr) { this.car = car; this.cdr = cdr; }
     Cons.prototype.wat_eval = function(e, k, f) {
         if (isResume(k)) {
             var op = resume(k, f);
@@ -34,17 +37,18 @@ function Wat() {
         }
     };
     function macroCombine(e, k, f, macro, form) {
-        var cached_macro = form.cached_macro;
-        var cache = form.cache;
-        if (cached_macro !== macro) {
-            cache = macroExpand(e, k, f, macro, form);
-            form.cache = cache;
-            form.cached_macro = macro;
+        if (form.cache !== undefined) return evaluate(e, k, f, form.cache);
+        if (isResume(k)) {
+            var expanded = resume(k, f);
+        } else {
+            var expanded = combine(e, k, f, macro.expander, cdr(form));
         }
-        return evaluate(e, k, f, cache);
-    }
-    function macroExpand(e, k, f, macro, form) {
-        return combine(e, k, f, macro.expander, cdr(form));
+        if (isSuspend(expanded)) {
+            pushResume(expanded, function(k, f) { return macroCombine(e, k, f, macro, form); });
+            return expanded;
+        }
+        form.cache = expanded;
+        return evaluate(e, k, f, expanded);
     }
     function Macro(expander) { this.expander = expander; }
     function isMacro(x) { return x instanceof Macro; }
@@ -188,18 +192,18 @@ function Wat() {
             if (isSuspend(res)) {
                 return res;
             } else {
-                return doFinally(e, null, null, cleanup, res);
+                return doCleanup(e, null, null, cleanup, res);
             }
         }
     };
-    function doFinally(e, k, f, cleanup, res) {
+    function doCleanup(e, k, f, cleanup, res) {
         if (isResume(k)) {
             var fres = resume(k, f);
         } else {
             var fres = evaluate(e, null, null, cleanup);
         }
         if (isSuspend(fres)) {
-            pushResume(fres, function(k, f) { return doFinally(e, k, f, cleanup, res); });
+            pushResume(fres, function(k, f) { return doCleanup(e, k, f, cleanup, res); });
             return fres;
         } else {
             return res;
@@ -315,15 +319,13 @@ function Wat() {
     }
     /***** Objects *****/
     /* Core */
-    function Sym(name) { this.name = name; }
-    function Cons(car, cdr) { this.car = car; this.cdr = cdr; }
     function cons(car, cdr) { return new Cons(car, cdr); }
     function car(cons) { assert(type_of(cons) === Cons.prototype.wat_type); return cons.car; }
     function cdr(cons) { assert(type_of(cons) === Cons.prototype.wat_type); return cons.cdr; }
     function elt(cons, i) { return (i === 0) ? car(cons) : elt(cdr(cons), i - 1); }
     function Env(parent) { this.bindings = Object.create(parent ? parent.bindings : null); }
-    function lookup0(e, sym) { return e.bindings[sym.name]; }
-    function lookup(e, sym) { var val = lookup0(e, sym); return (val !== undefined) ? val : fail("unbound: " + sym.name); }
+    function lookup0(e, name) { return e.bindings[name]; }
+    function lookup(e, name) { var val = lookup0(e, name); return (val !== undefined) ? val : fail("unbound: " + name); }
     function bind(e, lhs, rhs) { lhs.match(e, rhs); return rhs; }
     Sym.prototype.match = function(e, rhs) { if (rhs === undefined) fail("trying to match against undefined: " + this.name); 
                                              e.bindings[this.name] = rhs; };
@@ -331,13 +333,6 @@ function Wat() {
     Nil.prototype.match = function(e, rhs) { if (rhs !== NIL) fail("NIL expected"); };
     Ign.prototype.match = function(e, rhs) {};
     function bound(sym, e) { return (e.bindings[sym.name] !== undefined); }
-    var IDHASH = 0; var IDHASH_MAX = Math.pow(2, 53);
-    function idhash(obj) { 
-        if (obj.wat_idhash === undefined) {
-            if (IDHASH >= IDHASH_MAX) IDHASH = 0;
-            obj.wat_idhash = IDHASH;
-            IDHASH++; }
-        return obj.wat_idhash; }
     /* Data */
     function Str(jsstr) { this.jsstr = jsstr; };
     function str_eql(str1, str2) { return str1.jsstr === str2.jsstr; }
@@ -361,35 +356,6 @@ function Wat() {
     function sym_to_str(sym) { return new Str(sym.name); }
     function str_to_num(str) { return new Num(jsnums.fromString(str.jsstr)); }
     function num_to_str(num) { return new Str(num.jsnum.toString()); }
-    function IdentityHashtable() { this.entries = Object.create(null); }
-    function identity_hashtable_put(tbl, k, v) {
-        var hash = String(idhash(k));
-        var bucket = tbl.entries[hash];
-        if (bucket === undefined) {
-            bucket = [];
-            tbl.entries[hash] = bucket;
-        }
-        for (var i = 0; i < bucket.length; i++) {
-            if (bucket[i][0] === k) {
-                bucket[i][1] = v;
-                return v;
-            }
-        }
-        bucket.push([k, v]);
-        return v;
-    }
-    function identity_hashtable_get(tbl, k, def) {
-        var hash = String(idhash(k));
-        var bucket = tbl.entries[hash];
-        if (bucket === undefined) {
-            return def;
-        }
-        for (var i = 0; i < bucket.length; i++) {
-            if (bucket[i][0] === k)
-                return bucket[i][1];
-        }
-        return def;
-    }
     function StringHashtable() { this.entries = Object.create(null); }
     function string_hashtable_put(tbl, k, v) {
         assert(k.jsstr !== undefined);
@@ -434,7 +400,6 @@ function Wat() {
         "Def",
         "Env",
         "Eval",
-        "IdentityHashtable",
         "If",
         "Ign",
         "JSFun",
@@ -461,6 +426,8 @@ function Wat() {
     function currentMilliseconds() { return new Num(new Date().getTime()); }
     function array_to_list(array, end) {
 	var c = end ? end : NIL; for (var i = array.length; i > 0; i--) c = cons(array[i - 1], c); return c; }
+    function list() {
+        return array_to_list(Array.prototype.slice.call(arguments)); }
     function list_to_array(c) {
 	var res = []; while(c !== NIL) { res.push(car(c)); c = cdr(c); } return res; }
     function reverse_list(list) {
@@ -490,8 +457,8 @@ function Wat() {
 				var fractional_digits = ast[2] || "";
 				return new Num(jsnums.fromString(sign + integral_digits + fractional_digits)); });
     function make_constant_stx(string, constant) { return action(string, function(ast) { return constant; }); }
-    var void_stx = make_constant_stx("#void", VOID);
-    var ign_stx = make_constant_stx("#ign", IGN);
+    var void_stx = make_constant_stx("+wat-void+", VOID);
+    var ign_stx = make_constant_stx("_", IGN);
     var nil_stx = make_constant_stx("()", NIL);
     var t_stx = make_constant_stx("#t", T);
     var f_stx = make_constant_stx("#f", F);
@@ -517,78 +484,74 @@ function Wat() {
     }
     function mkenvcore() {
 	var e = new Env();
-	envbind(e, "def", new Def());
-	envbind(e, "if", new If());
-	envbind(e, "vau", new Vau());
-	envbind(e, "eval", wrap(new Eval()));
-	envbind(e, "begin", new Begin());
-        envbind(e, "loop1", new Loop());
-        envbind(e, "catch*", wrap(new Catch()));
-        envbind(e, "throw*", wrap(new Throw()));
-	envbind(e, "wrap", jswrap(wrap));
-	envbind(e, "unwrap", jswrap(unwrap));
-	envbind(e, "eq?", jswrap(function (a, b) { return (a === b) ? T : F }));
-	envbind(e, "cons", jswrap(cons));
-	envbind(e, "list*", jswrap(list_star));
-	envbind(e, "make-environment", jswrap(function (parent) { return new Env(parent); }));
-        envbind(e, "defined?", jswrap(function (sym, e) { return (bound(sym, e)) ? T : F }));
-	envbind(e, "make-type", jswrap(make_type));
-	envbind(e, "type-of", jswrap(type_of));
-	envbind(e, "label", jswrap(function(type) { return new Str(label(type)); }));
-	envbind(e, "set-label!", jswrap(function(type, name) { set_label(type, name.jsstr); return name; }));
-	envbind(e, "identity-hash-code", jswrap(function(obj) { return new Num(jsnums.fromFixnum(idhash(obj))); }));
-	envbind(e, "display", jswrap(log));
-	envbind(e, "log", jswrap(log));
-	envbind(e, "read-from-string", jswrap(function(str) { return array_to_list(parse(str.jsstr)); }));
-	envbind(e, "fail", jswrap(fail));
-	envbind(e, "num=", jswrap(function(num1, num2) { return num_eql(num1, num2) ? T : F }));
-	envbind(e, "num<", jswrap(function(num1, num2) { return num_lt(num1, num2) ? T : F }));
-	envbind(e, "+", jswrap(num_add));
-	envbind(e, "-", jswrap(num_sub));
-	envbind(e, "*", jswrap(num_mul));
-	envbind(e, "/", jswrap(num_div));
-	envbind(e, "%", jswrap(num_mod));
-        envbind(e, "str=", jswrap(function(str1, str2) { return str_eql(str1, str2) ? T : F }));
-        envbind(e, "strcat", jswrap(function() {
+	envbind(e, "wat-define", new Def());
+	envbind(e, "wat-if", new If());
+	envbind(e, "wat-fexpr", new Vau());
+	envbind(e, "wat-eval", wrap(new Eval()));
+	envbind(e, "wat-begin", new Begin());
+        envbind(e, "wat-loop", new Loop());
+        envbind(e, "wat-catch", wrap(new Catch()));
+        envbind(e, "wat-throw", wrap(new Throw()));
+	envbind(e, "wat-wrap", jswrap(wrap));
+	envbind(e, "wat-unwrap", jswrap(unwrap));
+        envbind(e, "wat-macro", jswrap(function(exp) { return new Macro(exp); }));
+	envbind(e, "wat-identical", jswrap(function (a, b) { return (a === b) ? T : F }));
+	envbind(e, "wat-cons", jswrap(cons));
+	envbind(e, "wat-list*", jswrap(list_star));
+	envbind(e, "wat-make-environment", jswrap(function (parent) { return new Env(parent); }));
+        envbind(e, "wat-defined", jswrap(function (sym, e) { return (bound(sym, e)) ? T : F }));
+	envbind(e, "wat-make-type", jswrap(make_type));
+	envbind(e, "wat-type-of", jswrap(type_of));
+	envbind(e, "wat-label", jswrap(function(type) { return new Str(label(type)); }));
+	envbind(e, "wat-set-label!", jswrap(function(type, name) { set_label(type, name.jsstr); return name; }));
+	envbind(e, "wat-display", jswrap(log));
+	envbind(e, "wat-log", jswrap(log));
+	envbind(e, "wat-read-from-string", jswrap(function(str) { return array_to_list(parse(str.jsstr)); }));
+	envbind(e, "wat-fail", jswrap(fail));
+	envbind(e, "wat-num=", jswrap(function(num1, num2) { return num_eql(num1, num2) ? T : F }));
+	envbind(e, "wat-num<", jswrap(function(num1, num2) { return num_lt(num1, num2) ? T : F }));
+	envbind(e, "wat-+", jswrap(num_add));
+	envbind(e, "wat--", jswrap(num_sub));
+	envbind(e, "wat-*", jswrap(num_mul));
+	envbind(e, "wat-/", jswrap(num_div));
+	envbind(e, "wat-%", jswrap(num_mod));
+        envbind(e, "wat-str=", jswrap(function(str1, str2) { return str_eql(str1, str2) ? T : F }));
+        envbind(e, "wat-strcat", jswrap(function() {
             return new Str(str_cat.call(null, Array.prototype.slice.call(arguments))); }));
-        envbind(e, "str-print", jswrap(function(str) { return new Str(str_print(str)); }));
-	envbind(e, "string->symbol", jswrap(str_to_sym));
-	envbind(e, "symbol->string", jswrap(sym_to_str));
-	envbind(e, "string->number", jswrap(str_to_num));
-	envbind(e, "number->string", jswrap(num_to_str));
-	envbind(e, "vector", jswrap(function() { return new Vector(Array.prototype.slice.call(arguments)); }));
-	envbind(e, "vector-ref", jswrap(function(vector, i) { return vector_ref(vector, jsnums.toFixnum(i.jsnum)); }));
-	envbind(e, "vector-set!", jswrap(function(vector, i, val) {
+        envbind(e, "wat-str-print", jswrap(function(str) { return new Str(str_print(str)); }));
+	envbind(e, "wat-string->symbol", jswrap(str_to_sym));
+	envbind(e, "wat-symbol->string", jswrap(sym_to_str));
+	envbind(e, "wat-string->number", jswrap(str_to_num));
+	envbind(e, "wat-number->string", jswrap(num_to_str));
+	envbind(e, "wat-vector", jswrap(function() { return new Vector(Array.prototype.slice.call(arguments)); }));
+	envbind(e, "wat-vector-ref", jswrap(function(vector, i) { return vector_ref(vector, jsnums.toFixnum(i.jsnum)); }));
+	envbind(e, "wat-vector-set!", jswrap(function(vector, i, val) {
             return vector_set(vector, jsnums.toFixnum(i.jsnum), val); }));
-	envbind(e, "vector-length", jswrap(function(vector) { return new Num(jsnums.fromFixnum(vector_length(vector))); }));
-        envbind(e, "make-identity-hashtable", jswrap(function() { return new IdentityHashtable(); }));
-        envbind(e, "identity-hashtable-put!", jswrap(identity_hashtable_put));
-        envbind(e, "identity-hashtable-get", jswrap(identity_hashtable_get));
-        envbind(e, "make-string-hashtable", jswrap(function() { return new StringHashtable(); }));
-        envbind(e, "string-hashtable-put!", jswrap(string_hashtable_put));
-        envbind(e, "string-hashtable-get", jswrap(string_hashtable_get));
-	envbind(e, "js-global", jswrap(js_global));
-	envbind(e, "js-set-global!", jswrap(js_set_global));
-	envbind(e, "js-prop", jswrap(js_prop));
-	envbind(e, "js-set-prop!", jswrap(js_set_prop));
-	envbind(e, "js-function", jswrap(js_function));
-	envbind(e, "js-method", jswrap(js_method));
-	envbind(e, "to-js", jswrap(to_js));
-	envbind(e, "from-js", jswrap(from_js));
-	envbind(e, "js-callback", wrap(new JSCallback()));
-	envbind(e, "js-array-to-list", jswrap(array_to_list));
-        envbind(e, "js-null", null);
-        envbind(e, "finally", new Finally());
-        envbind(e, "dnew", wrap(new DNew()));
-        envbind(e, "dlet*", wrap(new DLet()));
-        envbind(e, "dref", wrap(new DRef()));
-        envbind(e, "push-prompt*", wrap(new PushPrompt()));
-        envbind(e, "take-subcont*", wrap(new TakeSubcont()));
-        envbind(e, "push-subcont*", wrap(new PushSubcont()));
-        envbind(e, "put-method!", jswrap(put_method));
-        envbind(e, "find-method", jswrap(find_method));
-        envbind(e, "macro", jswrap(function(exp) { return new Macro(exp); }));
-        envbind(e, "current-milliseconds", jswrap(currentMilliseconds));
+	envbind(e, "wat-vector-length", jswrap(function(vector) { return new Num(jsnums.fromFixnum(vector_length(vector))); }));
+        envbind(e, "wat-make-string-hashtable", jswrap(function() { return new StringHashtable(); }));
+        envbind(e, "wat-string-hashtable-put!", jswrap(string_hashtable_put));
+        envbind(e, "wat-string-hashtable-get", jswrap(string_hashtable_get));
+	envbind(e, "wat-js-global", jswrap(js_global));
+	envbind(e, "wat-js-set-global!", jswrap(js_set_global));
+	envbind(e, "wat-js-prop", jswrap(js_prop));
+	envbind(e, "wat-js-set-prop!", jswrap(js_set_prop));
+	envbind(e, "wat-js-function", jswrap(js_function));
+	envbind(e, "wat-js-method", jswrap(js_method));
+	envbind(e, "wat-to-js", jswrap(to_js));
+	envbind(e, "wat-from-js", jswrap(from_js));
+	envbind(e, "wat-js-callback", wrap(new JSCallback()));
+	envbind(e, "wat-js-array-to-list", jswrap(array_to_list));
+        envbind(e, "wat-js-null", null);
+        envbind(e, "wat-finally", new Finally());
+        envbind(e, "wat-dnew", wrap(new DNew()));
+        envbind(e, "wat-dlet*", wrap(new DLet()));
+        envbind(e, "wat-dref", wrap(new DRef()));
+        envbind(e, "wat-push-prompt*", wrap(new PushPrompt()));
+        envbind(e, "wat-take-subcont*", wrap(new TakeSubcont()));
+        envbind(e, "wat-push-subcont*", wrap(new PushSubcont()));
+        envbind(e, "wat-put-method!", jswrap(put_method));
+        envbind(e, "wat-find-method", jswrap(find_method));
+        envbind(e, "wat-current-milliseconds", jswrap(currentMilliseconds));
 	return e;
     }
     var envcore = mkenvcore();
@@ -597,19 +560,21 @@ function Wat() {
 }
 var WAT_GLOBAL = this;
 // Abbreviations:
-// apv: applicative combiner
+// apv: applicative combiner (function)
 // arg: argument
 // cmb: combiner
 // cmt: comment
 // e: environment
+// f: function to be called on top of newly pushed continuation
 // ep: environment parameter
 // id: identifier
+// k: continuation / resumption
 // num: number
 // o: operand
-// opv: operative combiner
+// opv: operative combiner (fexpr)
 // p: parameter
 // str: string
-// stx: syntax
+// stx: parser syntax
 // sym: symbol
 // x: expression
 // xe: extended environment

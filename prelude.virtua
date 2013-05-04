@@ -1,0 +1,19 @@
+;; -*- scheme -*-
+
+;; This file is valid Virtua that implements some Virtua core
+;; functionality and is linked with all units.
+
+;; (define-interface boolean)
+;; (define-generic (if* boolean (void -> $a) (void -> $a) -> $a))
+;; (define-class true (boolean)
+;;   true)
+;; (define-class false (boolean)
+;;   false)
+;; (define-method (if* (_ true) then _) (then))
+;; (define-method (if* (_ false) _ else) (else))
+;; (define-macro (if test then else)
+;;   (list if* test (list lambda () then) (list lambda () else)))
+;; (define-macro (when test . body)
+;;   (list if test (list* begin body) void))
+;; (define-macro (unless test . body)
+;;   (list* when (list not test) body))

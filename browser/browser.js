@@ -4,14 +4,11 @@ var watbrowser = (function() {
 
     function init() {
         var forms = [];
-	forms = forms.concat(load_file("../crust.wat"));
-	forms = forms.concat(load_file("../dirtyjs.wat"));
-	forms = forms.concat(load_file("browser.wat"));
-	forms = forms.concat(load_file("../test.wat"));
-        forms = forms.concat(load_file("testrunner.wat"));
-	forms = forms.concat(load_file("../repl.wat"));
+	forms = forms.concat(load_file("../virtua.wat"));
+	forms = forms.concat(load_file("../selftest.wat"));
+	forms = forms.concat(load_file("../prelude.virtua"));
         start = new Date().getTime();
-        wat.eval(wat.array_to_list([new wat.Sym("begin")].concat(forms)));
+        wat.eval(wat.array_to_list([new wat.Sym("wat-begin")].concat(forms)));
         elapsed = new Date().getTime() - start;
         console_log("Total evaluation time " + elapsed + "ms");
     }

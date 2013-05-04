@@ -1,0 +1,10 @@
+* WAT VM
+
+Wat is a virtual machine with Lisp-like syntax, delimited
+continuations, and hygienic macros.
+
+Virtua is a language built on the Wat VM.
+
+* Try it out
+
+Serve the browser/ directory in a HTTP server and visit index.html.

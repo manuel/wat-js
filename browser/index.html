@@ -17,11 +17,7 @@ var self_test =
      ["wat-define", "===", ["wat-js-op", "==="]],
      ["wat-define", "+", ["wat-js-op", "+"]],
      ["wat-js-invoke", ["wat-js-global", ["wat-quote", "console"]], ["wat-quote", "log"], ["wat-string", "12"]],
-     ["wat-define", "foo",
-      ["wat-macro", ["wat-vau1", [], "ignore", ["wat-list", "+", 1, 2]]]],
-     ["wat-define", "x", ["wat-vau1", [], "ignore", ["foo"]]],
-     ["wat-alert", ["x"]],
-     ["wat-alert", ["x"]]
+     ["wat-alert", [["wat-vau", [], "ignore", 1, 2, 3]]]
     ];
 wat.run(wat.parse(self_test));
 </script>

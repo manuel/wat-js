@@ -310,7 +310,7 @@ function Wat() {
         var i = arr.indexOf("");
         if (i === -1) return array_to_list(arr.map(parse_json_value));
         else { var front = arr.slice(0, i);
-               return array_to_list(front.map(parse_json_value), arr[i + 1]); } }
+               return array_to_list(front.map(parse_json_value), parse_json_value(arr[i + 1])); } }
     /* JSNI */
     function JSFun(jsfun) { this.jsfun = jsfun; }
     JSFun.prototype.wat_combine = function(e, k, f, o) { return this.jsfun.apply(null, list_to_array(o)); };
@@ -339,7 +339,7 @@ function Wat() {
 	envbind(e, "wat-throw", jswrap(fail));
         envbind(e, "wat-catch", wrap(new Catch()));
         envbind(e, "wat-finally", new Finally());
-        envbind(e, "wat-macro", jswrap(function(expander) { return new Macro(expander); }));
+        envbind(e, "wat-macro*", jswrap(function(expander) { return new Macro(expander); }));
         envbind(e, "wat-push-prompt-proc", wrap(new PushPrompt()));
         envbind(e, "wat-take-subcont-proc", wrap(new TakeSubcont()));
         envbind(e, "wat-push-subcont-proc", wrap(new PushSubcont()));
@@ -352,7 +352,15 @@ function Wat() {
         envbind(e, "wat-js-invoke", jswrap(js_invoke));
 	return e;
     }
+    var primitives =
+        ["wat-begin",
+         ["wat-define", "wat-vau",
+          ["wat-macro*", ["wat-vau1", ["params", "env-param", "", "body"], "ignore",
+                          ["wat-list", "wat-vau1", "params", "env-param",
+                           ["wat-cons", "wat-begin", "body"]]]]]
+        ];
     var envcore = mkenvcore();
+    run(parse_json_value(primitives));
     function run(x) { return evaluate(envcore, null, null, x); }
     /* API */
     return { "run": run, "parse": parse_json_value, "Sym": Sym, "array_to_list": array_to_list };

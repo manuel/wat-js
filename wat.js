@@ -87,8 +87,6 @@ function Wat() {
     };
     /* Built-in Combiners */
     function Vau() {}; function Def() {}; function Eval() {};
-    function Begin() {}; function If() {}; function Loop() {};
-    function Catch() {}; function Finally() {};
     Vau.prototype.wat_combine = function(e, k, f, o) { return new Opv(elt(o, 0), elt(o, 1), elt(o, 2), e); };
     Def.prototype.wat_combine = function(e, k, f, o) {
         if (isResume(k)) {
@@ -102,19 +100,9 @@ function Wat() {
         }
         return bind(e, elt(o, 0), val);
     };
-    If.prototype.wat_combine = function(e, k, f, o) {
-        if (isResume(k)) {
-            var test = resume(k, f);
-        } else {
-            var test = evaluate(e, null, null, elt(o, 0));
-        }
-        if (isSuspend(test)) {
-            pushResume(test, function(k, f) { return If.prototype.wat_combine(e, k, f, o); }, cons(this,o));
-            return test;
-        }
-        return evaluate(e, null, null, test === false ? elt(o, 2) : elt(o, 1));
-    };
     Eval.prototype.wat_combine = function(e, k, f, o) { return evaluate(elt(o, 1), k, f, elt(o, 0)); };
+    /* First-order Control */
+    function Begin() {}; function If() {}; function Loop() {}; function Catch() {}; function Finally() {};
     Begin.prototype.wat_combine = function(e, k, f, o) { if (o === NIL) fail("empty wat-begin"); else return begin(e, k, f, o); };
     function begin(e, k, f, xs) {
         if (isResume(k)) {
@@ -129,6 +117,18 @@ function Wat() {
         var kdr = cdr(xs);
         if (kdr === NIL) return res; else return begin(e, null, null, kdr);
     }
+    If.prototype.wat_combine = function(e, k, f, o) {
+        if (isResume(k)) {
+            var test = resume(k, f);
+        } else {
+            var test = evaluate(e, null, null, elt(o, 0));
+        }
+        if (isSuspend(test)) {
+            pushResume(test, function(k, f) { return If.prototype.wat_combine(e, k, f, o); }, cons(this,o));
+            return test;
+        }
+        return evaluate(e, null, null, test === false ? elt(o, 2) : elt(o, 1));
+    };
     Loop.prototype.wat_combine = function(e, k, f, o) {
         var first = true; // only resume once
         while (true) {
@@ -196,37 +196,6 @@ function Wat() {
             return res;
         }
     }
-    /* Dynamic Variables */
-    function DV(val) { this.val = val; }
-    function DNew() {}; function DLet() {}; function DRef() {};
-    DNew.prototype.wat_combine = function(e, k, f, o) {
-        return new DV(elt(o, 0));
-    }
-    DLet.prototype.wat_combine = function(e, k, f, o) {
-        var dv = elt(o, 0);
-        var val = elt(o, 1);
-        var th = elt(o, 2);
-        var oldVal = dv.val;
-        dv.val = val;
-        try {
-            if (isResume(k)) {
-                var res = resume(k, f);
-            } else {
-                var res = combine(e, null, null, th, NIL);
-            }
-            if (isSuspend(res)) {
-                pushResume(res, function(k, f) { return DLet.prototype.wat_combine(e, k, f, o); }, cons(this,o));
-                return res;
-            } else {
-                return res;
-            }
-        } finally {
-            dv.val = oldVal;
-        }
-    }
-    DRef.prototype.wat_combine = function(e, k, f, o) {
-        return elt(o, 0).val;
-    };
     /* Delimited Control */
     function PushPrompt() {}; function TakeSubcont() {}; function PushSubcont() {};
     PushPrompt.prototype.wat_combine = function(e, k, f, o) {
@@ -272,8 +241,40 @@ function Wat() {
             return res;
         }
     };
+    /* Dynamic Variables */
+    function DV(val) { this.val = val; }
+    function DNew() {}; function DLet() {}; function DRef() {};
+    DNew.prototype.wat_combine = function(e, k, f, o) {
+        return new DV(elt(o, 0));
+    }
+    DLet.prototype.wat_combine = function(e, k, f, o) {
+        var dv = elt(o, 0);
+        var val = elt(o, 1);
+        var th = elt(o, 2);
+        var oldVal = dv.val;
+        dv.val = val;
+        try {
+            if (isResume(k)) {
+                var res = resume(k, f);
+            } else {
+                var res = combine(e, null, null, th, NIL);
+            }
+            if (isSuspend(res)) {
+                pushResume(res, function(k, f) { return DLet.prototype.wat_combine(e, k, f, o); }, cons(this,o));
+                return res;
+            } else {
+                return res;
+            }
+        } finally {
+            dv.val = oldVal;
+        }
+    }
+    DRef.prototype.wat_combine = function(e, k, f, o) {
+        return elt(o, 0).val;
+    };
     /* Objects */
     function Nil() {}; var NIL = new Nil();
+    function Ign() {}; var IGN = new Ign();
     function cons(car, cdr) { return new Cons(car, cdr); }
     function car(cons) { return cons.car; }
     function cdr(cons) { return cons.cdr; }
@@ -283,10 +284,12 @@ function Wat() {
     function lookup(e, name) { var val = lookup0(e, name); return (val !== undefined) ? val : fail("unbound: " + name); }
     function bind(e, lhs, rhs) { lhs.match(e, rhs); return rhs; }
     function sym_name(sym) { return sym.name; }
-    Sym.prototype.match = function(e, rhs) { if (rhs === undefined) fail("trying to match against undefined: " + this.name); 
-                                             e.bindings[this.name] = rhs; };
+    Sym.prototype.match = function(e, rhs) { 
+        if (rhs === undefined) fail("trying to match against undefined: " + this.name); 
+        e.bindings[this.name] = rhs; };
     Cons.prototype.match = function(e, rhs) { car(this).match(e, car(rhs)); cdr(this).match(e, cdr(rhs)); };
     Nil.prototype.match = function(e, rhs) { if (rhs !== NIL) fail("NIL expected"); };
+    Ign.prototype.match = function(e, rhs) {};
     /* Utilities */
     function fail(err) { throw err; }
     function list() {
@@ -303,7 +306,7 @@ function Wat() {
     /* Parser */
     function parse_json_value(obj) {
         switch(Object.prototype.toString.call(obj)) {
-        case "[object String]": return new Sym(obj);
+        case "[object String]": return obj === "#ignore" ? IGN : new Sym(obj);
         case "[object Array]": return parse_json_array(obj);
         default: return obj; } }
     function parse_json_array(arr) {
@@ -312,7 +315,8 @@ function Wat() {
         else { var front = arr.slice(0, i);
                return array_to_list(front.map(parse_json_value), parse_json_value(arr[i + 1])); } }
     /* JSNI */
-    function JSFun(jsfun) { this.jsfun = jsfun; }
+    function JSFun(jsfun) { if (Object.prototype.toString.call(jsfun) !== "[object Function]") fail("no fun");
+                            this.jsfun = jsfun; }
     JSFun.prototype.wat_combine = function(e, k, f, o) { return this.jsfun.apply(null, list_to_array(o)); };
     function jswrap(jsfun) { return wrap(new JSFun(jsfun)); }
     function js_op(op) { return jswrap(new Function("a", "b", "return a " + op + " b")); }
@@ -354,10 +358,28 @@ function Wat() {
     }
     var primitives =
         ["wat-begin",
+
+         ["wat-define", "wat-quote",
+          ["wat-vau1", "x", "#ignore", "x"]],
+
+         ["wat-define", "wat-list",
+          ["wat-wrap", ["wat-vau1", "arglist", "#ignore", "arglist"]]],
+
          ["wat-define", "wat-vau",
-          ["wat-macro*", ["wat-vau1", ["params", "env-param", "", "body"], "ignore",
+          ["wat-macro*", ["wat-vau1", ["params", "env-param", "", "body"], "#ignore",
                           ["wat-list", "wat-vau1", "params", "env-param",
-                           ["wat-cons", "wat-begin", "body"]]]]]
+                           ["wat-cons", "wat-begin", "body"]]]]],
+
+         ["wat-define", "wat-macro",
+          ["wat-macro*", ["wat-vau", ["params", "", "body"], "#ignore",
+                          ["wat-list", "wat-macro*",
+                           ["wat-list*", "wat-vau", "params", "#ignore", "body"]]]]],
+
+         ["wat-define", "wat-define-macro",
+          ["wat-macro", [["name", "", "params"], "", "body"],
+           ["wat-list", "wat-define", "name",
+            ["wat-list*", "wat-macro", "params", "body"]]]]
+
         ];
     var envcore = mkenvcore();
     run(parse_json_value(primitives));

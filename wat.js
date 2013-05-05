@@ -317,6 +317,8 @@ function Wat() {
     function jswrap(jsfun) { return wrap(new JSFun(jsfun)); }
     function js_op(op) { return jswrap(new Function("a", "b", "return a " + op + " b")); }
     function js_global(name) { return WAT_GLOBAL[name]; }
+    function js_invoke(obj, method_name) {
+        return obj[sym_name(method_name)].apply(obj, Array.prototype.slice.call(arguments, 2)); }
     /* Core Environment */
     function envbind(e, name, val) { bind(e, new Sym(name), val); }
     function mkenvcore() {
@@ -345,8 +347,9 @@ function Wat() {
         envbind(e, "wat-push-dynamic-proc", wrap(new DLet()));
         envbind(e, "wat-peek-dynamic", wrap(new DRef()));
         envbind(e, "wat-js-wrap", jswrap(jswrap));
-        envbind(e, "wat-js-global", new JSFun(function(sym) { return js_global(sym_name(sym)); }));
+        envbind(e, "wat-js-global", jswrap(function(sym) { return js_global(sym_name(sym)); }));
         envbind(e, "wat-js-op", new JSFun(function(sym) { return js_op(sym_name(sym)); }));
+        envbind(e, "wat-js-invoke", jswrap(js_invoke));
 	return e;
     }
     var envcore = mkenvcore();

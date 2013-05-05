@@ -11,10 +11,11 @@
 var wat = new Wat();
 var self_test = 
     ["wat-begin",
-     ["wat-define", "alert", ["wat-js-wrap", ["wat-js-global", "alert"]]],
+     ["wat-define", "wat-quote", ["wat-vau1", ["x"], "ignore", "x"]],
+     ["wat-define", "wat-alert", ["wat-js-wrap", ["wat-js-global", ["wat-quote", "alert"]]]],
      ["wat-define", "===", ["wat-js-op", "==="]],
      ["wat-define", "+", ["wat-js-op", "+"]],
-     ["alert", ["+", 1, 3]]
+     ["wat-js-invoke", ["wat-js-global", ["wat-quote", "console"]], ["wat-quote", "log"], ["wat-string", "12"]],
     ];
 wat.run(wat.parse(self_test));
 </script>

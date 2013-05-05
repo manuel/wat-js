@@ -4,9 +4,8 @@ var watbrowser = (function() {
 
     function init() {
         var forms = [];
-	forms = forms.concat(load_file("../virtua.wat"));
-	forms = forms.concat(load_file("../selftest.wat"));
-	forms = forms.concat(load_file("../prelude.virtua"));
+	forms.push(load_file("../prim.wat"));
+	forms.push(load_file("../test.wat"));
         start = new Date().getTime();
         wat.eval(wat.array_to_list([new wat.Sym("wat-begin")].concat(forms)));
         elapsed = new Date().getTime() - start;
@@ -21,10 +20,10 @@ var watbrowser = (function() {
 	req.send(null);
 	if(req.status == 200) {
             var start = new Date().getTime();
-            var forms = wat.parse(req.responseText);
+            var form = wat.parse(req.responseText);
             var elapsed = new Date().getTime() - start;
             console_log("Parse time " + elapsed + "ms");
-            return forms;
+            return form;
 	} else {
             throw("XHR error: " + req.status);
 	}

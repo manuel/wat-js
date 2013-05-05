@@ -1,18 +1,17 @@
 function Wat() {
-    /***** Evaluation *****/
-    function run(x) { return evaluate(envcore, null, null, x); }
     /* Continuations */
     function Suspension(prompt, handler) {
         this.prompt = prompt; this.handler = handler; this.resumption = null; }
     function isSuspend(x) { return x instanceof Suspension; }
     function Resumption(fun, next, dbg) {
-        this.fun = fun; this.next = next; this.dbg = dbg ? dbg : VOID; }
+        this.fun = fun; this.next = next; this.dbg = dbg; }
     function isResume(x) { return x instanceof Resumption; }
     function pushResume(susp, fun, dbg) {
         susp.resumption = new Resumption(fun, susp.resumption, dbg); }
     function resume(resumption, f) {
         return resumption.fun(resumption.next, f); }
     /* Evaluation Core */
+    function run(x) { return evaluate(envcore, null, null, x); }
     function evaluate(e, k, f, x) {
         if (x && x.wat_eval) return x.wat_eval(e, k, f); else return x; }
     function Sym(name) { this.name = name; }
@@ -37,7 +36,6 @@ function Wat() {
         }
     };
     function macroCombine(e, k, f, macro, form) {
-        if (form.cache !== undefined) return evaluate(e, k, f, form.cache);
         if (isResume(k)) {
             var expanded = resume(k, f);
         } else {
@@ -47,35 +45,22 @@ function Wat() {
             pushResume(expanded, function(k, f) { return macroCombine(e, k, f, macro, form); });
             return expanded;
         }
-        form.cache = expanded;
-        return evaluate(e, k, f, expanded);
+        form.car = expanded.car;
+        form.cdr = expanded.cdr;
+        return evaluate(e, k, f, form);
     }
     function Macro(expander) { this.expander = expander; }
     function isMacro(x) { return x instanceof Macro; }
-    function Def() {}
-    Def.prototype.combine = function(e, k, f, o) {
-        if (isResume(k)) {
-            var val = resume(k, f);
-        } else {
-            var val = evaluate(e, null, null, elt(o, 1));
-        }
-        if (isSuspend(val)) {
-            pushResume(val, function(k, f) { return Def.prototype.combine(e, k, f, o); }, cons(this,o));
-            return val;
-        }
-        return bind(e, elt(o, 0), val);
-    };
     /* Operative & Applicative Combiners */
     function combine(e, k, f, cmb, o) {
-        return cmb.combine ? cmb.combine(e, k, f, o) : fail("not a combiner");
-    }
+        if (cmb && cmb.wat_combine) return cmb.wat_combine(e, k, f, o); else fail("not a combiner"); }
     function Opv(p, ep, x, e) { this.p = p; this.ep = ep; this.x = x; this.e = e; }
     function Apv(cmb) { this.cmb = cmb; }; function wrap(cmb) { return new Apv(cmb); }; function unwrap(apv) { return apv.cmb; }
-    Opv.prototype.combine = function(e, k, f, o) {
+    Opv.prototype.wat_combine = function(e, k, f, o) {
 	var xe = new Env(this.e); bind(xe, this.p, o); bind(xe, this.ep, e);
         return evaluate(xe, k, f, this.x);
     };
-    Apv.prototype.combine = function(e, k, f, o) {
+    Apv.prototype.wat_combine = function(e, k, f, o) {
         if (isResume(k)) {
             var args = resume(k, f);
         } else {
@@ -83,10 +68,10 @@ function Wat() {
         }
         if (isSuspend(args)) {
             var that = this;
-            pushResume(args, function(k, f) { return that.combine(e, k, f, o); }, cons(this, o));
+            pushResume(args, function(k, f) { return that.wat_combine(e, k, f, o); }, cons(this, o));
             return args;
         }
-        return this.cmb.combine(e, null, null, args);
+        return this.cmb.wat_combine(e, null, null, args);
     };
     function evalArgs(e, k, f, todo, done) {
 	if (todo === NIL) { return reverse_list(done); }
@@ -102,23 +87,36 @@ function Wat() {
         return evalArgs(e, null, null, cdr(todo), cons(arg, done));
     };
     /* Built-in Combiners */
-    function Vau() {}; function If() {}; function Eval() {}; function Begin() {}; function Loop() {};
+    function Vau() {}; function Def() {}; function Eval() {};
+    function Begin() {}; function If() {}; function Loop() {};
     function Catch() {}; function Finally() {};
-    Vau.prototype.combine = function(e, k, f, o) { return new Opv(elt(o, 0), elt(o, 1), elt(o, 2), e); };
-    If.prototype.combine = function(e, k, f, o) {
+    Vau.prototype.wat_combine = function(e, k, f, o) { return new Opv(elt(o, 0), elt(o, 1), elt(o, 2), e); };
+    Def.prototype.wat_combine = function(e, k, f, o) {
+        if (isResume(k)) {
+            var val = resume(k, f);
+        } else {
+            var val = evaluate(e, null, null, elt(o, 1));
+        }
+        if (isSuspend(val)) {
+            pushResume(val, function(k, f) { return Def.prototype.wat_combine(e, k, f, o); }, cons(this,o));
+            return val;
+        }
+        return bind(e, elt(o, 0), val);
+    };
+    If.prototype.wat_combine = function(e, k, f, o) {
         if (isResume(k)) {
             var test = resume(k, f);
         } else {
             var test = evaluate(e, null, null, elt(o, 0));
         }
         if (isSuspend(test)) {
-            pushResume(test, function(k, f) { return If.prototype.combine(e, k, f, o); }, cons(this,o));
+            pushResume(test, function(k, f) { return If.prototype.wat_combine(e, k, f, o); }, cons(this,o));
             return test;
         }
         return evaluate(e, null, null, test === false ? elt(o, 2) : elt(o, 1));
     };
-    Eval.prototype.combine = function(e, k, f, o) { return evaluate(elt(o, 1), k, f, elt(o, 0)); };
-    Begin.prototype.combine = function(e, k, f, o) { if (o === NIL) return VOID; else return begin(e, k, f, o); };
+    Eval.prototype.wat_combine = function(e, k, f, o) { return evaluate(elt(o, 1), k, f, elt(o, 0)); };
+    Begin.prototype.wat_combine = function(e, k, f, o) { if (o === NIL) fail("empty wat-begin"); else return begin(e, k, f, o); };
     function begin(e, k, f, xs) {
         if (isResume(k)) {
             var res = resume(k, f);
@@ -132,7 +130,7 @@ function Wat() {
         var kdr = cdr(xs);
         if (kdr === NIL) return res; else return begin(e, null, null, kdr);
     }
-    Loop.prototype.combine = function(e, k, f, o) {
+    Loop.prototype.wat_combine = function(e, k, f, o) {
         var first = true; // only resume once
         while (true) {
             if (first && isResume(k)) {
@@ -142,12 +140,12 @@ function Wat() {
             }
             first = false;
             if (isSuspend(res)) {
-                pushResume(res, function(k, f) { return Loop.prototype.combine(e, k, f, o); }, cons(this,o));
+                pushResume(res, function(k, f) { return Loop.prototype.wat_combine(e, k, f, o); }, cons(this,o));
                 return res;
             }
         }
     }
-    Catch.prototype.combine = function(e, k, f, o) {
+    Catch.prototype.wat_combine = function(e, k, f, o) {
         var th = elt(o, 0);
         var handler = elt(o, 1);
         try {
@@ -160,13 +158,13 @@ function Wat() {
             var res = combine(e, null, null, handler, list(exc));
         }
         if (isSuspend(res)) {
-            pushResume(res, function(k, f) { return Catch.prototype.combine(e, k, f, o); }, cons(this,o));
+            pushResume(res, function(k, f) { return Catch.prototype.wat_combine(e, k, f, o); }, cons(this,o));
             return res;
         } else {
             return res;
         }
     };
-    Finally.prototype.combine = function(e, k, f, o) {
+    Finally.prototype.wat_combine = function(e, k, f, o) {
         var prot = elt(o, 0);
         var cleanup = elt(o, 1);
         try {
@@ -176,7 +174,7 @@ function Wat() {
                 var res = evaluate(e, null, null, prot);
             }
             if (isSuspend(res)) {
-                pushResume(res, function(k, f) { return Finally.prototype.combine(e, k, f, o); }, cons(this,o));
+                pushResume(res, function(k, f) { return Finally.prototype.wat_combine(e, k, f, o); }, cons(this,o));
             }
         } finally {
             if (isSuspend(res)) {
@@ -202,10 +200,10 @@ function Wat() {
     /* Dynamic Variables */
     function DV(val) { this.val = val; }
     function DNew() {}; function DLet() {}; function DRef() {};
-    DNew.prototype.combine = function(e, k, f, o) {
+    DNew.prototype.wat_combine = function(e, k, f, o) {
         return new DV(elt(o, 0));
     }
-    DLet.prototype.combine = function(e, k, f, o) {
+    DLet.prototype.wat_combine = function(e, k, f, o) {
         var dv = elt(o, 0);
         var val = elt(o, 1);
         var th = elt(o, 2);
@@ -218,7 +216,7 @@ function Wat() {
                 var res = combine(e, null, null, th, NIL);
             }
             if (isSuspend(res)) {
-                pushResume(res, function(k, f) { return DLet.prototype.combine(e, k, f, o); }, cons(this,o));
+                pushResume(res, function(k, f) { return DLet.prototype.wat_combine(e, k, f, o); }, cons(this,o));
                 return res;
             } else {
                 return res;
@@ -227,12 +225,12 @@ function Wat() {
             dv.val = oldVal;
         }
     }
-    DRef.prototype.combine = function(e, k, f, o) {
+    DRef.prototype.wat_combine = function(e, k, f, o) {
         return elt(o, 0).val;
     };
     /* Delimited Control */
     function PushPrompt() {}; function TakeSubcont() {}; function PushSubcont() {};
-    PushPrompt.prototype.combine = function(e, k, f, o) {
+    PushPrompt.prototype.wat_combine = function(e, k, f, o) {
         var prompt = elt(o, 0);
         var th = elt(o, 1);
         if (isResume(k)) {
@@ -246,21 +244,21 @@ function Wat() {
                 var handler = res.handler;
                 return combine(e, null, null, handler, cons(resumption, NIL));
             } else {
-                pushResume(res, function(k, f) { return PushPrompt.prototype.combine(e, k, f, o); }, cons(this,o));
+                pushResume(res, function(k, f) { return PushPrompt.prototype.wat_combine(e, k, f, o); }, cons(this,o));
                 return res;
             }
         } else {
             return res;
         }
     };
-    TakeSubcont.prototype.combine = function(e, k, f, o) {
+    TakeSubcont.prototype.wat_combine = function(e, k, f, o) {
         var prompt = elt(o, 0);
         var handler = elt(o, 1);
         var susp = new Suspension(prompt, handler);
         pushResume(susp, function(k, f) { return combine(e, null, null, f, NIL); }, cons(this, o));
         return susp;
     };
-    PushSubcont.prototype.combine = function(e, k, f, o) {
+    PushSubcont.prototype.wat_combine = function(e, k, f, o) {
         var thek = elt(o, 0);
         var thef = elt(o, 1);
         if (isResume(k)) {
@@ -269,36 +267,14 @@ function Wat() {
             var res = resume(thek, thef);
         }
         if (isSuspend(res)) {
-            pushResume(res, function(k, f) { return PushSubcont.prototype.combine(e, k, f, o); }, cons(this,o));
+            pushResume(res, function(k, f) { return PushSubcont.prototype.wat_combine(e, k, f, o); }, cons(this,o));
             return res;
         } else {
             return res;
         }
     };
-    /* JS Bridge */
-    function JSFun(jsfun) { this.jsfun = jsfun; }
-    JSFun.prototype.combine = function(e, k, f, o) { return this.jsfun.apply(null, list_to_array(o)); };
-    function jswrap(jsfun) { return wrap(new JSFun(jsfun)); }
-    function js_global(name) { return js_prop(WAT_GLOBAL, name); }
-    function js_set_global(name, val) { return js_set_prop(WAT_GLOBAL, name, val); }
-    function js_prop(obj, name) { return obj[name]; }
-    function js_set_prop(obj, name, val) { return obj[name] = val; }
-    function js_function(jsfun) { return jswrap(jsfun); }
-    function js_op(op) { return jswrap(new Function("a", "b", "return a " + op + " b")); }
-    function js_method(name) { return jswrap(function(obj) {
-	var args = Array.prototype.slice.call(arguments, 1); return obj[name].apply(obj, args); }); }
-    function JSCallback() {};
-    JSCallback.prototype.combine = function(e, k, f, o) {
-        var cmb = elt(o, 0);
-        return function() {
-            var args = array_to_list(Array.prototype.slice.call(arguments));
-            combine(e, null, null, cmb, args);
-        };
-    }
-    /***** Objects *****/
-    /* Core */
-    function Void() {}; function Ign() {}; function Nil() {};
-    var VOID = new Void(); var IGN = new Ign(); var NIL = new Nil();
+    /* Objects */
+    function Nil() {}; var NIL = new Nil();
     function cons(car, cdr) { return new Cons(car, cdr); }
     function car(cons) { return cons.car; }
     function cdr(cons) { return cons.cdr; }
@@ -307,11 +283,11 @@ function Wat() {
     function lookup0(e, name) { return e.bindings[name]; }
     function lookup(e, name) { var val = lookup0(e, name); return (val !== undefined) ? val : fail("unbound: " + name); }
     function bind(e, lhs, rhs) { lhs.match(e, rhs); return rhs; }
+    function sym_name(sym) { return sym.name; }
     Sym.prototype.match = function(e, rhs) { if (rhs === undefined) fail("trying to match against undefined: " + this.name); 
                                              e.bindings[this.name] = rhs; };
     Cons.prototype.match = function(e, rhs) { car(this).match(e, car(rhs)); cdr(this).match(e, cdr(rhs)); };
     Nil.prototype.match = function(e, rhs) { if (rhs !== NIL) fail("NIL expected"); };
-    Ign.prototype.match = function(e, rhs) {};
     /* Utilities */
     function fail(err) { throw err; }
     function list() {
@@ -325,90 +301,68 @@ function Wat() {
 	var res = []; while(c !== NIL) { res.push(car(c)); c = cdr(c); } return res; }
     function reverse_list(list) {
 	var res = NIL; while(list !== NIL) { res = cons(car(list), res); list = cdr(list); } return res; }
-    /***** Parser *****/
-    function parse(s) { // Returns array of forms
-	var res = program_stx(ps(s));
-	if (res.remaining.index === s.length) return res.ast; else fail("parse error at " + res.remaining.index + " in " + s); }
-    var x_stx = function(input) { return x_stx(input); }; // forward decl.
-    var id_special_char = choice("-", "&", "!", ":", "=", ">", "<", "%", "+", "?", "/", "*", "#", "$", "_", "'", ".");
-    var id_char = choice(range("a", "z"), range("A", "Z"), range("0", "9"), id_special_char);
-    // Kludge: don't allow single dot as id, so as not to conflict with dotted pair stx.
-    var id_stx = action(join_action(butnot(repeat1(id_char), "."), ""), function (ast) { return new Sym(ast); });
-    var escape_char = choice("\"", "\\");
-    var escape_sequence = action(sequence("\\", escape_char), function (ast) { return ast[1]; });
-    var string_char = choice(negate(escape_char), escape_sequence);
-    var string_stx =
-	action(sequence("\"", join_action(repeat0(string_char), ""), "\""),
-               function (ast) { return list(new Sym("wat-string"), ast[1]); });
-    var digits = join_action(repeat1(range("0", "9")), "");
-    var number_stx = action(sequence(optional(choice("+", "-")), digits, optional(join_action(sequence(".", digits), ""))),
-			    function (ast) {
-				var sign = ast[0] ? ast[0] : "";
-				var integral_digits = ast[1]; 
-				var fractional_digits = ast[2] || "";
-				return list(new Sym("wat-number"), sign + integral_digits + fractional_digits); });
-    function make_constant_stx(string, constant) { return action(string, function(ast) { return constant; }); }
-    var void_stx = make_constant_stx("+wat-void+", VOID);
-    var ign_stx = make_constant_stx("_", IGN);
-    var nil_stx = make_constant_stx("()", NIL);
-    var dot_stx = action(wsequence(".", x_stx), function (ast) { return ast[1]; });
-    var compound_stx = action(wsequence("(", repeat1(x_stx), optional(dot_stx), ")"),
-			      function(ast) {
-				  var exprs = ast[1];
-				  var end = ast[2] ? ast[2] : NIL;
-				  return array_to_list(exprs, end); });
-    var line_terminator = choice(ch("\r"), ch("\n"));
-    var cmt_stx = action(sequence(";", repeat0(negate(line_terminator)), optional(line_terminator)), nothing_action);
-    var whitespace_stx = action(choice(" ", "\n", "\r", "\t"), nothing_action);
-    function nothing_action(ast) { return VOID; } // HACK!
-    var x_stx = whitespace(choice(void_stx, ign_stx, nil_stx, number_stx,
-				  compound_stx, id_stx, string_stx, cmt_stx));
-    var program_stx = whitespace(repeat0(choice(x_stx, whitespace_stx))); // HACK!
-    /***** Core Environment *****/
+    /* Parser */
+    function parse(s) { return parse_json_object(JSON.parse(s)); }
+    function parse_json_object(obj) {
+        switch(Object.prototype.toString.call(obj)) {
+        case "[object String]": return new Sym(obj);
+        case "[object Array]": return parse_json_array(obj);
+        default: return obj; } }
+    function parse_json_array(arr) {
+        var i = arr.indexOf("");
+        if (i === -1) return array_to_list(arr.map(parse_json_object));
+        else { var front = arr.slice(0, i);
+               return array_to_list(front.map(parse_json_object), arr[i + 1]); } }
+    /* Primitives */
+    var self_test = 
+        ["wat-begin",
+         ["wat-define", "alert", jswrap(alert)],
+         ["wat-define", "===", js_op("===")],
+         ["wat-define", "+", js_op("+")],
+         ["alert", ["+", 1, 3]]
+        ];
+    /* JSNI */
+    function JSFun(jsfun) { this.jsfun = jsfun; }
+    JSFun.prototype.wat_combine = function(e, k, f, o) { return this.jsfun.apply(null, list_to_array(o)); };
+    function jswrap(jsfun) { return wrap(new JSFun(jsfun)); }
+    function js_op(op) { return jswrap(new Function("a", "b", "return a " + op + " b")); }
+    /* Core Environment */
     function envbind(e, name, val) { bind(e, new Sym(name), val); }
     function mkenvcore() {
 	var e = new Env();
 	envbind(e, "wat-define", new Def());
+	envbind(e, "wat-make-environment", jswrap(function (parent) { return new Env(parent); }));
 	envbind(e, "wat-eval", wrap(new Eval()));
 	envbind(e, "wat-cons", jswrap(cons));
 	envbind(e, "wat-list*", jswrap(list_star));
-	envbind(e, "wat-fexpr", new Vau());
+	envbind(e, "wat-string", new JSFun(sym_name));
+	envbind(e, "wat-symbol-name", jswrap(sym_name));
+	envbind(e, "wat-vau1", new Vau());
 	envbind(e, "wat-wrap", jswrap(wrap));
 	envbind(e, "wat-unwrap", jswrap(unwrap));
-	envbind(e, "wat-make-environment", jswrap(function (parent) { return new Env(parent); }));
-        envbind(e, "wat-macro", jswrap(function(exp) { return new Macro(exp); }));
-	envbind(e, "wat-if", new If());
 	envbind(e, "wat-begin", new Begin());
-        envbind(e, "wat-loop", new Loop());
+	envbind(e, "wat-if", new If());
+        envbind(e, "wat-loop1", new Loop());
 	envbind(e, "wat-throw", jswrap(fail));
-        envbind(e, "wat-catch*", wrap(new Catch()));
+        envbind(e, "wat-catch", wrap(new Catch()));
         envbind(e, "wat-finally", new Finally());
-        envbind(e, "wat-push-prompt*", wrap(new PushPrompt()));
-        envbind(e, "wat-take-subcont*", wrap(new TakeSubcont()));
-        envbind(e, "wat-push-subcont*", wrap(new PushSubcont()));
+        envbind(e, "wat-macro", jswrap(function(expander) { return new Macro(expander); }));
+        envbind(e, "wat-push-prompt-proc", wrap(new PushPrompt()));
+        envbind(e, "wat-take-subcont-proc", wrap(new TakeSubcont()));
+        envbind(e, "wat-push-subcont-proc", wrap(new PushSubcont()));
         envbind(e, "wat-make-dynamic", wrap(new DNew()));
-        envbind(e, "wat-push-dynamic*", wrap(new DLet()));
+        envbind(e, "wat-push-dynamic-proc", wrap(new DLet()));
         envbind(e, "wat-peek-dynamic", wrap(new DRef()));
-	envbind(e, "wat-read-from-string", jswrap(function(str) { return array_to_list(parse(str)); }));
-	envbind(e, "wat-js-global", jswrap(js_global));
-	envbind(e, "wat-js-set-global!", jswrap(js_set_global));
-	envbind(e, "wat-js-prop", jswrap(js_prop));
-	envbind(e, "wat-js-set-prop!", jswrap(js_set_prop));
-	envbind(e, "wat-js-function", jswrap(js_function));
-	envbind(e, "wat-js-op", jswrap(js_op));
-	envbind(e, "wat-js-method", jswrap(js_method));
-	envbind(e, "wat-js-callback", wrap(new JSCallback()));
-	envbind(e, "wat-js-array-to-list", jswrap(array_to_list));
-        envbind(e, "wat-js-null", null);
-        envbind(e, "wat-js-true", null);
-        envbind(e, "wat-js-false", null);
 	return e;
     }
     var envcore = mkenvcore();
-    /***** API *****/
+       //run(parse_json_object(primitives));
+    console.log(run(parse_json_object(self_test)));
+    /* API */
     return { "eval": run, "parse": parse, "Sym": Sym, "array_to_list": array_to_list };
 }
 var WAT_GLOBAL = this;
+new Wat();
 // Abbreviations:
 // apv: applicative combiner (function)
 // arg: argument

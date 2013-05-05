@@ -11,7 +11,6 @@ function Wat() {
     function resume(resumption, f) {
         return resumption.fun(resumption.next, f); }
     /* Evaluation Core */
-    function run(x) { return evaluate(envcore, null, null, x); }
     function evaluate(e, k, f, x) {
         if (x && x.wat_eval) return x.wat_eval(e, k, f); else return x; }
     function Sym(name) { this.name = name; }
@@ -302,30 +301,22 @@ function Wat() {
     function reverse_list(list) {
 	var res = NIL; while(list !== NIL) { res = cons(car(list), res); list = cdr(list); } return res; }
     /* Parser */
-    function parse(s) { return parse_json_object(JSON.parse(s)); }
-    function parse_json_object(obj) {
+    function parse_json_value(obj) {
         switch(Object.prototype.toString.call(obj)) {
         case "[object String]": return new Sym(obj);
         case "[object Array]": return parse_json_array(obj);
         default: return obj; } }
     function parse_json_array(arr) {
         var i = arr.indexOf("");
-        if (i === -1) return array_to_list(arr.map(parse_json_object));
+        if (i === -1) return array_to_list(arr.map(parse_json_value));
         else { var front = arr.slice(0, i);
-               return array_to_list(front.map(parse_json_object), arr[i + 1]); } }
-    /* Primitives */
-    var self_test = 
-        ["wat-begin",
-         ["wat-define", "alert", jswrap(alert)],
-         ["wat-define", "===", js_op("===")],
-         ["wat-define", "+", js_op("+")],
-         ["alert", ["+", 1, 3]]
-        ];
+               return array_to_list(front.map(parse_json_value), arr[i + 1]); } }
     /* JSNI */
     function JSFun(jsfun) { this.jsfun = jsfun; }
     JSFun.prototype.wat_combine = function(e, k, f, o) { return this.jsfun.apply(null, list_to_array(o)); };
     function jswrap(jsfun) { return wrap(new JSFun(jsfun)); }
     function js_op(op) { return jswrap(new Function("a", "b", "return a " + op + " b")); }
+    function js_global(name) { return WAT_GLOBAL[name]; }
     /* Core Environment */
     function envbind(e, name, val) { bind(e, new Sym(name), val); }
     function mkenvcore() {
@@ -353,16 +344,17 @@ function Wat() {
         envbind(e, "wat-make-dynamic", wrap(new DNew()));
         envbind(e, "wat-push-dynamic-proc", wrap(new DLet()));
         envbind(e, "wat-peek-dynamic", wrap(new DRef()));
+        envbind(e, "wat-js-wrap", jswrap(jswrap));
+        envbind(e, "wat-js-global", new JSFun(function(sym) { return js_global(sym_name(sym)); }));
+        envbind(e, "wat-js-op", new JSFun(function(sym) { return js_op(sym_name(sym)); }));
 	return e;
     }
     var envcore = mkenvcore();
-       //run(parse_json_object(primitives));
-    console.log(run(parse_json_object(self_test)));
+    function run(x) { return evaluate(envcore, null, null, x); }
     /* API */
-    return { "eval": run, "parse": parse, "Sym": Sym, "array_to_list": array_to_list };
+    return { "run": run, "parse": parse_json_value, "Sym": Sym, "array_to_list": array_to_list };
 }
-var WAT_GLOBAL = this;
-new Wat();
+WAT_GLOBAL = this;
 // Abbreviations:
 // apv: applicative combiner (function)
 // arg: argument

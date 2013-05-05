@@ -3,9 +3,20 @@
 <head>
   <title>Wat VM</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/> 
+  <script type="text/javascript" src="../wat.js"></script>
 </head>
 <body>
 <h1><a href="https://github.com/manuel/wat-js">Wat VM / Virtua</a></h1>
-<script type="text/javascript" src="../wat.js"></script>
+<script type="text/javascript">
+var wat = new Wat();
+var self_test = 
+    ["wat-begin",
+     ["wat-define", "alert", ["wat-js-wrap", ["wat-js-global", "alert"]]],
+     ["wat-define", "===", ["wat-js-op", "==="]],
+     ["wat-define", "+", ["wat-js-op", "+"]],
+     ["alert", ["+", 1, 3]]
+    ];
+wat.run(wat.parse(self_test));
+</script>
 </body>
 </html>

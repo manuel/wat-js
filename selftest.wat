@@ -10,3 +10,6 @@
 (assert (wat-selftest-= ((lambda (x) x) (wat-+ 3 4)) 7))
 (assert (wat-selftest-= ((lambda (x y) y) 1 (wat-+ 4 5)) 9))
 (assert (wat-selftest-= ((lambda (x y) 1 2 3 y) 1 (wat-+ 4 5)) 9))
+
+(assert (wat-selftest-= 3 (wat-catch* (lambda () (wat-throw 3)) (lambda (exc) exc))))
+(assert (wat-selftest-= 5 (wat-catch* (lambda () 4 5) (lambda (exc) exc))))

@@ -33,4 +33,4 @@
   (wat-fexpr (expr) env
     (wat-if (wat-eval expr env)
             +wat-void+
-            (wat-fail expr))))
+            (wat-js-throw expr))))

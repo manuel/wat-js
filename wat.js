@@ -115,7 +115,7 @@ function Wat() {
             pushResume(test, function(k, f) { return If.prototype.combine(e, k, f, o); }, cons(this,o));
             return test;
         }
-        return evaluate(e, null, null, (test === F) ? elt(o, 2) : elt(o, 1));
+        return evaluate(e, null, null, test === false ? elt(o, 2) : elt(o, 1));
     };
     Eval.prototype.combine = function(e, k, f, o) { return evaluate(elt(o, 1), k, f, elt(o, 0)); };
     Begin.prototype.combine = function(e, k, f, o) { if (o === NIL) return VOID; else return begin(e, k, f, o); };
@@ -292,23 +292,12 @@ function Wat() {
     function JSOBJ() {};
     function js_global(name) { return js_prop(WAT_GLOBAL, name); }
     function js_set_global(name, val) { return js_set_prop(WAT_GLOBAL, name, val); }
-    function js_prop(obj, name) { assert(type_of(name) === Str.prototype.wat_type); return obj[name.jsstr]; }
-    function js_set_prop(obj, name, val) { assert(type_of(name) === Str.prototype.wat_type); return obj[name.jsstr] = val; }
+    function js_prop(obj, name) { return obj[name]; }
+    function js_set_prop(obj, name, val) { return obj[name] = val; }
     function js_function(jsfun) { return jswrap(jsfun); }
+    function js_op(op) { return jswrap(new Function("a", "b", "return a " + op + " b")); }
     function js_method(name) { return jswrap(function(obj) {
-	var args = Array.prototype.slice.call(arguments, 1); return obj[name.jsstr].apply(obj, args); }); }
-    function to_js(obj) { return (obj && obj.to_js) ? obj.to_js() : obj; }
-    Str.prototype.to_js = function() { return this.jsstr; }
-    Num.prototype.to_js = function() { return jsnums.toFixnum(this.jsnum); }
-    Bool.prototype.to_js = function() { return this === T ? true : false; }
-    function from_js(obj) {
-	switch(typeof(obj)) {
-	case "string": return new Str(obj);
-	case "number": return new Num(jsnums.fromFixnum(obj));
-	case "boolean": return obj === true ? T : F;
-	default: return obj;
-	}
-    }
+	var args = Array.prototype.slice.call(arguments, 1); return obj[name].apply(obj, args); }); }
     function JSCallback() {};
     JSCallback.prototype.combine = function(e, k, f, o) {
         var cmb = elt(o, 0);
@@ -320,8 +309,8 @@ function Wat() {
     /***** Objects *****/
     /* Core */
     function cons(car, cdr) { return new Cons(car, cdr); }
-    function car(cons) { assert(type_of(cons) === Cons.prototype.wat_type); return cons.car; }
-    function cdr(cons) { assert(type_of(cons) === Cons.prototype.wat_type); return cons.cdr; }
+    function car(cons) { return cons.car; }
+    function cdr(cons) { return cons.cdr; }
     function elt(cons, i) { return (i === 0) ? car(cons) : elt(cdr(cons), i - 1); }
     function Env(parent) { this.bindings = Object.create(parent ? parent.bindings : null); }
     function lookup0(e, name) { return e.bindings[name]; }
@@ -333,108 +322,22 @@ function Wat() {
     Nil.prototype.match = function(e, rhs) { if (rhs !== NIL) fail("NIL expected"); };
     Ign.prototype.match = function(e, rhs) {};
     function bound(sym, e) { return (e.bindings[sym.name] !== undefined); }
-    /* Data */
-    function Str(jsstr) { this.jsstr = jsstr; };
-    function str_eql(str1, str2) { return str1.jsstr === str2.jsstr; }
-    function str_cat(strings) { return strings.map(function(str) { return str.jsstr; }).join(""); }
-    function str_print(str1) { return JSON.stringify(str1.jsstr); }
-    function Num(jsnum) { this.jsnum = jsnum; };
-    function num_eql(num1, num2) { return jsnums.equals(num1.jsnum, num2.jsnum); }
-    function num_lt(num1, num2) { return jsnums.lessThan(num1.jsnum, num2.jsnum); }
-    function num_add(num1, num2) { return new Num(jsnums.add(num1.jsnum, num2.jsnum)); };
-    function num_sub(num1, num2) { return new Num(jsnums.subtract(num1.jsnum, num2.jsnum)); };
-    function num_mul(num1, num2) { return new Num(jsnums.multiply(num1.jsnum, num2.jsnum)); };
-    function num_div(num1, num2) { return new Num(jsnums.divide(num1.jsnum, num2.jsnum)); };
-    function num_mod(num1, num2) { return new Num(jsnums.modulo(num1.jsnum, num2.jsnum)); };
-    function Vector(elements) { this.elements = elements; }
-    function vector_ref(vector, i) { return vector.elements[i]; }
-    function vector_set(vector, i, val) { vector.elements[i] = val; return val; }
-    function vector_length(vector) { return vector.length; }
-    function Void() {}; function Ign() {}; function Nil() {}; function Bool() {}
-    var VOID = new Void(); var IGN = new Ign(); var NIL = new Nil(); var T = new Bool(); var F = new Bool()
-    function str_to_sym(str) { return new Sym(str.jsstr); }
-    function sym_to_str(sym) { return new Str(sym.name); }
-    function str_to_num(str) { return new Num(jsnums.fromString(str.jsstr)); }
-    function num_to_str(num) { return new Str(num.jsnum.toString()); }
-    function StringHashtable() { this.entries = Object.create(null); }
-    function string_hashtable_put(tbl, k, v) {
-        assert(k.jsstr !== undefined);
-        tbl.entries[k.jsstr] = v;
-        return v;
-    }
-    function string_hashtable_get(tbl, k, def) {
-        assert(k.jsstr !== undefined);
-        var v = tbl.entries[k.jsstr];
-        return (v !== undefined) ? v : def;
-    }
-    /* Types */
-    function Type() {};
-    function Tagged(type, val) { this.wat_type = type; this.val = val };
-    function type_of(obj) { if (obj && obj.wat_type) return obj.wat_type; else return JSOBJ.prototype.wat_type; }
-    function make_type() {
-	var type = new Type();
-	var tagger = jswrap(function(val) { return new Tagged(type, val); });
-	var untagger = jswrap(function(obj) { if (type_of(obj) === type) return obj.val; else fail("wrong type"); });
-	return cons(type, cons(tagger, cons(untagger, NIL))); }
-    function label(obj) { 
-        if (obj.wat_type) return obj.wat_label ? obj.wat_label : "anonymous";
-        else return "JS " + obj.toString();
-    }
-    function set_label(type, name) { type.wat_label = name; }
-    function put_method(type, name, method) { type[name.jsstr] = method; return method; }
-    function find_method(type, name, deflt) {
-        var method = type[name.jsstr];
-        if (method !== undefined) return method; else return deflt;
-    }
-    function init_types(typenames) {
-        typenames.map(function (typename) { var type = new Type(); set_label(type, typename);
-                                            eval(typename).prototype.wat_type = type; }); }
-    init_types([
-        "Apv",
-        "Bool",
-        "Catch",
-        "Cons",
-        "DLet",
-        "DNew",
-        "DRef",
-        "Def",
-        "Env",
-        "Eval",
-        "If",
-        "Ign",
-        "JSFun",
-        "JSOBJ",
-        "Loop",
-        "Macro",
-        "Nil",
-        "Num",
-        "Opv",
-        "Resumption",
-        "Str",
-        "Suspension",
-        "Sym",
-        "Throw",
-        "Type",
-        "Vau",
-        "Vector",
-        "Void",
-    ]);
+
+    function Void() {}; function Ign() {}; function Nil() {};
+    var VOID = new Void(); var IGN = new Ign(); var NIL = new Nil();
     /* Utilities */
-    function assert(b) { if (!b) fail("assertion failed"); }
     function fail(err) { throw err; }
-    function log(str) { console.log(str); return str; }
-    function currentMilliseconds() { return new Num(new Date().getTime()); }
-    function array_to_list(array, end) {
-	var c = end ? end : NIL; for (var i = array.length; i > 0; i--) c = cons(array[i - 1], c); return c; }
     function list() {
         return array_to_list(Array.prototype.slice.call(arguments)); }
+    function list_star() {
+        var len = arguments.length;
+	var c = len >= 1 ? arguments[len-1] : NIL; for (var i = len-1; i > 0; i--) c = cons(arguments[i - 1], c); return c; }
+    function array_to_list(array, end) {
+	var c = end ? end : NIL; for (var i = array.length; i > 0; i--) c = cons(array[i - 1], c); return c; }
     function list_to_array(c) {
 	var res = []; while(c !== NIL) { res.push(car(c)); c = cdr(c); } return res; }
     function reverse_list(list) {
 	var res = NIL; while(list !== NIL) { res = cons(car(list), res); list = cdr(list); } return res; }
-    function list_star() {
-        var len = arguments.length;
-	var c = len >= 1 ? arguments[len-1] : NIL; for (var i = len-1; i > 0; i--) c = cons(arguments[i - 1], c); return c; }
     /***** Parser *****/
     function parse(s) { // Returns array of forms
 	var res = program_stx(ps(s));
@@ -448,20 +351,19 @@ function Wat() {
     var escape_sequence = action(sequence("\\", escape_char), function (ast) { return ast[1]; });
     var string_char = choice(negate(escape_char), escape_sequence);
     var string_stx =
-	action(sequence("\"", join_action(repeat0(string_char), ""), "\""), function (ast) { return new Str(ast[1]); });
+	action(sequence("\"", join_action(repeat0(string_char), ""), "\""),
+               function (ast) { return list(new Sym("wat-string"), ast[1]); });
     var digits = join_action(repeat1(range("0", "9")), "");
     var number_stx = action(sequence(optional(choice("+", "-")), digits, optional(join_action(sequence(".", digits), ""))),
 			    function (ast) {
 				var sign = ast[0] ? ast[0] : "";
 				var integral_digits = ast[1]; 
 				var fractional_digits = ast[2] || "";
-				return new Num(jsnums.fromString(sign + integral_digits + fractional_digits)); });
+				return list(new Sym("wat-number"), sign + integral_digits + fractional_digits); });
     function make_constant_stx(string, constant) { return action(string, function(ast) { return constant; }); }
     var void_stx = make_constant_stx("+wat-void+", VOID);
     var ign_stx = make_constant_stx("_", IGN);
     var nil_stx = make_constant_stx("()", NIL);
-    var t_stx = make_constant_stx("#t", T);
-    var f_stx = make_constant_stx("#f", F);
     var dot_stx = action(wsequence(".", x_stx), function (ast) { return ast[1]; });
     var compound_stx = action(wsequence("(", repeat1(x_stx), optional(dot_stx), ")"),
 			      function(ast) {
@@ -473,15 +375,11 @@ function Wat() {
     var cmt_stx = action(sequence(";", repeat0(negate(line_terminator)), optional(line_terminator)), nothing_action);
     var whitespace_stx = action(choice(" ", "\n", "\r", "\t"), nothing_action);
     function nothing_action(ast) { return VOID; } // HACK!
-    var x_stx = whitespace(choice(void_stx, ign_stx, nil_stx, t_stx, f_stx, number_stx,
+    var x_stx = whitespace(choice(void_stx, ign_stx, nil_stx, number_stx,
 				  quote_stx, compound_stx, id_stx, string_stx, cmt_stx));
     var program_stx = whitespace(repeat0(choice(x_stx, whitespace_stx))); // HACK!
     /***** Core Environment *****/
-    function envbind(e, name, val) {
-        bind(e, new Sym(name), val);
-        if (val)
-            set_label(val, name);
-    }
+    function envbind(e, name, val) { bind(e, new Sym(name), val); }
     function mkenvcore() {
 	var e = new Env();
 	envbind(e, "wat-define", new Def());
@@ -492,66 +390,31 @@ function Wat() {
         envbind(e, "wat-loop", new Loop());
         envbind(e, "wat-catch", wrap(new Catch()));
         envbind(e, "wat-throw", wrap(new Throw()));
+        envbind(e, "wat-finally", new Finally());
 	envbind(e, "wat-wrap", jswrap(wrap));
 	envbind(e, "wat-unwrap", jswrap(unwrap));
         envbind(e, "wat-macro", jswrap(function(exp) { return new Macro(exp); }));
-	envbind(e, "wat-identical", jswrap(function (a, b) { return (a === b) ? T : F }));
 	envbind(e, "wat-cons", jswrap(cons));
 	envbind(e, "wat-list*", jswrap(list_star));
 	envbind(e, "wat-make-environment", jswrap(function (parent) { return new Env(parent); }));
-        envbind(e, "wat-defined", jswrap(function (sym, e) { return (bound(sym, e)) ? T : F }));
-	envbind(e, "wat-make-type", jswrap(make_type));
-	envbind(e, "wat-type-of", jswrap(type_of));
-	envbind(e, "wat-label", jswrap(function(type) { return new Str(label(type)); }));
-	envbind(e, "wat-set-label!", jswrap(function(type, name) { set_label(type, name.jsstr); return name; }));
-	envbind(e, "wat-display", jswrap(log));
-	envbind(e, "wat-log", jswrap(log));
-	envbind(e, "wat-read-from-string", jswrap(function(str) { return array_to_list(parse(str.jsstr)); }));
-	envbind(e, "wat-fail", jswrap(fail));
-	envbind(e, "wat-num=", jswrap(function(num1, num2) { return num_eql(num1, num2) ? T : F }));
-	envbind(e, "wat-num<", jswrap(function(num1, num2) { return num_lt(num1, num2) ? T : F }));
-	envbind(e, "wat-+", jswrap(num_add));
-	envbind(e, "wat--", jswrap(num_sub));
-	envbind(e, "wat-*", jswrap(num_mul));
-	envbind(e, "wat-/", jswrap(num_div));
-	envbind(e, "wat-%", jswrap(num_mod));
-        envbind(e, "wat-str=", jswrap(function(str1, str2) { return str_eql(str1, str2) ? T : F }));
-        envbind(e, "wat-strcat", jswrap(function() {
-            return new Str(str_cat.call(null, Array.prototype.slice.call(arguments))); }));
-        envbind(e, "wat-str-print", jswrap(function(str) { return new Str(str_print(str)); }));
-	envbind(e, "wat-string->symbol", jswrap(str_to_sym));
-	envbind(e, "wat-symbol->string", jswrap(sym_to_str));
-	envbind(e, "wat-string->number", jswrap(str_to_num));
-	envbind(e, "wat-number->string", jswrap(num_to_str));
-	envbind(e, "wat-vector", jswrap(function() { return new Vector(Array.prototype.slice.call(arguments)); }));
-	envbind(e, "wat-vector-ref", jswrap(function(vector, i) { return vector_ref(vector, jsnums.toFixnum(i.jsnum)); }));
-	envbind(e, "wat-vector-set!", jswrap(function(vector, i, val) {
-            return vector_set(vector, jsnums.toFixnum(i.jsnum), val); }));
-	envbind(e, "wat-vector-length", jswrap(function(vector) { return new Num(jsnums.fromFixnum(vector_length(vector))); }));
-        envbind(e, "wat-make-string-hashtable", jswrap(function() { return new StringHashtable(); }));
-        envbind(e, "wat-string-hashtable-put!", jswrap(string_hashtable_put));
-        envbind(e, "wat-string-hashtable-get", jswrap(string_hashtable_get));
+	envbind(e, "wat-read-from-string", jswrap(function(str) { return array_to_list(parse(str)); }));
+        envbind(e, "wat-make-dynamic", wrap(new DNew()));
+        envbind(e, "wat-let-dynamic", wrap(new DLet()));
+        envbind(e, "wat-dynamic", wrap(new DRef()));
+        envbind(e, "wat-push-prompt", wrap(new PushPrompt()));
+        envbind(e, "wat-take-subcont", wrap(new TakeSubcont()));
+        envbind(e, "wat-push-subcont", wrap(new PushSubcont()));
 	envbind(e, "wat-js-global", jswrap(js_global));
 	envbind(e, "wat-js-set-global!", jswrap(js_set_global));
 	envbind(e, "wat-js-prop", jswrap(js_prop));
 	envbind(e, "wat-js-set-prop!", jswrap(js_set_prop));
 	envbind(e, "wat-js-function", jswrap(js_function));
+	envbind(e, "wat-js-op", jswrap(js_op));
 	envbind(e, "wat-js-method", jswrap(js_method));
-	envbind(e, "wat-to-js", jswrap(to_js));
-	envbind(e, "wat-from-js", jswrap(from_js));
+	envbind(e, "wat-js-throw", jswrap(fail));
 	envbind(e, "wat-js-callback", wrap(new JSCallback()));
 	envbind(e, "wat-js-array-to-list", jswrap(array_to_list));
         envbind(e, "wat-js-null", null);
-        envbind(e, "wat-finally", new Finally());
-        envbind(e, "wat-dnew", wrap(new DNew()));
-        envbind(e, "wat-dlet*", wrap(new DLet()));
-        envbind(e, "wat-dref", wrap(new DRef()));
-        envbind(e, "wat-push-prompt*", wrap(new PushPrompt()));
-        envbind(e, "wat-take-subcont*", wrap(new TakeSubcont()));
-        envbind(e, "wat-push-subcont*", wrap(new PushSubcont()));
-        envbind(e, "wat-put-method!", jswrap(put_method));
-        envbind(e, "wat-find-method", jswrap(find_method));
-        envbind(e, "wat-current-milliseconds", jswrap(currentMilliseconds));
 	return e;
     }
     var envcore = mkenvcore();

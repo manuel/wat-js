@@ -223,7 +223,7 @@ function Wat() {
         var prompt = elt(o, 0);
         var handler = elt(o, 1);
         var susp = new Suspension(prompt, handler);
-        pushResume(susp, function(k, f) { return combine(e, null, null, f, NIL); }, cons(this, o));
+        pushResume(susp, function(k, thef) { return combine(e, null, null, thef, NIL); }, cons(this, o));
         return susp;
     };
     PushSubcont.prototype.wat_combine = function(e, k, f, o) {
@@ -339,14 +339,14 @@ function Wat() {
 	envbind(e, "wat-if", new If());
         envbind(e, "wat-loop1", new Loop());
 	envbind(e, "wat-throw", jswrap(fail));
-        envbind(e, "wat-catch", wrap(new Catch()));
+        envbind(e, "wat-catch*", wrap(new Catch()));
         envbind(e, "wat-finally", new Finally());
         envbind(e, "wat-macro*", jswrap(function(expander) { return new Macro(expander); }));
-        envbind(e, "wat-mark-stack", wrap(new PushPrompt()));
-        envbind(e, "wat-cut-stack", wrap(new TakeSubcont()));
-        envbind(e, "wat-paste-stack", wrap(new PushSubcont()));
+        envbind(e, "wat-push-prompt*", wrap(new PushPrompt()));
+        envbind(e, "wat-take-subcont*", wrap(new TakeSubcont()));
+        envbind(e, "wat-push-subcont*", wrap(new PushSubcont()));
         envbind(e, "wat-make-dynamic", wrap(new DNew()));
-        envbind(e, "wat-push-dynamic-proc", wrap(new DLet()));
+        envbind(e, "wat-push-dynamic*", wrap(new DLet()));
         envbind(e, "wat-peek-dynamic", wrap(new DRef()));
         envbind(e, "wat-js-wrap", jswrap(jswrap));
         envbind(e, "wat-js-global", jswrap(function(sym) { return js_global(sym_name(sym)); }));
@@ -380,8 +380,23 @@ function Wat() {
 
          ["wat-define-macro", ["wat-lambda", "params", "#rest", "body"],
           ["wat-list", "wat-wrap",
-           ["wat-list*", "wat-vau", "params", "#ignore", "body"]]]
+           ["wat-list*", "wat-vau", "params", "#ignore", "body"]]],
 
+         ["wat-define-macro", ["loop", "#rest", "body"],
+          ["wat-list", "wat-loop", ["wat-list*", "wat-begin", "body"]]],
+
+         ["wat-define-macro", ["wat-push-prompt", "prompt", "#rest", "body"],
+          ["wat-list", "wat-push-prompt*", "prompt",
+           ["wat-list*", "wat-lambda", [], "body"]]],
+         
+         ["wat-define-macro", ["wat-take-subcont", "prompt", "k", "#rest", "body"],
+          ["wat-list", "wat-take-subcont*", "prompt",
+           ["wat-list*", "wat-lambda", ["wat-list", "k"], "body"]]],
+
+         ["wat-define-macro", ["wat-push-subcont", "k", "#rest", "body"],
+          ["wat-list", "wat-push-subcont*", "k",
+           ["wat-list*", "wat-lambda", [], "body"]]],
+ 
         ];
     var envcore = mkenvcore();
     run(parse_json_value(primitives));

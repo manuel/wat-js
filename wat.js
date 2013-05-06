@@ -281,10 +281,14 @@ function Wat() {
     function elt(cons, i) { return (i === 0) ? car(cons) : elt(cdr(cons), i - 1); }
     function Env(parent) { this.bindings = Object.create(parent ? parent.bindings : null); }
     function lookup0(e, name) { return e.bindings[name]; }
-    function lookup(e, name) { var val = lookup0(e, name); return (val !== undefined) ? val : fail("unbound: " + name); }
+    function lookup(e, name) {
+        var val = lookup0(e, name);
+        return (typeof(val) !== "undefined") ? val : fail("unbound: " + name); }
     function bind(e, lhs, rhs) { lhs.match(e, rhs); return rhs; }
     function sym_name(sym) { return sym.name; }
-    Sym.prototype.match = function(e, rhs) { e.bindings[this.name] = rhs; };
+    Sym.prototype.match = function(e, rhs) {
+        if (typeof(e) === "undefined") fail("undefined argument: " + this.name);
+        return e.bindings[this.name] = rhs; }
     Cons.prototype.match = function(e, rhs) { car(this).match(e, car(rhs)); cdr(this).match(e, cdr(rhs)); };
     Nil.prototype.match = function(e, rhs) { if (rhs !== NIL) fail("NIL expected"); };
     Ign.prototype.match = function(e, rhs) {};
@@ -318,47 +322,48 @@ function Wat() {
     JSFun.prototype.wat_combine = function(e, k, f, o) { return this.jsfun.apply(null, list_to_array(o)); };
     function jswrap(jsfun) { return wrap(new JSFun(jsfun)); }
     function js_op(op) { return jswrap(new Function("a", "b", "return a " + op + " b")); }
-    function js_global(name) { return WAT_GLOBAL[name]; }
+    function js_global(name) { return eval(name); }
     function js_invoke(obj, method_name) {
         return obj[sym_name(method_name)].apply(obj, Array.prototype.slice.call(arguments, 2)); }
     /* Core Environment */
-    function envbind(e, name, val) { bind(e, new Sym(name), val); }
-    function mkenvcore() {
-	var e = new Env();
-	envbind(e, "wat-define", new Def());
-	envbind(e, "wat-make-environment", jswrap(function (parent) { return new Env(parent); }));
-	envbind(e, "wat-eval", wrap(new Eval()));
-	envbind(e, "wat-cons", jswrap(cons));
-	envbind(e, "wat-list*", jswrap(list_star));
-	envbind(e, "wat-string", new JSFun(sym_name));
-	envbind(e, "wat-symbol-name", jswrap(sym_name));
-	envbind(e, "wat-vau1", new Vau());
-	envbind(e, "wat-wrap", jswrap(wrap));
-	envbind(e, "wat-unwrap", jswrap(unwrap));
-	envbind(e, "wat-begin", new Begin());
-	envbind(e, "wat-if", new If());
-        envbind(e, "wat-loop1", new Loop());
-	envbind(e, "wat-throw", jswrap(fail));
-        envbind(e, "wat-catch*", wrap(new Catch()));
-        envbind(e, "wat-finally", new Finally());
-        envbind(e, "wat-macro*", jswrap(function(expander) { return new Macro(expander); }));
-        envbind(e, "wat-push-prompt*", wrap(new PushPrompt()));
-        envbind(e, "wat-take-subcont*", wrap(new TakeSubcont()));
-        envbind(e, "wat-push-subcont*", wrap(new PushSubcont()));
-        envbind(e, "wat-make-dynamic", wrap(new DNew()));
-        envbind(e, "wat-push-dynamic*", wrap(new DLet()));
-        envbind(e, "wat-peek-dynamic", wrap(new DRef()));
-        envbind(e, "wat-js-wrap", jswrap(jswrap));
-        envbind(e, "wat-js-global", jswrap(function(sym) { return js_global(sym_name(sym)); }));
-        envbind(e, "wat-js-op", new JSFun(function(sym) { return js_op(sym_name(sym)); }));
-        envbind(e, "wat-js-invoke", jswrap(js_invoke));
-	return e;
+    function make_core_environment() {
+        function define(name, val) { bind(env, new Sym(name), val); }
+	var env = new Env();
+	define("wat-define", new Def());
+	define("wat-vau1", new Vau());
+	define("wat-wrap", jswrap(wrap));
+	define("wat-unwrap", jswrap(unwrap));
+	define("wat-eval", wrap(new Eval()));
+	define("wat-make-environment", jswrap(function (parent) { return new Env(parent); }));
+	define("wat-begin", new Begin());
+	define("wat-if", new If());
+        define("wat-loop1", new Loop());
+	define("wat-throw", jswrap(fail));
+        define("wat-catch*", wrap(new Catch()));
+        define("wat-finally", new Finally());
+        define("wat-push-prompt*", wrap(new PushPrompt()));
+        define("wat-take-subcont*", wrap(new TakeSubcont()));
+        define("wat-push-subcont*", wrap(new PushSubcont()));
+        define("wat-dnew", wrap(new DNew()));
+        define("wat-dlet*", wrap(new DLet()));
+        define("wat-dref", wrap(new DRef()));
+        define("wat-macro*", jswrap(function(expander) { return new Macro(expander); }));
+	define("wat-cons", jswrap(cons));
+	define("wat-list*", jswrap(list_star));
+        define("wat-nil?", jswrap(function(obj) { return obj === NIL; }));
+	define("wat-symbol-name", jswrap(sym_name));
+        define("wat-js-wrap", jswrap(jswrap));
+        define("wat-js-global", jswrap(function(sym) { return js_global(sym_name(sym)); }));
+        define("wat-js-op", new JSFun(function(sym) { return js_op(sym_name(sym)); }));
+        define("wat-js-invoke", jswrap(js_invoke));
+	return env;
     }
+    /* Primitives & Library */
     var primitives =
         ["wat-begin",
 
          ["wat-define", "wat-quote",
-          ["wat-vau1", "x", "#ignore", "x"]],
+          ["wat-vau1", ["x"], "#ignore", "x"]],
 
          ["wat-define", "wat-list",
           ["wat-wrap", ["wat-vau1", "arglist", "#ignore", "arglist"]]],
@@ -378,10 +383,6 @@ function Wat() {
            ["wat-list", "wat-define", "name",
             ["wat-list*", "wat-macro", "params", "body"]]]],
 
-         ["wat-define-macro", ["wat-lambda", "params", "#rest", "body"],
-          ["wat-list", "wat-wrap",
-           ["wat-list*", "wat-vau", "params", "#ignore", "body"]]],
-
          ["wat-define-macro", ["wat-loop", "#rest", "body"],
           ["wat-list", "wat-loop1", ["wat-list*", "wat-begin", "body"]]],
 
@@ -396,32 +397,40 @@ function Wat() {
          ["wat-define-macro", ["wat-push-subcont", "k", "#rest", "body"],
           ["wat-list", "wat-push-subcont*", "k",
            ["wat-list*", "wat-lambda", [], "body"]]],
+
+         // Library
+
+         ["wat-define-macro", ["wat-lambda", "params", "#rest", "body"],
+          ["wat-list", "wat-wrap",
+           ["wat-list*", "wat-vau", "params", "#ignore", "body"]]],
+
+         ["wat-define", "wat-compose",
+          ["wat-lambda", ["f", "g"],
+           ["wat-lambda", ["arg"], ["g", ["f", "arg"]]]]],
+
+         ["wat-define", "wat-car", ["wat-lambda", [["x", "#rest", "#ignore"]], "x"]],
+         ["wat-define", "wat-cdr", ["wat-lambda", [["#ignore", "#rest", "x"]], "x"]],
+         ["wat-define", "wat-caar", ["wat-compose", "wat-car", "wat-car"]],
+         ["wat-define", "wat-cadr", ["wat-compose", "wat-car", "wat-cdr"]],
+         ["wat-define", "wat-cdar", ["wat-compose", "wat-cdr", "wat-car"]],
+         ["wat-define", "wat-cddr", ["wat-compose", "wat-cdr", "wat-cdr"]],
+
+         ["wat-define", "wat-map-list",
+          ["wat-lambda", ["f", "lst"],
+           ["wat-if", ["wat-nil?", "lst"],
+            [],
+            ["wat-cons", ["f", ["wat-car", "lst"]], ["wat-map-list", "f", ["wat-cdr", "lst"]]]]]],
+
+         ["wat-define-macro", ["wat-let", "bindings", "#rest", "body"],
+          ["wat-list*",
+           ["wat-list*", "wat-lambda", ["wat-map-list", "wat-car", "bindings"], "body"],
+           ["wat-map-list", "wat-cadr", "bindings"]]]
  
         ];
-    var envcore = mkenvcore();
-    run(parse_json_value(primitives));
-    function run(x) { return evaluate(envcore, null, null, x); }
-    /* API */
-    return { "run": run, "parse": parse_json_value, "Sym": Sym, "array_to_list": array_to_list };
+    /* Init & API */
+    var core_environment = make_core_environment();
+    run(primitives);
+    function run(x) { return evaluate(core_environment, null, null, parse_json_value(x)); }
+    return { "run": run };
 }
-WAT_GLOBAL = this;
-// Abbreviations:
-// apv: applicative combiner (function)
-// arg: argument
-// cmb: combiner
-// cmt: comment
-// e: environment
-// f: function to be called on top of newly pushed continuation
-// ep: environment parameter
-// id: identifier
-// k: continuation / resumption
-// num: number
-// o: operand
-// opv: operative combiner (fexpr)
-// p: parameter
-// str: string
-// stx: parser syntax
-// sym: symbol
-// x: expression
-// xe: extended environment
-// xs: expressions
+

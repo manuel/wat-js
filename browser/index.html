@@ -8,15 +8,14 @@
 <body>
 <h1><a href="https://github.com/manuel/wat-js">Wat VM / Virtua</a></h1>
 <script type="text/javascript">
-var wat = new Wat();
 var self_test = 
     ["wat-begin",
      ["wat-define", "+", ["wat-js-op", "+"]],
      ["wat-define", "bar", ["wat-lambda", [], ["+", 3, 4]]],
      ["wat-define-macro", ["foo"], ["wat-list", "bar"]],
-     ["foo"],
+     [["wat-js-wrap", ["wat-js-global", ["wat-quote", "alert"]]], 3]
     ];
-console.log(wat.run(wat.parse(self_test)));
+console.log(new Wat().run(self_test));
 </script>
 </body>
 </html>

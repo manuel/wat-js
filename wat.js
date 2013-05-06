@@ -382,8 +382,8 @@ function Wat() {
           ["wat-list", "wat-wrap",
            ["wat-list*", "wat-vau", "params", "#ignore", "body"]]],
 
-         ["wat-define-macro", ["loop", "#rest", "body"],
-          ["wat-list", "wat-loop", ["wat-list*", "wat-begin", "body"]]],
+         ["wat-define-macro", ["wat-loop", "#rest", "body"],
+          ["wat-list", "wat-loop1", ["wat-list*", "wat-begin", "body"]]],
 
          ["wat-define-macro", ["wat-push-prompt", "prompt", "#rest", "body"],
           ["wat-list", "wat-push-prompt*", "prompt",

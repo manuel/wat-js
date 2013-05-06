@@ -12,8 +12,9 @@ var wat = new Wat();
 var self_test = 
     ["wat-begin",
      ["wat-define", "+", ["wat-js-op", "+"]],
-     ["wat-define-macro", ["foo"], ["wat-list", "+", 1, 2]],
-     ["foo"]
+     ["wat-define", "bar", ["wat-lambda", [], ["+", 3, 4]]],
+     ["wat-define-macro", ["foo"], ["wat-list", "bar"]],
+     ["foo"],
     ];
 console.log(wat.run(wat.parse(self_test)));
 </script>

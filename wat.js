@@ -284,9 +284,7 @@ function Wat() {
     function lookup(e, name) { var val = lookup0(e, name); return (val !== undefined) ? val : fail("unbound: " + name); }
     function bind(e, lhs, rhs) { lhs.match(e, rhs); return rhs; }
     function sym_name(sym) { return sym.name; }
-    Sym.prototype.match = function(e, rhs) { 
-        if (rhs === undefined) fail("trying to match against undefined: " + this.name); 
-        e.bindings[this.name] = rhs; };
+    Sym.prototype.match = function(e, rhs) { e.bindings[this.name] = rhs; };
     Cons.prototype.match = function(e, rhs) { car(this).match(e, car(rhs)); cdr(this).match(e, cdr(rhs)); };
     Nil.prototype.match = function(e, rhs) { if (rhs !== NIL) fail("NIL expected"); };
     Ign.prototype.match = function(e, rhs) {};
@@ -310,7 +308,7 @@ function Wat() {
         case "[object Array]": return parse_json_array(obj);
         default: return obj; } }
     function parse_json_array(arr) {
-        var i = arr.indexOf("");
+        var i = arr.indexOf("#rest");
         if (i === -1) return array_to_list(arr.map(parse_json_value));
         else { var front = arr.slice(0, i);
                return array_to_list(front.map(parse_json_value), parse_json_value(arr[i + 1])); } }
@@ -344,9 +342,9 @@ function Wat() {
         envbind(e, "wat-catch", wrap(new Catch()));
         envbind(e, "wat-finally", new Finally());
         envbind(e, "wat-macro*", jswrap(function(expander) { return new Macro(expander); }));
-        envbind(e, "wat-push-prompt-proc", wrap(new PushPrompt()));
-        envbind(e, "wat-take-subcont-proc", wrap(new TakeSubcont()));
-        envbind(e, "wat-push-subcont-proc", wrap(new PushSubcont()));
+        envbind(e, "wat-mark-stack", wrap(new PushPrompt()));
+        envbind(e, "wat-cut-stack", wrap(new TakeSubcont()));
+        envbind(e, "wat-paste-stack", wrap(new PushSubcont()));
         envbind(e, "wat-make-dynamic", wrap(new DNew()));
         envbind(e, "wat-push-dynamic-proc", wrap(new DLet()));
         envbind(e, "wat-peek-dynamic", wrap(new DRef()));
@@ -366,19 +364,23 @@ function Wat() {
           ["wat-wrap", ["wat-vau1", "arglist", "#ignore", "arglist"]]],
 
          ["wat-define", "wat-vau",
-          ["wat-macro*", ["wat-vau1", ["params", "env-param", "", "body"], "#ignore",
+          ["wat-macro*", ["wat-vau1", ["params", "env-param", "#rest", "body"], "#ignore",
                           ["wat-list", "wat-vau1", "params", "env-param",
                            ["wat-cons", "wat-begin", "body"]]]]],
 
          ["wat-define", "wat-macro",
-          ["wat-macro*", ["wat-vau", ["params", "", "body"], "#ignore",
+          ["wat-macro*", ["wat-vau1", ["params", "#rest", "body"], "#ignore",
                           ["wat-list", "wat-macro*",
                            ["wat-list*", "wat-vau", "params", "#ignore", "body"]]]]],
 
          ["wat-define", "wat-define-macro",
-          ["wat-macro", [["name", "", "params"], "", "body"],
+          ["wat-macro", [["name", "#rest", "params"], "#rest", "body"],
            ["wat-list", "wat-define", "name",
-            ["wat-list*", "wat-macro", "params", "body"]]]]
+            ["wat-list*", "wat-macro", "params", "body"]]]],
+
+         ["wat-define-macro", ["wat-lambda", "params", "#rest", "body"],
+          ["wat-list", "wat-wrap",
+           ["wat-list*", "wat-vau", "params", "#ignore", "body"]]]
 
         ];
     var envcore = mkenvcore();

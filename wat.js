@@ -4,10 +4,10 @@ function Wat() {
         this.fun = fun; this.next = next; }
     function isContinuation(x) { return x instanceof Continuation; }
     function Capture(prompt, handler) {
-        this.prompt = prompt; this.handler = handler; this.continuation = null; }
+        this.prompt = prompt; this.handler = handler; this.k = null; }
     function isCapture(x) { return x instanceof Capture; }
-    function captureFrame(abort, fun) {
-        abort.k = new Continuation(fun, abort.k); }
+    function captureFrame(capture, fun) {
+        capture.k = new Continuation(fun, capture.k); }
     function continueFrame(k, f) {
         return k.fun(k.next, f); }
     /* Evaluation Core */
@@ -218,7 +218,7 @@ function Wat() {
         }
         if (isCapture(res)) {
             if (res.prompt === prompt) {
-                var continuation = res.continuation;
+                var continuation = res.k;
                 var handler = res.handler;
                 return combine(e, null, null, handler, cons(continuation, NIL));
             } else {
@@ -335,8 +335,8 @@ function Wat() {
     function js_invoke(obj, method_name) {
         return obj[sym_name(method_name)].apply(obj, Array.prototype.slice.call(arguments, 2)); }
     function sym_name(sym) { return sym.name; }
-    /* Microcode */
-    var microcode =
+    /* Primitives */
+    var primitives =
         ["wat-begin",
 
          // Core
@@ -477,7 +477,7 @@ function Wat() {
     var environment = new Env();
     bind(environment, new Sym("wat-def"), new Def());
     bind(environment, new Sym("wat-begin"), new Begin());
-    run(microcode);
+    run(primitives);
     /* API */
     function run(x) { return evaluate(environment, null, null, parse_json_value(x)); }
     return { "run": run };

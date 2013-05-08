@@ -143,7 +143,7 @@ function Wat() {
                 return res;
             }
         }
-    }
+    };
     Catch.prototype.wat_combine = function(e, k, f, o) {
         var th = elt(o, 0);
         var handler = elt(o, 1);
@@ -325,112 +325,112 @@ function Wat() {
     function js_global(name) { return eval(name); }
     function js_invoke(obj, method_name) {
         return obj[sym_name(method_name)].apply(obj, Array.prototype.slice.call(arguments, 2)); }
-    /* Core Environment */
-    function make_core_environment() {
-        function define(name, val) { bind(env, new Sym(name), val); }
-	var env = new Env();
-	define("wat-define", new Def());
-	define("wat-eval", wrap(new Eval()));
-	define("wat-make-environment", jswrap(function (parent) { return new Env(parent); }));
-	define("wat-vau1", new Vau());
-        define("wat-macro*", jswrap(function(expander) { return new Macro(expander); }));
-	define("wat-cons", jswrap(cons));
-        define("wat-nil?", jswrap(function(obj) { return obj === NIL; }));
-	define("wat-symbol-name", jswrap(sym_name));
-	define("wat-wrap", jswrap(wrap));
-	define("wat-unwrap", jswrap(unwrap));
-	define("wat-begin", new Begin());
-	define("wat-if", new If());
-        define("wat-loop1", new Loop());
-	define("wat-throw", jswrap(fail));
-        define("wat-catch*", wrap(new Catch()));
-        define("wat-finally", new Finally());
-        define("wat-push-prompt*", wrap(new PushPrompt()));
-        define("wat-take-subcont*", wrap(new TakeSubcont()));
-        define("wat-push-subcont*", wrap(new PushSubcont()));
-        define("wat-dnew", wrap(new DNew()));
-        define("wat-dlet*", wrap(new DLet()));
-        define("wat-dref", wrap(new DRef()));
-        define("wat-js-wrap", jswrap(jswrap));
-        define("wat-js-global", jswrap(function(sym) { return js_global(sym_name(sym)); }));
-        define("wat-js-op", new JSFun(function(sym) { return js_op(sym_name(sym)); }));
-        define("wat-js-invoke", jswrap(js_invoke));
-	define("wat-list*", jswrap(list_star));
-	return env;
-    }
-    /* Primitives & Library */
-    var primitives =
+    /* Microcode */
+    var microcode =
         ["wat-begin",
 
-         ["wat-define", "wat-quote",
-          ["wat-vau1", ["x"], "#ignore", "x"]],
+         // Core
 
-         ["wat-define", "wat-list",
-          ["wat-wrap", ["wat-vau1", "arglist", "#ignore", "arglist"]]],
-
-         ["wat-define", "wat-vau",
-          ["wat-macro*", ["wat-vau1", ["params", "env-param", "#rest", "body"], "#ignore",
-                          ["wat-list", "wat-vau1", "params", "env-param",
-                           ["wat-cons", "wat-begin", "body"]]]]],
-
-         ["wat-define", "wat-macro",
-          ["wat-macro*", ["wat-vau1", ["params", "#rest", "body"], "#ignore",
-                          ["wat-list", "wat-macro*",
-                           ["wat-list*", "wat-vau", "params", "#ignore", "body"]]]]],
-
-         ["wat-define", "wat-define-macro",
-          ["wat-macro", [["name", "#rest", "params"], "#rest", "body"],
-           ["wat-list", "wat-define", "name",
-            ["wat-list*", "wat-macro", "params", "body"]]]],
-
-         ["wat-define-macro", ["wat-loop", "#rest", "body"],
-          ["wat-list", "wat-loop1", ["wat-list*", "wat-begin", "body"]]],
-
-         ["wat-define-macro", ["wat-push-prompt", "prompt", "#rest", "body"],
-          ["wat-list", "wat-push-prompt*", "prompt",
-           ["wat-list*", "wat-lambda", [], "body"]]],
+         // Fexprs and Macros
+         ["wat-def", "wat-vau1", new Vau()],
+         ["wat-def", "wat-wrap", jswrap(wrap)],
+         ["wat-def", "wat-macro*", jswrap(function(expander) { return new Macro(expander); })],
+         // Forms
+         ["wat-def", "wat-cons", jswrap(cons)],
+         ["wat-def", "wat-cons?", jswrap(function(obj) { return obj instanceof Cons; })],
+         ["wat-def", "wat-nil?", jswrap(function(obj) { return obj === NIL; })],
+         // First-order Control
+         ["wat-def", "wat-if", new If()],
+         ["wat-def", "wat-loop1", new Loop()],
+         ["wat-def", "wat-throw", jswrap(fail)],
+         ["wat-def", "wat-catch*", wrap(new Catch())],
+         ["wat-def", "wat-finally", new Finally()],
+         // Delimited Control
+         ["wat-def", "wat-push-prompt*", wrap(new PushPrompt())],
+         ["wat-def", "wat-take-subcont*", wrap(new TakeSubcont())],
+         ["wat-def", "wat-push-subcont*", wrap(new PushSubcont())],
+         // Dynamically-scoped Variables
+         ["wat-def", "wat-dnew", wrap(new DNew())],
+         ["wat-def", "wat-dlet*", wrap(new DLet())],
+         ["wat-def", "wat-dref", wrap(new DRef())],
+         // JS Interface
+         ["wat-def", "wat-js-wrap", jswrap(jswrap)],
+         ["wat-def", "wat-js-global", jswrap(function(sym) { return js_global(sym_name(sym)); })],
+         ["wat-def", "wat-js-op", new JSFun(function(sym) { return js_op(sym_name(sym)); })],
+         ["wat-def", "wat-js-invoke", jswrap(js_invoke)],
+         // Optimization
+         ["wat-def", "wat-list*", jswrap(list_star)],
          
-         ["wat-define-macro", ["wat-take-subcont", "prompt", "k", "#rest", "body"],
-          ["wat-list", "wat-take-subcont*", "prompt",
-           ["wat-list*", "wat-lambda", ["wat-list", "k"], "body"]]],
+         // Primitives
 
-         ["wat-define-macro", ["wat-push-subcont", "k", "#rest", "body"],
-          ["wat-list", "wat-push-subcont*", "k",
-           ["wat-list*", "wat-lambda", [], "body"]]],
+         ["wat-def", "def", "wat-def"],
+         ["def", "begin", "wat-begin"],
+         ["def", "cons", "wat-cons"],
+         ["def", "cons?", "wat-cons?"],
+         ["def", "if", "wat-if"],
+         ["def", "list*", "wat-list*"],
+         ["def", "nil?", "wat-nil?"],
 
-         // Library
+         ["def", "quote", ["wat-vau1", ["x"], "#ignore", "x"]],
+         ["def", "list", ["wat-wrap", ["wat-vau1", "arglist", "#ignore", "arglist"]]],
 
-         ["wat-define-macro", ["wat-lambda", "params", "#rest", "body"],
-          ["wat-list", "wat-wrap",
-           ["wat-list*", "wat-vau", "params", "#ignore", "body"]]],
+         ["def", "vau",
+          ["wat-macro*",
+           ["wat-vau1", ["params", "env-param", "#rest", "body"], "#ignore",
+            ["list", "wat-vau1", "params", "env-param", ["cons", "begin", "body"]]]]],
 
-         ["wat-define", "wat-compose",
-          ["wat-lambda", ["f", "g"],
-           ["wat-lambda", ["arg"], ["g", ["f", "arg"]]]]],
+         ["def", "macro",
+          ["wat-macro*",
+           ["wat-vau1", ["params", "#rest", "body"], "#ignore",
+            ["list", "wat-macro*", ["list*", "vau", "params", "#ignore", "body"]]]]],
 
-         ["wat-define", "wat-car", ["wat-lambda", [["x", "#rest", "#ignore"]], "x"]],
-         ["wat-define", "wat-cdr", ["wat-lambda", [["#ignore", "#rest", "x"]], "x"]],
-         ["wat-define", "wat-caar", ["wat-compose", "wat-car", "wat-car"]],
-         ["wat-define", "wat-cadr", ["wat-compose", "wat-car", "wat-cdr"]],
-         ["wat-define", "wat-cdar", ["wat-compose", "wat-cdr", "wat-car"]],
-         ["wat-define", "wat-cddr", ["wat-compose", "wat-cdr", "wat-cdr"]],
+         ["def", "define-macro",
+          ["macro", [["name", "#rest", "params"], "#rest", "body"],
+           ["list", "def", "name", ["list*", "macro", "params", "body"]]]],
 
-         ["wat-define", "wat-map-list",
-          ["wat-lambda", ["f", "lst"],
-           ["wat-if", ["wat-nil?", "lst"],
+         ["define-macro", ["lambda", "params", "#rest", "body"],
+          ["list", "wat-wrap", ["list*", "vau", "params", "#ignore", "body"]]],
+         ["define-macro", ["loop", "#rest", "body"],
+          ["list", "wat-loop1", ["list*", "begin", "body"]]],
+
+         ["define-macro", ["push-prompt", "prompt", "#rest", "body"],
+          ["list", "push-prompt*", "prompt", ["list*", "lambda", [], "body"]]],
+         ["define-macro", ["take-subcont", "prompt", "k", "#rest", "body"],
+          ["list", "take-subcont*", "prompt", ["list*", "lambda", ["list", "k"], "body"]]],
+         ["define-macro", ["push-subcont", "k", "#rest", "body"],
+          ["list", "push-subcont*", "k", ["list*", "lambda", [], "body"]]],
+
+         ["def", "compose", ["lambda", ["f", "g"], ["lambda", ["arg"], ["g", ["f", "arg"]]]]],
+
+         ["def", "car", ["lambda", [["x", "#rest", "#ignore"]], "x"]],
+         ["def", "cdr", ["lambda", [["#ignore", "#rest", "x"]], "x"]],
+         ["def", "caar", ["compose", "car", "car"]],
+         ["def", "cadr", ["compose", "car", "cdr"]],
+         ["def", "cdar", ["compose", "cdr", "car"]],
+         ["def", "cddr", ["compose", "cdr", "cdr"]],
+
+         ["define-macro", ["define", "lhs", "#rest", "rhs"],
+          ["if", ["cons?", "lhs"],
+           ["list", "def", ["car", "lhs"], ["list*", "lambda", ["cdr", "lhs"], "rhs"]],
+           ["list", "def", "lhs", ["car", "rhs"]]]],
+
+         ["define", ["map-list", "f", "lst"],
+           ["if", ["nil?", "lst"],
             [],
-            ["wat-cons", ["f", ["wat-car", "lst"]], ["wat-map-list", "f", ["wat-cdr", "lst"]]]]]],
+            ["cons", ["f", ["car", "lst"]], ["map-list", "f", ["cdr", "lst"]]]]],
 
-         ["wat-define-macro", ["wat-let", "bindings", "#rest", "body"],
-          ["wat-list*",
-           ["wat-list*", "wat-lambda", ["wat-map-list", "wat-car", "bindings"], "body"],
-           ["wat-map-list", "wat-cadr", "bindings"]]]
- 
+         ["define-macro", ["let", "bindings", "#rest", "body"],
+          ["list*",
+           ["list*", "lambda", ["map-list", "car", "bindings"], "body"],
+           ["map-list", "cadr", "bindings"]]]
+         
         ];
-    /* Init & API */
-    var core_environment = make_core_environment();
-    run(primitives);
-    function run(x) { return evaluate(core_environment, null, null, parse_json_value(x)); }
+    /* Init */
+    var environment = new Env();
+    bind(environment, new Sym("wat-def"), new Def());
+    bind(environment, new Sym("wat-begin"), new Begin());
+    run(microcode);
+    /* API */
+    function run(x) { return evaluate(environment, null, null, parse_json_value(x)); }
     return { "run": run };
 }
-

@@ -13,7 +13,7 @@ Wat provides the following features:
 
  * Lazily expanded hygienic macros http://people.csail.mit.edu/jaffer/CNS/interpreter-latency
 
- * First-order control (sequential, loop, try, catch, finally) running on JS stack
+ * First-order control (sequential, loop, throw, catch, finally) running on JS stack
 
  * Access to JavaScript values, functions, and globals
 

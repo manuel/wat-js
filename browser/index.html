@@ -1,19 +1,32 @@
 <!-- WAT browser REPL. -->
 <html>
 <head>
-  <title>Wat VM</title>
+  <title>Wat</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/> 
   <script type="text/javascript" src="../wat.js"></script>
 </head>
 <body>
-<h1><a href="https://github.com/manuel/wat-js">Wat VM / Virtua</a></h1>
+<h1><a href="https://github.com/manuel/wat-js">Wat</a></h1>
 <script type="text/javascript">
+
+function wat_self_test() {
+    var vm = new Wat();
+    function assert(label, that) { if (!that) throw "assertion failed: " + label; }
+    function assertFails(label, fun) { try { fun(); } catch(exc) { return; } throw "should have failed:" + label; }
+    assert("vau1", vm.run([["wat-vau1", ["x"], "#ignore", "x"], 1]) === 1);
+    assertFails("vau1-unbound-var", function() { vm.run([["wat-vau1", ["#ignore"], "#ignore", "x"], 1]); });
+    assertFails("vau1-wrong-var", function() { vm.run([["wat-vau1", ["y"], "#ignore", "x"], 1]); });
+    assertFails("nil-app", function() { vm.run([[]]); });
+    assertFails("unbound-app", function() { vm.run([["x"]]); });
+}
+wat_self_test();
+
 var self_test = 
-    ["wat-begin",
-     ["wat-define", "+", ["wat-js-op", "+"]],
-     ["wat-define", "bar", ["wat-lambda", [], ["+", 3, 4]]],
-     ["wat-define-macro", ["foo"], ["wat-list", "bar"]],
-     [["wat-js-wrap", ["wat-js-global", ["wat-quote", "alert"]]], 3]
+    ["begin",
+     ["define", "+", ["wat-js-op", "+"]],
+     ["define", "bar", ["lambda", [], ["+", 3, 4]]],
+     ["define-macro", ["foo"], ["list", "bar"]],
+     [["wat-js-wrap", ["wat-js-global", ["quote", "alert"]]], 3]
     ];
 console.log(new Wat().run(self_test));
 </script>

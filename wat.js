@@ -435,11 +435,20 @@ function Wat() {
          ["define-js-op", "=="],
          ["define-js-op", "==="],
          ["define-js-op", ">"],
-         ["define-js-op", ">="],
+         ["define-js-op", "%"],
+         ["define-js-op", "!="],
+         ["define-js-op", "!=="],
+         ["define-js-op", "&"],
+         ["define-js-op", "|"],
+         ["define-js-op", "^"],
+         ["define-js-op", "<<"],
+         ["define-js-op", ">>"],
+         ["define-js-op", ">>>"],
+         ["define-js-op", "&&"],
+         ["define-js-op", "||"],
+         ["define-js-op", "instanceof"],
+         ["define-js-op", "in"],
 
-         ["define-macro", ["not", "x"],
-          ["list", "if", "x", false, true]]
-         
         ];
     /* Init */
     var environment = new Env();

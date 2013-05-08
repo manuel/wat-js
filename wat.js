@@ -1,31 +1,30 @@
 function Wat() {
     /* Continuations */
-    function Suspension(prompt, handler) {
-        this.prompt = prompt; this.handler = handler; this.resumption = null; }
-    function isSuspend(x) { return x instanceof Suspension; }
-    function Resumption(fun, next, dbg) {
-        this.fun = fun; this.next = next; this.dbg = dbg; }
-    function isResume(x) { return x instanceof Resumption; }
-    function pushResume(susp, fun, dbg) {
-        susp.resumption = new Resumption(fun, susp.resumption, dbg); }
-    function resume(resumption, f) {
-        return resumption.fun(resumption.next, f); }
+    function Continuation(fun, next) {
+        this.fun = fun; this.next = next; }
+    function isContinuation(x) { return x instanceof Continuation; }
+    function Capture(prompt, handler) {
+        this.prompt = prompt; this.handler = handler; this.continuation = null; }
+    function isCapture(x) { return x instanceof Capture; }
+    function captureFrame(abort, fun) {
+        abort.k = new Continuation(fun, abort.k); }
+    function continueFrame(k, f) {
+        return k.fun(k.next, f); }
     /* Evaluation Core */
     function evaluate(e, k, f, x) {
         if (x && x.wat_eval) return x.wat_eval(e, k, f); else return x; }
     function Sym(name) { this.name = name; }
-    Sym.prototype.wat_eval = function(e, k, f) {
-        return lookup(e, this.name); };
+    Sym.prototype.wat_eval = function(e, k, f) { return lookup(e, this.name); };
     function Cons(car, cdr) { this.car = car; this.cdr = cdr; }
     Cons.prototype.wat_eval = function(e, k, f) {
-        if (isResume(k)) {
-            var op = resume(k, f);
+        if (isContinuation(k)) {
+            var op = continueFrame(k, f);
         } else {
             var op = evaluate(e, null, null, car(this));
         }
-        if (isSuspend(op)) {
+        if (isCapture(op)) {
             var that = this;
-            pushResume(op, function(k, f) { return that.wat_eval(e, k, f); }, that);
+            captureFrame(op, function(k, f) { return that.wat_eval(e, k, f); });
             return op;
         }
         if (isMacro(op)) {
@@ -35,13 +34,13 @@ function Wat() {
         }
     };
     function macroCombine(e, k, f, macro, form) {
-        if (isResume(k)) {
-            var expanded = resume(k, f);
+        if (isContinuation(k)) {
+            var expanded = continueFrame(k, f);
         } else {
             var expanded = combine(e, k, f, macro.expander, cdr(form));
         }
-        if (isSuspend(expanded)) {
-            pushResume(expanded, function(k, f) { return macroCombine(e, k, f, macro, form); });
+        if (isCapture(expanded)) {
+            captureFrame(expanded, function(k, f) { return macroCombine(e, k, f, macro, form); });
             return expanded;
         }
         form.car = expanded.car;
@@ -54,129 +53,134 @@ function Wat() {
     function combine(e, k, f, cmb, o) {
         if (cmb && cmb.wat_combine) return cmb.wat_combine(e, k, f, o); else fail("not a combiner"); }
     function Opv(p, ep, x, e) { this.p = p; this.ep = ep; this.x = x; this.e = e; }
-    function Apv(cmb) { this.cmb = cmb; }; function wrap(cmb) { return new Apv(cmb); }; function unwrap(apv) { return apv.cmb; }
+    function Apv(cmb) { this.cmb = cmb; }
+    function wrap(cmb) { return new Apv(cmb); }; function unwrap(apv) { return apv.cmb; }
     Opv.prototype.wat_combine = function(e, k, f, o) {
 	var xe = new Env(this.e); bind(xe, this.p, o); bind(xe, this.ep, e);
         return evaluate(xe, k, f, this.x);
     };
     Apv.prototype.wat_combine = function(e, k, f, o) {
-        if (isResume(k)) {
-            var args = resume(k, f);
+        if (isContinuation(k)) {
+            var args = continueFrame(k, f);
         } else {
             var args = evalArgs(e, null, null, o, NIL);
         }
-        if (isSuspend(args)) {
+        if (isCapture(args)) {
             var that = this;
-            pushResume(args, function(k, f) { return that.wat_combine(e, k, f, o); }, cons(this, o));
+            captureFrame(args, function(k, f) { return that.wat_combine(e, k, f, o); });
             return args;
         }
         return this.cmb.wat_combine(e, null, null, args);
     };
     function evalArgs(e, k, f, todo, done) {
 	if (todo === NIL) { return reverse_list(done); }
-        if (isResume(k)) {
-            var arg = resume(k, f);
+        if (isContinuation(k)) {
+            var arg = continueFrame(k, f);
         } else {
             var arg = evaluate(e, null, null, car(todo));
         }
-        if (isSuspend(arg)) {
-            pushResume(arg, function(k, f) { return evalArgs(e, k, f, todo, done); });
+        if (isCapture(arg)) {
+            captureFrame(arg, function(k, f) { return evalArgs(e, k, f, todo, done); });
             return arg;
         }
         return evalArgs(e, null, null, cdr(todo), cons(arg, done));
-    };
+    }
     /* Built-in Combiners */
-    function Vau() {}; function Def() {}; function Eval() {};
-    Vau.prototype.wat_combine = function(e, k, f, o) { return new Opv(elt(o, 0), elt(o, 1), elt(o, 2), e); };
-    Def.prototype.wat_combine = function(e, k, f, o) {
-        if (isResume(k)) {
-            var val = resume(k, f);
+    function Vau() {}; function Def() {}; function Eval() {}
+    Vau.prototype.wat_combine = function(e, k, f, o) {
+        return new Opv(elt(o, 0), elt(o, 1), elt(o, 2), e); };
+    Def.prototype.wat_combine = function self(e, k, f, o) {
+        if (isContinuation(k)) {
+            var val = continueFrame(k, f);
         } else {
             var val = evaluate(e, null, null, elt(o, 1));
         }
-        if (isSuspend(val)) {
-            pushResume(val, function(k, f) { return Def.prototype.wat_combine(e, k, f, o); }, cons(this,o));
+        if (isCapture(val)) {
+            captureFrame(val, function(k, f) { return self(e, k, f, o); });
             return val;
         }
         return bind(e, elt(o, 0), val);
     };
-    Eval.prototype.wat_combine = function(e, k, f, o) { return evaluate(elt(o, 1), k, f, elt(o, 0)); };
+    Eval.prototype.wat_combine = function(e, k, f, o) {
+        return evaluate(elt(o, 1), k, f, elt(o, 0)); };
     /* First-order Control */
-    function Begin() {}; function If() {}; function Loop() {}; function Catch() {}; function Finally() {};
-    Begin.prototype.wat_combine = function(e, k, f, o) { if (o === NIL) fail("empty wat-begin"); else return begin(e, k, f, o); };
+    function Begin() {}; function If() {}; function Loop() {}
+    function Catch() {}; function Finally() {}
+    Begin.prototype.wat_combine = function(e, k, f, o) {
+        if (o === NIL) return null; else return begin(e, k, f, o); };
     function begin(e, k, f, xs) {
-        if (isResume(k)) {
-            var res = resume(k, f);
+        if (isContinuation(k)) {
+            var res = continueFrame(k, f);
         } else {
             var res = evaluate(e, null, null, car(xs));
         }
-        if (isSuspend(res)) {
-            pushResume(res, function(k, f) { return begin(e, k, f, xs); });
+        if (isCapture(res)) {
+            captureFrame(res, function(k, f) { return begin(e, k, f, xs); });
             return res;
         }
         var kdr = cdr(xs);
         if (kdr === NIL) return res; else return begin(e, null, null, kdr);
     }
-    If.prototype.wat_combine = function(e, k, f, o) {
-        if (isResume(k)) {
-            var test = resume(k, f);
+    If.prototype.wat_combine = function self(e, k, f, o) {
+        if (isContinuation(k)) {
+            var test = continueFrame(k, f);
         } else {
             var test = evaluate(e, null, null, elt(o, 0));
         }
-        if (isSuspend(test)) {
-            pushResume(test, function(k, f) { return If.prototype.wat_combine(e, k, f, o); }, cons(this,o));
+        if (isCapture(test)) {
+            captureFrame(test, function(k, f) { return self(e, k, f, o); });
             return test;
         }
         return evaluate(e, null, null, test === false ? elt(o, 2) : elt(o, 1));
     };
-    Loop.prototype.wat_combine = function(e, k, f, o) {
-        var first = true; // only resume once
+    Loop.prototype.wat_combine = function self(e, k, f, o) {
+        var first = true; // only continue once
         while (true) {
-            if (first && isResume(k)) {
-                var res = resume(k, f);
+            if (first && isContinuation(k)) {
+                var res = continueFrame(k, f);
             } else {
                 var res = evaluate(e, null, null, elt(o, 0));
             }
             first = false;
-            if (isSuspend(res)) {
-                pushResume(res, function(k, f) { return Loop.prototype.wat_combine(e, k, f, o); }, cons(this,o));
+            if (isCapture(res)) {
+                captureFrame(res, function(k, f) { return self(e, k, f, o); });
                 return res;
             }
         }
     };
-    Catch.prototype.wat_combine = function(e, k, f, o) {
+    Catch.prototype.wat_combine = function self(e, k, f, o) {
         var th = elt(o, 0);
         var handler = elt(o, 1);
         try {
-            if (isResume(k)) {
-                var res = resume(k, f);
+            if (isContinuation(k)) {
+                var res = continueFrame(k, f);
             } else {
                 var res = combine(e, null, null, th, NIL);
             }
         } catch(exc) {
             var res = combine(e, null, null, handler, list(exc));
         }
-        if (isSuspend(res)) {
-            pushResume(res, function(k, f) { return Catch.prototype.wat_combine(e, k, f, o); }, cons(this,o));
+        if (isCapture(res)) {
+            captureFrame(res, function(k, f) { return self(e, k, f, o); });
             return res;
         } else {
             return res;
         }
     };
-    Finally.prototype.wat_combine = function(e, k, f, o) {
+    Finally.prototype.wat_combine = function self(e, k, f, o) {
         var prot = elt(o, 0);
         var cleanup = elt(o, 1);
         try {
-            if (isResume(k)) {
-                var res = resume(k, f);
+            if (isContinuation(k)) {
+                var res = continueFrame(k, f);
             } else {
                 var res = evaluate(e, null, null, prot);
             }
-            if (isSuspend(res)) {
-                pushResume(res, function(k, f) { return Finally.prototype.wat_combine(e, k, f, o); }, cons(this,o));
+            if (isCapture(res)) {
+                captureFrame(res, function(k, f) { return self(e, k, f, o); });
             }
         } finally {
-            if (isSuspend(res)) {
+            if (isCapture(res)) {
                 return res;
             } else {
                 return doCleanup(e, null, null, cleanup, res);
@@ -184,35 +188,35 @@ function Wat() {
         }
     };
     function doCleanup(e, k, f, cleanup, res) {
-        if (isResume(k)) {
-            var fres = resume(k, f);
+        if (isContinuation(k)) {
+            var fres = continueFrame(k, f);
         } else {
             var fres = evaluate(e, null, null, cleanup);
         }
-        if (isSuspend(fres)) {
-            pushResume(fres, function(k, f) { return doCleanup(e, k, f, cleanup, res); });
+        if (isCapture(fres)) {
+            captureFrame(fres, function(k, f) { return doCleanup(e, k, f, cleanup, res); });
             return fres;
         } else {
             return res;
         }
     }
     /* Delimited Control */
-    function PushPrompt() {}; function TakeSubcont() {}; function PushSubcont() {};
-    PushPrompt.prototype.wat_combine = function(e, k, f, o) {
+    function PushPrompt() {}; function TakeSubcont() {}; function PushSubcont() {}
+    PushPrompt.prototype.wat_combine = function self(e, k, f, o) {
         var prompt = elt(o, 0);
         var th = elt(o, 1);
-        if (isResume(k)) {
-            var res = resume(k, f);
+        if (isContinuation(k)) {
+            var res = continueFrame(k, f);
         } else {
             var res = combine(e, null, null, th, NIL);
         }
-        if (isSuspend(res)) {
+        if (isCapture(res)) {
             if (res.prompt === prompt) {
-                var resumption = res.resumption;
+                var continuation = res.continuation;
                 var handler = res.handler;
-                return combine(e, null, null, handler, cons(resumption, NIL));
+                return combine(e, null, null, handler, cons(continuation, NIL));
             } else {
-                pushResume(res, function(k, f) { return PushPrompt.prototype.wat_combine(e, k, f, o); }, cons(this,o));
+                captureFrame(res, function(k, f) { return self(e, k, f, o); });
                 return res;
             }
         } else {
@@ -222,20 +226,20 @@ function Wat() {
     TakeSubcont.prototype.wat_combine = function(e, k, f, o) {
         var prompt = elt(o, 0);
         var handler = elt(o, 1);
-        var susp = new Suspension(prompt, handler);
-        pushResume(susp, function(k, thef) { return combine(e, null, null, thef, NIL); }, cons(this, o));
-        return susp;
+        var cap = new Capture(prompt, handler);
+        captureFrame(cap, function(k, thef) { return combine(e, null, null, thef, NIL); });
+        return cap;
     };
-    PushSubcont.prototype.wat_combine = function(e, k, f, o) {
+    PushSubcont.prototype.wat_combine = function self(e, k, f, o) {
         var thek = elt(o, 0);
         var thef = elt(o, 1);
-        if (isResume(k)) {
-            var res = resume(k, f);
+        if (isContinuation(k)) {
+            var res = continueFrame(k, f);
         } else {
-            var res = resume(thek, thef);
+            var res = continueFrame(thek, thef);
         }
-        if (isSuspend(res)) {
-            pushResume(res, function(k, f) { return PushSubcont.prototype.wat_combine(e, k, f, o); }, cons(this,o));
+        if (isCapture(res)) {
+            captureFrame(res, function(k, f) { return self(e, k, f, o); });
             return res;
         } else {
             return res;
@@ -247,20 +251,20 @@ function Wat() {
     DNew.prototype.wat_combine = function(e, k, f, o) {
         return new DV(elt(o, 0));
     }
-    DLet.prototype.wat_combine = function(e, k, f, o) {
+    DLet.prototype.wat_combine = function self(e, k, f, o) {
         var dv = elt(o, 0);
         var val = elt(o, 1);
         var th = elt(o, 2);
         var oldVal = dv.val;
         dv.val = val;
         try {
-            if (isResume(k)) {
-                var res = resume(k, f);
+            if (isContinuation(k)) {
+                var res = continueFrame(k, f);
             } else {
                 var res = combine(e, null, null, th, NIL);
             }
-            if (isSuspend(res)) {
-                pushResume(res, function(k, f) { return DLet.prototype.wat_combine(e, k, f, o); }, cons(this,o));
+            if (isCapture(res)) {
+                captureFrame(res, function(k, f) { return self(e, k, f, o); });
                 return res;
             } else {
                 return res;
@@ -401,7 +405,8 @@ function Wat() {
          ["define-macro", ["push-subcont", "k", "#rest", "body"],
           ["list", "push-subcont*", "k", ["list*", "lambda", [], "body"]]],
 
-         ["def", "compose", ["lambda", ["f", "g"], ["lambda", ["arg"], ["g", ["f", "arg"]]]]],
+         ["def", "compose",
+          ["lambda", ["f", "g"], ["lambda", ["arg"], ["g", ["f", "arg"]]]]],
 
          ["def", "car", ["lambda", [["x", "#rest", "#ignore"]], "x"]],
          ["def", "cdr", ["lambda", [["#ignore", "#rest", "x"]], "x"]],

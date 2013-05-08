@@ -27,7 +27,8 @@ var self_test =
      ["define-macro", ["foo"], ["list", "bar"]],
      [alert, ["foo"]],
      ["!", 12],
-     [".", document, "write", 11]
+     [".", document, "write", 11],
+     ["=", window, "bar", 1]
     ];
 console.log(new Wat().run(self_test));
 </script>

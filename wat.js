@@ -332,6 +332,7 @@ function Wat() {
     function js_unop(op) { return jswrap(new Function("a", "return (" + op + " a)")); }
     function js_binop(op) { return jswrap(new Function("a", "b", "return (a " + op + " b)")); }
     function js_prop(obj, field_name) { return obj[sym_name(field_name)]; }
+    function js_set_prop(obj, field_name, value) { return obj[sym_name(field_name)] = value; }
     function js_invoke(obj, method_name) {
         return obj[sym_name(method_name)].apply(obj, Array.prototype.slice.call(arguments, 2)); }
     function sym_name(sym) { return sym.name; }
@@ -368,6 +369,7 @@ function Wat() {
          ["wat-def", "wat-js-unop", new JSFun(function(sym) { return js_unop(sym_name(sym)); })],
          ["wat-def", "wat-js-binop", new JSFun(function(sym) { return js_binop(sym_name(sym)); })],
          ["wat-def", "wat-js-prop", jswrap(js_prop)],
+         ["wat-def", "wat-js-set-prop", jswrap(js_set_prop)],
          ["wat-def", "wat-js-invoke", jswrap(js_invoke)],
          // Optimization
          ["wat-def", "wat-list*", jswrap(list_star)],
@@ -471,6 +473,9 @@ function Wat() {
           ["if", ["nil?", "args"],
            ["list", "wat-js-prop", "obj", ["list", "quote", "field"]],
            ["list*", "wat-js-invoke", "obj", ["list", "quote", "field"], "args"]]],
+
+         ["define-macro", ["=", "obj", "field", "value"],
+          ["list", "wat-js-set-prop", "obj", ["list", "quote", "field"], "value"]],
 
         ];
     /* Init */

@@ -321,7 +321,8 @@ function Wat() {
                             this.jsfun = jsfun; }
     JSFun.prototype.wat_combine = function(e, k, f, o) { return this.jsfun.apply(null, list_to_array(o)); };
     function jswrap(jsfun) { return wrap(new JSFun(jsfun)); }
-    function js_op(op) { return jswrap(new Function("a", "b", "return a " + op + " b")); }
+    function js_unop(op) { return jswrap(new Function("a", "return (" + op + "a)")); }
+    function js_binop(op) { return jswrap(new Function("a", "b", "return (a " + op + " b)")); }
     function js_global(name) { return eval(name); }
     function js_invoke(obj, method_name) {
         return obj[sym_name(method_name)].apply(obj, Array.prototype.slice.call(arguments, 2)); }
@@ -356,7 +357,8 @@ function Wat() {
          // JS Interface
          ["wat-def", "wat-js-wrap", jswrap(jswrap)],
          ["wat-def", "wat-js-global", jswrap(function(sym) { return js_global(sym_name(sym)); })],
-         ["wat-def", "wat-js-op", new JSFun(function(sym) { return js_op(sym_name(sym)); })],
+         ["wat-def", "wat-js-unop", new JSFun(function(sym) { return js_unop(sym_name(sym)); })],
+         ["wat-def", "wat-js-binop", new JSFun(function(sym) { return js_binop(sym_name(sym)); })],
          ["wat-def", "wat-js-invoke", jswrap(js_invoke)],
          // Optimization
          ["wat-def", "wat-list*", jswrap(list_star)],
@@ -424,30 +426,36 @@ function Wat() {
            ["list*", "lambda", ["map-list", "car", "bindings"], "body"],
            ["map-list", "cadr", "bindings"]]],
 
-         ["define-macro", ["define-js-op", "op"],
-          ["list", "define", "op", ["list", "wat-js-op", "op"]]],
-         ["define-js-op", "*"],
-         ["define-js-op", "+"],
-         ["define-js-op", "-"],
-         ["define-js-op", "/"],
-         ["define-js-op", "<"],
-         ["define-js-op", "<="],
-         ["define-js-op", "=="],
-         ["define-js-op", "==="],
-         ["define-js-op", ">"],
-         ["define-js-op", "%"],
-         ["define-js-op", "!="],
-         ["define-js-op", "!=="],
-         ["define-js-op", "&"],
-         ["define-js-op", "|"],
-         ["define-js-op", "^"],
-         ["define-js-op", "<<"],
-         ["define-js-op", ">>"],
-         ["define-js-op", ">>>"],
-         ["define-js-op", "&&"],
-         ["define-js-op", "||"],
-         ["define-js-op", "instanceof"],
-         ["define-js-op", "in"],
+         ["define-macro", ["define-js-unop", "op"],
+          ["list", "define", "op", ["list", "wat-js-unop", "op"]]],
+         ["define-js-unop", "!"],
+         ["define-js-unop", "typeof"],
+         ["define-js-unop", "~"],
+
+         ["define-macro", ["define-js-binop", "op"],
+          ["list", "define", "op", ["list", "wat-js-binop", "op"]]],
+         ["define-js-binop", "!="],
+         ["define-js-binop", "!=="],
+         ["define-js-binop", "%"],
+         ["define-js-binop", "&"],
+         ["define-js-binop", "&&"],
+         ["define-js-binop", "*"],
+         ["define-js-binop", "+"],
+         ["define-js-binop", "-"],
+         ["define-js-binop", "/"],
+         ["define-js-binop", "<"],
+         ["define-js-binop", "<<"],
+         ["define-js-binop", "<="],
+         ["define-js-binop", "=="],
+         ["define-js-binop", "==="],
+         ["define-js-binop", ">"],
+         ["define-js-binop", ">>"],
+         ["define-js-binop", ">>>"],
+         ["define-js-binop", "^"],
+         ["define-js-binop", "in"],
+         ["define-js-binop", "instanceof"],
+         ["define-js-binop", "|"],
+         ["define-js-binop", "||"],
 
         ];
     /* Init */

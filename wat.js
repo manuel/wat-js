@@ -422,7 +422,23 @@ function Wat() {
          ["define-macro", ["let", "bindings", "#rest", "body"],
           ["list*",
            ["list*", "lambda", ["map-list", "car", "bindings"], "body"],
-           ["map-list", "cadr", "bindings"]]]
+           ["map-list", "cadr", "bindings"]]],
+
+         ["define-macro", ["define-js-op", "op"],
+          ["list", "define", "op", ["list", "wat-js-op", "op"]]],
+         ["define-js-op", "*"],
+         ["define-js-op", "+"],
+         ["define-js-op", "-"],
+         ["define-js-op", "/"],
+         ["define-js-op", "<"],
+         ["define-js-op", "<="],
+         ["define-js-op", "=="],
+         ["define-js-op", "==="],
+         ["define-js-op", ">"],
+         ["define-js-op", ">="],
+
+         ["define-macro", ["not", "x"],
+          ["list", "if", "x", false, true]]
          
         ];
     /* Init */

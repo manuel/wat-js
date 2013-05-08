@@ -25,7 +25,9 @@ var self_test =
     ["begin",
      ["define", "bar", ["lambda", [], ["+", 3, 4]]],
      ["define-macro", ["foo"], ["list", "bar"]],
-     [["wat-js-wrap", ["wat-js-global", ["quote", "alert"]]], ["foo"]]
+     [alert, ["foo"]],
+     ["!", 12],
+     [".", document, "write", 11]
     ];
 console.log(new Wat().run(self_test));
 </script>

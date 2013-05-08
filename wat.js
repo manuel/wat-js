@@ -51,7 +51,13 @@ function Wat() {
     function isMacro(x) { return x instanceof Macro; }
     /* Operative & Applicative Combiners */
     function combine(e, k, f, cmb, o) {
-        if (cmb && cmb.wat_combine) return cmb.wat_combine(e, k, f, o); else fail("not a combiner"); }
+        if (cmb && cmb.wat_combine)
+            return cmb.wat_combine(e, k, f, o);
+        else if (Object.prototype.toString.call(cmb) == "[object Function]")
+            return combine(e, k, f, jswrap(cmb), o);
+        else
+            fail("not a function");
+    }
     function Opv(p, ep, x, e) { this.p = p; this.ep = ep; this.x = x; this.e = e; }
     function Apv(cmb) { this.cmb = cmb; }
     function wrap(cmb) { return new Apv(cmb); }; function unwrap(apv) { return apv.cmb; }
@@ -323,9 +329,9 @@ function Wat() {
                             this.jsfun = jsfun; }
     JSFun.prototype.wat_combine = function(e, k, f, o) { return this.jsfun.apply(null, list_to_array(o)); };
     function jswrap(jsfun) { return wrap(new JSFun(jsfun)); }
-    function js_unop(op) { return jswrap(new Function("a", "return (" + op + "a)")); }
+    function js_unop(op) { return jswrap(new Function("a", "return (" + op + " a)")); }
     function js_binop(op) { return jswrap(new Function("a", "b", "return (a " + op + " b)")); }
-    function js_global(name) { return eval(name); }
+    function js_prop(obj, field_name) { return obj[sym_name(field_name)]; }
     function js_invoke(obj, method_name) {
         return obj[sym_name(method_name)].apply(obj, Array.prototype.slice.call(arguments, 2)); }
     function sym_name(sym) { return sym.name; }
@@ -359,9 +365,9 @@ function Wat() {
          ["wat-def", "wat-dref", wrap(new DRef())],
          // JS Interface
          ["wat-def", "wat-js-wrap", jswrap(jswrap)],
-         ["wat-def", "wat-js-global", jswrap(function(sym) { return js_global(sym_name(sym)); })],
          ["wat-def", "wat-js-unop", new JSFun(function(sym) { return js_unop(sym_name(sym)); })],
          ["wat-def", "wat-js-binop", new JSFun(function(sym) { return js_binop(sym_name(sym)); })],
+         ["wat-def", "wat-js-prop", jswrap(js_prop)],
          ["wat-def", "wat-js-invoke", jswrap(js_invoke)],
          // Optimization
          ["wat-def", "wat-list*", jswrap(list_star)],
@@ -460,6 +466,11 @@ function Wat() {
          ["define-js-binop", "instanceof"],
          ["define-js-binop", "|"],
          ["define-js-binop", "||"],
+
+         ["define-macro", [".", "obj", "field", "#rest", "args"],
+          ["if", ["nil?", "args"],
+           ["list", "wat-js-prop", "obj", ["list", "quote", "field"]],
+           ["list*", "wat-js-invoke", "obj", ["list", "quote", "field"], "args"]]],
 
         ];
     /* Init */

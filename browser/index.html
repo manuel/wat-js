@@ -13,9 +13,9 @@ function wat_self_test() {
     var vm = new Wat();
     function assert(label, that) { if (!that) throw "assertion failed: " + label; }
     function assertFails(label, fun) { try { fun(); } catch(exc) { return; } throw "should have failed:" + label; }
-    assert("vau1", vm.run([["wat-vau1", ["x"], "#ignore", "x"], 1]) === 1);
-    assertFails("vau1-unbound-var", function() { vm.run([["wat-vau1", ["#ignore"], "#ignore", "x"], 1]); });
-    assertFails("vau1-wrong-var", function() { vm.run([["wat-vau1", ["y"], "#ignore", "x"], 1]); });
+    assert("vau", vm.run([["wat-vau", ["x"], "#ignore", "x"], 1]) === 1);
+    assertFails("vau-unbound-var", function() { vm.run([["wat-vau", ["#ignore"], "#ignore", "x"], 1]); });
+    assertFails("vau-wrong-var", function() { vm.run([["wat-vau", ["y"], "#ignore", "x"], 1]); });
     assertFails("nil-app", function() { vm.run([[]]); });
     assertFails("unbound-app", function() { vm.run([["x"]]); });
 }

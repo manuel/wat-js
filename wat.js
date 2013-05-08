@@ -1,4 +1,4 @@
-function Wat() {
+function WatVM() {
     /* Continuations */
     function Continuation(fun, next) {
         this.fun = fun; this.next = next; }
@@ -352,6 +352,7 @@ function Wat() {
          ["wat-def", "wat-cons", jswrap(cons)],
          ["wat-def", "wat-cons?", jswrap(function(obj) { return obj instanceof Cons; })],
          ["wat-def", "wat-nil?", jswrap(function(obj) { return obj === NIL; })],
+         ["wat-def", "wat-symbol-name", jswrap(sym_name)],
          // First-order Control
          ["wat-def", "wat-if", new If()],
          ["wat-def", "wat-loop", new Loop()],
@@ -483,6 +484,9 @@ function Wat() {
          ["define-macro", ["=", "obj", "field", "value"],
           ["list", "wat-js-set-prop", "obj", ["list", "quote", "field"], "value"]],
 
+         ["define-macro", ["str", "sym"],
+          ["list", "begin", ["wat-symbol-name", "sym"]]]
+         
         ];
     /* Init */
     var environment = new Env();

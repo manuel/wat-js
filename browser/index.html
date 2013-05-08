@@ -28,7 +28,8 @@ var self_test =
      [alert, ["foo"]],
      ["!", 12],
      [".", document, "write", 11],
-     ["=", window, "bar", 1]
+     ["[]=", window, 12, 1],
+     ["[]", window, 12],
     ];
 console.log(new Wat().run(self_test));
 </script>

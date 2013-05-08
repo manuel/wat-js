@@ -333,6 +333,8 @@ function Wat() {
     function js_binop(op) { return jswrap(new Function("a", "b", "return (a " + op + " b)")); }
     function js_prop(obj, field_name) { return obj[sym_name(field_name)]; }
     function js_set_prop(obj, field_name, value) { return obj[sym_name(field_name)] = value; }
+    function js_element(obj, i) { return obj[i]; }
+    function js_set_element(obj, i, value) { return obj[i] = value; }
     function js_invoke(obj, method_name) {
         return obj[sym_name(method_name)].apply(obj, Array.prototype.slice.call(arguments, 2)); }
     function sym_name(sym) { return sym.name; }
@@ -370,6 +372,8 @@ function Wat() {
          ["wat-def", "wat-js-binop", new JSFun(function(sym) { return js_binop(sym_name(sym)); })],
          ["wat-def", "wat-js-prop", jswrap(js_prop)],
          ["wat-def", "wat-js-set-prop", jswrap(js_set_prop)],
+         ["wat-def", "wat-js-element", jswrap(js_element)],
+         ["wat-def", "wat-js-set-element", jswrap(js_set_element)],
          ["wat-def", "wat-js-invoke", jswrap(js_invoke)],
          // Optimization
          ["wat-def", "wat-list*", jswrap(list_star)],
@@ -383,6 +387,8 @@ function Wat() {
          ["def", "if", "wat-if"],
          ["def", "list*", "wat-list*"],
          ["def", "nil?", "wat-nil?"],
+         ["def", "[]", "wat-js-element"],
+         ["def", "[]=", "wat-js-set-element"],
 
          ["def", "quote", ["wat-vau", ["x"], "#ignore", "x"]],
          ["def", "list", ["wat-wrap", ["wat-vau", "arglist", "#ignore", "arglist"]]],
@@ -407,11 +413,11 @@ function Wat() {
           ["list", "wat-loop1", ["list*", "begin", "body"]]],
 
          ["define-macro", ["push-prompt", "prompt", "#rest", "body"],
-          ["list", "push-prompt*", "prompt", ["list*", "lambda", [], "body"]]],
+          ["list", "wat-push-prompt", "prompt", ["list*", "lambda", [], "body"]]],
          ["define-macro", ["take-subcont", "prompt", "k", "#rest", "body"],
-          ["list", "take-subcont*", "prompt", ["list*", "lambda", ["list", "k"], "body"]]],
+          ["list", "wat-take-subcont", "prompt", ["list*", "lambda", ["list", "k"], "body"]]],
          ["define-macro", ["push-subcont", "k", "#rest", "body"],
-          ["list", "push-subcont*", "k", ["list*", "lambda", [], "body"]]],
+          ["list", "wat-push-subcont", "k", ["list*", "lambda", [], "body"]]],
 
          ["def", "compose",
           ["lambda", ["f", "g"], ["lambda", ["arg"], ["g", ["f", "arg"]]]]],

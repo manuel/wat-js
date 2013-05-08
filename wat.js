@@ -330,11 +330,15 @@ function Wat() {
         function define(name, val) { bind(env, new Sym(name), val); }
 	var env = new Env();
 	define("wat-define", new Def());
-	define("wat-vau1", new Vau());
-	define("wat-wrap", jswrap(wrap));
-	define("wat-unwrap", jswrap(unwrap));
 	define("wat-eval", wrap(new Eval()));
 	define("wat-make-environment", jswrap(function (parent) { return new Env(parent); }));
+	define("wat-vau1", new Vau());
+        define("wat-macro*", jswrap(function(expander) { return new Macro(expander); }));
+	define("wat-cons", jswrap(cons));
+        define("wat-nil?", jswrap(function(obj) { return obj === NIL; }));
+	define("wat-symbol-name", jswrap(sym_name));
+	define("wat-wrap", jswrap(wrap));
+	define("wat-unwrap", jswrap(unwrap));
 	define("wat-begin", new Begin());
 	define("wat-if", new If());
         define("wat-loop1", new Loop());
@@ -347,15 +351,11 @@ function Wat() {
         define("wat-dnew", wrap(new DNew()));
         define("wat-dlet*", wrap(new DLet()));
         define("wat-dref", wrap(new DRef()));
-        define("wat-macro*", jswrap(function(expander) { return new Macro(expander); }));
-	define("wat-cons", jswrap(cons));
-	define("wat-list*", jswrap(list_star));
-        define("wat-nil?", jswrap(function(obj) { return obj === NIL; }));
-	define("wat-symbol-name", jswrap(sym_name));
         define("wat-js-wrap", jswrap(jswrap));
         define("wat-js-global", jswrap(function(sym) { return js_global(sym_name(sym)); }));
         define("wat-js-op", new JSFun(function(sym) { return js_op(sym_name(sym)); }));
         define("wat-js-invoke", jswrap(js_invoke));
+	define("wat-list*", jswrap(list_star));
 	return env;
     }
     /* Primitives & Library */

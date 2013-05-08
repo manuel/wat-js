@@ -280,12 +280,10 @@ function Wat() {
     function cdr(cons) { return cons.cdr; }
     function elt(cons, i) { return (i === 0) ? car(cons) : elt(cdr(cons), i - 1); }
     function Env(parent) { this.bindings = Object.create(parent ? parent.bindings : null); }
-    function lookup0(e, name) { return e.bindings[name]; }
     function lookup(e, name) {
-        var val = lookup0(e, name);
+        var val = e.bindings[name];
         return (typeof(val) !== "undefined") ? val : fail("unbound: " + name); }
     function bind(e, lhs, rhs) { lhs.match(e, rhs); return rhs; }
-    function sym_name(sym) { return sym.name; }
     Sym.prototype.match = function(e, rhs) {
         if (typeof(e) === "undefined") fail("undefined argument: " + this.name);
         return e.bindings[this.name] = rhs; }
@@ -326,6 +324,7 @@ function Wat() {
     function js_global(name) { return eval(name); }
     function js_invoke(obj, method_name) {
         return obj[sym_name(method_name)].apply(obj, Array.prototype.slice.call(arguments, 2)); }
+    function sym_name(sym) { return sym.name; }
     /* Microcode */
     var microcode =
         ["wat-begin",

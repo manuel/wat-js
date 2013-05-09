@@ -37,7 +37,7 @@ Wat is developed by Manuel Simoni (msimoni@gmail.com).
     </body>
     </html>
 
-*** Node.js
+### Node.js
 
     > var wat = require("./wat");
     > var vm = new wat.VM();

@@ -424,7 +424,7 @@ wat.VM = function() {
           ["list", "wat-push-subcont", "k", ["list*", "lambda", [], "body"]]],
 
          ["def", "compose",
-          ["lambda", ["f", "g"], ["lambda", ["arg"], ["g", ["f", "arg"]]]]],
+          ["lambda", ["f", "g"], ["lambda", ["arg"], ["f", ["g", "arg"]]]]],
 
          ["def", "car", ["lambda", [["x", "#rest", "#ignore"]], "x"]],
          ["def", "cdr", ["lambda", [["#ignore", "#rest", "x"]], "x"]],
@@ -444,7 +444,7 @@ wat.VM = function() {
             ["cons", ["f", ["car", "lst"]], ["map-list", "f", ["cdr", "lst"]]]]],
 
          ["define-macro", ["let", "bindings", "#rest", "body"],
-          ["list*",
+          ["cons",
            ["list*", "lambda", ["map-list", "car", "bindings"], "body"],
            ["map-list", "cadr", "bindings"]]],
 

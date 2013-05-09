@@ -26,7 +26,8 @@ var code =
      ["[]=", window, 12, 1],
      ["[]", window, 12],
      ["define", "txt", [".", document, "createTextNode", ["str", "Quux"]]],
-     [".", [".", document, "body"], "appendChild", "txt"]
+     [".", [".", document, "body"], "appendChild", "txt"],
+     ["let", [["x", 33]], "x"]
     ];
 console.log(new wat.VM().run(code));
 </script>

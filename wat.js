@@ -44,6 +44,9 @@ wat.VM = function() {
             captureFrame(expanded, function(k, f) { return macroCombine(e, k, f, macro, form); });
             return expanded;
         }
+        if (!(expanded instanceof Cons)) {
+            expanded = list(new Sym("wat-begin"), expanded);
+        }
         form.car = expanded.car;
         form.cdr = expanded.cdr;
         return evaluate(e, k, f, form);
@@ -340,6 +343,13 @@ wat.VM = function() {
     function js_set_prop(obj, field_name, value) { return obj[sym_name(field_name)] = value; }
     function js_invoke(obj, method_name) {
         return obj[sym_name(method_name)].apply(obj, Array.prototype.slice.call(arguments, 2)); }
+    function JSCallback() {};
+    JSCallback.prototype.wat_combine = function(e, k, f, o) {
+        var cmb = elt(o, 0);
+        return function() {
+            var args = array_to_list(Array.prototype.slice.call(arguments));
+            combine(e, null, null, cmb, args);
+        }; };
     function sym_name(sym) { return sym.name; }
     /* Primitives */
     var primitives =
@@ -379,6 +389,7 @@ wat.VM = function() {
          ["wat-def", "wat-js-prop", jswrap(js_prop)],
          ["wat-def", "wat-js-set-prop", jswrap(js_set_prop)],
          ["wat-def", "wat-js-invoke", jswrap(js_invoke)],
+	 ["wat-def", "wat-js-callback", wrap(new JSCallback())],
          // Optimization
          ["wat-def", "wat-list*", jswrap(list_star)],
          
@@ -487,8 +498,8 @@ wat.VM = function() {
          ["define-macro", ["=", "obj", "field", "value"],
           ["list", "wat-js-set-prop", "obj", ["list", "quote", "field"], "value"]],
 
-         ["define-macro", ["str", "sym"],
-          ["list", "begin", ["wat-symbol-name", "sym"]]]
+         ["define-macro", ["string", "sym"],
+          ["wat-symbol-name", "sym"]]
          
         ];
     /* Init */

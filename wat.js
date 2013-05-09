@@ -1,4 +1,5 @@
-function WatVM() {
+(function(wat){
+wat.VM = function() {
     /* Continuations */
     function Continuation(fun, next) {
         this.fun = fun; this.next = next; }
@@ -499,3 +500,4 @@ function WatVM() {
     function run(x) { return evaluate(environment, null, null, parse_json_value(x)); }
     return { "run": run };
 }
+})(typeof exports === "undefined" ? this["wat"] = {} : exports);

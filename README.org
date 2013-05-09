@@ -21,3 +21,29 @@ Wat provides the following features:
 
 Wat is developed by Manuel Simoni (msimoni@gmail.com).
 
+** Usage
+
+*** Browser
+
+#+begin_src html
+<html>
+<head>
+  <script type="text/javascript" src="wat.js"></script>
+</head>
+<body>
+  <script type="text/javascript">
+    var vm = new wat.VM();
+    console.log(vm.run(["+", 1, 2]));
+  </script>
+</body>
+</html>
+#+end_src
+
+*** Node.js
+
+#+begin_src javascript
+> var wat = require("./wat");
+> var vm = new wat.VM();
+> vm.run(["+", 1, 2]);
+3
+#+end_src

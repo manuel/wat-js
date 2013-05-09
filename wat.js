@@ -297,7 +297,8 @@ function WatVM() {
     Sym.prototype.match = function(e, rhs) {
         if (typeof(e) === "undefined") fail("undefined argument: " + this.name);
         return e.bindings[this.name] = rhs; }
-    Cons.prototype.match = function(e, rhs) { car(this).match(e, car(rhs)); cdr(this).match(e, cdr(rhs)); };
+    Cons.prototype.match = function(e, rhs) {
+        car(this).match(e, car(rhs)); cdr(this).match(e, cdr(rhs)); };
     Nil.prototype.match = function(e, rhs) { if (rhs !== NIL) fail("NIL expected"); };
     Ign.prototype.match = function(e, rhs) {};
     /* Utilities */
@@ -305,10 +306,11 @@ function WatVM() {
     function list() {
         return array_to_list(Array.prototype.slice.call(arguments)); }
     function list_star() {
-        var len = arguments.length;
-	var c = len >= 1 ? arguments[len-1] : NIL; for (var i = len-1; i > 0; i--) c = cons(arguments[i - 1], c); return c; }
+        var len = arguments.length; var c = len >= 1 ? arguments[len-1] : NIL;
+        for (var i = len-1; i > 0; i--) c = cons(arguments[i - 1], c); return c; }
     function array_to_list(array, end) {
-	var c = end ? end : NIL; for (var i = array.length; i > 0; i--) c = cons(array[i - 1], c); return c; }
+	var c = end ? end : NIL;
+        for (var i = array.length; i > 0; i--) c = cons(array[i - 1], c); return c; }
     function list_to_array(c) {
 	var res = []; while(c !== NIL) { res.push(car(c)); c = cdr(c); } return res; }
     function reverse_list(list) {
@@ -325,16 +327,16 @@ function WatVM() {
         else { var front = arr.slice(0, i);
                return array_to_list(front.map(parse_json_value), parse_json_value(arr[i + 1])); } }
     /* JSNI */
-    function JSFun(jsfun) { if (Object.prototype.toString.call(jsfun) !== "[object Function]") fail("no fun");
-                            this.jsfun = jsfun; }
-    JSFun.prototype.wat_combine = function(e, k, f, o) { return this.jsfun.apply(null, list_to_array(o)); };
+    function JSFun(jsfun) {
+        if (Object.prototype.toString.call(jsfun) !== "[object Function]") fail("no fun");
+        this.jsfun = jsfun; }
+    JSFun.prototype.wat_combine = function(e, k, f, o) {
+        return this.jsfun.apply(null, list_to_array(o)); };
     function jswrap(jsfun) { return wrap(new JSFun(jsfun)); }
     function js_unop(op) { return jswrap(new Function("a", "return (" + op + " a)")); }
     function js_binop(op) { return jswrap(new Function("a", "b", "return (a " + op + " b)")); }
     function js_prop(obj, field_name) { return obj[sym_name(field_name)]; }
     function js_set_prop(obj, field_name, value) { return obj[sym_name(field_name)] = value; }
-    function js_element(obj, i) { return obj[i]; }
-    function js_set_element(obj, i, value) { return obj[i] = value; }
     function js_invoke(obj, method_name) {
         return obj[sym_name(method_name)].apply(obj, Array.prototype.slice.call(arguments, 2)); }
     function sym_name(sym) { return sym.name; }
@@ -371,10 +373,10 @@ function WatVM() {
          ["wat-def", "wat-js-wrap", jswrap(jswrap)],
          ["wat-def", "wat-js-unop", new JSFun(function(sym) { return js_unop(sym_name(sym)); })],
          ["wat-def", "wat-js-binop", new JSFun(function(sym) { return js_binop(sym_name(sym)); })],
+         ["wat-def", "wat-js-element", jswrap(function(obj, i) { return obj[i]; })],
+         ["wat-def", "wat-js-set-element", jswrap(function(obj, i, v) { return obj[i] = v; })],
          ["wat-def", "wat-js-prop", jswrap(js_prop)],
          ["wat-def", "wat-js-set-prop", jswrap(js_set_prop)],
-         ["wat-def", "wat-js-element", jswrap(js_element)],
-         ["wat-def", "wat-js-set-element", jswrap(js_set_element)],
          ["wat-def", "wat-js-invoke", jswrap(js_invoke)],
          // Optimization
          ["wat-def", "wat-list*", jswrap(list_star)],

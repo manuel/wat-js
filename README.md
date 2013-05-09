@@ -1,6 +1,8 @@
-# Wat VM: Concurrency and Metaprogramming for JavaScript
+# Wat VM
 
-Wat is an ultra-lightweight scripting language for embedding in
+### Lightweight Concurrency and Metaprogramming for JS
+
+Wat is a lightweight Scheme-like scripting language for embedding in
 JavaScript programs that provides advanced concurrency and
 metaprogramming tools.
 
@@ -20,9 +22,9 @@ metaprogramming tools.
 
 Wat is developed by Manuel Simoni (msimoni@gmail.com).
 
-## Usage
+### Usage
 
-### Browser
+#### Browser
 
     <html>
     <head>
@@ -36,9 +38,14 @@ Wat is developed by Manuel Simoni (msimoni@gmail.com).
     </body>
     </html>
 
-### Node.js
+#### Node.js
 
     > var wat = require("./wat");
     > var vm = new wat.VM();
     > vm.run(["+", 1, 2]);
     3
+
+### More documentation upcoming!
+
+For now, follow http://axisofeval.blogspot.com/search/label/wat and/or
+https://twitter.com/msimoni for updates.

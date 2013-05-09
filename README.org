@@ -25,7 +25,7 @@ Wat is developed by Manuel Simoni (msimoni@gmail.com).
 
 *** Browser
 
-#+begin_src html
+#+begin_example
 <html>
 <head>
   <script type="text/javascript" src="wat.js"></script>
@@ -37,13 +37,13 @@ Wat is developed by Manuel Simoni (msimoni@gmail.com).
   </script>
 </body>
 </html>
-#+end_src
+#+end_example
 
 *** Node.js
 
-#+begin_src javascript
+#+begin_example
 > var wat = require("./wat");
 > var vm = new wat.VM();
 > vm.run(["+", 1, 2]);
 3
-#+end_src
+#+end_example

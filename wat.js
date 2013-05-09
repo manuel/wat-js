@@ -411,7 +411,7 @@ function WatVM() {
          ["define-macro", ["lambda", "params", "#rest", "body"],
           ["list", "wat-wrap", ["list*", "vau", "params", "#ignore", "body"]]],
          ["define-macro", ["loop", "#rest", "body"],
-          ["list", "wat-loop1", ["list*", "begin", "body"]]],
+          ["list", "wat-loop", ["list*", "begin", "body"]]],
 
          ["define-macro", ["push-prompt", "prompt", "#rest", "body"],
           ["list", "wat-push-prompt", "prompt", ["list*", "lambda", [], "body"]]],

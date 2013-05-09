@@ -1,0 +1,40 @@
+<html>
+<head>
+  <title>Wat Sleeping Demo</title>
+  <script type="text/javascript" src="../../wat.js"></script>
+</head>
+<body>
+<h1><a href="https://github.com/manuel/wat-js">Wat</a></h1>
+<script type="text/javascript">
+var code = 
+    ["begin",
+
+     ["define", "default-prompt", ["quote", "default-prompt"]],
+
+     ["define", ["spawn-thread", "id"],
+      ["push-prompt", "default-prompt",
+       ["run-thread", "id"]]],
+
+     ["define", ["run-thread", "id"],
+      ["loop",
+       [".", document, "write", ["+", ["string", "Active thread: "], "id"]],
+       ["sleep", 250]]],
+
+     ["define", ["sleep", "ms"],
+      ["take-subcont", "default-prompt", "k",
+       ["define", ["callback"],
+        ["push-prompt", "default-prompt",
+         ["push-subcont", "k"]]],
+       [setTimeout, ["wat-js-callback", "callback"], "ms"]]],
+
+     ["spawn-thread", 1],
+     ["spawn-thread", 2],
+     ["spawn-thread", 3],
+     ["spawn-thread", 4],
+     ["spawn-thread", 5]
+
+    ];
+new wat.VM().run(code);
+</script>
+</body>
+</html>

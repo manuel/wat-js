@@ -1,9 +1,8 @@
-# Wat
+# Wat VM: Concurrency and Metaprogramming for JavaScript
 
-Wat is an ultra-lightweight, low-latency interpreter for Lisp- and
-ML-like call-by-value languages running in JavaScript.
-
-Wat provides the following features:
+Wat is an ultra-lightweight scripting language for embedding in
+JavaScript programs that provides advanced concurrency and
+metaprogramming tools.
 
 * Delimited continuations http://www.cs.indiana.edu/~dyb/pubs/monadicDC.pdf
 
@@ -13,11 +12,11 @@ Wat provides the following features:
 
 * Lazily expanded hygienic macros http://people.csail.mit.edu/jaffer/CNS/interpreter-latency
 
-* First-order control (sequential, loop, throw, catch, finally) running on JS stack
+* First-order control (sequential, conditional, loop, throw, catch, finally) running on JS stack
 
 * Access to JavaScript values, functions, and globals
 
-* JSON-based syntax for writing primitives without needing extra parser
+* JSON-based syntax for embedding Wat code in JavaScript
 
 Wat is developed by Manuel Simoni (msimoni@gmail.com).
 

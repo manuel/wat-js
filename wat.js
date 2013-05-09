@@ -396,14 +396,15 @@ wat.VM = function() {
          // Primitives
 
          ["wat-def", "def", "wat-def"],
+         ["def", "[]", "wat-js-element"],
+         ["def", "[]=", "wat-js-set-element"],
          ["def", "begin", "wat-begin"],
          ["def", "cons", "wat-cons"],
          ["def", "cons?", "wat-cons?"],
          ["def", "if", "wat-if"],
          ["def", "list*", "wat-list*"],
          ["def", "nil?", "wat-nil?"],
-         ["def", "[]", "wat-js-element"],
-         ["def", "[]=", "wat-js-set-element"],
+         ["def", "throw", "wat-throw"],
 
          ["def", "quote", ["wat-vau", ["x"], "#ignore", "x"]],
          ["def", "list", ["wat-wrap", ["wat-vau", "arglist", "#ignore", "arglist"]]],
@@ -426,6 +427,8 @@ wat.VM = function() {
           ["list", "wat-wrap", ["list*", "vau", "params", "#ignore", "body"]]],
          ["define-macro", ["loop", "#rest", "body"],
           ["list", "wat-loop", ["list*", "begin", "body"]]],
+         ["define-macro", ["catch", "protected", "handler"],
+          ["list", "wat-catch", ["list", "lambda", [], "protected"], "handler"]],
 
          ["define-macro", ["push-prompt", "prompt", "#rest", "body"],
           ["list", "wat-push-prompt", "prompt", ["list*", "lambda", [], "body"]]],

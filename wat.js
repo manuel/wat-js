@@ -141,7 +141,7 @@ wat.VM = function() {
             captureFrame(test, function(k, f) { return self(e, k, f, o); });
             return test;
         }
-        return evaluate(e, null, null, test === false ? elt(o, 2) : elt(o, 1));
+        return evaluate(e, null, null, test ? elt(o, 1) : elt(o, 2));
     };
     Loop.prototype.wat_combine = function self(e, k, f, o) {
         var first = true; // only continue once
@@ -257,10 +257,10 @@ wat.VM = function() {
     };
     /* Dynamic Variables */
     function DV(val) { this.val = val; }
-    function DNew() {}; function DLet() {}; function DRef() {};
+    function DNew() {}; function DLet() {}; function DRef() {}
     DNew.prototype.wat_combine = function(e, k, f, o) {
         return new DV(elt(o, 0));
-    }
+    };
     DLet.prototype.wat_combine = function self(e, k, f, o) {
         var dv = elt(o, 0);
         var val = elt(o, 1);
@@ -282,7 +282,7 @@ wat.VM = function() {
         } finally {
             dv.val = oldVal;
         }
-    }
+    };
     DRef.prototype.wat_combine = function(e, k, f, o) {
         return elt(o, 0).val;
     };

@@ -390,6 +390,7 @@ wat.VM = function() {
          ["wat-def", "wat-js-set-prop", jswrap(js_set_prop)],
          ["wat-def", "wat-js-invoke", jswrap(js_invoke)],
 	 ["wat-def", "wat-js-callback", wrap(new JSCallback())],
+	 ["wat-def", "wat-list-to-array", jswrap(list_to_array)],
          // Optimization
          ["wat-def", "wat-list*", jswrap(list_star)],
          
@@ -492,6 +493,9 @@ wat.VM = function() {
          ["define-js-binop", "instanceof"],
          ["define-js-binop", "|"],
          ["define-js-binop", "||"],
+
+         ["define", ["array", "#rest", "args"],
+          ["wat-list-to-array", "args"]],
 
          ["define-macro", [".", "obj", "field", "#rest", "args"],
           ["if", ["nil?", "args"],

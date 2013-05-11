@@ -66,7 +66,7 @@ wat.VM = function() {
     function Apv(cmb) { this.cmb = cmb; }
     function wrap(cmb) { return new Apv(cmb); }; function unwrap(apv) { return apv.cmb; }
     Opv.prototype.wat_combine = function(e, k, f, o) {
-	var xe = new Env(this.e); bind(xe, this.p, o); bind(xe, this.ep, e);
+        var xe = new Env(this.e); bind(xe, this.p, o); bind(xe, this.ep, e);
         return evaluate(xe, k, f, this.x);
     };
     Apv.prototype.wat_combine = function(e, k, f, o) {
@@ -83,7 +83,7 @@ wat.VM = function() {
         return this.cmb.wat_combine(e, null, null, args);
     };
     function evalArgs(e, k, f, todo, done) {
-	if (todo === NIL) { return reverse_list(done); }
+        if (todo === NIL) { return reverse_list(done); }
         if (isContinuation(k)) {
             var arg = continueFrame(k, f);
         } else {
@@ -314,12 +314,12 @@ wat.VM = function() {
         var len = arguments.length; var c = len >= 1 ? arguments[len-1] : NIL;
         for (var i = len-1; i > 0; i--) c = cons(arguments[i - 1], c); return c; }
     function array_to_list(array, end) {
-	var c = end ? end : NIL;
+        var c = end ? end : NIL;
         for (var i = array.length; i > 0; i--) c = cons(array[i - 1], c); return c; }
     function list_to_array(c) {
-	var res = []; while(c !== NIL) { res.push(car(c)); c = cdr(c); } return res; }
+        var res = []; while(c !== NIL) { res.push(car(c)); c = cdr(c); } return res; }
     function reverse_list(list) {
-	var res = NIL; while(list !== NIL) { res = cons(car(list), res); list = cdr(list); } return res; }
+        var res = NIL; while(list !== NIL) { res = cons(car(list), res); list = cdr(list); } return res; }
     /* Parser */
     function parse_json_value(obj) {
         switch(Object.prototype.toString.call(obj)) {
@@ -390,8 +390,8 @@ wat.VM = function() {
          ["wat-def", "wat-js-prop", jswrap(js_prop)],
          ["wat-def", "wat-js-set-prop", jswrap(js_set_prop)],
          ["wat-def", "wat-js-invoke", jswrap(js_invoke)],
-	 ["wat-def", "wat-js-callback", wrap(new JSCallback())],
-	 ["wat-def", "wat-list-to-array", jswrap(list_to_array)],
+         ["wat-def", "wat-js-callback", wrap(new JSCallback())],
+         ["wat-def", "wat-list-to-array", jswrap(list_to_array)],
          // Optimization
          ["wat-def", "wat-list*", jswrap(list_star)],
          

@@ -141,7 +141,7 @@ wat.VM = function() {
             captureFrame(test, function(k, f) { return self(e, k, f, o); });
             return test;
         }
-        return evaluate(e, null, null, test === false ? elt(o, 2) : elt(o, 1));
+        return evaluate(e, null, null, test ? elt(o, 1) : elt(o, 2));
     };
     Loop.prototype.wat_combine = function self(e, k, f, o) {
         var first = true; // only continue once
@@ -257,10 +257,10 @@ wat.VM = function() {
     };
     /* Dynamic Variables */
     function DV(val) { this.val = val; }
-    function DNew() {}; function DLet() {}; function DRef() {};
+    function DNew() {}; function DLet() {}; function DRef() {}
     DNew.prototype.wat_combine = function(e, k, f, o) {
         return new DV(elt(o, 0));
-    }
+    };
     DLet.prototype.wat_combine = function self(e, k, f, o) {
         var dv = elt(o, 0);
         var val = elt(o, 1);
@@ -282,7 +282,7 @@ wat.VM = function() {
         } finally {
             dv.val = oldVal;
         }
-    }
+    };
     DRef.prototype.wat_combine = function(e, k, f, o) {
         return elt(o, 0).val;
     };
@@ -303,7 +303,8 @@ wat.VM = function() {
         return e.bindings[this.name] = rhs; }
     Cons.prototype.match = function(e, rhs) {
         car(this).match(e, car(rhs)); cdr(this).match(e, cdr(rhs)); };
-    Nil.prototype.match = function(e, rhs) { if (rhs !== NIL) fail("NIL expected"); };
+    Nil.prototype.match = function(e, rhs) {
+        if (rhs !== NIL) fail("NIL expected, but got: " + JSON.stringify(rhs)); };
     Ign.prototype.match = function(e, rhs) {};
     /* Utilities */
     function fail(err) { throw err; }
@@ -390,20 +391,22 @@ wat.VM = function() {
          ["wat-def", "wat-js-set-prop", jswrap(js_set_prop)],
          ["wat-def", "wat-js-invoke", jswrap(js_invoke)],
 	 ["wat-def", "wat-js-callback", wrap(new JSCallback())],
+	 ["wat-def", "wat-list-to-array", jswrap(list_to_array)],
          // Optimization
          ["wat-def", "wat-list*", jswrap(list_star)],
          
          // Primitives
 
          ["wat-def", "def", "wat-def"],
+         ["def", "[]", "wat-js-element"],
+         ["def", "[]=", "wat-js-set-element"],
          ["def", "begin", "wat-begin"],
          ["def", "cons", "wat-cons"],
          ["def", "cons?", "wat-cons?"],
          ["def", "if", "wat-if"],
          ["def", "list*", "wat-list*"],
          ["def", "nil?", "wat-nil?"],
-         ["def", "[]", "wat-js-element"],
-         ["def", "[]=", "wat-js-set-element"],
+         ["def", "throw", "wat-throw"],
 
          ["def", "quote", ["wat-vau", ["x"], "#ignore", "x"]],
          ["def", "list", ["wat-wrap", ["wat-vau", "arglist", "#ignore", "arglist"]]],
@@ -426,6 +429,8 @@ wat.VM = function() {
           ["list", "wat-wrap", ["list*", "vau", "params", "#ignore", "body"]]],
          ["define-macro", ["loop", "#rest", "body"],
           ["list", "wat-loop", ["list*", "begin", "body"]]],
+         ["define-macro", ["catch", "protected", "handler"],
+          ["list", "wat-catch", ["list", "lambda", [], "protected"], "handler"]],
 
          ["define-macro", ["push-prompt", "prompt", "#rest", "body"],
           ["list", "wat-push-prompt", "prompt", ["list*", "lambda", [], "body"]]],
@@ -489,6 +494,9 @@ wat.VM = function() {
          ["define-js-binop", "instanceof"],
          ["define-js-binop", "|"],
          ["define-js-binop", "||"],
+
+         ["define", ["array", "#rest", "args"],
+          ["wat-list-to-array", "args"]],
 
          ["define-macro", [".", "obj", "field", "#rest", "args"],
           ["if", ["nil?", "args"],

@@ -303,7 +303,8 @@ wat.VM = function() {
         return e.bindings[this.name] = rhs; }
     Cons.prototype.match = function(e, rhs) {
         car(this).match(e, car(rhs)); cdr(this).match(e, cdr(rhs)); };
-    Nil.prototype.match = function(e, rhs) { if (rhs !== NIL) fail("NIL expected"); };
+    Nil.prototype.match = function(e, rhs) {
+        if (rhs !== NIL) fail("NIL expected, but got: " + JSON.stringify(rhs)); };
     Ign.prototype.match = function(e, rhs) {};
     /* Utilities */
     function fail(err) { throw err; }

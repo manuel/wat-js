@@ -45,6 +45,12 @@ Wat is developed by Manuel Simoni (msimoni@gmail.com).
     > vm.run(["+", 1, 2]);
     3
 
+### JavaScript
+
+Wat aims to adhere to JavaScript 1.5 plus some small additions (like
+Array.map).  Wat does not patch or otherwise modify existing
+JavaScript objects and functions in any way.
+
 ### More documentation upcoming!
 
 For now, follow http://axisofeval.blogspot.com/search/label/wat and/or

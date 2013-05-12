@@ -342,10 +342,8 @@ wat.VM = function() {
     function jswrap(jsfun) { return wrap(new JSFun(jsfun)); }
     function js_unop(op) { return jswrap(new Function("a", "return (" + op + " a)")); }
     function js_binop(op) { return jswrap(new Function("a", "b", "return (a " + op + " b)")); }
-    function js_prop(obj, field_name) { return obj[sym_name(field_name)]; }
-    function js_set_prop(obj, field_name, value) { return obj[sym_name(field_name)] = value; }
     function js_invoke(obj, method_name) {
-        return obj[sym_name(method_name)].apply(obj, Array.prototype.slice.call(arguments, 2)); }
+        return obj[method_name].apply(obj, Array.prototype.slice.call(arguments, 2)); }
     function JSCallback() {};
     JSCallback.prototype.wat_combine = function(e, k, f, o) {
         var cmb = elt(o, 0);
@@ -393,8 +391,6 @@ wat.VM = function() {
          ["wat-def", "wat-js-binop", new JSFun(function(sym) { return js_binop(sym_name(sym)); })],
          ["wat-def", "wat-js-element", jswrap(function(obj, i) { return obj[i]; })],
          ["wat-def", "wat-js-set-element", jswrap(function(obj, i, v) { return obj[i] = v; })],
-         ["wat-def", "wat-js-prop", jswrap(js_prop)],
-         ["wat-def", "wat-js-set-prop", jswrap(js_set_prop)],
          ["wat-def", "wat-js-invoke", jswrap(js_invoke)],
          ["wat-def", "wat-js-callback", wrap(new JSCallback())],
          ["wat-def", "wat-list-to-array", jswrap(list_to_array)],
@@ -534,11 +530,11 @@ wat.VM = function() {
           ["list", "define", "name", ["list", "js-wrap", "js-fun"]]],
 
          ["define-macro", [".", "obj", "field"],
-           ["list", "wat-js-prop", "obj", ["list", "quote", "field"]]],
+           ["list", "wat-js-element", "obj", ["wat-symbol-name", "field"]]],
          ["define-macro", ["=", "obj", "field", "value"],
-          ["list", "wat-js-set-prop", "obj", ["list", "quote", "field"], "value"]],
+          ["list", "wat-js-set-element", "obj", ["wat-symbol-name", "field"], "value"]],
          ["define-macro", ["#", "obj", "method", "#rest", "args"],
-          ["list*", "wat-js-invoke", "obj", ["list", "quote", "method"], "args"]],
+          ["list*", "wat-js-invoke", "obj", ["wat-symbol-name", "method"], "args"]],
 
          ["define-macro", ["string", "sym"],
           ["wat-symbol-name", "sym"]],

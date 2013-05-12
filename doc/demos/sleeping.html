@@ -17,8 +17,8 @@ var code =
 
      ["define", ["run-thread", "id"],
       ["loop",
-       ["#", [".", document, "body"], "appendChild",
-        ["#", document, "createTextNode", ["+", ["string", "Active thread: "], "id"]]],
+       ["#", "appendChild", [".", "body", document],
+        ["#", "createTextNode", document, ["+", ["string", "Active thread: "], "id"]]],
        ["sleep", 250]]],
 
      ["define", ["sleep", "ms"],

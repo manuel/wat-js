@@ -1,10 +1,9 @@
-# Wat VM
+# Wat
 
-### Lightweight Concurrency and Metaprogramming for JS
+### Concurrency and Metaprogramming for JS
 
-Wat is a lightweight Scheme-like scripting language for embedding in
-JavaScript programs that provides advanced concurrency and
-metaprogramming tools.
+Wat is a tiny language with powerful concurrency and metaprogramming
+features for embedding in JavaScript programs.
 
 * Delimited continuations http://www.cs.indiana.edu/~dyb/pubs/monadicDC.pdf
 
@@ -12,11 +11,11 @@ metaprogramming tools.
 
 * First-class lexical environments and fexprs ftp://ftp.cs.wpi.edu/pub/techreports/pdf/05-07.pdf
 
-* Lazily expanded hygienic macros http://people.csail.mit.edu/jaffer/CNS/interpreter-latency
+* Hygienic macros
 
 * First-order control (sequential, conditional, loop, throw, catch, finally) running on JS stack
 
-* Access to JavaScript values, functions, and globals
+* Interop with JavaScript objects, functions, and callbacks
 
 * JSON-based syntax for embedding Wat code in JavaScript
 

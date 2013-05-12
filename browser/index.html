@@ -25,12 +25,18 @@ var code =
      [".", document, "write", 11],
      ["[]=", window, 12, 1],
      ["[]", window, 12],
-     ["define", "txt", [".", document, "createTextNode", ["string", "Quux"]]],
-     [".", [".", document, "body"], "appendChild", "txt"],
+     ["define", "txt", ["#", document, "createTextNode", ["string", "Quux"]]],
+     ["#", [".", document, "body"], "appendChild", "txt"],
      ["let", [["x", 33]], "x"],
      ["catch",
       ["throw", ["string", "foo"]],
-      ["lambda", ["exc"], [".", console, "log", "exc"]]]
+      ["lambda", ["exc"], [".", console, "log", "exc"]]],
+     ["let-escape", "x",
+      ["x", 12]],
+     ["let", [["i", ["ref", 0]]],
+      ["while", ["<", ["get", "i"], 10],
+       ["#", console, "log", ["get", "i"]],
+       ["set", "i", ["+", ["get", "i"], 1]]]]
     ];
 console.log(new wat.VM().run(code));
 </script>

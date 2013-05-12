@@ -60,7 +60,7 @@ wat.VM = function() {
         else if (Object.prototype.toString.call(cmb) == "[object Function]")
             return combine(e, k, f, jswrap(cmb), o);
         else
-            fail("not a function");
+            fail("not a function: " + JSON.stringify(cmb));
     }
     function Opv(p, ep, x, e) { this.p = p; this.ep = ep; this.x = x; this.e = e; }
     function Apv(cmb) { this.cmb = cmb; }
@@ -168,7 +168,7 @@ wat.VM = function() {
                 var res = combine(e, null, null, th, NIL);
             }
         } catch(exc) {
-            var res = combine(e, null, null, handler, list(exc));
+            var res = combine(e, null, null, unwrap(handler), list(exc));
         }
         if (isCapture(res)) {
             captureFrame(res, function(k, f) { return self(e, k, f, o); });
@@ -286,6 +286,8 @@ wat.VM = function() {
     DRef.prototype.wat_combine = function(e, k, f, o) {
         return elt(o, 0).val;
     };
+    /* Mutable references */
+    function Ref(value) { this.value = value; }
     /* Objects */
     function Nil() {}; var NIL = new Nil();
     function Ign() {}; var IGN = new Ign();
@@ -381,6 +383,10 @@ wat.VM = function() {
          ["wat-def", "wat-dnew", wrap(new DNew())],
          ["wat-def", "wat-dlet", wrap(new DLet())],
          ["wat-def", "wat-dref", wrap(new DRef())],
+         // Mutable references
+         ["wat-def", "wat-ref", jswrap(function(value) { return new Ref(value); })],
+         ["wat-def", "wat-get", jswrap(function(ref) { return ref.value; })],
+         ["wat-def", "wat-set", jswrap(function(ref, value) { return ref.value = value; })],
          // JS Interface
          ["wat-def", "wat-js-wrap", jswrap(jswrap)],
          ["wat-def", "wat-js-unop", new JSFun(function(sym) { return js_unop(sym_name(sym)); })],
@@ -403,9 +409,15 @@ wat.VM = function() {
          ["def", "begin", "wat-begin"],
          ["def", "cons", "wat-cons"],
          ["def", "cons?", "wat-cons?"],
+         ["def", "finally", "wat-finally"],
+         ["def", "get", "wat-get"],
          ["def", "if", "wat-if"],
+         ["def", "js-callback", "wat-js-callback"],
+         ["def", "js-wrap", "wat-js-wrap"],
          ["def", "list*", "wat-list*"],
          ["def", "nil?", "wat-nil?"],
+         ["def", "ref", "wat-ref"],
+         ["def", "set", "wat-set"],
          ["def", "throw", "wat-throw"],
 
          ["def", "quote", ["wat-vau", ["x"], "#ignore", "x"]],
@@ -464,6 +476,29 @@ wat.VM = function() {
            ["list*", "lambda", ["map-list", "car", "bindings"], "body"],
            ["map-list", "cadr", "bindings"]]],
 
+         ["define", ["call-with-escape", "fun"],
+          ["let", [["fresh", ["list", 44]]],
+           ["catch", ["fun", ["lambda", ["val"], ["throw", ["list", "fresh", "val"]]]],
+            ["lambda", ["exc"],
+             ["if", ["&&", ["cons?", "exc"], ["===", "fresh", ["car", "exc"]]],
+              ["cadr", "exc"],
+              ["throw", "exc"]]]]]],
+
+         ["define-macro", ["let-escape", "name", "#rest", "body"],
+          ["list", "call-with-escape", ["list*", "lambda", ["list", "name"], "body"]]],
+
+         ["define", ["call-while", "test-fun", "body-fun"],
+          ["let-escape", "return",
+           ["loop",
+            ["if", ["test-fun"],
+             ["body-fun"],
+             ["return", null]]]]],
+
+         ["define-macro", ["while", "test", "#rest", "body"],
+          ["list", "call-while",
+           ["list", "lambda", [], "test"],
+           ["list*", "lambda", [], "body"]]],
+
          ["define-macro", ["define-js-unop", "op"],
           ["list", "define", "op", ["list", "wat-js-unop", "op"]]],
          ["define-js-unop", "!"],
@@ -495,19 +530,22 @@ wat.VM = function() {
          ["define-js-binop", "|"],
          ["define-js-binop", "||"],
 
-         ["define", ["array", "#rest", "args"],
-          ["wat-list-to-array", "args"]],
+         ["define-macro", ["define-js-function", "name", "js-fun"],
+          ["list", "define", "name", ["list", "js-wrap", "js-fun"]]],
 
          ["define-macro", [".", "obj", "field", "#rest", "args"],
           ["if", ["nil?", "args"],
            ["list", "wat-js-prop", "obj", ["list", "quote", "field"]],
            ["list*", "wat-js-invoke", "obj", ["list", "quote", "field"], "args"]]],
-
+         ["define-macro", ["#", "obj", "method", "#rest", "args"],
+          ["list*", "wat-js-invoke", "obj", ["list", "quote", "method"], "args"]],
          ["define-macro", ["=", "obj", "field", "value"],
           ["list", "wat-js-set-prop", "obj", ["list", "quote", "field"], "value"]],
 
          ["define-macro", ["string", "sym"],
-          ["wat-symbol-name", "sym"]]
+          ["wat-symbol-name", "sym"]],
+         ["define", ["array", "#rest", "args"],
+          ["wat-list-to-array", "args"]],
          
         ];
     /* Init */

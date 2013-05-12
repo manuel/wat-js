@@ -526,6 +526,11 @@ wat.VM = function() {
          ["define-js-binop", "|"],
          ["define-js-binop", "||"],
 
+         ["define-macro", ["string", "sym"],
+          ["wat-symbol-name", "sym"]],
+         ["define", ["array", "#rest", "args"],
+          ["wat-list-to-array", "args"]],
+         
          ["define-macro", ["define-js-function", "name", "js-fun"],
           ["list", "define", "name", ["list", "js-wrap", "js-fun"]]],
 
@@ -536,11 +541,6 @@ wat.VM = function() {
          ["define-macro", ["#", "obj", "method", "#rest", "args"],
           ["list*", "wat-js-invoke", "obj", ["wat-symbol-name", "method"], "args"]],
 
-         ["define-macro", ["string", "sym"],
-          ["wat-symbol-name", "sym"]],
-         ["define", ["array", "#rest", "args"],
-          ["wat-list-to-array", "args"]],
-         
         ];
     /* Init */
     var environment = new Env();

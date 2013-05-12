@@ -462,6 +462,11 @@ wat.VM = function() {
            ["list", "def", ["car", "lhs"], ["list*", "lambda", ["cdr", "lhs"], "rhs"]],
            ["list", "def", "lhs", ["car", "rhs"]]]],
 
+         ["define-macro", ["string", "sym"],
+          ["wat-symbol-name", "sym"]],
+         ["define", ["array", "#rest", "args"],
+          ["wat-list-to-array", "args"]],
+         
          ["define", ["map-list", "f", "lst"],
            ["if", ["nil?", "lst"],
             [],
@@ -473,7 +478,7 @@ wat.VM = function() {
            ["map-list", "cadr", "bindings"]]],
 
          ["define", ["call-with-escape", "fun"],
-          ["let", [["fresh", ["list", 44]]],
+          ["let", [["fresh", ["list", null]]],
            ["catch", ["fun", ["lambda", ["val"], ["throw", ["list", "fresh", "val"]]]],
             ["lambda", ["exc"],
              ["if", ["&&", ["cons?", "exc"], ["===", "fresh", ["car", "exc"]]],
@@ -526,11 +531,6 @@ wat.VM = function() {
          ["define-js-binop", "|"],
          ["define-js-binop", "||"],
 
-         ["define-macro", ["string", "sym"],
-          ["wat-symbol-name", "sym"]],
-         ["define", ["array", "#rest", "args"],
-          ["wat-list-to-array", "args"]],
-         
          ["define-macro", ["define-js-function", "name", "js-fun"],
           ["list", "define", "name", ["list", "js-wrap", "js-fun"]]],
 

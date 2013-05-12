@@ -2,8 +2,8 @@
 
 ### Concurrency and Metaprogramming for JS
 
-Wat is a tiny language for embedding in JavaScript programs with
-powerful concurrency and metaprogramming features.
+Wat is a tiny language with powerful concurrency and metaprogramming
+features for embedding in JavaScript programs.
 
 * Delimited continuations http://www.cs.indiana.edu/~dyb/pubs/monadicDC.pdf
 

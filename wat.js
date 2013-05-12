@@ -533,14 +533,12 @@ wat.VM = function() {
          ["define-macro", ["define-js-function", "name", "js-fun"],
           ["list", "define", "name", ["list", "js-wrap", "js-fun"]]],
 
-         ["define-macro", [".", "obj", "field", "#rest", "args"],
-          ["if", ["nil?", "args"],
-           ["list", "wat-js-prop", "obj", ["list", "quote", "field"]],
-           ["list*", "wat-js-invoke", "obj", ["list", "quote", "field"], "args"]]],
-         ["define-macro", ["#", "obj", "method", "#rest", "args"],
-          ["list*", "wat-js-invoke", "obj", ["list", "quote", "method"], "args"]],
+         ["define-macro", [".", "obj", "field"],
+           ["list", "wat-js-prop", "obj", ["list", "quote", "field"]]],
          ["define-macro", ["=", "obj", "field", "value"],
           ["list", "wat-js-set-prop", "obj", ["list", "quote", "field"], "value"]],
+         ["define-macro", ["#", "obj", "method", "#rest", "args"],
+          ["list*", "wat-js-invoke", "obj", ["list", "quote", "method"], "args"]],
 
          ["define-macro", ["string", "sym"],
           ["wat-symbol-name", "sym"]],

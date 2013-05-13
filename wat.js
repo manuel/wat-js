@@ -49,7 +49,7 @@ wat.VM = function() {
         }
         form.car = expanded.car;
         form.cdr = expanded.cdr;
-        return evaluate(e, k, f, form);
+        return evaluate(e, k, f, expanded);
     }
     function Macro(expander) { this.expander = expander; }
     function isMacro(x) { return x instanceof Macro; }
@@ -57,7 +57,7 @@ wat.VM = function() {
     function combine(e, k, f, cmb, o) {
         if (cmb && cmb.wat_combine)
             return cmb.wat_combine(e, k, f, o);
-        else if (Object.prototype.toString.call(cmb) == "[object Function]")
+        else if (Object.prototype.toString.call(cmb) === "[object Function]")
             return combine(e, k, f, jswrap(cmb), o);
         else
             fail("not a function: " + JSON.stringify(cmb));
@@ -168,6 +168,7 @@ wat.VM = function() {
                 var res = combine(e, null, null, th, NIL);
             }
         } catch(exc) {
+            // unwrap handler to prevent eval if exc is sym or cons
             var res = combine(e, null, null, unwrap(handler), list(exc));
         }
         if (isCapture(res)) {
@@ -536,8 +537,6 @@ wat.VM = function() {
 
          ["define-macro", [".", "field", "obj"],
            ["list", "wat-js-element", "obj", ["wat-symbol-name", "field"]]],
-         ["define-macro", ["=", "obj", "field", "value"],
-          ["list", "wat-js-set-element", "obj", ["wat-symbol-name", "field"], "value"]],
          ["define-macro", ["#", "method", "obj", "#rest", "args"],
           ["list*", "wat-js-invoke", "obj", ["wat-symbol-name", "method"], "args"]],
 

@@ -49,7 +49,7 @@ wat.VM = function() {
         }
         form.car = expanded.car;
         form.cdr = expanded.cdr;
-        return evaluate(e, k, f, form);
+        return evaluate(e, k, f, expanded);
     }
     function Macro(expander) { this.expander = expander; }
     function isMacro(x) { return x instanceof Macro; }
@@ -57,7 +57,7 @@ wat.VM = function() {
     function combine(e, k, f, cmb, o) {
         if (cmb && cmb.wat_combine)
             return cmb.wat_combine(e, k, f, o);
-        else if (Object.prototype.toString.call(cmb) == "[object Function]")
+        else if (Object.prototype.toString.call(cmb) === "[object Function]")
             return combine(e, k, f, jswrap(cmb), o);
         else
             fail("not a function: " + JSON.stringify(cmb));
@@ -168,6 +168,7 @@ wat.VM = function() {
                 var res = combine(e, null, null, th, NIL);
             }
         } catch(exc) {
+            // unwrap handler to prevent eval if exc is sym or cons
             var res = combine(e, null, null, unwrap(handler), list(exc));
         }
         if (isCapture(res)) {
@@ -462,6 +463,11 @@ wat.VM = function() {
            ["list", "def", ["car", "lhs"], ["list*", "lambda", ["cdr", "lhs"], "rhs"]],
            ["list", "def", "lhs", ["car", "rhs"]]]],
 
+         ["define-macro", ["string", "sym"],
+          ["wat-symbol-name", "sym"]],
+         ["define", ["array", "#rest", "args"],
+          ["wat-list-to-array", "args"]],
+         
          ["define", ["map-list", "f", "lst"],
            ["if", ["nil?", "lst"],
             [],
@@ -473,7 +479,7 @@ wat.VM = function() {
            ["map-list", "cadr", "bindings"]]],
 
          ["define", ["call-with-escape", "fun"],
-          ["let", [["fresh", ["list", 44]]],
+          ["let", [["fresh", ["list", null]]],
            ["catch", ["fun", ["lambda", ["val"], ["throw", ["list", "fresh", "val"]]]],
             ["lambda", ["exc"],
              ["if", ["&&", ["cons?", "exc"], ["===", "fresh", ["car", "exc"]]],
@@ -526,19 +532,12 @@ wat.VM = function() {
          ["define-js-binop", "|"],
          ["define-js-binop", "||"],
 
-         ["define-macro", ["string", "sym"],
-          ["wat-symbol-name", "sym"]],
-         ["define", ["array", "#rest", "args"],
-          ["wat-list-to-array", "args"]],
-         
          ["define-macro", ["define-js-function", "name", "js-fun"],
           ["list", "define", "name", ["list", "js-wrap", "js-fun"]]],
 
-         ["define-macro", [".", "obj", "field"],
+         ["define-macro", [".", "field", "obj"],
            ["list", "wat-js-element", "obj", ["wat-symbol-name", "field"]]],
-         ["define-macro", ["=", "obj", "field", "value"],
-          ["list", "wat-js-set-element", "obj", ["wat-symbol-name", "field"], "value"]],
-         ["define-macro", ["#", "obj", "method", "#rest", "args"],
+         ["define-macro", ["#", "method", "obj", "#rest", "args"],
           ["list*", "wat-js-invoke", "obj", ["wat-symbol-name", "method"], "args"]],
 
         ];

@@ -425,6 +425,8 @@ wat.VM = function() {
          ["define-macro", ["push-subcont", "k", "#rest", "body"],
           ["list", "wat-push-subcont", "k", ["list*", "lambda", [], "body"]]],
 
+         // Library
+
          ["def", "compose",
           ["lambda", ["f", "g"], ["lambda", ["arg"], ["f", ["g", "arg"]]]]],
 
@@ -490,14 +492,18 @@ wat.VM = function() {
            ["list", "lambda", [], "test"],
            ["list*", "lambda", [], "body"]]],
 
-         ["define-macro", ["define-js-unop", "op"],
-          ["list", "define", "op", ["list", "wat-js-unop", "op"]]],
+         // JS
+
+         ["def", "define-js-unop",
+          ["macro", ["op"],
+           ["list", "def", "op", ["list", "wat-js-unop", "op"]]]],
          ["define-js-unop", "!"],
          ["define-js-unop", "typeof"],
          ["define-js-unop", "~"],
 
-         ["define-macro", ["define-js-binop", "op"],
-          ["list", "define", "op", ["list", "wat-js-binop", "op"]]],
+         ["def", "define-js-binop",
+          ["macro", ["op"],
+           ["list", "def", "op", ["list", "wat-js-binop", "op"]]]],
          ["define-js-binop", "!="],
          ["define-js-binop", "!=="],
          ["define-js-binop", "%"],
@@ -521,13 +527,12 @@ wat.VM = function() {
          ["define-js-binop", "|"],
          ["define-js-binop", "||"],
 
-         ["define-macro", ["define-js-function", "name", "js-fun"],
-          ["list", "define", "name", ["list", "js-wrap", "js-fun"]]],
-
-         ["define-macro", [".", "field", "obj"],
-           ["list", "wat-js-element", "obj", ["wat-symbol-name", "field"]]],
-         ["define-macro", ["#", "method", "obj", "#rest", "args"],
-          ["list*", "wat-js-invoke", "obj", ["wat-symbol-name", "method"], "args"]],
+         ["def", ".",
+          ["macro", ["field", "obj"],
+           ["list", "wat-js-element", "obj", ["wat-symbol-name", "field"]]]],
+         ["def", "#",
+          ["macro", ["method", "obj", "#rest", "args"],
+           ["list*", "wat-js-invoke", "obj", ["wat-symbol-name", "method"], "args"]]],
 
         ];
     /* Init */

@@ -369,7 +369,13 @@ wat.VM = function() {
          ["wat-def", "wat-list-to-array", jswrap(list_to_array)],
          // Optimization
          ["wat-def", "wat-list*", jswrap(list_star)],
-         
+         // Macros
+         ["wat-def", "wat-macro",
+          ["wat-wrap",
+           ["wat-vau", ["expander"], "#ignore",
+            ["wat-vau", "operands", "env",
+             ["eval", ["eval", ["cons", "expander", "operands"], ["make-environment"]], "env"]]]]],
+
          // Primitives
 
          ["wat-def", "def", "wat-def"],
@@ -378,24 +384,18 @@ wat.VM = function() {
          ["def", "begin", "wat-begin"],
          ["def", "cons", "wat-cons"],
          ["def", "cons?", "wat-cons?"],
+         ["def", "eval", "wat-eval"],
          ["def", "finally", "wat-finally"],
          ["def", "if", "wat-if"],
          ["def", "js-callback", "wat-js-callback"],
          ["def", "js-wrap", "wat-js-wrap"],
          ["def", "list*", "wat-list*"],
+         ["def", "make-environment", "wat-make-environment"],
          ["def", "nil?", "wat-nil?"],
          ["def", "throw", "wat-throw"],
-         ["def", "make-environment", "wat-make-environment"],
 
          ["def", "quote", ["wat-vau", ["x"], "#ignore", "x"]],
          ["def", "list", ["wat-wrap", ["wat-vau", "arglist", "#ignore", "arglist"]]],
-
-         ["def", "wat-macro",
-          ["wat-wrap",
-           ["wat-vau", ["expander"], "#ignore",
-            ["wat-vau", "operands", "menv",
-             // there must be a simpler way
-             ["wat-eval", ["wat-eval", ["cons", "expander", "operands"], ["make-environment"]], "menv"]]]]],
 
          ["def", "vau",
           ["wat-macro",

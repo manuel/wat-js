@@ -28,31 +28,8 @@ wat.VM = function() {
             captureFrame(op, function(k, f) { return that.wat_eval(e, k, f); });
             return op;
         }
-        if (isMacro(op)) {
-            return macroCombine(e, null, null, op, this);
-        } else {
-            return combine(e, null, null, op, cdr(this));
-        }
+        return combine(e, null, null, op, cdr(this));
     };
-    function macroCombine(e, k, f, macro, form) {
-        if (isContinuation(k)) {
-            var expanded = continueFrame(k, f);
-        } else {
-            var expanded = combine(e, k, f, macro.expander, cdr(form));
-        }
-        if (isCapture(expanded)) {
-            captureFrame(expanded, function(k, f) { return macroCombine(e, k, f, macro, form); });
-            return expanded;
-        }
-        if (!(expanded instanceof Cons)) {
-            expanded = list(new Sym("wat-begin"), expanded);
-        }
-        form.car = expanded.car;
-        form.cdr = expanded.cdr;
-        return evaluate(e, k, f, expanded);
-    }
-    function Macro(expander) { this.expander = expander; }
-    function isMacro(x) { return x instanceof Macro; }
     /* Operative & Applicative Combiners */
     function combine(e, k, f, cmb, o) {
         if (cmb && cmb.wat_combine)
@@ -359,10 +336,11 @@ wat.VM = function() {
 
          // Core
 
-         // Fexprs and Macros
+         // Fexprs
          ["wat-def", "wat-vau", new Vau()],
+         ["wat-def", "wat-eval", wrap(new Eval())],
+         ["wat-def", "wat-make-environment", jswrap(function() { return new Env(); })],
          ["wat-def", "wat-wrap", jswrap(wrap)],
-         ["wat-def", "wat-macro", jswrap(function(expander) { return new Macro(expander); })],
          // Forms
          ["wat-def", "wat-cons", jswrap(cons)],
          ["wat-def", "wat-cons?", jswrap(function(obj) { return obj instanceof Cons; })],
@@ -416,9 +394,17 @@ wat.VM = function() {
          ["def", "ref", "wat-ref"],
          ["def", "set", "wat-set"],
          ["def", "throw", "wat-throw"],
+         ["def", "make-environment", "wat-make-environment"],
 
          ["def", "quote", ["wat-vau", ["x"], "#ignore", "x"]],
          ["def", "list", ["wat-wrap", ["wat-vau", "arglist", "#ignore", "arglist"]]],
+
+         ["def", "wat-macro",
+          ["wat-wrap",
+           ["wat-vau", ["expander"], "#ignore",
+            ["wat-vau", "operands", "menv",
+             // there must be a simpler way
+             ["wat-eval", ["wat-eval", ["cons", "expander", "operands"], ["make-environment"]], "menv"]]]]],
 
          ["def", "vau",
           ["wat-macro",

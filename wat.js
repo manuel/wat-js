@@ -360,8 +360,8 @@ wat.VM = function() {
          ["wat-def", "wat-dref", wrap(new DRef())],
          // JS Interface
          ["wat-def", "wat-js-wrap", jswrap(jswrap)],
-         ["wat-def", "wat-js-unop", new JSFun(function(sym) { return js_unop(sym_name(sym)); })],
-         ["wat-def", "wat-js-binop", new JSFun(function(sym) { return js_binop(sym_name(sym)); })],
+         ["wat-def", "wat-js-unop", jswrap(js_unop)],
+         ["wat-def", "wat-js-binop", jswrap(js_binop)],
          ["wat-def", "wat-js-element", jswrap(function(obj, i) { return obj[i]; })],
          ["wat-def", "wat-js-set-element", jswrap(function(obj, i, v) { return obj[i] = v; })],
          ["wat-def", "wat-js-invoke", jswrap(js_invoke)],
@@ -496,14 +496,14 @@ wat.VM = function() {
 
          ["def", "define-js-unop",
           ["macro", ["op"],
-           ["list", "def", "op", ["list", "wat-js-unop", "op"]]]],
+           ["list", "def", "op", ["list", "wat-js-unop", ["list", "string", "op"]]]]],
          ["define-js-unop", "!"],
          ["define-js-unop", "typeof"],
          ["define-js-unop", "~"],
 
          ["def", "define-js-binop",
           ["macro", ["op"],
-           ["list", "def", "op", ["list", "wat-js-binop", "op"]]]],
+           ["list", "def", "op", ["list", "wat-js-binop", ["list", "string", "op"]]]]],
          ["define-js-binop", "!="],
          ["define-js-binop", "!=="],
          ["define-js-binop", "%"],
@@ -529,10 +529,10 @@ wat.VM = function() {
 
          ["def", ".",
           ["macro", ["field", "obj"],
-           ["list", "wat-js-element", "obj", ["wat-symbol-name", "field"]]]],
+           ["list", "wat-js-element", "obj", ["list", "string", "field"]]]],
          ["def", "#",
           ["macro", ["method", "obj", "#rest", "args"],
-           ["list*", "wat-js-invoke", "obj", ["wat-symbol-name", "method"], "args"]]],
+           ["list*", "wat-js-invoke", "obj", ["list", "string", "method"], "args"]]],
 
         ];
     /* Init */

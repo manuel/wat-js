@@ -264,8 +264,6 @@ wat.VM = function() {
     DRef.prototype.wat_combine = function(e, k, f, o) {
         return elt(o, 0).val;
     };
-    /* Mutable references */
-    function Ref(value) { this.value = value; }
     /* Objects */
     function Nil() {}; var NIL = new Nil();
     function Ign() {}; var IGN = new Ign();
@@ -360,10 +358,6 @@ wat.VM = function() {
          ["wat-def", "wat-dnew", wrap(new DNew())],
          ["wat-def", "wat-dlet", wrap(new DLet())],
          ["wat-def", "wat-dref", wrap(new DRef())],
-         // Mutable references
-         ["wat-def", "wat-ref", jswrap(function(value) { return new Ref(value); })],
-         ["wat-def", "wat-get", jswrap(function(ref) { return ref.value; })],
-         ["wat-def", "wat-set", jswrap(function(ref, value) { return ref.value = value; })],
          // JS Interface
          ["wat-def", "wat-js-wrap", jswrap(jswrap)],
          ["wat-def", "wat-js-unop", new JSFun(function(sym) { return js_unop(sym_name(sym)); })],
@@ -385,14 +379,11 @@ wat.VM = function() {
          ["def", "cons", "wat-cons"],
          ["def", "cons?", "wat-cons?"],
          ["def", "finally", "wat-finally"],
-         ["def", "get", "wat-get"],
          ["def", "if", "wat-if"],
          ["def", "js-callback", "wat-js-callback"],
          ["def", "js-wrap", "wat-js-wrap"],
          ["def", "list*", "wat-list*"],
          ["def", "nil?", "wat-nil?"],
-         ["def", "ref", "wat-ref"],
-         ["def", "set", "wat-set"],
          ["def", "throw", "wat-throw"],
          ["def", "make-environment", "wat-make-environment"],
 

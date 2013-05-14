@@ -34,7 +34,10 @@ var code =
      ["let-escape", "x",
       ["x", 12]],
      ["let*", [["a", 1], ["b", ["+", "a", 1]]],
-      "b"]
+      "b"],
+     ["where", ["+", "x", "y"],
+      ["x", 1],
+      ["y", 2]],
     ];
 console.log(new wat.VM().run(code));
 </script>

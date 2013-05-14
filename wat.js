@@ -455,6 +455,12 @@ wat.VM = function() {
            ["list*", "lambda", ["map-list", "car", "bindings"], "body"],
            ["map-list", "cadr", "bindings"]]],
 
+         ["define-macro", ["let*", "bindings", "#rest", "body"],
+          ["if", ["nil?", "bindings"],
+           ["list*", "let", [], "body"],
+           ["list", "let", ["list", ["car", "bindings"]],
+            ["list*", "let*", ["cdr", "bindings"], "body"]]]],
+
          ["define", ["call-with-escape", "fun"],
           ["let", [["fresh", ["list", null]]],
            ["catch", ["fun", ["lambda", ["val"], ["throw", ["list", "fresh", "val"]]]],

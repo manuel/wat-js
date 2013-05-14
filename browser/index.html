@@ -32,7 +32,9 @@ var code =
       ["throw", ["string", "foo"]],
       ["lambda", ["exc"], ["#", "log", console, "exc"]]],
      ["let-escape", "x",
-      ["x", 12]]
+      ["x", 12]],
+     ["let*", [["a", 1], ["b", ["+", "a", 1]]],
+      "b"]
     ];
 console.log(new wat.VM().run(code));
 </script>

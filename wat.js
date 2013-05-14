@@ -369,12 +369,6 @@ wat.VM = function() {
          ["wat-def", "wat-list-to-array", jswrap(list_to_array)],
          // Optimization
          ["wat-def", "wat-list*", jswrap(list_star)],
-         // Macros
-         ["wat-def", "wat-macro",
-          ["wat-wrap",
-           ["wat-vau", ["expander"], "#ignore",
-            ["wat-vau", "operands", "env",
-             ["eval", ["eval", ["cons", "expander", "operands"], ["make-environment"]], "env"]]]]],
 
          // Primitives
 
@@ -396,6 +390,12 @@ wat.VM = function() {
 
          ["def", "quote", ["wat-vau", ["x"], "#ignore", "x"]],
          ["def", "list", ["wat-wrap", ["wat-vau", "arglist", "#ignore", "arglist"]]],
+
+         ["wat-def", "wat-macro",
+          ["wat-wrap",
+           ["wat-vau", ["expander"], "#ignore",
+            ["wat-vau", "operands", "env",
+             ["eval", ["eval", ["cons", "expander", "operands"], ["make-environment"]], "env"]]]]],
 
          ["def", "vau",
           ["wat-macro",

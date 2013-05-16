@@ -32,13 +32,8 @@ wat.VM = function() {
     };
     /* Operative & Applicative Combiners */
     function combine(e, k, f, cmb, o) {
-        if (cmb && cmb.wat_combine)
-            return cmb.wat_combine(e, k, f, o);
-        else if (Object.prototype.toString.call(cmb) === "[object Function]")
-            return combine(e, k, f, jswrap(cmb), o);
-        else
-            fail("not a function: " + JSON.stringify(cmb));
-    }
+        if (cmb && cmb.wat_combine) return cmb.wat_combine(e, k, f, o);
+        else fail("not a combiner: " + JSON.stringify(cmb)); }
     function Opv(p, ep, x, e) { this.p = p; this.ep = ep; this.x = x; this.e = e; }
     function Apv(cmb) { this.cmb = cmb; }
     function wrap(cmb) { return new Apv(cmb); }; function unwrap(apv) { return apv.cmb; }

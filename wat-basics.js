@@ -13,6 +13,10 @@ wat_basics.main =
          ["def", "cdar", ["compose", "cdr", "car"]],
          ["def", "cddr", ["compose", "cdr", "cdr"]],
 
+         ["def", "define-macro",
+          ["macro", [["name", "#rest", "params"], "#rest", "body"],
+           ["list", "def", "name", ["list*", "macro", "params", "body"]]]],
+
          ["define-macro", ["define", "lhs", "#rest", "rhs"],
           ["if", ["cons?", "lhs"],
            ["list", "def", ["car", "lhs"], ["list*", "lambda", ["cdr", "lhs"], "rhs"]],

@@ -334,6 +334,7 @@ wat.VM = function() {
          ["wat-def", "wat-eval", wrap(new Eval())],
          ["wat-def", "wat-make-environment", jswrap(function() { return new Env(); })],
          ["wat-def", "wat-wrap", jswrap(wrap)],
+         ["wat-def", "wat-unwrap", jswrap(unwrap)],
          // Forms
          ["wat-def", "wat-cons", jswrap(cons)],
          ["wat-def", "wat-cons?", jswrap(function(obj) { return obj instanceof Cons; })],
@@ -381,10 +382,12 @@ wat.VM = function() {
          ["def", "list*", "wat-list*"],
          ["def", "make-environment", "wat-make-environment"],
          ["def", "nil?", "wat-nil?"],
+         ["def", "symbol-name", "wat-symbol-name"],
          ["def", "throw", "wat-throw"],
 
          ["def", "quote", ["wat-vau", ["x"], "#ignore", "x"]],
          ["def", "list", ["wat-wrap", ["wat-vau", "arglist", "#ignore", "arglist"]]],
+         ["def", "string", ["wat-vau", ["sym"], "#ignore", ["symbol-name", "sym"]]],
 
          ["wat-def", "wat-macro",
           ["wat-wrap",
@@ -422,9 +425,12 @@ wat.VM = function() {
 
          // JS
 
+         ["def", "array", ["lambda", "args", ["wat-list-to-array", "args"]]],
+
          ["def", "define-js-unop",
           ["macro", ["op"],
            ["list", "def", "op", ["list", "wat-js-unop", ["list", "string", "op"]]]]],
+
          ["define-js-unop", "!"],
          ["define-js-unop", "typeof"],
          ["define-js-unop", "~"],
@@ -432,6 +438,7 @@ wat.VM = function() {
          ["def", "define-js-binop",
           ["macro", ["op"],
            ["list", "def", "op", ["list", "wat-js-binop", ["list", "string", "op"]]]]],
+
          ["define-js-binop", "!="],
          ["define-js-binop", "!=="],
          ["define-js-binop", "%"],
@@ -458,6 +465,7 @@ wat.VM = function() {
          ["def", ".",
           ["macro", ["field", "obj"],
            ["list", "wat-js-element", "obj", ["list", "string", "field"]]]],
+
          ["def", "#",
           ["macro", ["method", "obj", "#rest", "args"],
            ["list*", "wat-js-invoke", "obj", ["list", "string", "method"], "args"]]],

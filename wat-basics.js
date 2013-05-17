@@ -18,11 +18,6 @@ wat_basics.main =
            ["list", "def", ["car", "lhs"], ["list*", "lambda", ["cdr", "lhs"], "rhs"]],
            ["list", "def", "lhs", ["car", "rhs"]]]],
 
-         ["define-macro", ["string", "sym"],
-          ["wat-symbol-name", "sym"]],
-         ["define", ["array", "#rest", "args"],
-          ["wat-list-to-array", "args"]],
-         
          ["define", ["map-list", "f", "lst"],
            ["if", ["nil?", "lst"],
             [],

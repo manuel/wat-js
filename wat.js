@@ -335,10 +335,11 @@ wat.VM = function() {
          ["def", "make-environment", jswrap(function() { return new Env(); })],
          ["def", "wrap", jswrap(wrap)],
          ["def", "unwrap", jswrap(unwrap)],
-         // Forms
+         // Values
          ["def", "cons", jswrap(cons)],
          ["def", "cons?", jswrap(function(obj) { return obj instanceof Cons; })],
          ["def", "nil?", jswrap(function(obj) { return obj === NIL; })],
+         ["def", "symbol?", jswrap(function(obj) { return obj instanceof Sym; })],
          ["def", "symbol-name", jswrap(sym_name)],
          // First-order Control
          ["def", "if", new If()],
@@ -385,7 +386,7 @@ wat.VM = function() {
 
          ["def", "macro",
           ["--macro",
-           ["--vau", ["params", "#rest", "body"], "#ignore",
+           ["vau", ["params", "#rest", "body"], "#ignore",
             ["list", "--macro", ["list*", "vau", "params", "#ignore", "body"]]]]],
 
          ["def", "lambda",
@@ -446,9 +447,6 @@ wat.VM = function() {
          ["define-js-binop", "instanceof"],
          ["define-js-binop", "|"],
          ["define-js-binop", "||"],
-
-         ["def", "[]", "js-element"],
-         ["def", "[]=", "js-set-element"],
 
          ["def", ".",
           ["macro", ["field", "obj"],

@@ -2,12 +2,15 @@
 <head>
   <title>Wat Sleeping Demo</title>
   <script type="text/javascript" src="../../wat.js"></script>
+  <script type="text/javascript" src="../../wat-basics.js"></script>
 </head>
 <body>
 <h1><a href="https://github.com/manuel/wat-js">Wat</a></h1>
 <script type="text/javascript">
 var code = 
     ["begin",
+
+     wat_basics.main,
 
      ["define", "default-prompt", ["quote", "default-prompt"]],
 
@@ -26,7 +29,7 @@ var code =
        ["define", ["callback", "#rest", "#ignore"],
         ["push-prompt", "default-prompt",
          ["push-subcont", "k"]]],
-       [setTimeout, ["wat-js-callback", "callback"], "ms"]]],
+       [["js-wrap", setTimeout], ["js-callback", "callback"], "ms"]]],
 
      ["spawn-thread", 1],
      ["spawn-thread", 2],

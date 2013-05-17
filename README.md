@@ -9,9 +9,7 @@ features for embedding in JavaScript programs.
 
 * Delimited dynamic binding http://okmij.org/ftp/papers/DDBinding.pdf
 
-* First-class lexical environments and fexprs ftp://ftp.cs.wpi.edu/pub/techreports/pdf/05-07.pdf
-
-* Hygienic macros
+* First-class lexical environments and fexprs http://www.wpi.edu/Pubs/ETD/Available/etd-090110-124904/unrestricted/jshutt.pdf
 
 * First-order control (sequential, conditional, loop, throw, catch, finally) running on JS stack
 

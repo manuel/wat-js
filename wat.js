@@ -38,7 +38,7 @@ wat.VM = function() {
     function Apv(cmb) { this.cmb = cmb; }
     function wrap(cmb) { return new Apv(cmb); }; function unwrap(apv) { return apv.cmb; }
     Opv.prototype.wat_combine = function(e, k, f, o) {
-        var xe = new Env(this.e); bind(xe, this.p, o); bind(xe, this.ep, e);
+        var xe = make_env(this.e); bind(xe, this.p, o); bind(xe, this.ep, e);
         return evaluate(xe, k, f, this.x);
     };
     Apv.prototype.wat_combine = function(e, k, f, o) {
@@ -230,10 +230,9 @@ wat.VM = function() {
     };
     /* Dynamic Variables */
     function DV(val) { this.val = val; }
-    function DNew() {}; function DLet() {}; function DRef() {}
-    DNew.prototype.wat_combine = function(e, k, f, o) {
-        return new DV(elt(o, 0));
-    };
+    function DNew() {}; function DRef() {}; function DLet() {}
+    DNew.prototype.wat_combine = function(e, k, f, o) { return new DV(elt(o, 0)); };
+    DRef.prototype.wat_combine = function(e, k, f, o) { return elt(o, 0).val; };
     DLet.prototype.wat_combine = function self(e, k, f, o) {
         var dv = elt(o, 0);
         var val = elt(o, 1);
@@ -256,9 +255,6 @@ wat.VM = function() {
             dv.val = oldVal;
         }
     };
-    DRef.prototype.wat_combine = function(e, k, f, o) {
-        return elt(o, 0).val;
-    };
     /* Objects */
     function Nil() {}; var NIL = new Nil();
     function Ign() {}; var IGN = new Ign();
@@ -266,7 +262,9 @@ wat.VM = function() {
     function car(cons) { return cons.car; }
     function cdr(cons) { return cons.cdr; }
     function elt(cons, i) { return (i === 0) ? car(cons) : elt(cdr(cons), i - 1); }
+    function sym_name(sym) { return sym.name; }
     function Env(parent) { this.bindings = Object.create(parent ? parent.bindings : null); }
+    function make_env(parent) { return new Env(parent); }
     function lookup(e, name) {
         var val = e.bindings[name];
         return (typeof(val) !== "undefined") ? val : fail("unbound: " + name); }
@@ -315,14 +313,11 @@ wat.VM = function() {
     function js_binop(op) { return jswrap(new Function("a", "b", "return (a " + op + " b)")); }
     function js_invoke(obj, method_name) {
         return obj[method_name].apply(obj, Array.prototype.slice.call(arguments, 2)); }
-    function JSCallback() {};
-    JSCallback.prototype.wat_combine = function(e, k, f, o) {
-        var cmb = elt(o, 0);
+    function js_callback(cmb) {
         return function() {
             var args = array_to_list(Array.prototype.slice.call(arguments));
-            combine(e, null, null, cmb, args);
-        }; };
-    function sym_name(sym) { return sym.name; }
+            return combine(make_env(), null, null, cmb, args);
+        } }
     /* Primitives */
     var primitives =
         ["begin",
@@ -332,7 +327,7 @@ wat.VM = function() {
          // Fexprs
          ["def", "--vau", new Vau()],
          ["def", "eval", wrap(new Eval())],
-         ["def", "make-environment", jswrap(function() { return new Env(); })],
+         ["def", "make-environment", jswrap(function() { return make_env(); })],
          ["def", "wrap", jswrap(wrap)],
          ["def", "unwrap", jswrap(unwrap)],
          // Values
@@ -362,7 +357,7 @@ wat.VM = function() {
          ["def", "js-element", jswrap(function(obj, i) { return obj[i]; })],
          ["def", "js-set-element", jswrap(function(obj, i, v) { return obj[i] = v; })],
          ["def", "js-invoke", jswrap(js_invoke)],
-         ["def", "js-callback", wrap(new JSCallback())],
+         ["def", "js-callback", jswrap(js_callback)],
          ["def", "list-to-array", jswrap(list_to_array)],
          // Optimization
          ["def", "list*", jswrap(list_star)],
@@ -458,7 +453,7 @@ wat.VM = function() {
 
         ];
     /* Init */
-    var environment = new Env();
+    var environment = make_env();
     bind(environment, new Sym("def"), new Def());
     bind(environment, new Sym("begin"), new Begin());
     run(primitives);

@@ -270,15 +270,15 @@ wat.VM = function() {
     function lookup(e, name) {
         var val = e.bindings[name];
         return (typeof(val) !== "undefined") ? val : fail("unbound: " + name); }
-    function bind(e, lhs, rhs) { lhs.match(e, rhs); return rhs; }
-    Sym.prototype.match = function(e, rhs) {
+    function bind(e, lhs, rhs) { lhs.wat_match(e, rhs); return rhs; }
+    Sym.prototype.wat_match = function(e, rhs) {
         if (typeof(e) === "undefined") fail("undefined argument: " + this.name);
         return e.bindings[this.name] = rhs; }
-    Cons.prototype.match = function(e, rhs) {
-        car(this).match(e, car(rhs)); cdr(this).match(e, cdr(rhs)); };
-    Nil.prototype.match = function(e, rhs) {
+    Cons.prototype.wat_match = function(e, rhs) {
+        car(this).wat_match(e, car(rhs)); cdr(this).wat_match(e, cdr(rhs)); };
+    Nil.prototype.wat_match = function(e, rhs) {
         if (rhs !== NIL) fail("NIL expected, but got: " + JSON.stringify(rhs)); };
-    Ign.prototype.match = function(e, rhs) {};
+    Ign.prototype.wat_match = function(e, rhs) {};
     /* Utilities */
     function fail(err) { throw err; }
     function list() {

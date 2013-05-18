@@ -1,4 +1,3 @@
-// Wat Basics Library. Include wat_basics.main in your program to use.
 (function(wat_basics){
 wat_basics.main =
         ["begin",

@@ -1,4 +1,4 @@
-(function(wat){
+(function(wat) {
 wat.VM = function() {
     /* Continuations */
     function Continuation(fun, next) {
@@ -68,8 +68,8 @@ wat.VM = function() {
         return evalArgs(e, null, null, cdr(todo), cons(arg, done));
     }
     /* Built-in Combiners */
-    function Vau() {}; function Def() {}; function Eval() {}
-    Vau.prototype.wat_combine = function(e, k, f, o) {
+    function __Vau() {}; function Def() {}; function Eval() {}
+    __Vau.prototype.wat_combine = function(e, k, f, o) {
         return new Opv(elt(o, 0), elt(o, 1), elt(o, 2), e); };
     Def.prototype.wat_combine = function self(e, k, f, o) {
         if (isContinuation(k)) {
@@ -86,8 +86,8 @@ wat.VM = function() {
     Eval.prototype.wat_combine = function(e, k, f, o) {
         return evaluate(elt(o, 1), k, f, elt(o, 0)); };
     /* First-order Control */
-    function Begin() {}; function If() {}; function Loop() {}
-    function Catch() {}; function Finally() {}
+    function Begin() {}; function If() {}; function __Loop() {}
+    function __Catch() {}; function Finally() {}
     Begin.prototype.wat_combine = function(e, k, f, o) {
         if (o === NIL) return null; else return begin(e, k, f, o); };
     function begin(e, k, f, xs) {
@@ -115,7 +115,7 @@ wat.VM = function() {
         }
         return evaluate(e, null, null, test ? elt(o, 1) : elt(o, 2));
     };
-    Loop.prototype.wat_combine = function self(e, k, f, o) {
+    __Loop.prototype.wat_combine = function self(e, k, f, o) {
         var first = true; // only continue once
         while (true) {
             if (first && isContinuation(k)) {
@@ -130,7 +130,7 @@ wat.VM = function() {
             }
         }
     };
-    Catch.prototype.wat_combine = function self(e, k, f, o) {
+    __Catch.prototype.wat_combine = function self(e, k, f, o) {
         var th = elt(o, 0);
         var handler = elt(o, 1);
         try {
@@ -184,8 +184,8 @@ wat.VM = function() {
         }
     }
     /* Delimited Control */
-    function PushPrompt() {}; function TakeSubcont() {}; function PushSubcont() {}
-    PushPrompt.prototype.wat_combine = function self(e, k, f, o) {
+    function __PushPrompt() {}; function __TakeSubcont() {}; function __PushSubcont() {}
+    __PushPrompt.prototype.wat_combine = function self(e, k, f, o) {
         var prompt = elt(o, 0);
         var th = elt(o, 1);
         if (isContinuation(k)) {
@@ -206,14 +206,14 @@ wat.VM = function() {
             return res;
         }
     };
-    TakeSubcont.prototype.wat_combine = function(e, k, f, o) {
+    __TakeSubcont.prototype.wat_combine = function(e, k, f, o) {
         var prompt = elt(o, 0);
         var handler = elt(o, 1);
         var cap = new Capture(prompt, handler);
         captureFrame(cap, function(k, thef) { return combine(e, null, null, thef, NIL); });
         return cap;
     };
-    PushSubcont.prototype.wat_combine = function self(e, k, f, o) {
+    __PushSubcont.prototype.wat_combine = function self(e, k, f, o) {
         var thek = elt(o, 0);
         var thef = elt(o, 1);
         if (isContinuation(k)) {
@@ -230,10 +230,10 @@ wat.VM = function() {
     };
     /* Dynamic Variables */
     function DV(val) { this.val = val; }
-    function DNew() {}; function DRef() {}; function DLet() {}
+    function DNew() {}; function DRef() {}; function __DLet() {}
     DNew.prototype.wat_combine = function(e, k, f, o) { return new DV(elt(o, 0)); };
     DRef.prototype.wat_combine = function(e, k, f, o) { return elt(o, 0).val; };
-    DLet.prototype.wat_combine = function self(e, k, f, o) {
+    __DLet.prototype.wat_combine = function self(e, k, f, o) {
         var dv = elt(o, 0);
         var val = elt(o, 1);
         var th = elt(o, 2);
@@ -325,7 +325,7 @@ wat.VM = function() {
          // Core
 
          // Fexprs
-         ["def", "--vau", new Vau()],
+         ["def", "--vau", new __Vau()],
          ["def", "eval", wrap(new Eval())],
          ["def", "make-environment", jswrap(function() { return make_env(); })],
          ["def", "wrap", jswrap(wrap)],
@@ -338,18 +338,18 @@ wat.VM = function() {
          ["def", "symbol-name", jswrap(sym_name)],
          // First-order Control
          ["def", "if", new If()],
-         ["def", "--loop", new Loop()],
+         ["def", "--loop", new __Loop()],
          ["def", "throw", jswrap(fail)],
-         ["def", "--catch", wrap(new Catch())],
+         ["def", "--catch", wrap(new __Catch())],
          ["def", "finally", new Finally()],
          // Delimited Control
-         ["def", "--push-prompt", wrap(new PushPrompt())],
-         ["def", "--take-subcont", wrap(new TakeSubcont())],
-         ["def", "--push-subcont", wrap(new PushSubcont())],
+         ["def", "--push-prompt", wrap(new __PushPrompt())],
+         ["def", "--take-subcont", wrap(new __TakeSubcont())],
+         ["def", "--push-subcont", wrap(new __PushSubcont())],
          // Dynamically-scoped Variables
-         ["def", "--dnew", wrap(new DNew())],
-         ["def", "--dlet", wrap(new DLet())],
-         ["def", "--dref", wrap(new DRef())],
+         ["def", "dnew", wrap(new DNew())],
+         ["def", "--dlet", wrap(new __DLet())],
+         ["def", "dref", wrap(new DRef())],
          // JS Interface
          ["def", "js-wrap", jswrap(jswrap)],
          ["def", "js-unop", jswrap(js_unop)],
@@ -368,21 +368,21 @@ wat.VM = function() {
          ["def", "list", ["wrap", ["--vau", "arglist", "#ignore", "arglist"]]],
          ["def", "string", ["--vau", ["sym"], "#ignore", ["symbol-name", "sym"]]],
 
-         ["def", "--macro",
+         ["def", "make-macro-expander",
           ["wrap",
            ["--vau", ["expander"], "#ignore",
             ["--vau", "operands", "env",
              ["eval", ["eval", ["cons", "expander", "operands"], ["make-environment"]], "env"]]]]],
 
          ["def", "vau",
-          ["--macro",
+          ["make-macro-expander",
            ["--vau", ["params", "env-param", "#rest", "body"], "#ignore",
             ["list", "--vau", "params", "env-param", ["cons", "begin", "body"]]]]],
 
          ["def", "macro",
-          ["--macro",
+          ["make-macro-expander",
            ["vau", ["params", "#rest", "body"], "#ignore",
-            ["list", "--macro", ["list*", "vau", "params", "#ignore", "body"]]]]],
+            ["list", "make-macro-expander", ["list*", "vau", "params", "#ignore", "body"]]]]],
 
          ["def", "lambda",
           ["macro", ["params", "#rest", "body"],

@@ -368,21 +368,21 @@ wat.VM = function() {
          ["def", "list", ["wrap", ["--vau", "arglist", "#ignore", "arglist"]]],
          ["def", "string", ["--vau", ["sym"], "#ignore", ["symbol-name", "sym"]]],
 
-         ["def", "--macro",
+         ["def", "make-macro-expander",
           ["wrap",
            ["--vau", ["expander"], "#ignore",
             ["--vau", "operands", "env",
              ["eval", ["eval", ["cons", "expander", "operands"], ["make-environment"]], "env"]]]]],
 
          ["def", "vau",
-          ["--macro",
+          ["make-macro-expander",
            ["--vau", ["params", "env-param", "#rest", "body"], "#ignore",
             ["list", "--vau", "params", "env-param", ["cons", "begin", "body"]]]]],
 
          ["def", "macro",
-          ["--macro",
+          ["make-macro-expander",
            ["vau", ["params", "#rest", "body"], "#ignore",
-            ["list", "--macro", ["list*", "vau", "params", "#ignore", "body"]]]]],
+            ["list", "make-macro-expander", ["list*", "vau", "params", "#ignore", "body"]]]]],
 
          ["def", "lambda",
           ["macro", ["params", "#rest", "body"],

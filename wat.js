@@ -367,6 +367,7 @@ wat.VM = function() {
          ["def", "quote", ["--vau", ["x"], "#ignore", "x"]],
          ["def", "list", ["wrap", ["--vau", "arglist", "#ignore", "arglist"]]],
          ["def", "string", ["--vau", ["sym"], "#ignore", ["symbol-name", "sym"]]],
+         ["def", "get-current-environment", ["--vau", [], "e", "e"]],
 
          ["def", "make-macro-expander",
           ["wrap",

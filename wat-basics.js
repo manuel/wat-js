@@ -64,7 +64,14 @@ wat_basics.main =
          ["define-macro", ["while", "test", "#rest", "body"],
           ["list", "call-while",
            ["list", "lambda", [], "test"],
-           ["list*", "lambda", [], "body"]]]
+           ["list*", "lambda", [], "body"]]],
+
+         ["def", "set!",
+          ["vau", ["env", "lhs", "rhs"], "denv",
+           ["eval",
+            ["list", "def", "lhs",
+             ["list", ["unwrap", "eval"], "rhs", "denv"]],
+            ["eval", "env", "denv"]]]],
 
         ];
 })(typeof exports === "undefined" ? this["wat_basics"] = {} : exports);

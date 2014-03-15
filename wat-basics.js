@@ -73,5 +73,8 @@ wat_basics.main =
              ["list", ["unwrap", "eval"], "rhs", "denv"]],
             ["eval", "env", "denv"]]]],
 
+         ["define", ["apply", "appv", "arg"],
+          ["eval", ["cons", ["unwrap", "appv"], "arg"], ["make-environment"]]]
+
         ];
 })(typeof exports === "undefined" ? this["wat_basics"] = {} : exports);

@@ -359,6 +359,7 @@ wat.VM = function() {
          ["def", "js-invoke", jswrap(js_invoke)],
          ["def", "js-callback", jswrap(js_callback)],
          ["def", "list-to-array", jswrap(list_to_array)],
+         ["def", "array-to-list", jswrap(array_to_list)],
          // Optimization
          ["def", "list*", jswrap(list_star)],
 

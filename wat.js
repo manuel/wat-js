@@ -405,6 +405,10 @@ wat.VM = function() {
           ["macro", ["k", "#rest", "body"],
            ["list", "--push-subcont", "k", ["list*", "lambda", [], "body"]]]],
 
+         ["def", "dlet",
+          ["macro", ["dv", "val", "#rest", "body"],
+           ["list", "--dlet", "dv", "val", ["list*", "lambda", [], "body"]]]],
+
          // JS
 
          ["def", "array", ["lambda", "args", ["list-to-array", "args"]]],

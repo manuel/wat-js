@@ -270,7 +270,7 @@ wat.VM = function() {
         return (typeof(val) !== "undefined") ? val : fail("unbound: " + name); }
     function bind(e, lhs, rhs) { lhs.wat_match(e, rhs); return rhs; }
     Sym.prototype.wat_match = function(e, rhs) {
-        if (typeof(e) === "undefined") fail("undefined argument: " + this.name);
+        if (typeof(rhs) === "undefined") fail("undefined argument: " + this.name);
         return e.bindings[this.name] = rhs; }
     Cons.prototype.wat_match = function(e, rhs) {
         car(this).wat_match(e, car(rhs)); cdr(this).wat_match(e, cdr(rhs)); };

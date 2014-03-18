@@ -2,43 +2,40 @@
 <head>
   <title>Wat Sleeping Demo</title>
   <script type="text/javascript" src="../../wat.js"></script>
-  <script type="text/javascript" src="../../wat-basics.js"></script>
 </head>
 <body>
 <h1><a href="https://github.com/manuel/wat-js">Wat</a></h1>
+<script type="text/wat" id="sleeping">
+
+(define default-prompt (quote default-prompt))
+
+(define (spawn-thread id)
+  (push-prompt default-prompt
+    (run-thread id)))
+
+(define (run-thread id)
+  (loop
+    (#appendChild (.body @document)
+                  (#createTextNode @document (+ "Active thread: " id)))
+    (sleep 250)))
+
+(define (sleep ms)
+  (take-subcont default-prompt k
+    (define (callback . ignore)
+      (push-prompt default-prompt
+        (push-subcont k)))
+    (@setTimeout (js-callback callback) ms)))
+
+(spawn-thread 1)
+(spawn-thread 2)
+(spawn-thread 3)
+(spawn-thread 4)
+(spawn-thread 5)
+
+</script>
+
 <script type="text/javascript">
-var code = 
-    ["begin",
-
-     wat_basics.main,
-
-     ["define", "default-prompt", ["quote", "default-prompt"]],
-
-     ["define", ["spawn-thread", "id"],
-      ["push-prompt", "default-prompt",
-       ["run-thread", "id"]]],
-
-     ["define", ["run-thread", "id"],
-      ["loop",
-       ["#", "appendChild", [".", "body", document],
-        ["#", "createTextNode", document, ["+", ["string", "Active thread: "], "id"]]],
-       ["sleep", 250]]],
-
-     ["define", ["sleep", "ms"],
-      ["take-subcont", "default-prompt", "k",
-       ["define", ["callback", "#rest", "#ignore"],
-        ["push-prompt", "default-prompt",
-         ["push-subcont", "k"]]],
-       [["js-wrap", setTimeout], ["js-callback", "callback"], "ms"]]],
-
-     ["spawn-thread", 1],
-     ["spawn-thread", 2],
-     ["spawn-thread", 3],
-     ["spawn-thread", 4],
-     ["spawn-thread", 5]
-
-    ];
-new wat.VM().run(code);
+new wat.VM().eval(document.getElementById("sleeping").textContent);
 </script>
 </body>
 </html>

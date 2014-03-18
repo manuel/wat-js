@@ -364,8 +364,12 @@ wat.VM = function() {
     function jswrap(jsfun) { return wrap(new JSFun(jsfun)); }
     function js_unop(op) { return jswrap(new Function("a", "return (" + op + " a)")); }
     function js_binop(op) { return jswrap(new Function("a", "b", "return (a " + op + " b)")); }
-    function js_invoke(obj, method_name) {
-        return obj[method_name].apply(obj, Array.prototype.slice.call(arguments, 2)); }
+    function js_invoker(method_name) {
+        return jswrap(function() {
+            var rcv = arguments[0];
+            var method = rcv[method_name];
+            return method.apply(rcv, Array.prototype.slice.call(arguments, 1));
+        }); }
     function js_callback(cmb) {
         return function() {
             var args = array_to_list(Array.prototype.slice.call(arguments));
@@ -409,7 +413,7 @@ wat.VM = function() {
          ["def", "js-binop", jswrap(js_binop)],
          ["def", "js-element", jswrap(function(obj, i) { return obj[i]; })],
          ["def", "js-set-element", jswrap(function(obj, i, v) { return obj[i] = v; })],
-         ["def", "js-invoke", jswrap(js_invoke)],
+         ["def", "js-invoker", jswrap(js_invoker)],
          ["def", "js-callback", jswrap(js_callback)],
          ["def", "list-to-array", jswrap(list_to_array)],
          ["def", "array-to-list", jswrap(array_to_list)],
@@ -508,7 +512,7 @@ wat.VM = function() {
 
          ["def", "#",
           ["macro", ["method", "obj", "#rest", "args"],
-           ["list*", "js-invoke", "obj", ["list", "string", "method"], "args"]]],
+           ["list*", ["list", "js-invoker", ["list", "string", "method"]], "obj", "args"]]],
 
         ];
     /* Init */

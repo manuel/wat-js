@@ -1,14 +1,14 @@
 (function(wat) {
 wat.VM = function() {
     /* Continuations */
-    function Continuation(fun, next) {
-        this.fun = fun; this.next = next; }
+    function Continuation(fun, next, dbg) {
+        this.fun = fun; this.next = next; this.dbg = dbg; }
     function isContinuation(x) { return x instanceof Continuation; }
     function Capture(prompt, handler) {
         this.prompt = prompt; this.handler = handler; this.k = null; }
     function isCapture(x) { return x instanceof Capture; }
-    function captureFrame(capture, fun) {
-        capture.k = new Continuation(fun, capture.k); }
+    function captureFrame(capture, fun, dbg) {
+        capture.k = new Continuation(fun, capture.k, dbg); }
     function continueFrame(k, f) {
         return k.fun(k.next, f); }
     /* Evaluation Core */
@@ -16,6 +16,7 @@ wat.VM = function() {
         if (x && x.wat_eval) return x.wat_eval(e, k, f); else return x; }
     function Sym(name) { this.name = name; }
     Sym.prototype.wat_eval = function(e, k, f) { return lookup(e, this.name); };
+    Sym.prototype.toString = function() { return this.name; };
     function Cons(car, cdr) { this.car = car; this.cdr = cdr; }
     Cons.prototype.wat_eval = function(e, k, f) {
         if (isContinuation(k)) {
@@ -25,22 +26,32 @@ wat.VM = function() {
         }
         if (isCapture(op)) {
             var that = this;
-            captureFrame(op, function(k, f) { return that.wat_eval(e, k, f); });
+            captureFrame(op, function(k, f) { return that.wat_eval(e, k, f); }, this);
             return op;
         }
         return combine(e, null, null, op, cdr(this));
     };
+    Cons.prototype.toString = function() { return "(" + cons_to_string(this) + ")" };
+    function cons_to_string(cons) {
+        if (cons.cdr !== NIL) {
+            return cons.car.toString() + " " + cons_to_string(cons.cdr);
+        } else {
+            return cons.car.toString();
+        }
+    }
     /* Operative & Applicative Combiners */
     function combine(e, k, f, cmb, o) {
         if (cmb && cmb.wat_combine) return cmb.wat_combine(e, k, f, o);
         else fail("not a combiner: " + JSON.stringify(cmb)); }
     function Opv(p, ep, x, e) { this.p = p; this.ep = ep; this.x = x; this.e = e; }
     function Apv(cmb) { this.cmb = cmb; }
+    Apv.prototype.toString = function() { return "(Applicative " + this.cmb.toString() + ")"; };
     function wrap(cmb) { return new Apv(cmb); }; function unwrap(apv) { return apv.cmb; }
     Opv.prototype.wat_combine = function(e, k, f, o) {
         var xe = make_env(this.e); bind(xe, this.p, o); bind(xe, this.ep, e);
         return evaluate(xe, k, f, this.x);
     };
+    Opv.prototype.toString = function() { return "(Operative " + this.x.toString() + ")"; };
     Apv.prototype.wat_combine = function(e, k, f, o) {
         if (isContinuation(k)) {
             var args = continueFrame(k, f);
@@ -49,7 +60,7 @@ wat.VM = function() {
         }
         if (isCapture(args)) {
             var that = this;
-            captureFrame(args, function(k, f) { return that.wat_combine(e, k, f, o); });
+            captureFrame(args, function(k, f) { return that.wat_combine(e, k, f, o); }, cons(this, o));
             return args;
         }
         return this.cmb.wat_combine(e, null, null, args);
@@ -62,32 +73,42 @@ wat.VM = function() {
             var arg = evaluate(e, null, null, car(todo));
         }
         if (isCapture(arg)) {
-            captureFrame(arg, function(k, f) { return evalArgs(e, k, f, todo, done); });
+            captureFrame(arg, function(k, f) { return evalArgs(e, k, f, todo, done); }, car(todo));
             return arg;
         }
         return evalArgs(e, null, null, cdr(todo), cons(arg, done));
     }
     /* Built-in Combiners */
     function __Vau() {}; function Def() {}; function Eval() {}
+    __Vau.prototype.toString = function() { return "vau"; };
+    Def.prototype.toString = function() { return "def"; };
+    Eval.prototype.toString = function() { return "eval"; };
     __Vau.prototype.wat_combine = function(e, k, f, o) {
         return new Opv(elt(o, 0), elt(o, 1), elt(o, 2), e); };
     Def.prototype.wat_combine = function self(e, k, f, o) {
+        var lhs = elt(o, 0);
+        var rhs = elt(o, 1);
         if (isContinuation(k)) {
             var val = continueFrame(k, f);
         } else {
-            var val = evaluate(e, null, null, elt(o, 1));
+            var val = evaluate(e, null, null, rhs);
         }
         if (isCapture(val)) {
-            captureFrame(val, function(k, f) { return self(e, k, f, o); });
+            captureFrame(val, function(k, f) { return self(e, k, f, o); }, rhs);
             return val;
         }
-        return bind(e, elt(o, 0), val);
+        return bind(e, lhs, val);
     };
     Eval.prototype.wat_combine = function(e, k, f, o) {
         return evaluate(elt(o, 1), k, f, elt(o, 0)); };
     /* First-order Control */
     function Begin() {}; function If() {}; function __Loop() {}
     function __Catch() {}; function Finally() {}
+    Begin.prototype.toString = function() { return "begin"; };
+    If.prototype.toString = function() { return "if"; };
+    __Loop.prototype.toString = function() { return "loop"; };
+    __Catch.prototype.toString = function() { return "catch"; };
+    Finally.prototype.toString = function() { return "finally"; };
     Begin.prototype.wat_combine = function(e, k, f, o) {
         if (o === NIL) return null; else return begin(e, k, f, o); };
     function begin(e, k, f, xs) {
@@ -97,7 +118,7 @@ wat.VM = function() {
             var res = evaluate(e, null, null, car(xs));
         }
         if (isCapture(res)) {
-            captureFrame(res, function(k, f) { return begin(e, k, f, xs); });
+            captureFrame(res, function(k, f) { return begin(e, k, f, xs); }, car(xs));
             return res;
         }
         var kdr = cdr(xs);
@@ -110,7 +131,7 @@ wat.VM = function() {
             var test = evaluate(e, null, null, elt(o, 0));
         }
         if (isCapture(test)) {
-            captureFrame(test, function(k, f) { return self(e, k, f, o); });
+            captureFrame(test, function(k, f) { return self(e, k, f, o); }, elt(o, 0));
             return test;
         }
         return evaluate(e, null, null, test ? elt(o, 1) : elt(o, 2));
@@ -125,7 +146,7 @@ wat.VM = function() {
             }
             first = false;
             if (isCapture(res)) {
-                captureFrame(res, function(k, f) { return self(e, k, f, o); });
+                captureFrame(res, function(k, f) { return self(e, k, f, o); }, elt(o, 0));
                 return res;
             }
         }
@@ -144,7 +165,7 @@ wat.VM = function() {
             var res = combine(e, null, null, unwrap(handler), list(exc));
         }
         if (isCapture(res)) {
-            captureFrame(res, function(k, f) { return self(e, k, f, o); });
+            captureFrame(res, function(k, f) { return self(e, k, f, o); }, th);
             return res;
         } else {
             return res;
@@ -160,7 +181,7 @@ wat.VM = function() {
                 var res = evaluate(e, null, null, prot);
             }
             if (isCapture(res)) {
-                captureFrame(res, function(k, f) { return self(e, k, f, o); });
+                captureFrame(res, function(k, f) { return self(e, k, f, o); }, prot);
             }
         } finally {
             if (isCapture(res)) {
@@ -177,7 +198,7 @@ wat.VM = function() {
             var fres = evaluate(e, null, null, cleanup);
         }
         if (isCapture(fres)) {
-            captureFrame(fres, function(k, f) { return doCleanup(e, k, f, cleanup, res); });
+            captureFrame(fres, function(k, f) { return doCleanup(e, k, f, cleanup, res); }, cleanup);
             return fres;
         } else {
             return res;
@@ -187,11 +208,11 @@ wat.VM = function() {
     function __PushPrompt() {}; function __TakeSubcont() {}; function __PushSubcont() {}
     __PushPrompt.prototype.wat_combine = function self(e, k, f, o) {
         var prompt = elt(o, 0);
-        var th = elt(o, 1);
+        var x = elt(o, 1);
         if (isContinuation(k)) {
             var res = continueFrame(k, f);
         } else {
-            var res = combine(e, null, null, th, NIL);
+            var res = evaluate(e, null, null, x);
         }
         if (isCapture(res)) {
             if (res.prompt === prompt) {
@@ -199,7 +220,7 @@ wat.VM = function() {
                 var handler = res.handler;
                 return combine(e, null, null, handler, cons(continuation, NIL));
             } else {
-                captureFrame(res, function(k, f) { return self(e, k, f, o); });
+                captureFrame(res, function(k, f) { return self(e, k, f, o); }, x);
                 return res;
             }
         } else {
@@ -210,7 +231,7 @@ wat.VM = function() {
         var prompt = elt(o, 0);
         var handler = elt(o, 1);
         var cap = new Capture(prompt, handler);
-        captureFrame(cap, function(k, thef) { return combine(e, null, null, thef, NIL); });
+        captureFrame(cap, function(k, thef) { return combine(e, null, null, thef, NIL); }, this);
         return cap;
     };
     __PushSubcont.prototype.wat_combine = function self(e, k, f, o) {
@@ -222,7 +243,7 @@ wat.VM = function() {
             var res = continueFrame(thek, thef);
         }
         if (isCapture(res)) {
-            captureFrame(res, function(k, f) { return self(e, k, f, o); });
+            captureFrame(res, function(k, f) { return self(e, k, f, o); }, thef);
             return res;
         } else {
             return res;
@@ -246,7 +267,7 @@ wat.VM = function() {
                 var res = combine(e, null, null, th, NIL);
             }
             if (isCapture(res)) {
-                captureFrame(res, function(k, f) { return self(e, k, f, o); });
+                captureFrame(res, function(k, f) { return self(e, k, f, o); }, th);
                 return res;
             } else {
                 return res;
@@ -278,7 +299,18 @@ wat.VM = function() {
         if (rhs !== NIL) fail("NIL expected, but got: " + JSON.stringify(rhs)); };
     Ign.prototype.wat_match = function(e, rhs) {};
     /* Utilities */
-    function fail(err) { throw err; }
+    var ROOT_PROMPT = new Sym("--root-prompt");
+    function fail(err) {
+        var handler = jswrap(function(k) {
+            do {
+                console.log(k.dbg ? k.dbg.toString() : "(unknown stack frame)");
+            } while((k = k.next) !== null);
+            throw err;
+        });
+        var cap = new Capture(ROOT_PROMPT, handler);
+        captureFrame(cap, function(k, f) { throw "never reached"; }, "(error handler stack frame)");
+        return cap;
+    }
     function list() {
         return array_to_list(Array.prototype.slice.call(arguments)); }
     function list_star() {
@@ -316,7 +348,7 @@ wat.VM = function() {
     function js_callback(cmb) {
         return function() {
             var args = array_to_list(Array.prototype.slice.call(arguments));
-            return combine(make_env(), null, null, cmb, args);
+            return evaluate(environment, null, null, push_root_prompt(cons(cmb, args)));
         } }
     /* Primitives */
     var primitives =
@@ -339,11 +371,11 @@ wat.VM = function() {
          // First-order Control
          ["def", "if", new If()],
          ["def", "--loop", new __Loop()],
-         ["def", "throw", jswrap(fail)],
+         ["def", "throw", jswrap(function(err) { throw err; })],
          ["def", "--catch", wrap(new __Catch())],
          ["def", "finally", new Finally()],
          // Delimited Control
-         ["def", "--push-prompt", wrap(new __PushPrompt())],
+         ["def", "--push-prompt", new __PushPrompt()],
          ["def", "--take-subcont", wrap(new __TakeSubcont())],
          ["def", "--push-subcont", wrap(new __PushSubcont())],
          // Dynamically-scoped Variables
@@ -397,8 +429,8 @@ wat.VM = function() {
            ["list", "--catch", ["list", "lambda", [], "protected"], "handler"]]],
 
          ["def", "push-prompt",
-          ["macro", ["prompt", "#rest", "body"],
-           ["list", "--push-prompt", "prompt", ["list*", "lambda", [], "body"]]]],
+          ["vau", ["prompt", "#rest", "body"], "e",
+           ["eval", ["list", "--push-prompt", ["eval", "prompt", "e"], ["list*", "begin", "body"]], "e"]]],
          ["def", "take-subcont",
           ["macro", ["prompt", "k", "#rest", "body"],
            ["list", "--take-subcont", "prompt", ["list*", "lambda", ["list", "k"], "body"]]]],
@@ -462,9 +494,15 @@ wat.VM = function() {
     var environment = make_env();
     bind(environment, new Sym("def"), new Def());
     bind(environment, new Sym("begin"), new Begin());
-    run(primitives);
+    evaluate(environment, null, null, parse_json_value(primitives));
+    function push_root_prompt(x) {
+        return cons(new Sym("push-prompt"), cons(cons(new Sym("quote"), cons(ROOT_PROMPT, NIL)), cons(x, NIL)));
+    }
     /* API */
-    function run(x) { return evaluate(environment, null, null, parse_json_value(x)); }
+    function run(x) {
+        var wrapped = push_root_prompt(parse_json_value(x));
+        return evaluate(environment, null, null, wrapped);
+    }
     return { "run": run };
 }
 })(typeof exports === "undefined" ? this["wat"] = {} : exports);

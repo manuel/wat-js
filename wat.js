@@ -366,9 +366,22 @@ wat.VM = function() {
     function js_binop(op) { return jswrap(new Function("a", "b", "return (a " + op + " b)")); }
     function js_invoker(method_name) {
         return jswrap(function() {
+            if (arguments.length < 1) return fail("invoker: " + arguments);
             var rcv = arguments[0];
             var method = rcv[method_name];
             return method.apply(rcv, Array.prototype.slice.call(arguments, 1));
+        }); }
+    function js_getter(prop_name) {
+        return jswrap(function() {
+            if (arguments.length !== 1) return fail("getter: " + arguments);
+            var rcv = arguments[0];
+            return rcv[prop_name];
+        }); }
+    function js_setter(prop_name) {
+        return jswrap(function() {
+            if (arguments.length !== 2) return fail("setter: " + arguments);
+            var rcv = arguments[0];
+            return rcv[prop_name] = arguments[1];
         }); }
     function js_callback(cmb) {
         return function() {
@@ -411,8 +424,8 @@ wat.VM = function() {
          ["def", "js-wrap", jswrap(jswrap)],
          ["def", "js-unop", jswrap(js_unop)],
          ["def", "js-binop", jswrap(js_binop)],
-         ["def", "js-element", jswrap(function(obj, i) { return obj[i]; })],
-         ["def", "js-set-element", jswrap(function(obj, i, v) { return obj[i] = v; })],
+         ["def", "js-getter", jswrap(js_getter)],
+         ["def", "js-setter", jswrap(js_setter)],
          ["def", "js-invoker", jswrap(js_invoker)],
          ["def", "js-callback", jswrap(js_callback)],
          ["def", "list-to-array", jswrap(list_to_array)],
@@ -508,7 +521,7 @@ wat.VM = function() {
 
          ["def", ".",
           ["macro", ["field", "obj"],
-           ["list", "js-element", "obj", ["list", "string", "field"]]]],
+           ["list", ["list", "js-getter", ["list", "string", "field"]], "obj"]]],
 
          ["def", "#",
           ["macro", ["method", "obj", "#rest", "args"],

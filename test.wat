@@ -38,4 +38,7 @@
 
 (assert-throws (throw "foo"))
 
+;; Short-circuiting
 
+(assert-false (&& false (throw "error")))
+(assert-true (|| true (throw "error")))

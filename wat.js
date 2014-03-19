@@ -360,7 +360,7 @@ wat.VM = function() {
         else throw("parse error at " + res.remaining.index + " in " + s); }
     var x_stx = function(input) { return x_stx(input); }; // forward decl.
     var id_special_char =
-        choice("-", "&", "!", ":", "=", ">", "<", "%", "+", "?", "/", "*", "#", "$", "_", "'", ".", "@");
+        choice("-", "&", "!", ":", "=", ">", "<", "%", "+", "?", "/", "*", "#", "$", "_", "'", ".", "@", "|");
     var id_char = choice(range("a", "z"), range("A", "Z"), range("0", "9"), id_special_char);
     // Kludge: don't allow single dot as id, so as not to conflict with dotted pair stx.
     var id_stx = action(join_action(butnot(repeat1(id_char), "."), ""), function (ast) {
@@ -560,7 +560,6 @@ wat.VM = function() {
          ["define-js-binop", "!=="],
          ["define-js-binop", "%"],
          ["define-js-binop", "&"],
-         ["define-js-binop", "&&"],
          ["define-js-binop", "*"],
          ["define-js-binop", "+"],
          ["define-js-binop", "-"],
@@ -577,7 +576,6 @@ wat.VM = function() {
          ["define-js-binop", "in"],
          ["define-js-binop", "instanceof"],
          ["define-js-binop", "|"],
-         ["define-js-binop", "||"],
 
          // Core Language
 
@@ -626,11 +624,9 @@ wat.VM = function() {
           ["let", [["fresh", ["list", null]]],
            ["catch", ["fun", ["lambda", "opt-arg", ["throw", ["list", "fresh", "opt-arg"]]]],
             ["lambda", ["exc"],
-             ["if", ["cons?", "exc"],
-              ["if", ["===", "fresh", ["car", "exc"]],
-               ["let", [["opt-arg", ["cadr", "exc"]]],
-                ["if", ["cons?", "opt-arg"], ["car", "opt-arg"], []]],
-               ["throw", "exc"]],
+             ["if", ["&&", ["cons?", "exc"], ["===", "fresh", ["car", "exc"]]],
+              ["let", [["opt-arg", ["cadr", "exc"]]],
+               ["if", ["cons?", "opt-arg"], ["car", "opt-arg"], []]],
               ["throw", "exc"]]]]]],
 
          ["define-macro", ["label", "name", "#rest", "body"],
@@ -659,7 +655,13 @@ wat.VM = function() {
           ["list", "if", "test", ["list", "begin", "body"], null]],
 
          ["define-macro", ["unless", "test", "#rest", "body"],
-          ["list*", "when", ["list", "!", "test"], "body"]]
+          ["list*", "when", ["list", "!", "test"], "body"]],
+
+         ["define-macro", ["&&", "a", "b"],
+          ["list", "if", "a", "b", false]],
+
+         ["define-macro", ["||", "a", "b"],
+          ["list", "if", "a", "a", "b"]]
 
         ];
     /* Init */

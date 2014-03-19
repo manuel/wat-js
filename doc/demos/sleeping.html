@@ -5,9 +5,11 @@
 </head>
 <body>
 <h1><a href="https://github.com/manuel/wat-js">Wat</a></h1>
+<pre id="output"></pre>
+
 <script type="text/wat" id="sleeping">
 
-(define default-prompt (quote default-prompt))
+(define default-prompt 'default-prompt)
 
 (define (spawn-thread id)
   (push-prompt default-prompt

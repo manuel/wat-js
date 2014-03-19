@@ -41,7 +41,7 @@ wat.VM = function() {
     function combine(e, k, f, cmb, o) {
         if (cmb && cmb.wat_combine) return cmb.wat_combine(e, k, f, o);
         else if (cmb instanceof Function) return jswrap(cmb).wat_combine(e, k, f, o);
-        else return fail("not a combiner: " + to_string(cmb)); }
+        else return error("not a combiner: " + to_string(cmb)); }
     function Opv(p, ep, x, e) { this.p = p; this.ep = ep; this.x = x; this.e = e; }
     function Apv(cmb) { this.cmb = cmb; }
     Apv.prototype.toString = function() { return "[Apv " + to_string(this.cmb) + "]"; };
@@ -286,19 +286,19 @@ wat.VM = function() {
     function Nil() {}; var NIL = new Nil();
     Nil.prototype.toString = function() { return "()"; };
     function Ign() {}; var IGN = new Ign();
-    Ign.prototype.toString = function() { return "#ignore"; };
+    Ign.prototype.toString = function() { return "ignore"; };
     function cons(car, cdr) { return new Cons(car, cdr); }
     function car(cons) {
-        if (cons instanceof Cons) return cons.car; else return fail("not a cons: " + to_string(cons)); }
+        if (cons instanceof Cons) return cons.car; else return error("not a cons: " + to_string(cons)); }
     function cdr(cons) {
-        if (cons instanceof Cons) return cons.cdr; else return fail("not a cons: " + to_string(cons)); }
+        if (cons instanceof Cons) return cons.cdr; else return error("not a cons: " + to_string(cons)); }
     function elt(cons, i) { return (i === 0) ? car(cons) : elt(cdr(cons), i - 1); }
     function sym_name(sym) { return sym.name; }
     function Env(parent) { this.bindings = Object.create(parent ? parent.bindings : null); }
     function make_env(parent) { return new Env(parent); }
     function lookup(e, name) {
         if (name in e.bindings) return e.bindings[name];
-        else return fail("unbound: " + name);
+        else return error("unbound: " + name);
     }
     function bind(e, lhs, rhs) { return lhs.wat_match(e, rhs); }
     Sym.prototype.wat_match = function(e, rhs) {
@@ -310,13 +310,13 @@ wat.VM = function() {
         if (isCapture(cdrCap)) return cdrCap;
     };
     Nil.prototype.wat_match = function(e, rhs) {
-        if (rhs !== NIL) return fail("NIL expected, but got: " + to_string(rhs)); };
+        if (rhs !== NIL) return error("NIL expected, but got: " + to_string(rhs)); };
     Ign.prototype.wat_match = function(e, rhs) {};
     /* Utilities */
     var ROOT_PROMPT = new Sym("--root-prompt");
     function push_root_prompt(x) {
         return list(new Sym("push-prompt"), list(new Sym("quote"), ROOT_PROMPT), x); }
-    function fail(err) {
+    function error(err) {
         var handler = jswrap(function(k) {
             do {
                 console.log(k.dbg ? to_string(k.dbg) : "[unknown stack frame]", k.e.bindings);
@@ -406,7 +406,7 @@ wat.VM = function() {
     var program_stx = whitespace(repeat0(choice(x_stx, whitespace_stx))); // HACK!
     /* JSNI */
     function JSFun(jsfun) {
-        if (Object.prototype.toString.call(jsfun) !== "[object Function]") return fail("no fun");
+        if (Object.prototype.toString.call(jsfun) !== "[object Function]") return error("no fun");
         this.jsfun = jsfun; }
     JSFun.prototype.wat_combine = function(e, k, f, o) {
         return this.jsfun.apply(null, list_to_array(o)); };
@@ -416,23 +416,23 @@ wat.VM = function() {
     function js_binop(op) { return jswrap(new Function("a", "b", "return (a " + op + " b)")); }
     function js_invoker(method_name) {
         return jswrap(function() {
-            if (arguments.length < 1) return fail("invoker: " + arguments);
+            if (arguments.length < 1) return error("invoker called with wrong args: " + arguments);
             var rcv = arguments[0];
             var method = rcv[method_name];
             return method.apply(rcv, Array.prototype.slice.call(arguments, 1));
         }); }
     function js_getter(prop_name) {
         return jswrap(function() {
-            if (arguments.length !== 1) return fail("getter: " + arguments);
+            if (arguments.length !== 1) return error("getter called with wrong args: " + arguments);
             var rcv = arguments[0];
             if ((rcv !== undefined) && (rcv !== null)) return rcv[prop_name];
-            else return fail("can't get " + prop_name + " of " + rcv);
+            else return error("can't get " + prop_name + " of " + rcv);
         }); }
     function js_setter(prop_name) {
         return jswrap(function() {
-            if (arguments.length !== 2) return fail("setter: " + arguments);
+            if (arguments.length !== 2) return error("setter called with wrong args: " + arguments);
             if ((rcv !== undefined) && (rcv !== null)) return rcv[prop_name] = arguments[1];
-            else return fail("can't set " + prop_name + " of " + rcv);
+            else return error("can't set " + prop_name + " of " + rcv);
         }); }
     function js_callback(cmb) {
         return function() {
@@ -624,17 +624,20 @@ wat.VM = function() {
 
          ["define", ["call-with-escape", "fun"],
           ["let", [["fresh", ["list", null]]],
-           ["catch", ["fun", ["lambda", ["val"], ["throw", ["list", "fresh", "val"]]]],
+           ["catch", ["fun", ["lambda", "opt-arg", ["throw", ["list", "fresh", "opt-arg"]]]],
             ["lambda", ["exc"],
-             ["if", ["&&", ["cons?", "exc"], ["===", "fresh", ["car", "exc"]]],
-              ["cadr", "exc"],
+             ["if", ["cons?", "exc"],
+              ["if", ["===", "fresh", ["car", "exc"]],
+               ["let", [["opt-arg", ["cadr", "exc"]]],
+                ["if", ["cons?", "opt-arg"], ["car", "opt-arg"], []]],
+               ["throw", "exc"]],
               ["throw", "exc"]]]]]],
 
-         ["define-macro", ["let-escape", "name", "#rest", "body"],
+         ["define-macro", ["label", "name", "#rest", "body"],
           ["list", "call-with-escape", ["list*", "lambda", ["list", "name"], "body"]]],
 
          ["define", ["call-while", "test-fun", "body-fun"],
-          ["let-escape", "return",
+          ["label", "return",
            ["loop",
             ["if", ["test-fun"],
              ["body-fun"],
@@ -650,7 +653,13 @@ wat.VM = function() {
            ["eval",
             ["list", "def", "lhs",
              ["list", ["unwrap", "eval"], "rhs", "denv"]],
-            ["eval", "env", "denv"]]]]
+            ["eval", "env", "denv"]]]],
+
+         ["define-macro", ["when", "test", "#rest", "body"],
+          ["list", "if", "test", ["list", "begin", "body"], null]],
+
+         ["define-macro", ["unless", "test", "#rest", "body"],
+          ["list*", "when", ["list", "!", "test"], "body"]]
 
         ];
     /* Init */

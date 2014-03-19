@@ -315,6 +315,7 @@ wat.VM = function() {
     function push_root_prompt(x) {
         return list(new Sym("push-prompt"), list(new Sym("quote"), ROOT_PROMPT), x); }
     function fail(err) {
+        throw err;
         var handler = jswrap(function(k) {
             do {
                 console.log(k.dbg ? to_string(k.dbg) : "[unknown stack frame]", k.e.bindings);
@@ -369,7 +370,8 @@ wat.VM = function() {
     });
     var escape_char = choice("\"", "\\");
     var escape_sequence = action(sequence("\\", escape_char), function (ast) { return ast[1]; });
-    var string_char = choice(negate(escape_char), escape_sequence);
+    var line_terminator = choice(ch("\r"), ch("\n"));
+    var string_char = choice(negate(escape_char), escape_sequence, line_terminator);
     var string_stx =
         action(sequence("\"", join_action(repeat0(string_char), ""), "\""),
                function (ast) { return ast[1]; });
@@ -395,7 +397,6 @@ wat.VM = function() {
                                   var end = ast[2] ? ast[2] : NIL;
                                   return array_to_list(exprs, end); });
     var quote_stx = action(sequence("'", x_stx), function(ast) { return array_to_list([new Sym("quote"), ast[1]]); });
-    var line_terminator = choice(ch("\r"), ch("\n"));
     var cmt_stx = action(sequence(";", repeat0(negate(line_terminator)), optional(line_terminator)), nothing_action);
     var whitespace_stx = action(choice(" ", "\n", "\r", "\t"), nothing_action);
     function nothing_action(ast) { return "void"; } // HACK!
@@ -436,6 +437,13 @@ wat.VM = function() {
             var args = array_to_list(Array.prototype.slice.call(arguments));
             return evaluate(environment, null, null, push_root_prompt(cons(cmb, args)));
         } }
+    // Apply needs custom implementation to be able to apply JS functions transparently
+    function Apply() {}; Apply.prototype.toString = function() { return "apply"; };
+    Apply.prototype.wat_combine = function(e, k, f, o) {
+        var cmb = elt(o, 0); if (isCapture(cmb)) return cmb;
+        var args = elt(o, 1); if (isCapture(args)) return args;
+        return combine(e, k, f, cmb, args);
+    };
     /* Primitives */
     var primitives =
         ["begin",
@@ -479,6 +487,7 @@ wat.VM = function() {
          ["def", "js-global", jswrap(function(name) { return global[name]; })],
          ["def", "list-to-array", jswrap(list_to_array)],
          ["def", "array-to-list", jswrap(array_to_list)],
+         ["def", "apply", wrap(new Apply())],
          // Optimization
          ["def", "list*", jswrap(list_star)],
 
@@ -647,10 +656,7 @@ wat.VM = function() {
            ["eval",
             ["list", "def", "lhs",
              ["list", ["unwrap", "eval"], "rhs", "denv"]],
-            ["eval", "env", "denv"]]]],
-
-         ["define", ["apply", "appv", "arg"],
-          ["eval", ["cons", ["unwrap", "appv"], "arg"], ["make-environment"]]]
+            ["eval", "env", "denv"]]]]
 
         ];
     /* Init */
@@ -667,7 +673,10 @@ wat.VM = function() {
         var wrapped = push_root_prompt(parse_sexp(sexp));
         return evaluate(environment, null, null, wrapped);
     }
-    return { "run": run, "eval": eval };
+    function call(fun_name) {
+        return run([fun_name].concat(Array.prototype.slice.call(arguments, 1)));
+    }
+    return { "run": run, "eval": eval, "call": call };
 }
 // Copyright (C) 2007 Chris Double.
 //

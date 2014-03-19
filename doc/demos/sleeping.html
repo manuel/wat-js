@@ -11,14 +11,19 @@
 
 (define default-prompt 'default-prompt)
 
+(define *the-id* (dnew "default"))
+
 (define (spawn-thread id)
   (push-prompt default-prompt
     (run-thread id)))
 
+(define (cat . objects)
+  (#join (list-to-array objects) ""))
+
 (define (run-thread id)
   (loop
     (#appendChild (.body @document)
-                  (#createTextNode @document (+ "Active thread: " id)))
+                  (#createTextNode @document (cat "Active thread: " id (dref *the-id*))))
     (sleep 250)))
 
 (define (sleep ms)

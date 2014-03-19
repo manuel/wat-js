@@ -83,13 +83,20 @@ wat.VM = function() {
         return evalArgs(e, null, null, cdr(todo), cons(arg, done));
     }
     /* Built-in Combiners */
-    function __Vau() {}; function Def() {}; function Eval() {}
+    function __Vau() {}; function Def() {}; function Eval() {}; function __Set() {};
     __Vau.prototype.toString = function() { return "vau"; };
     Def.prototype.toString = function() { return "def"; };
     Eval.prototype.toString = function() { return "eval"; };
+    __Set.prototype.toString = function() { return "--set!"; };
     __Vau.prototype.wat_combine = function(e, k, f, o) {
         return new Opv(elt(o, 0), elt(o, 1), elt(o, 2), e); };
     Def.prototype.wat_combine = function self(e, k, f, o) {
+        return def_set(bind, e, k, f, o);
+    };
+    __Set.prototype.wat_combine = function self(e, k, f, o) {
+        return def_set(set, e, k, f, o);
+    };
+    function def_set(binder, e, k, f, o) {
         var lhs = elt(o, 0); if (isCapture(lhs)) return lhs;
         var rhs = elt(o, 1); if (isCapture(rhs)) return rhs;
         if (isContinuation(k)) {
@@ -101,8 +108,8 @@ wat.VM = function() {
             captureFrame(val, function(k, f) { return self(e, k, f, o); }, rhs, e);
             return val;
         }
-        return bind(e, lhs, val);
-    };
+        return binder(e, lhs, val);
+    }
     Eval.prototype.wat_combine = function(e, k, f, o) {
         var x = elt(o, 0); if (isCapture(x)) return x;
         var e = elt(o, 1); if (isCapture(e)) return e;
@@ -212,6 +219,9 @@ wat.VM = function() {
     }
     /* Delimited Control */
     function __PushPrompt() {}; function __TakeSubcont() {}; function __PushSubcont() {}
+    __PushPrompt.prototype.toString = function() { return "--push-prompt"; }
+    __TakeSubcont.prototype.toString = function() { return "--take-subcont"; }
+    __PushSubcont.prototype.toString = function() { return "--push-subcont"; }
     __PushPrompt.prototype.wat_combine = function self(e, k, f, o) {
         var prompt = elt(o, 0);
         var x = elt(o, 1);
@@ -294,13 +304,18 @@ wat.VM = function() {
         if (cons instanceof Cons) return cons.cdr; else return error("not a cons: " + to_string(cons)); }
     function elt(cons, i) { return (i === 0) ? car(cons) : elt(cdr(cons), i - 1); }
     function sym_name(sym) { return sym.name; }
-    function Env(parent) { this.bindings = Object.create(parent ? parent.bindings : null); }
+    function Env(parent) { this.bindings = Object.create(parent ? parent.bindings : null); this.parent = parent; }
     function make_env(parent) { return new Env(parent); }
     function lookup(e, name) {
         if (name in e.bindings) return e.bindings[name];
         else return error("unbound: " + name);
     }
-    function bind(e, lhs, rhs) { return lhs.wat_match(e, rhs); }
+    function bind(e, lhs, rhs) { 
+        if (lhs.wat_match) return lhs.wat_match(e, rhs); else return error("cannot match against: " + lhs); }
+    function set(e, sym, rhs) {
+        if (!e) return error("tried to set nonexistent binding: " + sym);
+        else if (Object.prototype.hasOwnProperty.call(e.bindings, sym.name)) return bind(e, sym, rhs);
+        else return set(e.parent, sym, rhs); }
     Sym.prototype.wat_match = function(e, rhs) {
         return e.bindings[this.name] = rhs; }
     Cons.prototype.wat_match = function(e, rhs) {
@@ -312,20 +327,21 @@ wat.VM = function() {
     Nil.prototype.wat_match = function(e, rhs) {
         if (rhs !== NIL) return error("NIL expected, but got: " + to_string(rhs)); };
     Ign.prototype.wat_match = function(e, rhs) {};
+    /* Reference cells */
+    function Cell(val) { this.val = val; }
+    function ref(cell) { if (!cell instanceof Cell) return error("not a cell: " + cell); else return cell.val; }
+    function upd(cell, val) { if (!cell instanceof Cell) return error("not a cell: " + cell); else cell.val = val; }
     /* Utilities */
     var ROOT_PROMPT = new Sym("--root-prompt");
     function push_root_prompt(x) {
         return list(new Sym("push-prompt"), list(new Sym("quote"), ROOT_PROMPT), x); }
     function error(err) {
-        var handler = jswrap(function(k) {
-            do {
-                console.log(k.dbg ? to_string(k.dbg) : "[unknown stack frame]", k.e.bindings);
-            } while((k = k.next) !== null);
+        var print_stacktrace = environment.bindings["--print-stacktrace-and-throw"];
+        if (print_stacktrace !== undefined) {
+            return combine(environment, null, null, print_stacktrace, list(err));
+        } else {
             throw err;
-        });
-        var cap = new Capture(ROOT_PROMPT, handler);
-        captureFrame(cap, function(k, f) { throw "never reached"; }, "[error handler stack frame]", {});
-        return cap;
+        }
     }
     function list() {
         return array_to_list(Array.prototype.slice.call(arguments)); }
@@ -458,6 +474,7 @@ wat.VM = function() {
          ["def", "make-environment", jswrap(function() { return make_env(); })],
          ["def", "wrap", jswrap(wrap)],
          ["def", "unwrap", jswrap(unwrap)],
+         ["def", "--set!", new __Set()],
          // Values
          ["def", "cons", jswrap(cons)],
          ["def", "cons?", jswrap(function(obj) { return obj instanceof Cons; })],
@@ -478,6 +495,8 @@ wat.VM = function() {
          ["def", "dnew", wrap(new DNew())],
          ["def", "--dlet", wrap(new __DLet())],
          ["def", "dref", wrap(new DRef())],
+         // Errors
+         ["def", "error", jswrap(error)],
          // JS Interface
          ["def", "js-wrap", jswrap(jswrap)],
          ["def", "js-unop", jswrap(js_unop)],
@@ -499,6 +518,8 @@ wat.VM = function() {
          ["def", "list", ["wrap", ["--vau", "arglist", "#ignore", "arglist"]]],
          ["def", "string", ["--vau", ["sym"], "#ignore", ["symbol-name", "sym"]]],
          ["def", "get-current-environment", ["--vau", [], "e", "e"]],
+
+         ["def", "--root-prompt", ["quote", ROOT_PROMPT]],
 
          ["def", "make-macro-expander",
           ["wrap",
@@ -644,13 +665,6 @@ wat.VM = function() {
            ["list", "lambda", [], "test"],
            ["list*", "lambda", [], "body"]]],
 
-         ["def", "set!",
-          ["vau", ["env", "lhs", "rhs"], "denv",
-           ["eval",
-            ["list", "def", "lhs",
-             ["list", ["unwrap", "eval"], "rhs", "denv"]],
-            ["eval", "env", "denv"]]]],
-
          ["define-macro", ["when", "test", "#rest", "body"],
           ["list", "if", "test", ["list", "begin", "body"], null]],
 
@@ -661,7 +675,10 @@ wat.VM = function() {
           ["list", "if", "a", "b", false]],
 
          ["define-macro", ["||", "a", "b"],
-          ["list", "if", "a", "a", "b"]]
+          ["list", "if", "a", "a", "b"]],
+
+         ["define-macro", ["set!", "name", "value"],
+          ["list", "--set!", "name", "value"]]
 
         ];
     /* Init */

@@ -1,3 +1,7 @@
+;;;;; Wat Test Suite
+
+;;;; Utilities
+
 (define (cat . objects)
   (#join (list-to-array objects) ""))
 
@@ -7,38 +11,33 @@
 (def assert-true
   (vau (expr) e
     (unless (=== true (eval expr e))
-      (throw (+ "Should be true: " expr)))))
-
-(def assert-equal
-  (vau (expr1 expr2) e
-    (unless (=== (eval expr1 e) (eval expr2 e))
-      (throw (cat "Should be equal: " expr1 " and " expr2)))))
+      (error (+ "Should be true: " expr)))))
 
 (def assert-false
   (vau (expr) e
     (unless (=== false (eval expr e))
-      (throw (+ "Should be false: " expr)))))
+      (error (+ "Should be false: " expr)))))
+
+(def assert-equal
+  (vau (expr1 expr2) e
+    (unless (=== (eval expr1 e) (eval expr2 e))
+      (error (cat "Should be equal: " expr1 " and " expr2)))))
 
 (def assert-throws
   (vau (expr) e
     (label return
       (catch (eval expr e)
         (lambda (exc) (return)))
-      (throw (+ "Should throw: " expr)))))
+      (error (+ "Should throw: " expr)))))
 
-;; Test the testers
-
-(assert-throws (assert-true false))
-(assert-throws (assert-false true))
-(assert-throws (assert-equal 1 2))
-(assert-throws (assert-throws "baz"))
-
-(assert-true (=== 2 2))
-(assert-false (!== 2 2))
-
-(assert-throws (throw "foo"))
-
-;; Short-circuiting
-
-(assert-false (&& false (throw "error")))
-(assert-true (|| true (throw "error")))
+(define (--print-stacktrace-and-throw err)
+  (define (print-frame k)
+    (#log @console (#toString (.dbg k) (.e k)))
+    (if (.next k)
+      (print-frame (.next k))
+      null))
+  (take-subcont --root-prompt k
+    (print-frame k)
+    (push-prompt --root-prompt
+      (push-subcont k
+        (throw err)))))

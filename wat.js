@@ -32,8 +32,10 @@ wat.VM = function() {
         return combine(e, null, null, op, cdr(this));
     };
     Cons.prototype.toString = function() { return "(" + cons_to_string(this) + ")" };
-    function cons_to_string(cons) {
-        return JSON.stringify(cons);
+    function cons_to_string(c) {
+        if (cdr(c) === NIL) return to_string(car(c));
+        else if (cdr(c) instanceof Cons) { return to_string(car(c)) + " " + cons_to_string(cdr(c)); }
+        else return to_string(car(c)) + " . " + to_string(cdr(c));
     }
     /* Operative & Applicative Combiners */
     function combine(e, k, f, cmb, o) {
@@ -315,7 +317,6 @@ wat.VM = function() {
     function push_root_prompt(x) {
         return list(new Sym("push-prompt"), list(new Sym("quote"), ROOT_PROMPT), x); }
     function fail(err) {
-        throw err;
         var handler = jswrap(function(k) {
             do {
                 console.log(k.dbg ? to_string(k.dbg) : "[unknown stack frame]", k.e.bindings);
@@ -424,13 +425,14 @@ wat.VM = function() {
         return jswrap(function() {
             if (arguments.length !== 1) return fail("getter: " + arguments);
             var rcv = arguments[0];
-            return rcv[prop_name];
+            if ((rcv !== undefined) && (rcv !== null)) return rcv[prop_name];
+            else return fail("can't get " + prop_name + " of " + rcv);
         }); }
     function js_setter(prop_name) {
         return jswrap(function() {
             if (arguments.length !== 2) return fail("setter: " + arguments);
-            var rcv = arguments[0];
-            return rcv[prop_name] = arguments[1];
+            if ((rcv !== undefined) && (rcv !== null)) return rcv[prop_name] = arguments[1];
+            else return fail("can't set " + prop_name + " of " + rcv);
         }); }
     function js_callback(cmb) {
         return function() {

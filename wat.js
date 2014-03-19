@@ -579,14 +579,6 @@ wat.VM = function() {
          ["define-js-binop", "|"],
          ["define-js-binop", "||"],
 
-         ["def", ".",
-          ["macro", ["field", "obj"],
-           ["list", ["list", "js-getter", ["list", "string", "field"]], "obj"]]],
-
-         ["def", "#",
-          ["macro", ["method", "obj", "#rest", "args"],
-           ["list*", ["list", "js-invoker", ["list", "string", "method"]], "obj", "args"]]],
-
          // Core Language
 
          ["def", "compose",

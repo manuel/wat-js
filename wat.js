@@ -433,7 +433,9 @@ wat.VM = function() {
     function js_invoker(method_name) {
         return jswrap(function() {
             if (arguments.length < 1) return error("invoker called with wrong args: " + arguments);
+            if (!method_name) return error("method name is null/undefined");
             var rcv = arguments[0];
+            if (!rcv) return error("receiver is null/undefined");
             var method = rcv[method_name];
             return method.apply(rcv, Array.prototype.slice.call(arguments, 1));
         }); }

@@ -32,7 +32,7 @@
 
 (define (--print-stacktrace-and-throw err)
   (define (print-frame k)
-    (#log @console (#toString (.dbg k) (.e k)))
+    (#log @console (#toString (.dbg k)) (.e k))
     (if (.next k)
       (print-frame (.next k))
       null))

@@ -1,3 +1,4 @@
+// Wat VM by Manuel Simoni (msimoni@gmail.com)
 (function(wat, global) {
 wat.VM = function() {
     /* Continuations */
@@ -90,12 +91,8 @@ wat.VM = function() {
     __Set.prototype.toString = function() { return "--set!"; };
     __Vau.prototype.wat_combine = function(e, k, f, o) {
         return new Opv(elt(o, 0), elt(o, 1), elt(o, 2), e); };
-    Def.prototype.wat_combine = function self(e, k, f, o) {
-        return def_set(bind, e, k, f, o);
-    };
-    __Set.prototype.wat_combine = function self(e, k, f, o) {
-        return def_set(set, e, k, f, o);
-    };
+    Def.prototype.wat_combine = function self(e, k, f, o) { return def_set(bind, e, k, f, o); };
+    __Set.prototype.wat_combine = function self(e, k, f, o) { return def_set(set, e, k, f, o); };
     function def_set(binder, e, k, f, o) {
         var lhs = elt(o, 0); if (isCapture(lhs)) return lhs;
         var rhs = elt(o, 1); if (isCapture(rhs)) return rhs;
@@ -327,10 +324,6 @@ wat.VM = function() {
     Nil.prototype.wat_match = function(e, rhs) {
         if (rhs !== NIL) return error("NIL expected, but got: " + to_string(rhs)); };
     Ign.prototype.wat_match = function(e, rhs) {};
-    /* Reference cells */
-    function Cell(val) { this.val = val; }
-    function ref(cell) { if (!cell instanceof Cell) return error("not a cell: " + cell); else return cell.val; }
-    function upd(cell, val) { if (!cell instanceof Cell) return error("not a cell: " + cell); else cell.val = val; }
     /* Utilities */
     var ROOT_PROMPT = new Sym("--root-prompt");
     function push_root_prompt(x) {
@@ -341,8 +334,7 @@ wat.VM = function() {
             return combine(environment, null, null, print_stacktrace, list(err));
         } else {
             throw err;
-        }
-    }
+        } }
     function list() {
         return array_to_list(Array.prototype.slice.call(arguments)); }
     function list_star() {
@@ -385,10 +377,16 @@ wat.VM = function() {
         else if (ast[0] === "@") { return list(new Sym("js-global"), ast.substring(1)) }
         else return new Sym(ast);
     });
-    var escape_char = choice("\"", "\\");
-    var escape_sequence = action(sequence("\\", escape_char), function (ast) { return ast[1]; });
+    var escape_char = choice("\"", "\\", "n", "r", "t");
+    var escape_sequence = action(sequence("\\", escape_char), function (ast) {
+        switch(ast[1]) {
+        case "n": return "\n";
+        case "r": return "\r";
+        case "t": return "\t";
+        default: return ast[1]; }
+    });
     var line_terminator = choice(ch("\r"), ch("\n"));
-    var string_char = choice(negate(escape_char), escape_sequence, line_terminator);
+    var string_char = choice(escape_sequence, negate("\""), line_terminator);
     var string_stx =
         action(sequence("\"", join_action(repeat0(string_char), ""), "\""),
                function (ast) { return ast[1]; });
@@ -462,13 +460,12 @@ wat.VM = function() {
     Apply.prototype.wat_combine = function(e, k, f, o) {
         var cmb = elt(o, 0); if (isCapture(cmb)) return cmb;
         var args = elt(o, 1); if (isCapture(args)) return args;
-        return combine(e, k, f, cmb, args);
-    };
+        return combine(e, k, f, cmb, args); };
     /* Primitives */
     var primitives =
         ["begin",
 
-         // Core
+         // Primitives
 
          // Fexprs
          ["def", "--vau", new __Vau()],
@@ -600,7 +597,7 @@ wat.VM = function() {
          ["define-js-binop", "instanceof"],
          ["define-js-binop", "|"],
 
-         // Core Language
+         // Porcelain
 
          ["def", "compose",
           ["lambda", ["f", "g"], ["lambda", ["arg"], ["f", ["g", "arg"]]]]],
@@ -677,7 +674,7 @@ wat.VM = function() {
           ["list", "if", "a", "b", false]],
 
          ["define-macro", ["||", "a", "b"],
-          ["list", "if", "a", "a", "b"]],
+          ["list", "if", "a", true, "b"]],
 
          ["define-macro", ["set!", "name", "value"],
           ["list", "--set!", "name", "value"]]
@@ -689,19 +686,20 @@ wat.VM = function() {
     bind(environment, new Sym("begin"), new Begin());
     evaluate(environment, null, null, parse_json_value(primitives));
     /* API */
-    function run(x) {
-        var wrapped = push_root_prompt(parse_json_value(x));
-        return evaluate(environment, null, null, wrapped);
+    function parse_and_eval(sexp) {
+        return eval(parse_sexp(sexp));
     }
-    function eval(sexp) {
-        var wrapped = push_root_prompt(parse_sexp(sexp));
-        return evaluate(environment, null, null, wrapped);
+    function eval(x) {
+        var res = evaluate(environment, null, null, push_root_prompt(x));
+        if (isCapture(res)) throw "prompt not found: " + res.prompt;
+        return res;
     }
     function call(fun_name) {
-        return run([fun_name].concat(Array.prototype.slice.call(arguments, 1)));
+        return eval(cons(new Sym(fun_name), array_to_list(Array.prototype.slice.call(arguments, 1))));
     }
-    return { "run": run, "eval": eval, "call": call };
+    return { "eval": parse_and_eval, "call": call };
 }
+
 // Copyright (C) 2007 Chris Double.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -1358,4 +1356,4 @@ function not(p) {
     }
 }
 
-})(typeof exports === "undefined" ? this["wat"] = {} : exports, this);
+})(typeof exports === "undefined" ? this["wat"] = {} : exports, typeof global === "undefined" ? this : global);

@@ -17,7 +17,7 @@
 (define (run-thread id)
   (loop
     (#appendChild (.body @document)
-                  (#createTextNode @document (+ "Active thread: " id)))
+                  (#createTextNode @document (+ "Active thread\n: " id)))
     (sleep 250)))
 
 (define (sleep ms)

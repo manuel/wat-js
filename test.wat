@@ -8,22 +8,22 @@
 (define (log . objects)
   (apply #log (list* @console objects)))
 
-(def assert-true
+(define assert-true
   (vau (expr) e
     (unless (=== true (eval expr e))
       (error (+ "Should be true: " expr)))))
 
-(def assert-false
+(define assert-false
   (vau (expr) e
     (unless (=== false (eval expr e))
       (error (+ "Should be false: " expr)))))
 
-(def assert-equal
+(define assert-equal
   (vau (expr1 expr2) e
     (unless (=== (eval expr1 e) (eval expr2 e))
       (error (cat "Should be equal: " expr1 " and " expr2)))))
 
-(def assert-throws
+(define assert-throws
   (vau (expr) e
     (label return
       (catch (eval expr e)

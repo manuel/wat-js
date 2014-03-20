@@ -1,3 +1,5 @@
+;; -*- mode: scheme -*-
+
 ;;;;; Wat Test Suite
 
 ;;;; Utilities
@@ -36,8 +38,25 @@
     (if (.next k)
       (print-frame (.next k))
       null))
-  (take-subcont --root-prompt k
+  (take-subcont (--root-prompt) k
     (print-frame k)
-    (push-prompt --root-prompt
+    (push-prompt (--root-prompt)
       (push-subcont k
         (throw err)))))
+
+(assert-throws (lambda))
+;(assert-throws (lambda 12 12))
+;(assert-throws (lambda "foo" "bar"))
+(assert-throws (def))
+(assert-throws (def 12))
+(assert-throws (def 12 12))
+
+(assert-equal null (begin))
+(assert-equal 1 (begin 1))
+(assert-equal 2 (begin 1 2))
+
+(define-macro (provide symbols . body)
+  (list define symbols
+    (list let ()
+      (list* begin body)
+      (list* list symbols))))

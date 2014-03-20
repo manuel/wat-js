@@ -495,6 +495,7 @@ wat.VM = function() {
          ["def", "--dlet", wrap(new __DLet())],
          ["def", "dref", wrap(new DRef())],
          // Errors
+         ["def", "--root-prompt", jswrap(function() { return ROOT_PROMPT; })],
          ["def", "error", jswrap(error)],
          // JS Interface
          ["def", "js-wrap", jswrap(jswrap)],
@@ -517,8 +518,6 @@ wat.VM = function() {
          ["def", "list", ["wrap", ["--vau", "arglist", "#ignore", "arglist"]]],
          ["def", "string", ["--vau", ["sym"], "#ignore", ["symbol-name", "sym"]]],
          ["def", "get-current-environment", ["--vau", [], "e", "e"]],
-
-         ["def", "--root-prompt", ["quote", ROOT_PROMPT]],
 
          ["def", "make-macro-expander",
           ["wrap",

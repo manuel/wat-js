@@ -38,9 +38,9 @@
     (if (.next k)
       (print-frame (.next k))
       null))
-  (take-subcont (--root-prompt) k
+  (take-subcont (--get-root-prompt) k
     (print-frame k)
-    (push-prompt (--root-prompt)
+    (push-prompt (--get-root-prompt)
       (push-subcont k
         (throw err)))))
 
@@ -60,3 +60,4 @@
     (list let ()
       (list* begin body)
       (list* list symbols))))
+

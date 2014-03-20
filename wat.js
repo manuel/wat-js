@@ -16,6 +16,7 @@ wat.VM = function() {
     function evaluate(e, k, f, x) {
         if (x && x.wat_eval) return x.wat_eval(e, k, f); else return x; }
     function Sym(name) { this.name = name; }
+    function sym(name) { return new Sym(name); }
     Sym.prototype.wat_eval = function(e, k, f) { return lookup(e, this.name); };
     Sym.prototype.toString = function() { return this.name; };
     function Cons(car, cdr) { this.car = car; this.cdr = cdr; }
@@ -353,9 +354,14 @@ wat.VM = function() {
     /* JSON parser */
     function parse_json_value(obj) {
         switch(Object.prototype.toString.call(obj)) {
-        case "[object String]": return obj === "#ignore" ? IGN : new Sym(obj);
+        case "[object String]": return obj === "#ignore" ? IGN : handle_identifier(obj);
         case "[object Array]": return parse_json_array(obj);
         default: return obj; } }
+    function handle_identifier(str) {
+        if (str[0] === ".") { return list(sym("js-getter"), str.substring(1)); }
+        else if (str[0] === "#") { return list(sym("js-invoker"), str.substring(1)); }
+        else if (str[0] === "@") { return list(sym("js-global"), str.substring(1)); }
+        else return sym(str); }
     function parse_json_array(arr) {
         var i = arr.indexOf("#rest");
         if (i === -1) return array_to_list(arr.map(parse_json_value));
@@ -371,12 +377,7 @@ wat.VM = function() {
         choice("-", "&", "!", ":", "=", ">", "<", "%", "+", "?", "/", "*", "#", "$", "_", "'", ".", "@", "|");
     var id_char = choice(range("a", "z"), range("A", "Z"), range("0", "9"), id_special_char);
     // Kludge: don't allow single dot as id, so as not to conflict with dotted pair stx.
-    var id_stx = action(join_action(butnot(repeat1(id_char), "."), ""), function (ast) {
-        if (ast[0] === ".") { return ["js-getter", ["string", ast.substring(1)]]; }
-        else if (ast[0] === "#") { return ["js-invoker", ["string", ast.substring(1)]]; }
-        else if (ast[0] === "@") { return ["js-global", ["string", ast.substring(1)]]; }
-        else return ast;
-    });
+    var id_stx = action(join_action(butnot(repeat1(id_char), "."), ""), function (ast) { return ast; });
     var escape_char = choice("\"", "\\", "n", "r", "t");
     var escape_sequence = action(sequence("\\", escape_char), function (ast) {
         switch(ast[1]) {

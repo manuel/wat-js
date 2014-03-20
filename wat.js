@@ -326,9 +326,9 @@ wat.VM = function() {
         if (rhs !== NIL) return error("NIL expected, but got: " + to_string(rhs)); };
     Ign.prototype.wat_match = function(e, rhs) {};
     /* Utilities */
-    var ROOT_PROMPT = new Sym("--root-prompt");
+    var ROOT_PROMPT = sym("--root-prompt");
     function push_root_prompt(x) {
-        return list(new Sym("push-prompt"), list(new Sym("quote"), ROOT_PROMPT), x); }
+        return list(sym("push-prompt"), list(sym("quote"), ROOT_PROMPT), x); }
     function error(err) {
         var print_stacktrace = environment.bindings["--print-stacktrace-and-throw"];
         if (print_stacktrace !== undefined) {
@@ -682,8 +682,8 @@ wat.VM = function() {
         ];
     /* Init */
     var environment = make_env();
-    bind(environment, new Sym("def"), new Def());
-    bind(environment, new Sym("begin"), new Begin());
+    bind(environment, sym("def"), new Def());
+    bind(environment, sym("begin"), new Begin());
     evaluate(environment, null, null, parse_json_value(primitives));
     /* API */
     function parse_and_eval(sexp) {
@@ -697,7 +697,7 @@ wat.VM = function() {
         return res;
     }
     function call(fun_name) {
-        return eval(cons(new Sym(fun_name), array_to_list(Array.prototype.slice.call(arguments, 1))));
+        return eval(cons(sym(fun_name), array_to_list(Array.prototype.slice.call(arguments, 1))));
     }
     return { "eval": parse_and_eval, "call": call };
 }

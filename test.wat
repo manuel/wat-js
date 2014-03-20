@@ -32,18 +32,6 @@
         (lambda (exc) (return)))
       (error (+ "Should throw: " expr)))))
 
-(define (--print-stacktrace-and-throw err)
-  (define (print-frame k)
-    (#log @console (#toString (.dbg k)) (.e k))
-    (if (.next k)
-      (print-frame (.next k))
-      null))
-  (take-subcont (--get-root-prompt) k
-    (print-frame k)
-    (push-prompt (--get-root-prompt)
-      (push-subcont k
-        (throw err)))))
-
 (assert-throws (lambda))
 ;(assert-throws (lambda 12 12))
 ;(assert-throws (lambda "foo" "bar"))
@@ -53,7 +41,7 @@
 
 (assert-equal null (begin))
 (assert-equal 1 (begin 1))
-(assert-equal 2 (begin 1 2))
+(assert-equal 3 (begin 1 2))
 
 (define-macro (provide symbols . body)
   (list define symbols

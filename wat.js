@@ -677,7 +677,19 @@ wat.VM = function() {
           ["list", "if", "a", true, "b"]],
 
          ["define-macro", ["set!", "name", "value"],
-          ["list", "--set!", "name", "value"]]
+          ["list", "--set!", "name", "value"]],
+
+         ["define", ["--print-stacktrace-and-throw", "err"],
+          ["define", ["print-frame", "k"],
+           ["#log", "@console", ["#toString", [".dbg", "k"]], [".e", "k"]],
+           ["if", [".next", "k"],
+            ["print-frame", [".next", "k"]],
+            null]],
+          ["take-subcont", ["--get-root-prompt"], "k",
+           ["print-frame", "k"],
+           ["push-prompt", ["--get-root-prompt"],
+            ["push-subcont", "k",
+             ["throw", "err"]]]]]
 
         ];
     /* Init */
@@ -687,8 +699,6 @@ wat.VM = function() {
     evaluate(environment, null, null, parse_json_value(primitives));
     /* API */
     function parse_and_eval(sexp) {
-        console.log(JSON.stringify(parse_sexp(sexp)));
-        console.log(to_string(parse_json_value(parse_sexp(sexp))));
         return eval(parse_json_value(parse_sexp(sexp)));
     }
     function eval(x) {

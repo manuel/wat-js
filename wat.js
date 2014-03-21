@@ -103,7 +103,7 @@ wat.VM = function() {
             var val = evaluate(e, null, null, rhs);
         }
         if (isCapture(val)) {
-            captureFrame(val, function(k, f) { return self(e, k, f, o); }, rhs, e);
+            captureFrame(val, function(k, f) { return def_set(binder, e, k, f, o); }, rhs, e);
             return val;
         }
         return binder(e, lhs, val);

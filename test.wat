@@ -41,11 +41,77 @@
 
 (assert-equal null (begin))
 (assert-equal 1 (begin 1))
-(assert-equal 3 (begin 1 2))
+(assert-equal 2 (begin 1 2))
 
 (define-macro (provide symbols . body)
   (list define symbols
     (list let ()
       (list* begin body)
       (list* list symbols))))
+
+;;;; Delimited Dynamic Binding Tests
+
+;; adapted from 
+
+(define-macro (test-check label expr expected)
+  (list assert-equal expr expected))
+
+(define (new-prompt) (list null))
+
+(define (abortP p e)
+  (take-subcont p ignore e))
+
+(test-check 'test2
+  (let ((p (new-prompt)))
+    (+ (push-prompt p (push-prompt p 5))
+      4))
+  9)
+
+(test-check 'test3
+  (let ((p (new-prompt)))
+    (+ (push-prompt p (+ (abortP p 5) 6))
+      4))
+  9)
+
+(test-check 'test3-1
+  (let ((p (new-prompt)))
+    (+ (push-prompt p (push-prompt p (+ (abortP p 5) 6)))
+      4))
+  9)
+
+(test-check 'test3-2
+  (let ((p (new-prompt)))
+    (let ((v (push-prompt p
+	       (let* ((v1 (push-prompt p (+ (abortP p 5) 6)))
+		      (v1 (abortP p 7)))
+		 (+ v1 10)))))
+      (+ v 20)))
+  27)
+
+'(test-check 'test3-3
+  (let ((p (new-prompt)))
+    (let ((v (push-prompt p
+	       (let* ((v1 (push-prompt p (+ (abortP p 5) 6)))
+		      (v1 (abortP p 7)))
+		 (+ v1 10)))))
+      (abortP p 9)
+      (+ v 20)))
+  'must-be-error)
+
+;; (test-check 'test3-3-1
+;;   (let ((p (new-prompt)))
+;;     (let ((v (push-prompt p
+;; 	       (let* ((v1 (push-prompt p (+ (abortP p 5) 6)))
+;; 		      (v1 (abortP p 7)))
+;; 		 (+ v1 10)))))
+;;       (prompt-set? p)))
+;;   false)
+
+(test-check 'test4
+  (let ((p (new-prompt)))
+    (+ (push-prompt p 
+	 (+ (take-subcont p sk (push-prompt p (push-subcont sk 5)))
+	   10))
+      20))
+  35)
 

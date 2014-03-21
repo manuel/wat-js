@@ -475,7 +475,9 @@ wat.VM = function() {
     Apply.prototype.wat_combine = function(e, k, f, o) {
         var cmb = elt(o, 0); if (isCapture(cmb)) return cmb;
         var args = elt(o, 1); if (isCapture(args)) return args;
-        return combine(e, k, f, cmb, args); };
+        if (cmb && cmb.wat_combine) return unwrap(cmb).wat_combine(e, k, f, args);
+        else if (cmb instanceof Function) return cmb.apply(null, list_to_array(args));
+        else return error("apply: not a combiner: " + to_string(cmb)); }
     /* Primitives */
     var primitives =
         ["begin",
@@ -576,7 +578,8 @@ wat.VM = function() {
 
          ["def", "dlet",
           ["vau", ["dv", "val", "#rest", "body"], "e",
-           ["apply", "--dlet", ["list", ["eval", "dv", "e"], ["eval", "val", "e"], ["list*", "begin", "body"]]]]],
+           ["eval", ["cons", "--dlet", ["list", ["eval", "dv", "e"], ["eval", "val", "e"], ["list*", "begin", "body"]]],
+            "e"]]],
 
          // JS
 

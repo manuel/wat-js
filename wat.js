@@ -360,7 +360,7 @@ wat.VM = function() {
     function handle_identifier(str) {
         if (str[0] === ".") { return list(sym("js-getter"), str.substring(1)); }
         else if (str[0] === "#") { return list(sym("js-invoker"), str.substring(1)); }
-        else if (str[0] === "@") { return list(sym("js-global"), str.substring(1)); }
+        else if (str[0] === "$") { return list(sym("js-global"), str.substring(1)); }
         else return sym(str); }
     function parse_json_array(arr) {
         var i = arr.indexOf("#rest");
@@ -704,11 +704,11 @@ wat.VM = function() {
           ["#join", ["list-to-array", "objects"], ["string", ""]]],
 
          ["define", ["log", "#rest", "objects"],
-          ["apply", "#log", ["list*", "@console", "objects"]]],
+          ["apply", "#log", ["list*", "$console", "objects"]]],
 
          ["define", ["--print-stacktrace-and-throw", "err"],
           ["define", ["print-frame", "k"],
-           ["#log", "@console", ["#toString", [".dbg", "k"]]],
+           ["#log", "$console", ["#toString", [".dbg", "k"]]],
            ["if", [".next", "k"],
             ["print-frame", [".next", "k"]],
             null]],

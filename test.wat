@@ -4,12 +4,6 @@
 
 ;;;; Utilities
 
-(define (cat . objects)
-  (#join (list-to-array objects) ""))
-
-(define (log . objects)
-  (apply #log (list* @console objects)))
-
 (define assert-true
   (vau (expr) e
     (unless (=== true (eval expr e))

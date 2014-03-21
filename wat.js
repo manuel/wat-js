@@ -697,9 +697,15 @@ wat.VM = function() {
          ["define-macro", ["set!", "name", "value"],
           ["list", "--set!", "name", "value"]],
 
+         ["define", ["cat", "#rest", "objects"],
+          ["#join", ["list-to-array", "objects"], ["string", ""]]],
+
+         ["define", ["log", "#rest", "objects"],
+          ["apply", "#log", ["list*", "@console", "objects"]]],
+
          ["define", ["--print-stacktrace-and-throw", "err"],
           ["define", ["print-frame", "k"],
-           ["#log", "@console", ["#toString", [".dbg", "k"]], [".e", "k"]],
+           ["#log", "@console", ["#toString", [".dbg", "k"]]],
            ["if", [".next", "k"],
             ["print-frame", [".next", "k"]],
             null]],

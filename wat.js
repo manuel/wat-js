@@ -457,6 +457,16 @@ wat.VM = function() {
             var args = array_to_list(Array.prototype.slice.call(arguments));
             return evaluate(environment, null, null, push_root_prompt(cons(cmb, args)));
         } }
+    function make_prototype(name) {
+        var prop_names = Array.prototype.slice.call(arguments, 1);
+        var param_names = prop_names.join(",");
+        var param_inits = prop_names.map(function(prop_name) {
+            return "this." + prop_name + "=" + prop_name + ";"; }).join("");
+        return eval("(function " + name + "(" + param_names + "){" + param_inits + "})"); }
+    function jsnew(ctor) {
+        console.log(ctor);
+        var factoryFunction = constructor.bind.apply(ctor, arguments);
+        return new factoryFunction(); }
     // Apply needs custom implementation to be able to apply JS functions transparently
     function Apply() {}; Apply.prototype.toString = function() { return "apply"; };
     Apply.prototype.wat_combine = function(e, k, f, o) {
@@ -512,6 +522,8 @@ wat.VM = function() {
          ["def", "array-to-list", jswrap(array_to_list)],
          ["def", "apply", wrap(new Apply())],
          ["def", "--object", jswrap(function() { return {}; })],
+         ["def", "--make-prototype", jswrap(make_prototype)],
+         ["def", "new", jswrap(jsnew)],
          // Optimization
          ["def", "list*", jswrap(list_star)],
 
@@ -702,7 +714,12 @@ wat.VM = function() {
                        ["value", ["eval", ["cadr", "pair"], "e"]]],
                [["js-setter", "name"], "obj", "value"]]],
              "pairs"],
-            "obj"]]]
+            "obj"]]],
+
+         ["define-macro", ["define-prototype", "name", "#rest", "prop-names"],
+          ["list", "define", "name",
+           ["list*", "--make-prototype", ["symbol-name", "name"],
+            ["map-list", "symbol-name", "prop-names"]]]]
 
         ];
     /* Init */
@@ -712,9 +729,9 @@ wat.VM = function() {
     evaluate(environment, null, null, parse_json_value(primitives));
     /* API */
     function parse_and_eval(sexp) {
-        return eval(parse_json_value(parse_sexp(sexp)));
+        return eval_json(parse_json_value(parse_sexp(sexp)));
     }
-    function eval(x) {
+    function eval_json(x) {
         var res = evaluate(environment, null, null, push_root_prompt(x));
         if (isCapture(res)) throw "prompt not found: " + res.prompt;
         return res;

@@ -271,17 +271,17 @@ wat.VM = function() {
     __DLet.prototype.wat_combine = function self(e, k, f, o) {
         var dv = elt(o, 0);
         var val = elt(o, 1);
-        var th = elt(o, 2);
+        var x = elt(o, 2);
         var oldVal = dv.val;
         dv.val = val;
         try {
             if (isContinuation(k)) {
                 var res = continueFrame(k, f);
             } else {
-                var res = combine(e, null, null, th, NIL);
+                var res = evaluate(e, null, null, x);
             }
             if (isCapture(res)) {
-                captureFrame(res, function(k, f) { return self(e, k, f, o); }, th, e);
+                captureFrame(res, function(k, f) { return self(e, k, f, o); }, x, e);
                 return res;
             } else {
                 return res;
@@ -494,7 +494,7 @@ wat.VM = function() {
          ["def", "--push-subcont", wrap(new __PushSubcont())],
          // Dynamically-scoped Variables
          ["def", "dnew", wrap(new DNew())],
-         ["def", "--dlet", wrap(new __DLet())],
+         ["def", "--dlet", new __DLet()],
          ["def", "dref", wrap(new DRef())],
          // Errors
          ["def", "--get-root-prompt", jswrap(function() { return ROOT_PROMPT; })],
@@ -559,8 +559,8 @@ wat.VM = function() {
            ["list", "--push-subcont", "k", ["list*", "lambda", [], "body"]]]],
 
          ["def", "dlet",
-          ["macro", ["dv", "val", "#rest", "body"],
-           ["list", "--dlet", "dv", "val", ["list*", "lambda", [], "body"]]]],
+          ["vau", ["dv", "val", "#rest", "body"], "e",
+           ["apply", "--dlet", ["list", ["eval", "dv", "e"], ["eval", "val", "e"], ["list*", "begin", "body"]]]]],
 
          // JS
 

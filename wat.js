@@ -487,7 +487,7 @@ wat.VM = function() {
          // Fexprs
          ["def", "--vau", new __Vau()],
          ["def", "eval", wrap(new Eval())],
-         ["def", "make-environment", jswrap(function() { return make_env(); })],
+         ["def", "make-environment", jswrap(function(env) { return make_env(env); })],
          ["def", "wrap", jswrap(wrap)],
          ["def", "unwrap", jswrap(unwrap)],
          ["def", "--set!", new __Set()],
@@ -708,7 +708,7 @@ wat.VM = function() {
 
          ["define", ["--print-stacktrace-and-throw", "err"],
           ["define", ["print-frame", "k"],
-           ["#log", "$console", ["#toString", [".dbg", "k"]]],
+           ["#log", "$console", ["#toString", [".dbg", "k"]], [".e", "k"]],
            ["if", [".next", "k"],
             ["print-frame", [".next", "k"]],
             null]],

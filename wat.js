@@ -452,10 +452,10 @@ wat.VM = function() {
             if ((rcv !== undefined) && (rcv !== null)) return rcv[prop_name] = arguments[1];
             else return error("can't set " + prop_name + " of " + rcv);
         }); }
-    function js_callback(cmb) {
+    function js_function(cmb) {
         return function() {
             var args = array_to_list(Array.prototype.slice.call(arguments));
-            return evaluate(environment, null, null, push_root_prompt(cons(cmb, args)));
+            return evaluate(environment, null, null, cons(cmb, args));
         } }
     function make_prototype(name) {
         var prop_names = Array.prototype.slice.call(arguments, 1);
@@ -521,7 +521,7 @@ wat.VM = function() {
          ["def", "js-getter", jswrap(js_getter)],
          ["def", "js-setter", jswrap(js_setter)],
          ["def", "js-invoker", jswrap(js_invoker)],
-         ["def", "js-callback", jswrap(js_callback)],
+         ["def", "js-function", jswrap(js_function)],
          ["def", "js-global", jswrap(function(name) { return global[name]; })],
          ["def", "list-to-array", jswrap(list_to_array)],
          ["def", "array-to-list", jswrap(array_to_list)],
@@ -747,7 +747,10 @@ wat.VM = function() {
             ["apply", ["js-invoker", ["symbol-name", "name"]], "args"]]]],
          
          ["define", ["@", "object", "key"],
-          [["js-getter", "key"], "object"]]
+          [["js-getter", "key"], "object"]],
+
+         ["define", ["js-callback", "fun"],
+          ["js-function", ["lambda", "args", ["push-prompt", ["--get-root-prompt"], ["fun"]]]]]
 
         ];
     /* Init */

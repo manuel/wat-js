@@ -448,6 +448,7 @@ wat.VM = function() {
     function js_setter(prop_name) {
         return jswrap(function() {
             if (arguments.length !== 2) return error("setter called with wrong args: " + arguments);
+            var rcv = arguments[0];
             if ((rcv !== undefined) && (rcv !== null)) return rcv[prop_name] = arguments[1];
             else return error("can't set " + prop_name + " of " + rcv);
         }); }
@@ -510,6 +511,7 @@ wat.VM = function() {
          ["def", "list-to-array", jswrap(list_to_array)],
          ["def", "array-to-list", jswrap(array_to_list)],
          ["def", "apply", wrap(new Apply())],
+         ["def", "--object", jswrap(function() { return {}; })],
          // Optimization
          ["def", "list*", jswrap(list_star)],
 
@@ -689,7 +691,18 @@ wat.VM = function() {
            ["print-frame", "k"],
            ["push-prompt", ["--get-root-prompt"],
             ["push-subcont", "k",
-             ["throw", "err"]]]]]
+             ["throw", "err"]]]]],
+
+         ["define", "object",
+          ["vau", "pairs", "e",
+           ["let", [["obj", ["--object"]]],
+            ["map-list",
+             ["lambda", ["pair"],
+              ["let", [["name", ["eval", ["car", "pair"], "e"]],
+                       ["value", ["eval", ["cadr", "pair"], "e"]]],
+               [["js-setter", "name"], "obj", "value"]]],
+             "pairs"],
+            "obj"]]]
 
         ];
     /* Init */

@@ -697,7 +697,7 @@ wat.VM = function() {
          ["define-macro", ["||", "a", "b"],
           ["list", "if", "a", true, "b"]],
 
-         ["define-macro", ["set!", "name", "value"],
+         ["define-macro", ["=", "name", "value"],
           ["list", "--set!", "name", "value"]],
 
          ["define", ["cat", "#rest", "objects"],

@@ -751,15 +751,15 @@ wat.VM = function() {
     evaluate(environment, null, null, parse_json_value(primitives));
     /* API */
     function parse_and_eval(sexp) {
-        return eval_json(parse_json_value(parse_sexp(sexp)));
+        return eval_expr(parse_json_value(parse_sexp(sexp)));
     }
-    function eval_json(x) {
+    function eval_expr(x) {
         var res = evaluate(environment, null, null, push_root_prompt(x));
         if (isCapture(res)) throw "prompt not found: " + res.prompt;
         return res;
     }
     function call(fun_name) {
-        return eval(cons(sym(fun_name), array_to_list(Array.prototype.slice.call(arguments, 1))));
+        return eval_expr(parse_json_value([fun_name].concat(Array.prototype.slice.call(arguments, 1))));
     }
     return { "eval": parse_and_eval, "call": call };
 }

@@ -464,9 +464,12 @@ wat.VM = function() {
             return "this." + prop_name + "=" + prop_name + ";"; }).join("");
         return eval("(function " + name + "(" + param_names + "){" + param_inits + "})"); }
     function jsnew(ctor) {
-        console.log(ctor);
         var factoryFunction = constructor.bind.apply(ctor, arguments);
         return new factoryFunction(); }
+    function js_method_stub(fun) {
+        return function() {
+            var args = cons(this, array_to_list(Array.prototype.slice.call(arguments)));
+            return combine(null, null, null, fun, args); } }
     // Apply needs custom implementation to be able to apply JS functions transparently
     function Apply() {}; Apply.prototype.toString = function() { return "apply"; };
     Apply.prototype.wat_combine = function(e, k, f, o) {
@@ -524,6 +527,7 @@ wat.VM = function() {
          ["def", "--object", jswrap(function() { return {}; })],
          ["def", "--make-prototype", jswrap(make_prototype)],
          ["def", "new", jswrap(jsnew)],
+         ["def", "--js-method-stub", jswrap(js_method_stub)],
          // Optimization
          ["def", "list*", jswrap(list_star)],
 
@@ -719,7 +723,14 @@ wat.VM = function() {
          ["define-macro", ["define-prototype", "name", "#rest", "prop-names"],
           ["list", "define", "name",
            ["list*", "--make-prototype", ["symbol-name", "name"],
-            ["map-list", "symbol-name", "prop-names"]]]]
+            ["map-list", "symbol-name", "prop-names"]]]],
+
+         ["define", ["--put-method", "ctor", "name", "js-fun"],
+          [["js-setter", "name"], [".prototype", "ctor"], "js-fun"]],
+
+         ["define-macro", ["define-method", ["name", ["self", "ctor"], "#rest", "args"], "#rest", "body"],
+           ["list", "--put-method", "ctor", ["symbol-name", "name"],
+            ["list", "--js-method-stub", ["list*", "lambda", ["list*", "self", "args"], "body"]]]]
 
         ];
     /* Init */

@@ -744,7 +744,10 @@ wat.VM = function() {
          ["define-macro", ["define-generic", ["name", "#rest", "#ignore"]],
           ["list", "define", "name",
            ["lambda", "args",
-            ["apply", ["js-invoker", ["symbol-name", "name"]], "args"]]]]
+            ["apply", ["js-invoker", ["symbol-name", "name"]], "args"]]]],
+         
+         ["define", ["@", "object", "key"],
+          [["js-getter", "key"], "object"]]
 
         ];
     /* Init */

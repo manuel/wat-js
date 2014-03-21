@@ -750,7 +750,14 @@ wat.VM = function() {
           [["js-getter", "key"], "object"]],
 
          ["define", ["js-callback", "fun"],
-          ["js-function", ["lambda", "args", ["push-prompt", ["--get-root-prompt"], ["fun"]]]]]
+          ["js-function", ["lambda", "args", ["push-prompt", ["--get-root-prompt"], ["fun"]]]]],
+
+         ["define", ["map-array", "f", "arr"],
+          ["let*", [["i", 0], ["len", [".length", "arr"]], ["res", ["array"]]],
+           ["while", ["<", "i", "len"],
+            ["#push", "res", ["f", ["@", "arr", "i"]]],
+            ["=", "i", ["+", "i", 1]]],
+           "res"]]
 
         ];
     /* Init */

@@ -3,19 +3,19 @@
 (define *current-parent* (dnew null))
 
 (define-prototype Document
-  id
-  title
-  children)
+  (id
+   title
+   children))
 
 (define-prototype Section
-  id
-  parent
-  title
-  children)
+  (id
+   parent
+   title
+   children))
 
 (define-prototype Para
-  text
-  parent)
+  (text
+   parent))
 
 (define (make-document id title)
   (new Document id title (array)))

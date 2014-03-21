@@ -729,7 +729,7 @@ wat.VM = function() {
              "pairs"],
             "obj"]]],
 
-         ["define-macro", ["define-prototype", "name", "#rest", "prop-names"],
+         ["define-macro", ["define-prototype", "name", "prop-names"],
           ["list", "define", "name",
            ["list*", "--make-prototype", ["symbol-name", "name"],
             ["map-list", "symbol-name", "prop-names"]]]],

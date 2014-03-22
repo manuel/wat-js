@@ -42,17 +42,17 @@
       (#push (.children parent) para)
       para))
 
-  (define-generic (render item))
+  (define-generic (render item -> contents))
   
-  (define-method (render (doc Document))
+  (define-method (render (doc Document) -> String)
     (apply cat (list* (cat "<h1>" (.title doc) "</h1>\n")
                       (map-list render (array-to-list (.children doc))))))
   
-  (define-method (render (sec Section))
+  (define-method (render (sec Section) -> String)
     (apply cat (list* (cat "<h2>" (.title sec) "</h2>\n")
                       (map-list render (array-to-list (.children sec))))))
   
-  (define-method (render (para Para))
+  (define-method (render (para Para) -> String)
     (cat "<p>" (.text para) "</p>\n"))
   
   )

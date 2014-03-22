@@ -779,7 +779,7 @@ wat.VM = function() {
 
          ["define-macro", ["define-method", ["name", ["self", "ctor"], "&rest", "args"], "&rest", "body"],
            ["list", "--put-method", "ctor", ["symbol-name", "name"],
-            ["list", "js-function", ["list*", "lambda", ["list*", "self", "args"], "body"]]]],
+            ["list", "js-function", ["list*", "typed-lambda", ["list*", "self", "args"], "body"]]]],
 
          ["define-macro", ["define-generic", ["name", "&rest", "#ignore"]],
           ["list", "define", "name",

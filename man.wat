@@ -18,8 +18,8 @@
   (define-prototype Para
     (text
      parent))
-
-  (define (make-document id title)
+  
+  (defun (make-document (id String) (title String) -> Document)
     (new Document id title (array)))
   
   (define-macro (document id title)

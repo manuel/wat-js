@@ -1,20 +1,19 @@
-
 (define provide
-  (vau (symbols . body) env
-    (eval (list def symbols
+  (vau (symbolz &rest body) env
+    (eval (list def symbolz
             (list let ()
               (list* begin body)
-              (list* list symbols)))
+              (list* list symbolz)))
           env)))
 
 (define module
-  (vau (exports . body) e
+  (vau (exports &rest body) e
     (let ((env (make-environment e)))
       (eval (list* provide exports body) env)
       env)))
 
 (define define-module
-  (vau (name exports . body) e
+  (vau (name exports &rest body) e
     (eval (list define name (list* module exports body)) e)))
 
 (define import

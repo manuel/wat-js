@@ -91,7 +91,13 @@ wat.VM = function() {
     Eval.prototype.toString = function() { return "eval"; };
     __Set.prototype.toString = function() { return "--set!"; };
     __Vau.prototype.wat_combine = function(e, k, f, o) {
-        return new Opv(elt(o, 0), elt(o, 1), elt(o, 2), e); };
+        return new Opv(xform_vau_list(elt(o, 0)), elt(o, 1), elt(o, 2), e); };
+    function xform_vau_list(obj) {
+        if (obj instanceof Cons) {
+            var kar = car(obj);
+            if ((kar instanceof Sym) && (kar.name === "&rest")) { return xform_vau_list(car(cdr(obj))); }
+            else { return cons(xform_vau_list(kar), xform_vau_list(cdr(obj))); }
+        } else { return obj; } }
     Def.prototype.wat_combine = function self(e, k, f, o) { return def_set(bind, e, k, f, o); };
     __Set.prototype.wat_combine = function self(e, k, f, o) { return def_set(set, e, k, f, o); };
     function def_set(binder, e, k, f, o) {
@@ -362,11 +368,7 @@ wat.VM = function() {
         else if (str[0] === "#") { return list(sym("js-invoker"), str.substring(1)); }
         else if (str[0] === "$") { return list(sym("js-global"), str.substring(1)); }
         else return sym(str); }
-    function parse_json_array(arr) {
-        var i = arr.indexOf("#rest");
-        if (i === -1) return array_to_list(arr.map(parse_json_value));
-        else { var front = arr.slice(0, i);
-               return array_to_list(front.map(parse_json_value), parse_json_value(arr[i + 1])); } }
+    function parse_json_array(arr) { return array_to_list(arr.map(parse_json_value)); }
     /* S-expr parser */
     function parse_sexp(s) {
         var res = program_stx(ps(s));
@@ -376,8 +378,7 @@ wat.VM = function() {
     var id_special_char =
         choice("-", "&", "!", ":", "=", ">", "<", "%", "+", "?", "/", "*", "#", "$", "_", "'", ".", "@", "|");
     var id_char = choice(range("a", "z"), range("A", "Z"), range("0", "9"), id_special_char);
-    // Kludge: don't allow single dot as id, so as not to conflict with dotted pair stx.
-    var id_stx = action(join_action(butnot(repeat1(id_char), "."), ""), function (ast) { return ast; });
+    var id_stx = action(join_action(repeat1(id_char), ""), function (ast) { return ast; });
     var escape_char = choice("\"", "\\", "n", "r", "t");
     var escape_sequence = action(sequence("\\", escape_char), function (ast) {
         switch(ast[1]) {
@@ -406,12 +407,7 @@ wat.VM = function() {
     var f_stx = make_constant_stx("false", false);
     var null_stx = make_constant_stx("null", null);
     var undef_stx = make_constant_stx("undefined", undefined);
-    var dot_stx = action(wsequence(".", x_stx), function (ast) { return ast[1]; });
-    var compound_stx = action(wsequence("(", repeat1(x_stx), optional(dot_stx), ")"),
-                              function(ast) {
-                                  var exprs = ast[1];
-                                  var end = ast[2] ? ["#rest", ast[2]] : [];
-                                  return exprs.concat(end); });
+    var compound_stx = action(wsequence("(", repeat1(x_stx), ")"), function(ast) { return ast[1]; });
     var quote_stx = action(sequence("'", x_stx), function(ast) { return ["quote", ast[1]]; });
     var cmt_stx = action(sequence(";", repeat0(negate(line_terminator)), optional(line_terminator)), nothing_action);
     var whitespace_stx = action(choice(" ", "\n", "\r", "\t"), nothing_action);
@@ -543,16 +539,16 @@ wat.VM = function() {
 
          ["def", "vau",
           ["make-macro-expander",
-           ["--vau", ["params", "env-param", "#rest", "body"], "#ignore",
+           ["--vau", ["params", "env-param", "&rest", "body"], "#ignore",
             ["list", "--vau", "params", "env-param", ["cons", "begin", "body"]]]]],
 
          ["def", "macro",
           ["make-macro-expander",
-           ["vau", ["params", "#rest", "body"], "#ignore",
+           ["vau", ["params", "&rest", "body"], "#ignore",
             ["list", "make-macro-expander", ["list*", "vau", "params", "#ignore", "body"]]]]],
 
          ["def", "lambda",
-          ["macro", ["params", "#rest", "body"],
+          ["macro", ["params", "&rest", "body"],
            ["list", "wrap", ["list*", "vau", "params", "#ignore", "body"]]]],
          ["def", "loop",
           ["macro", "body",
@@ -562,17 +558,17 @@ wat.VM = function() {
            ["list", "--catch", ["list", "lambda", [], "protected"], "handler"]]],
 
          ["def", "push-prompt",
-          ["vau", ["prompt", "#rest", "body"], "e",
+          ["vau", ["prompt", "&rest", "body"], "e",
            ["eval", ["list", "--push-prompt", ["eval", "prompt", "e"], ["list*", "begin", "body"]], "e"]]],
          ["def", "take-subcont",
-          ["macro", ["prompt", "k", "#rest", "body"],
+          ["macro", ["prompt", "k", "&rest", "body"],
            ["list", "--take-subcont", "prompt", ["list*", "lambda", ["list", "k"], "body"]]]],
          ["def", "push-subcont",
-          ["macro", ["k", "#rest", "body"],
+          ["macro", ["k", "&rest", "body"],
            ["list", "--push-subcont", "k", ["list*", "lambda", [], "body"]]]],
 
          ["def", "dlet",
-          ["vau", ["dv", "val", "#rest", "body"], "e",
+          ["vau", ["dv", "val", "&rest", "body"], "e",
            ["eval", ["cons", "--dlet", ["list", ["eval", "dv", "e"], ["eval", "val", "e"], ["list*", "begin", "body"]]],
             "e"]]],
 
@@ -618,18 +614,18 @@ wat.VM = function() {
          ["def", "compose",
           ["lambda", ["f", "g"], ["lambda", ["arg"], ["f", ["g", "arg"]]]]],
 
-         ["def", "car", ["lambda", [["x", "#rest", "#ignore"]], "x"]],
-         ["def", "cdr", ["lambda", [["#ignore", "#rest", "x"]], "x"]],
+         ["def", "car", ["lambda", [["x", "&rest", "#ignore"]], "x"]],
+         ["def", "cdr", ["lambda", [["#ignore", "&rest", "x"]], "x"]],
          ["def", "caar", ["compose", "car", "car"]],
          ["def", "cadr", ["compose", "car", "cdr"]],
          ["def", "cdar", ["compose", "cdr", "car"]],
          ["def", "cddr", ["compose", "cdr", "cdr"]],
 
          ["def", "define-macro",
-          ["macro", [["name", "#rest", "params"], "#rest", "body"],
+          ["macro", [["name", "&rest", "params"], "&rest", "body"],
            ["list", "def", "name", ["list*", "macro", "params", "body"]]]],
 
-         ["define-macro", ["define", "lhs", "#rest", "rhs"],
+         ["define-macro", ["define", "lhs", "&rest", "rhs"],
           ["if", ["cons?", "lhs"],
            ["list", "def", ["car", "lhs"], ["list*", "lambda", ["cdr", "lhs"], "rhs"]],
            ["list", "def", "lhs", ["car", "rhs"]]]],
@@ -639,21 +635,21 @@ wat.VM = function() {
             [],
             ["cons", ["f", ["car", "lst"]], ["map-list", "f", ["cdr", "lst"]]]]],
 
-         ["define-macro", ["let", "bindings", "#rest", "body"],
+         ["define-macro", ["let", "bindings", "&rest", "body"],
           ["cons",
            ["list*", "lambda", ["map-list", "car", "bindings"], "body"],
            ["map-list", "cadr", "bindings"]]],
 
-         ["define-macro", ["let*", "bindings", "#rest", "body"],
+         ["define-macro", ["let*", "bindings", "&rest", "body"],
           ["if", ["nil?", "bindings"],
            ["list*", "let", [], "body"],
            ["list", "let", ["list", ["car", "bindings"]],
             ["list*", "let*", ["cdr", "bindings"], "body"]]]],
 
-         ["define-macro", ["where", "expr", "#rest", "bindings"],
+         ["define-macro", ["where", "expr", "&rest", "bindings"],
           ["list", "let", "bindings", "expr"]],
 
-         ["define-macro", ["where*", "expr", "#rest", "bindings"],
+         ["define-macro", ["where*", "expr", "&rest", "bindings"],
           ["list", "let*", "bindings", "expr"]],
 
          ["define", ["call-with-escape", "fun"],
@@ -665,7 +661,7 @@ wat.VM = function() {
                ["if", ["cons?", "opt-arg"], ["car", "opt-arg"], []]],
               ["throw", "exc"]]]]]],
 
-         ["define-macro", ["label", "name", "#rest", "body"],
+         ["define-macro", ["label", "name", "&rest", "body"],
           ["list", "call-with-escape", ["list*", "lambda", ["list", "name"], "body"]]],
 
          ["define", ["call-while", "test-fun", "body-fun"],
@@ -675,15 +671,15 @@ wat.VM = function() {
              ["body-fun"],
              ["return", null]]]]],
 
-         ["define-macro", ["while", "test", "#rest", "body"],
+         ["define-macro", ["while", "test", "&rest", "body"],
           ["list", "call-while",
            ["list", "lambda", [], "test"],
            ["list*", "lambda", [], "body"]]],
 
-         ["define-macro", ["when", "test", "#rest", "body"],
+         ["define-macro", ["when", "test", "&rest", "body"],
           ["list", "if", "test", ["list", "begin", "body"], null]],
 
-         ["define-macro", ["unless", "test", "#rest", "body"],
+         ["define-macro", ["unless", "test", "&rest", "body"],
           ["list*", "when", ["list", "!", "test"], "body"]],
 
          ["define-macro", ["&&", "a", "b"],
@@ -695,10 +691,10 @@ wat.VM = function() {
          ["define-macro", ["=", "name", "value"],
           ["list", "--set!", "name", "value"]],
 
-         ["define", ["cat", "#rest", "objects"],
+         ["define", ["cat", "&rest", "objects"],
           ["#join", ["list-to-array", "objects"], ["string", ""]]],
 
-         ["define", ["log", "#rest", "objects"],
+         ["define", ["log", "&rest", "objects"],
           ["apply", "#log", ["list*", "$console", "objects"]]],
 
          ["define", ["--print-stacktrace-and-throw", "err"],
@@ -732,11 +728,11 @@ wat.VM = function() {
          ["define", ["--put-method", "ctor", "name", "js-fun"],
           [["js-setter", "name"], [".prototype", "ctor"], "js-fun"]],
 
-         ["define-macro", ["define-method", ["name", ["self", "ctor"], "#rest", "args"], "#rest", "body"],
+         ["define-macro", ["define-method", ["name", ["self", "ctor"], "&rest", "args"], "&rest", "body"],
            ["list", "--put-method", "ctor", ["symbol-name", "name"],
             ["list", "js-function", ["list*", "lambda", ["list*", "self", "args"], "body"]]]],
 
-         ["define-macro", ["define-generic", ["name", "#rest", "#ignore"]],
+         ["define-macro", ["define-generic", ["name", "&rest", "#ignore"]],
           ["list", "define", "name",
            ["lambda", "args",
             ["apply", ["js-invoker", ["symbol-name", "name"]], "args"]]]],

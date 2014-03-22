@@ -29,8 +29,8 @@
     (let ((sec (new Section id parent title (array))))
       (#push (.children parent) sec)
     sec))
-  
-  (define-macro (section (parent id) title . children)
+
+  (define-macro (section (parent id) title &rest children)
     (list begin
       (list define id (list make-section (symbol-name id) parent title))
         (list* dlet *current-parent* id

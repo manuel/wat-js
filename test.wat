@@ -37,12 +37,6 @@
 (assert-equal 1 (begin 1))
 (assert-equal 2 (begin 1 2))
 
-(define-macro (provide symbols . body)
-  (list define symbols
-    (list let ()
-      (list* begin body)
-      (list* list symbols))))
-
 ;;;; Delimited Dynamic Binding Tests
 
 ;; adapted from 

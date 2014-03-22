@@ -452,11 +452,6 @@ wat.VM = function() {
             if ((rcv !== undefined) && (rcv !== null)) return rcv[prop_name] = arguments[1];
             else return error("can't set " + prop_name + " of " + rcv);
         }); }
-    function js_function(cmb) {
-        return function() {
-            var args = array_to_list(Array.prototype.slice.call(arguments));
-            return evaluate(environment, null, null, cons(cmb, args));
-        } }
     function make_prototype(name) {
         var prop_names = Array.prototype.slice.call(arguments, 1);
         var param_names = prop_names.join(",");
@@ -466,10 +461,11 @@ wat.VM = function() {
     function jsnew(ctor) {
         var factoryFunction = constructor.bind.apply(ctor, arguments);
         return new factoryFunction(); }
-    function js_method_stub(fun) {
+    function js_function(cmb) {
         return function() {
             var args = cons(this, array_to_list(Array.prototype.slice.call(arguments)));
-            return combine(null, null, null, fun, args); } }
+            return combine(null, null, null, cmb, args);
+        } }
     // Apply needs custom implementation to be able to apply JS functions transparently
     function Apply() {}; Apply.prototype.toString = function() { return "apply"; };
     Apply.prototype.wat_combine = function(e, k, f, o) {
@@ -526,10 +522,9 @@ wat.VM = function() {
          ["def", "list-to-array", jswrap(list_to_array)],
          ["def", "array-to-list", jswrap(array_to_list)],
          ["def", "apply", wrap(new Apply())],
-         ["def", "--object", jswrap(function() { return {}; })],
+         ["def", "--make-object", jswrap(function() { return {}; })],
          ["def", "--make-prototype", jswrap(make_prototype)],
          ["def", "new", jswrap(jsnew)],
-         ["def", "--js-method-stub", jswrap(js_method_stub)],
          // Optimization
          ["def", "list*", jswrap(list_star)],
 
@@ -720,7 +715,7 @@ wat.VM = function() {
 
          ["define", "object",
           ["vau", "pairs", "e",
-           ["let", [["obj", ["--object"]]],
+           ["let", [["obj", ["--make-object"]]],
             ["map-list",
              ["lambda", ["pair"],
               ["let", [["name", ["eval", ["car", "pair"], "e"]],
@@ -739,7 +734,7 @@ wat.VM = function() {
 
          ["define-macro", ["define-method", ["name", ["self", "ctor"], "#rest", "args"], "#rest", "body"],
            ["list", "--put-method", "ctor", ["symbol-name", "name"],
-            ["list", "--js-method-stub", ["list*", "lambda", ["list*", "self", "args"], "body"]]]],
+            ["list", "js-function", ["list*", "lambda", ["list*", "self", "args"], "body"]]]],
 
          ["define-macro", ["define-generic", ["name", "#rest", "#ignore"]],
           ["list", "define", "name",
@@ -750,7 +745,7 @@ wat.VM = function() {
           [["js-getter", "key"], "object"]],
 
          ["define", ["js-callback", "fun"],
-          ["js-function", ["lambda", "args", ["push-prompt", ["--get-root-prompt"], ["fun"]]]]],
+          ["js-function", ["lambda", "args", ["push-prompt", ["--get-root-prompt"], ["apply", "fun", "args"]]]]],
 
          ["define", ["map-array", "f", "arr"],
           ["let*", [["i", 0], ["len", [".length", "arr"]], ["res", ["array"]]],

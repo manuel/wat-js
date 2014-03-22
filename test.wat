@@ -103,4 +103,12 @@
       20))
   35)
 
-(the Array (array))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,
+
+(assert-true (eval (cons && (list (=== 1 1) (=== 2 2))) (get-current-environment)))
+(assert-false (eval (cons && (list (!== 1 1) (=== 2 2))) (get-current-environment)))
+
+(assert-equal 2 (apply (lambda x x) 2))
+
+(assert-throws (unwrap (vau () ignore)))
+

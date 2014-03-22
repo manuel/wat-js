@@ -47,7 +47,8 @@ wat.VM = function() {
     function Opv(p, ep, x, e) { this.p = p; this.ep = ep; this.x = x; this.e = e; }
     function Apv(cmb) { this.cmb = cmb; }
     Apv.prototype.toString = function() { return "[Apv " + to_string(this.cmb) + "]"; };
-    function wrap(cmb) { return new Apv(cmb); }; function unwrap(apv) { return apv.cmb; }
+    function wrap(cmb) { return new Apv(cmb); };
+    function unwrap(apv) { return apv instanceof Apv ? apv.cmb : error("cannot unwrap: " + apv); }
     Opv.prototype.wat_combine = function(e, k, f, o) {
         var xe = make_env(this.e); 
         var pCap = bind(xe, this.p, o);

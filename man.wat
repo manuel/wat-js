@@ -25,10 +25,10 @@
   (define-macro (document id title)
     (list define id (list make-document (symbol-name id) title)))
   
-  (define (make-section id parent title)
+  (defun (make-section (id String) (parent Document) (title String) -> Section)
     (let ((sec (new Section id parent title (array))))
       (#push (.children parent) sec)
-    sec))
+      sec))
 
   (define-macro (section (parent id) title &rest children)
     (list begin
@@ -36,9 +36,9 @@
         (list* dlet *current-parent* id
                children)))
   
-  (define (para text)
+  (defun (para (text String) -> Para)
     (let* ((parent (dref *current-parent*))
-           (para (new Para text parent)))
+           (para (new Para text (the Section parent))))
       (#push (.children parent) para)
       para))
 

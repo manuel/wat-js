@@ -111,11 +111,11 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         return evaluate(e, k, f, x); };
     /* First-order Control */
     function Begin() {}; function If() {}; function Loop1() {}
-    function __Catch() {}; function Finally() {}
+    function Catch() {}; function Finally() {}
     Begin.prototype.toString = function() { return "begin"; };
     If.prototype.toString = function() { return "if"; };
     Loop1.prototype.toString = function() { return "loop"; };
-    __Catch.prototype.toString = function() { return "catch"; };
+    Catch.prototype.toString = function() { return "catch"; };
     Finally.prototype.toString = function() { return "finally"; };
     Begin.prototype.wat_combine = function(e, k, f, o) {
         if (o === NIL) return null; else return begin(e, k, f, o); };
@@ -159,21 +159,21 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
             }
         }
     };
-    __Catch.prototype.wat_combine = function self(e, k, f, o) {
-        var th = elt(o, 0);
+    Catch.prototype.wat_combine = function self(e, k, f, o) {
+        var x = elt(o, 0);
         var handler = elt(o, 1);
         try {
             if (isContinuation(k)) {
                 var res = continueFrame(k, f);
             } else {
-                var res = combine(e, null, null, th, NIL);
+                var res = evaluate(e, null, null, x);
             }
         } catch(exc) {
             // unwrap handler to prevent eval if exc is sym or cons
             var res = combine(e, null, null, unwrap(handler), list(exc));
         }
         if (isCapture(res)) {
-            captureFrame(res, function(k, f) { return self(e, k, f, o); }, th, e);
+            captureFrame(res, function(k, f) { return self(e, k, f, o); }, x, e);
             return res;
         } else {
             return res;
@@ -442,7 +442,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
          ["def", "if", new If()],
          ["def", "loop1", new Loop1()],
          ["def", "throw", jswrap(function(err) { throw err; })],
-         ["def", "--catch", wrap(new __Catch())],
+         ["def", "catch*", new Catch()],
          ["def", "finally", new Finally()],
          // Delimited Control
          ["def", "--push-prompt", new __PushPrompt()],

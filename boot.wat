@@ -26,8 +26,8 @@
  (macro body
   (list loop1 (list* begin body))))
 (def catch
- (macro (protected handler)
-  (list --catch (list lambda () protected) handler)))
+ (vau (protected handler) e
+  (eval (list catch* protected (eval handler e)) e)))
 
 (def push-prompt
  (vau (prompt . body) e

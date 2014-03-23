@@ -103,7 +103,7 @@
       20))
   35)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (combine cmb ops) (apply (wrap cmb) ops))
 
@@ -114,3 +114,8 @@
 
 (assert-throws (unwrap (vau () ignore)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(let ((res (map-array #toString (array 1 2))))
+  (assert-equal (@ res 0) "1")
+  (assert-equal (@ res 1) "2"))

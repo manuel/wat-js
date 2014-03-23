@@ -218,12 +218,12 @@
  (js-function (lambda args (push-prompt --root-prompt (apply fun args)))))
 
 (define provide
-  (vau (symbolz . body) env
-    (eval (list def symbolz
-   (list let ()
-     (list* begin body)
-     (list* list symbolz)))
- env)))
+  (vau (symbols . body) env
+    (eval (list def symbols
+                (list let ()
+                      (list* begin body)
+                      (list* list symbols)))
+          env)))
 
 (define module
   (vau (exports . body) e

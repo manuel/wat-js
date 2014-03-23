@@ -428,7 +428,6 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
          // Basics
          ["def", "vau1", new Vau1()],
          ["def", "eval", wrap(new Eval())],
-         ["def", "apply", wrap(new Apply())],
          ["def", "make-environment", jswrap(function(env) { return make_env(env); })],
          ["def", "wrap", jswrap(wrap)],
          ["def", "unwrap", jswrap(unwrap)],
@@ -456,6 +455,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
          ["def", "--root-prompt", ROOT_PROMPT],
          ["def", "error", jswrap(error)],
          // JS Interface
+         ["def", "apply", wrap(new Apply())],
          ["def", "js-wrap", jswrap(jswrap)],
          ["def", "js-unop", jswrap(js_unop)],
          ["def", "js-binop", jswrap(js_binop)],

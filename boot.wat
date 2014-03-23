@@ -30,8 +30,7 @@
 ;; Important utilities
 (_define quote (vm-vau (x) ignore x))
 (_define list (wrap (vm-vau elts ignore elts)))
-(_define string (vm-vau (sym) ignore (symbol-name sym)))
-(_define get-current-environment (vm-vau () e e))
+(_define the-environment (vm-vau () e e))
 
 ;; Macro and vau
 (_define make-macro-expander
@@ -43,7 +42,7 @@
 (_define _vau
   (make-macro-expander
     (vm-vau (params env-param . body) ignore
-      (list vm-vau params env-param (cons begin body)))))
+      (list vm-vau params env-param (list* begin body)))))
 
 (_define macro
   (make-macro-expander
@@ -90,40 +89,6 @@
 (_define cdar (compose cdr car))
 (_define cddr (compose cdr cdr))
 
-;; JS operators
-(_define define-js-unop
-  (macro (op)
-    (list _define op (list vm-js-unop (list string op)))))
-
-(_define define-js-binop
-  (macro (op)
-    (list _define op (list vm-js-binop (list string op)))))
-
-(define-js-unop !)
-(define-js-unop typeof)
-(define-js-unop ~)
-
-(define-js-binop !=)
-(define-js-binop !==)
-(define-js-binop %)
-(define-js-binop &)
-(define-js-binop *)
-(define-js-binop +)
-(define-js-binop -)
-(define-js-binop /)
-(define-js-binop <)
-(define-js-binop <<)
-(define-js-binop <=)
-(define-js-binop ==)
-(define-js-binop ===)
-(define-js-binop >)
-(define-js-binop >>)
-(define-js-binop >>>)
-(define-js-binop ^)
-(define-js-binop in)
-(define-js-binop instanceof)
-(define-js-binop |)
-
 ;; Important macros and functions
 (_define define-macro
   (macro ((name . params) . body)
@@ -164,7 +129,7 @@
       (_lambda (exc)
         (if (&& (cons? exc) (=== fresh (car exc)))
             (let ((opt-arg (cadr exc)))
-              (if (cons? opt-arg) (car opt-arg) ()))
+              (if (cons? opt-arg) (car opt-arg) undefined))
             (throw exc))))))
 
 (define-macro (label name . body)
@@ -175,7 +140,7 @@
     (loop
       (if (test-fun)
         (body-fun)
-        (return null)))))
+        (return)))))
 
 (define-macro (while test . body)
   (list call-while
@@ -230,7 +195,39 @@
            (values (map-list (_lambda (import) (eval import m)) imports)))
       (eval (list _define imports (list* list values)) e))))
 
-;; More JS utilities
+;; JavaScript
+
+(define-macro (define-js-unop op)
+  (list _define op (list vm-js-unop (symbol-name op))))
+
+(define-macro (define-js-binop op)
+  (list _define op (list vm-js-binop (symbol-name op))))
+
+(define-js-unop !)
+(define-js-unop typeof)
+(define-js-unop ~)
+
+(define-js-binop !=)
+(define-js-binop !==)
+(define-js-binop %)
+(define-js-binop &)
+(define-js-binop *)
+(define-js-binop +)
+(define-js-binop -)
+(define-js-binop /)
+(define-js-binop <)
+(define-js-binop <<)
+(define-js-binop <=)
+(define-js-binop ==)
+(define-js-binop ===)
+(define-js-binop >)
+(define-js-binop >>)
+(define-js-binop >>>)
+(define-js-binop ^)
+(define-js-binop in)
+(define-js-binop instanceof)
+(define-js-binop |)
+
 (define object
   (_vau pairs e
     (let ((obj (vm-js-make-object)))
@@ -268,6 +265,7 @@
   (apply #log (list* $console objects)))
 
 ;; Final events
+
 (define (user-break err)
   (define (print-frame k)
     (log (#toString (.dbg k)) (.e k))
@@ -293,7 +291,7 @@
     (eval (list let-redirect
                 (make-environment)
                 bindings
-                (list get-current-environment))
+                (list the-environment))
           denv)))
 
 (define slurp-environment
@@ -310,9 +308,8 @@
 RegExp String ^ _define _lambda _vau apply array array-to-list begin
 caar cadr car cat catch cdar cddr cdr cons cons? define define-generic
 define-macro define-method define-module define-prototype dlet dnew
-dref error eval get-current-environment if import in instanceof
-js-callback js-getter js-global js-invoker label lambda let let* list
-list* list-to-array log loop macro make-environment map-list module
-new nil? object provide push-prompt push-subcont quote string
-symbol-name take-subcont the throw typeof unless unwrap when while
-wrap || ~))
+dref error eval the-environment if import in instanceof js-callback
+js-getter js-global js-invoker label lambda let let* list list*
+list-to-array log loop macro make-environment map-list module new nil?
+object provide push-prompt push-subcont quote symbol-name take-subcont
+the throw typeof unless unwrap when while wrap || ~))

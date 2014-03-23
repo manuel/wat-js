@@ -91,7 +91,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
     Eval.prototype.toString = function() { return "eval"; };
     __Set.prototype.toString = function() { return "--set!"; };
     __Vau.prototype.wat_combine = function(e, k, f, o) {
-        return new Opv(xform_vau_list(elt(o, 0)), elt(o, 1), elt(o, 2), e); };
+        return new Opv(elt(o, 0), elt(o, 1), elt(o, 2), e); };
     Def.prototype.wat_combine = function self(e, k, f, o) { return def_set(bind, e, k, f, o); };
     __Set.prototype.wat_combine = function self(e, k, f, o) { return def_set(set, e, k, f, o); };
     function def_set(binder, e, k, f, o) {
@@ -351,39 +351,6 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
     function to_string(obj) {
         if ((obj !== null) && (obj !== undefined)) return obj.toString();
         else return Object.prototype.toString.call(obj); }
-    /* Typed lambdas */
-    // Strip . from vau list, return (possibly) improper list
-    var DOT = ".";
-    function xform_vau_list(obj) {
-        if (obj instanceof Cons) {
-            var kar = car(obj);
-            if ((kar instanceof Sym) && (kar.name === DOT)) { return xform_vau_list(car(cdr(obj))); }
-            else { return cons(xform_vau_list(kar), xform_vau_list(cdr(obj))); }
-        } else { return obj; } }
-    // Return (untyped-vau-list type-checked-body)
-    function xform_typed_lambda(obj, body) {
-        if ((obj === NIL) || (obj instanceof Sym)) { return list(obj, body); }
-        var vau_list = [];
-        var param_checks = [];
-        var result_type = null;
-        while(obj !== NIL) {
-            var param = car(obj);
-            if (param instanceof Cons) {
-                var name = car(param); var type = car(cdr(param));
-                vau_list.push(name);
-                param_checks.push(list(sym("the"), type, name));
-            } else if (param instanceof Sym) {
-                if (param.name === "->") {
-                    result_type = car(cdr(obj));
-                    break;
-                } else { vau_list.push(param); }
-            } else if (param === IGN) {
-                vau_list.push(param);
-            } else { return error("param must be cons or sym: " + param); }
-            obj = cdr(obj); }
-        param_checks.map(function(ptc) { body = cons(ptc, body); });
-        if (result_type !== null) { body = list(sym("the"), result_type, cons(sym("begin"), body)); }
-        return list(array_to_list(vau_list), body); }
     var js_types = ["Arguments", "Array", "Date", "Function", "Number", "Object", "RegExp", "String"];
     function is_type(type_name, type_obj, obj) {
         if (js_types.indexOf(type_name) === -1) { return obj instanceof type_obj; }
@@ -398,7 +365,11 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         case "[object String]": return obj === "ignore" ? IGN : sym(obj);
         case "[object Array]": return parse_bytecode_array(obj);
         default: return obj; } }
-    function parse_bytecode_array(arr) { return array_to_list(arr.map(parse_bytecode)); }
+    function parse_bytecode_array(arr) {
+        var i = arr.indexOf(".");
+        if (i === -1) return array_to_list(arr.map(parse_bytecode));
+        else { var front = arr.slice(0, i);
+               return array_to_list(front.map(parse_bytecode), parse_bytecode(arr[i + 1])); } }
     /* JSNI */
     function JSFun(jsfun) {
         if (Object.prototype.toString.call(jsfun) !== "[object Function]") return error("no fun");
@@ -502,7 +473,6 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
          ["def", "--make-object", jswrap(function() { return {}; })],
          ["def", "--make-prototype", jswrap(make_prototype)],
          ["def", "new", jswrap(jsnew)],
-         ["def", "xform-typed-lambda", jswrap(xform_typed_lambda)],
          ["def", "--type-check", jswrap(type_check)],
          // Optimization
          ["def", "list*", jswrap(list_star)],

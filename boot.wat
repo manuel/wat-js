@@ -116,14 +116,6 @@
   (list let (list (car bindings))
    (list* let* (cdr bindings) body))))
 
-(define-macro (defun (name . params) . body)
- (list def name (list* typed-lambda params body)))
-
-(def typed-lambda
- (macro (params . body)
-  (let (((vau-list typed-body) (xform-typed-lambda params body)))
-   (list wrap (list* vau vau-list ignore typed-body)))))
-
 (define-macro (the type obj)
  (list --type-check (symbol-name type) type obj))
 
@@ -214,7 +206,7 @@
 
 (define-macro (define-method (name (self ctor) . args) . body)
   (list --put-method ctor (symbol-name name)
-   (list js-function (list* typed-lambda (list* self args) body))))
+   (list js-function (list* lambda (list* self args) body))))
 
 (define-macro (define-generic (name . ignore))
  (list define name

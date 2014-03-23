@@ -1,7 +1,7 @@
 var jsparse = require("./jsparse.js");
 module.exports.parse_sexp = parse_sexp;
 
-var ps = jsparse.ps; var choice = jsparse.choice; var range = jsparse.range; var action = jsparse.action; var sequence = jsparse.sequence; var join = jsparse.join; var join_action = jsparse.join_action; var negate = jsparse.negate; var repeat0 = jsparse.repeat0; var optional = jsparse.optional; var repeat1 = jsparse.repeat1; var wsequence = jsparse.wsequence; var whitespace = jsparse.whitespace; var ch = jsparse.ch;
+var ps = jsparse.ps; var choice = jsparse.choice; var range = jsparse.range; var action = jsparse.action; var sequence = jsparse.sequence; var join = jsparse.join; var join_action = jsparse.join_action; var negate = jsparse.negate; var repeat0 = jsparse.repeat0; var optional = jsparse.optional; var repeat1 = jsparse.repeat1; var wsequence = jsparse.wsequence; var whitespace = jsparse.whitespace; var ch = jsparse.ch; var butnot = jsparse.butnot;
 
 /* S-expr parser */
 function parse_sexp(s) {
@@ -12,7 +12,8 @@ var x_stx = function(input) { return x_stx(input); }; // forward decl.
 var id_special_char =
     choice("-", "&", "!", ":", "=", ">", "<", "%", "+", "?", "/", "*", "#", "$", "_", "'", ".", "@", "|", "~", "^");
 var id_char = choice(range("a", "z"), range("A", "Z"), range("0", "9"), id_special_char);
-var id_stx = action(join_action(repeat1(id_char), ""), handle_identifier);
+// Kludge: don't allow single dot as id, so as not to conflict with dotted pair stx.
+var id_stx = action(join_action(butnot(repeat1(id_char), "."), ""), handle_identifier);
 function handle_identifier(str) {
     if ((str[0] === ".") && (str.length > 1)) { return ["js-getter", ["string", str.substring(1)]]; }
     else if (str[0] === "#") { return ["js-invoker", ["string", str.substring(1)]]; }
@@ -46,7 +47,12 @@ var t_stx = make_constant_stx("true", true);
 var f_stx = make_constant_stx("false", false);
 var null_stx = make_constant_stx("null", null);
 var undef_stx = make_constant_stx("undefined", undefined);
-var compound_stx = action(wsequence("(", repeat1(x_stx), ")"), function(ast) { return ast[1]; });
+var dot_stx = action(wsequence(".", x_stx), function (ast) { return ast[1]; });
+var compound_stx = action(wsequence("(", repeat1(x_stx), optional(dot_stx), ")"),
+                          function(ast) {
+                              var exprs = ast[1];
+                              var end = ast[2] ? [".", ast[2]] : [];
+                              return exprs.concat(end); });
 var quote_stx = action(sequence("'", x_stx), function(ast) { return ["quote", ast[1]]; });
 var cmt_stx = action(sequence(";", repeat0(negate(line_terminator)), optional(line_terminator)), nothing_action);
 var whitespace_stx = action(choice(" ", "\n", "\r", "\t"), nothing_action);

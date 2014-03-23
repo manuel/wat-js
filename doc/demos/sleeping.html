@@ -10,19 +10,19 @@
 
 (def default-prompt 'default-prompt)
 
-(defun (spawn-thread (id String))
+(define (spawn-thread id)
   (push-prompt default-prompt
     (run-thread id)))
 
-(defun (run-thread (id String))
+(define (run-thread id)
   (loop
     (#appendChild (.body $document)
                   (#createTextNode $document (cat "Active thread: " id " ")))
     (sleep 250)))
 
-(defun (sleep (ms Number))
+(define (sleep ms)
   (take-subcont default-prompt k
-    (defun (callback . ignore)
+    (define (callback . ignore)
       (push-prompt default-prompt
         (push-subcont k)))
     ($setTimeout (js-callback callback) ms)))

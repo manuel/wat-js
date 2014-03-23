@@ -44,6 +44,7 @@
   (eval (cons --dlet (list (eval dv e) (eval val e) (list* begin body)))
    e)))
 
+(def new js-new)
 
 (def array (lambda args (list-to-array args)))
 
@@ -117,7 +118,7 @@
    (list* let* (cdr bindings) body))))
 
 (define-macro (the type obj)
- (list --type-check (symbol-name type) type obj))
+ (list type-check (symbol-name type) type obj))
 
 (def Arguments $Arguments)
 (def Array $Array)
@@ -184,7 +185,7 @@
 
 (define object
  (vau pairs e
-  (let ((obj (--make-object)))
+  (let ((obj (js-make-object)))
    (map-list
     (lambda (pair)
      (let ((name (eval (car pair) e))
@@ -195,7 +196,7 @@
 
 (define-macro (define-prototype name prop-names)
  (list define name
-  (list* --make-prototype (symbol-name name)
+  (list* js-make-prototype (symbol-name name)
    (map-list symbol-name prop-names))))
 
 (define (--put-method ctor name js-fun)

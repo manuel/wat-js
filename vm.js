@@ -464,13 +464,13 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
          ["def", "js-invoker", jswrap(js_invoker)],
          ["def", "js-function", jswrap(js_function)],
          ["def", "js-global", jswrap(function(name) { return global[name]; })],
+         ["def", "js-make-object", jswrap(function() { return {}; })],
+         ["def", "js-make-prototype", jswrap(make_prototype)],
+         ["def", "js-new", jswrap(jsnew)],
+         ["def", "type-check", jswrap(type_check)],
+         // Utilities
          ["def", "list-to-array", jswrap(list_to_array)],
          ["def", "array-to-list", jswrap(array_to_list)],
-         ["def", "--make-object", jswrap(function() { return {}; })],
-         ["def", "--make-prototype", jswrap(make_prototype)],
-         ["def", "new", jswrap(jsnew)],
-         ["def", "--type-check", jswrap(type_check)],
-         // Optimization
          ["def", "list*", jswrap(list_star)],
          // User-supplied boot code; defines user environment
          user_boot_bytecode

@@ -815,11 +815,11 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         return evalArgs(e, null, null, cdr(todo), cons(arg, done));
     }
     /* Built-in Combiners */
-    function Vau() {}; function Def() {}; function Eval() {};
-    Vau.prototype.toString = function() { return "vau"; };
+    function Vau1() {}; function Def() {}; function Eval() {};
+    Vau1.prototype.toString = function() { return "vau"; };
     Def.prototype.toString = function() { return "def"; };
     Eval.prototype.toString = function() { return "eval"; };
-    Vau.prototype.wat_combine = function(e, k, f, o) {
+    Vau1.prototype.wat_combine = function(e, k, f, o) {
         return new Opv(elt(o, 0), elt(o, 1), elt(o, 2), e); };
     Def.prototype.wat_combine = function self(e, k, f, o) {
         var lhs = elt(o, 0); if (isCapture(lhs)) return lhs;
@@ -1156,7 +1156,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
     var boot_bytecode =
         ["begin",
          // Basics
-         ["def", "vau1", new Vau()],
+         ["def", "vau1", new Vau1()],
          ["def", "eval", wrap(new Eval())],
          ["def", "apply", wrap(new Apply())],
          ["def", "make-environment", jswrap(function(env) { return make_env(env); })],

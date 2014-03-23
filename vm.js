@@ -395,14 +395,9 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
     /* Bytecode parser */
     function parse_bytecode(obj) {
         switch(Object.prototype.toString.call(obj)) {
-        case "[object String]": return obj === "ignore" ? IGN : handle_identifier(obj);
+        case "[object String]": return obj === "ignore" ? IGN : sym(obj);
         case "[object Array]": return parse_bytecode_array(obj);
         default: return obj; } }
-    function handle_identifier(str) {
-        if ((str[0] === ".") && (str.length > 1)) { return list(sym("js-getter"), str.substring(1)); }
-        else if (str[0] === "#") { return list(sym("js-invoker"), str.substring(1)); }
-        else if (str[0] === "$") { return list(sym("js-global"), str.substring(1)); }
-        else return sym(str); }
     function parse_bytecode_array(arr) { return array_to_list(arr.map(parse_bytecode)); }
     /* JSNI */
     function JSFun(jsfun) {

@@ -12,7 +12,12 @@ var x_stx = function(input) { return x_stx(input); }; // forward decl.
 var id_special_char =
     choice("-", "&", "!", ":", "=", ">", "<", "%", "+", "?", "/", "*", "#", "$", "_", "'", ".", "@", "|", "~", "^");
 var id_char = choice(range("a", "z"), range("A", "Z"), range("0", "9"), id_special_char);
-var id_stx = action(join_action(repeat1(id_char), ""), function (ast) { return ast; });
+var id_stx = action(join_action(repeat1(id_char), ""), handle_identifier);
+function handle_identifier(str) {
+    if ((str[0] === ".") && (str.length > 1)) { return ["js-getter", ["string", str.substring(1)]]; }
+    else if (str[0] === "#") { return ["js-invoker", ["string", str.substring(1)]]; }
+    else if (str[0] === "$") { return ["js-global", ["string", str.substring(1)]]; }
+    else return str; }
 var escape_char = choice("\"", "\\", "n", "r", "t");
 var escape_sequence = action(sequence("\\", escape_char), function (ast) {
     switch(ast[1]) {

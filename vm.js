@@ -1,5 +1,5 @@
 // Wat VM by Manuel Simoni (msimoni@gmail.com)
-module.exports = function WatVM(boot_bytecode, parser) {
+module.exports = function WatVM(user_boot_bytecode, parser) {
     /* Continuations */
     function Continuation(fun, next, dbg, e) {
         this.fun = fun; this.next = next; this.dbg = dbg; this.e = e; }
@@ -327,7 +327,7 @@ module.exports = function WatVM(boot_bytecode, parser) {
     Ign.prototype.wat_match = function(e, rhs) {};
     /* Error handling */
     var ROOT_PROMPT = {};
-    function push_root_prompt(x) { return list(sym("--push-prompt"), ROOT_PROMPT, x); }
+    function push_root_prompt(x) { return list(new __PushPrompt(), ROOT_PROMPT, x); }
     function error(err) {
         var print_stacktrace = environment.bindings["--print-stacktrace-and-throw"];
         if (print_stacktrace !== undefined) {
@@ -459,8 +459,8 @@ module.exports = function WatVM(boot_bytecode, parser) {
         if (cmb && cmb.wat_combine) return unwrap(cmb).wat_combine(e, k, f, args);
         else if (cmb instanceof Function) return cmb.apply(null, list_to_array(args));
         else return error("apply: not a combiner: " + to_string(cmb)); }
-    /* Primitives */
-    var primitives =
+    /* Bootstrap */
+    var boot_bytecode =
         ["begin",
          // Fexprs
          ["def", "--vau", new __Vau()],
@@ -511,19 +511,19 @@ module.exports = function WatVM(boot_bytecode, parser) {
          ["def", "--type-check", jswrap(type_check)],
          // Optimization
          ["def", "list*", jswrap(list_star)],
-         // Boot
-         boot_bytecode
+         // User-supplied boot code; defines user environment
+         user_boot_bytecode
         ];
-    /* Init */
     var environment = make_env();
     bind(environment, sym("def"), new Def());
     bind(environment, sym("begin"), new Begin());
-    evaluate(environment, null, null, parse_bytecode(primitives));
+    var user_environment = evaluate(environment, null, null, parse_bytecode(boot_bytecode));
+    if (!(user_environment instanceof Env)) throw "failed to boot Wat";
     /* API */
     this.eval = function(sexp){
         if (!parser) throw "parsing not supported"; return this.exec(parser.parse_sexp(sexp)); }
     this.exec = function(bytecode) {
-        var res = evaluate(environment, null, null, push_root_prompt(parse_bytecode(bytecode)));
+        var res = evaluate(user_environment, null, null, push_root_prompt(parse_bytecode(bytecode)));
         if (isCapture(res)) throw "prompt not found: " + res.prompt;
         return res; }
     this.call = function(fun_name) {

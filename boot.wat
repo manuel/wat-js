@@ -259,3 +259,5 @@
       (eval (list def imports (list* list values))
    e))))
 
+;; Return bindings to VM
+(get-current-environment)

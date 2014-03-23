@@ -1,18 +1,18 @@
-(def quote (--vau (x) ignore x))
-(def list (wrap (--vau arglist ignore arglist)))
-(def string (--vau (sym) ignore (symbol-name sym)))
-(def get-current-environment (--vau () e e))
+(def quote (vau1 (x) ignore x))
+(def list (wrap (vau1 arglist ignore arglist)))
+(def string (vau1 (sym) ignore (symbol-name sym)))
+(def get-current-environment (vau1 () e e))
 
 (def make-macro-expander
  (wrap
-  (--vau (expander) ignore
-   (--vau operands env
+  (vau1 (expander) ignore
+   (vau1 operands env
     (eval (eval (cons expander operands) (make-environment)) env)))))
 
 (def vau
  (make-macro-expander
-  (--vau (params env-param . body) ignore
-   (list --vau params env-param (cons begin body)))))
+  (vau1 (params env-param . body) ignore
+   (list vau1 params env-param (cons begin body)))))
 
 (def macro
  (make-macro-expander

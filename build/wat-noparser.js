@@ -397,18 +397,18 @@ module.exports.VM = function() {
         if (!is_type(type_name, type_obj, obj)) {
             return error("type error: " + obj + " is not a " + type_name);
         } else { return obj; } }
-    /* JSON parser */
-    function parse_json_value(obj) {
+    /* Bytecode parser */
+    function parse_bytecode(obj) {
         switch(Object.prototype.toString.call(obj)) {
         case "[object String]": return obj === "#ignore" ? IGN : handle_identifier(obj);
-        case "[object Array]": return parse_json_array(obj);
+        case "[object Array]": return parse_bytecode_array(obj);
         default: return obj; } }
     function handle_identifier(str) {
         if (str[0] === ".") { return list(sym("js-getter"), str.substring(1)); }
         else if (str[0] === "#") { return list(sym("js-invoker"), str.substring(1)); }
         else if (str[0] === "$") { return list(sym("js-global"), str.substring(1)); }
         else return sym(str); }
-    function parse_json_array(arr) { return array_to_list(arr.map(parse_json_value)); }
+    function parse_bytecode_array(arr) { return array_to_list(arr.map(parse_bytecode)); }
     /* JSNI */
     function JSFun(jsfun) {
         if (Object.prototype.toString.call(jsfun) !== "[object Function]") return error("no fun");
@@ -527,17 +527,20 @@ module.exports.VM = function() {
     var environment = make_env();
     bind(environment, sym("def"), new Def());
     bind(environment, sym("begin"), new Begin());
-    evaluate(environment, null, null, parse_json_value(primitives));
+    evaluate(environment, null, null, parse_bytecode(primitives));
     /* API */
-    function parse_and_eval(sexp) {
-        return eval_expr(parse_json_value(parser.parse_sexp(sexp))); }
-    function eval_expr(x) {
-        var res = evaluate(environment, null, null, push_root_prompt(x));
+    function exec_sexp(sexp) { if (!parser) throw "parsing not supported"; return exec(parser.parse_sexp(sexp)); }
+    function exec(bytecode) {
+        var res = evaluate(environment, null, null, push_root_prompt(parse_bytecode(bytecode)));
         if (isCapture(res)) throw "prompt not found: " + res.prompt;
         return res; }
     function call(fun_name) {
-        return eval_expr(parse_json_value([fun_name].concat(Array.prototype.slice.call(arguments, 1)))); }
-    return { "eval": parse_and_eval, "call": call };
+        return exec(parse_bytecode([fun_name].concat(Array.prototype.slice.call(arguments, 1)))); }
+    return {
+        "eval": exec_sexp,
+        "exec": exec,
+        "call": call 
+    };
 }
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})

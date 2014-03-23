@@ -1,0 +1,2 @@
+- $setTimeout is undefined in Node, probably because we get passed the
+  wrong global object by browserify

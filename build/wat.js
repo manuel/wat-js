@@ -717,10 +717,8 @@ var program_stx = whitespace(repeat0(choice(x_stx, whitespace_stx))); // HACK!
 
 },{"./jsparse.js":2}],4:[function(require,module,exports){
 (function (global){
-var boot = require("./build/boot.js");
-var parser = require("./wat-parser.js");
 // Wat VM by Manuel Simoni (msimoni@gmail.com)
-module.exports.VM = function() {
+module.exports = function WatVM(boot_bytecode, parser) {
     /* Continuations */
     function Continuation(fun, next, dbg, e) {
         this.fun = fun; this.next = next; this.dbg = dbg; this.e = e; }
@@ -1049,6 +1047,7 @@ module.exports.VM = function() {
     /* Utilities */
     var ROOT_PROMPT = sym("--root-prompt");
     function push_root_prompt(x) {
+        // should use --push-prompt
         return list(sym("push-prompt"), list(sym("quote"), ROOT_PROMPT), x); }
     function error(err) {
         var print_stacktrace = environment.bindings["--print-stacktrace-and-throw"];
@@ -1182,9 +1181,6 @@ module.exports.VM = function() {
     /* Primitives */
     var primitives =
         ["begin",
-
-         // Primitives
-
          // Fexprs
          ["def", "--vau", new __Vau()],
          ["def", "eval", wrap(new Eval())],
@@ -1234,9 +1230,8 @@ module.exports.VM = function() {
          ["def", "--type-check", jswrap(type_check)],
          // Optimization
          ["def", "list*", jswrap(list_star)],
-
-         boot.main
-
+         // Boot
+         boot_bytecode
         ];
     /* Init */
     var environment = make_env();
@@ -1244,21 +1239,23 @@ module.exports.VM = function() {
     bind(environment, sym("begin"), new Begin());
     evaluate(environment, null, null, parse_bytecode(primitives));
     /* API */
-    function exec_sexp(sexp) { if (!parser) throw "parsing not supported"; return exec(parser.parse_sexp(sexp)); }
-    function exec(bytecode) {
+    this.eval = function(sexp){
+        if (!parser) throw "parsing not supported"; return this.exec(parser.parse_sexp(sexp)); }
+    this.exec = function(bytecode) {
         var res = evaluate(environment, null, null, push_root_prompt(parse_bytecode(bytecode)));
         if (isCapture(res)) throw "prompt not found: " + res.prompt;
         return res; }
-    function call(fun_name) {
-        return exec(parse_bytecode([fun_name].concat(Array.prototype.slice.call(arguments, 1)))); }
-    return {
-        "eval": exec_sexp,
-        "exec": exec,
-        "call": call 
-    };
+    this.call = function(fun_name) {
+        return this.exec(parse_bytecode([fun_name].concat(Array.prototype.slice.call(arguments, 1)))); }
 }
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./build/boot.js":1,"./wat-parser.js":3}]},{},[4])
-(4)
+},{}],5:[function(require,module,exports){
+var vm = require("./vm.js");
+var parser = require("./parser.js");
+var boot = require("./build/boot.js");
+module.exports.vm = function() { return new vm(boot.main, parser); }
+
+},{"./build/boot.js":1,"./parser.js":3,"./vm.js":4}]},{},[5])
+(5)
 });

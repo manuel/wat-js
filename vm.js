@@ -428,9 +428,10 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
     /* Bootstrap */
     var boot_bytecode =
         ["begin",
-         // Fexprs
+         // Basics
          ["def", "--vau", new __Vau()],
          ["def", "eval", wrap(new Eval())],
+         ["def", "apply", wrap(new Apply())],
          ["def", "make-environment", jswrap(function(env) { return make_env(env); })],
          ["def", "wrap", jswrap(wrap)],
          ["def", "unwrap", jswrap(unwrap)],
@@ -469,7 +470,6 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
          ["def", "js-global", jswrap(function(name) { return global[name]; })],
          ["def", "list-to-array", jswrap(list_to_array)],
          ["def", "array-to-list", jswrap(array_to_list)],
-         ["def", "apply", wrap(new Apply())],
          ["def", "--make-object", jswrap(function() { return {}; })],
          ["def", "--make-prototype", jswrap(make_prototype)],
          ["def", "new", jswrap(jsnew)],

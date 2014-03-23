@@ -134,7 +134,7 @@
    (lambda (exc)
     (if (&& (cons? exc) (=== fresh (car exc)))
      (let ((opt-arg (cadr exc)))
-      (if (cons? opt-arg) (car opt-arg) ())) ; return null?
+      (if (cons? opt-arg) (car opt-arg) ()))
      (throw exc))))))
 
 (define-macro (label name . body)
@@ -219,13 +219,6 @@
 (define (js-callback fun)
  (js-function (lambda args (push-prompt --root-prompt (apply fun args)))))
 
-(define (map-array f arr)
- (let* ((i 0) (len (.length arr)) (res (array)))
-  (while (< i len)
-   (#push res (f (@ arr i)))
-   (= i (+ i 1)))
-  res))
-
 (define provide
   (vau (symbolz . body) env
     (eval (list def symbolz
@@ -250,6 +243,32 @@
   (values (map-list (lambda (import) (eval import m)) imports)))
       (eval (list def imports (list* list values))
    e))))
+
+(def make-mutator
+  (lambda (name denv)
+    (lambda (val) (eval (list def name val) denv))))
+
+(def define-mutable
+  (vau (name mutator-name init) e
+    (eval (list def (list name mutator-name) (list list init (make-mutator name e)))
+          e)))
+
+(def let-mutable
+  (vau (triplets . body) e
+     (eval (list* begin
+                  (list* begin (map-list (lambda ((name mutator-name init))
+                                           (list define-mutable name mutator-name init))
+                                         triplets))
+                  body)
+           e)))
+
+(define (map-array f arr)
+  (let ((len (.length arr)) (res (array)))
+    (let-mutable ((i i= 0))
+      (while (< i len)
+        (#push res (f (@ arr i)))
+        (i= (+ i 1)))
+      res)))
 
 ;; Return bindings to VM
 (get-current-environment)

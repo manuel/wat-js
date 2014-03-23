@@ -6,7 +6,7 @@ var ps = jsparse.ps; var choice = jsparse.choice; var range = jsparse.range; var
 /* S-expr parser */
 function parse_sexp(s) {
     var res = program_stx(ps(s));
-    if (res.remaining.index === s.length) return ["begin"].concat(res.ast);
+    if (res.remaining.index === s.length) return ["vm-begin"].concat(res.ast);
     else throw("parse error at " + res.remaining.index + " in " + s); }
 var x_stx = function(input) { return x_stx(input); }; // forward decl.
 var id_special_char =
@@ -15,9 +15,9 @@ var id_char = choice(range("a", "z"), range("A", "Z"), range("0", "9"), id_speci
 // Kludge: don't allow single dot as id, so as not to conflict with dotted pair stx.
 var id_stx = action(join_action(butnot(repeat1(id_char), "."), ""), handle_identifier);
 function handle_identifier(str) {
-    if ((str[0] === ".") && (str.length > 1)) { return ["js-getter", ["string", str.substring(1)]]; }
-    else if (str[0] === "#") { return ["js-invoker", ["string", str.substring(1)]]; }
-    else if (str[0] === "$") { return ["js-global", ["string", str.substring(1)]]; }
+    if ((str[0] === ".") && (str.length > 1)) { return ["vm-js-getter", ["string", str.substring(1)]]; }
+    else if (str[0] === "#") { return ["vm-js-invoker", ["string", str.substring(1)]]; }
+    else if (str[0] === "$") { return ["vm-js-global", ["string", str.substring(1)]]; }
     else return str; }
 var escape_char = choice("\"", "\\", "n", "r", "t");
 var escape_sequence = action(sequence("\\", escape_char), function (ast) {

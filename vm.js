@@ -326,7 +326,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
     var ROOT_PROMPT = {};
     function push_root_prompt(x) { return list(new __PushPrompt(), ROOT_PROMPT, x); }
     function error(err) {
-        var print_stacktrace = environment.bindings["--print-stacktrace-and-throw"];
+        var print_stacktrace = environment.bindings["user-break"];
         if (print_stacktrace !== undefined) {
             return combine(environment, null, null, print_stacktrace, list(err));
         } else {
@@ -424,60 +424,60 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         else return error("apply: not a combiner: " + to_string(cmb)); }
     /* Bootstrap */
     var boot_bytecode =
-        ["begin",
+        ["vm-begin",
          // Basics
-         ["def", "vau1", new Vau1()],
-         ["def", "eval", wrap(new Eval())],
-         ["def", "make-environment", jswrap(function(env) { return make_env(env); })],
-         ["def", "wrap", jswrap(wrap)],
-         ["def", "unwrap", jswrap(unwrap)],
+         ["vm-def", "vm-vau", new Vau1()],
+         ["vm-def", "vm-eval", wrap(new Eval())],
+         ["vm-def", "vm-make-environment", jswrap(function(env) { return make_env(env); })],
+         ["vm-def", "vm-wrap", jswrap(wrap)],
+         ["vm-def", "vm-unwrap", jswrap(unwrap)],
          // Values
-         ["def", "cons", jswrap(cons)],
-         ["def", "cons?", jswrap(function(obj) { return obj instanceof Cons; })],
-         ["def", "nil?", jswrap(function(obj) { return obj === NIL; })],
-         ["def", "symbol?", jswrap(function(obj) { return obj instanceof Sym; })],
-         ["def", "symbol-name", jswrap(sym_name)],
+         ["vm-def", "vm-cons", jswrap(cons)],
+         ["vm-def", "vm-cons?", jswrap(function(obj) { return obj instanceof Cons; })],
+         ["vm-def", "vm-nil?", jswrap(function(obj) { return obj === NIL; })],
+         ["vm-def", "vm-symbol?", jswrap(function(obj) { return obj instanceof Sym; })],
+         ["vm-def", "vm-symbol-name", jswrap(sym_name)],
          // First-order Control
-         ["def", "if", new If()],
-         ["def", "loop1", new Loop1()],
-         ["def", "throw", jswrap(function(err) { throw err; })],
-         ["def", "catch*", new Catch()],
-         ["def", "finally", new Finally()],
+         ["vm-def", "vm-if", new If()],
+         ["vm-def", "vm-loop", new Loop1()],
+         ["vm-def", "vm-throw", jswrap(function(err) { throw err; })],
+         ["vm-def", "vm-catch", new Catch()],
+         ["vm-def", "vm-finally", new Finally()],
          // Delimited Control
-         ["def", "--push-prompt", new __PushPrompt()],
-         ["def", "--take-subcont", wrap(new __TakeSubcont())],
-         ["def", "--push-subcont", wrap(new __PushSubcont())],
+         ["vm-def", "vm-push-prompt", new __PushPrompt()],
+         ["vm-def", "vm-take-subcont", wrap(new __TakeSubcont())],
+         ["vm-def", "vm-push-subcont", wrap(new __PushSubcont())],
          // Dynamically-scoped Variables
-         ["def", "dnew", wrap(new DNew())],
-         ["def", "--dlet", new __DLet()],
-         ["def", "dref", wrap(new DRef())],
+         ["vm-def", "vm-dnew", wrap(new DNew())],
+         ["vm-def", "vm-dlet", new __DLet()],
+         ["vm-def", "vm-dref", wrap(new DRef())],
          // Errors
-         ["def", "--root-prompt", ROOT_PROMPT],
-         ["def", "error", jswrap(error)],
+         ["vm-def", "vm-root-prompt", ROOT_PROMPT],
+         ["vm-def", "vm-error", jswrap(error)],
          // JS Interface
-         ["def", "apply", wrap(new Apply())],
-         ["def", "js-wrap", jswrap(jswrap)],
-         ["def", "js-unop", jswrap(js_unop)],
-         ["def", "js-binop", jswrap(js_binop)],
-         ["def", "js-getter", jswrap(js_getter)],
-         ["def", "js-setter", jswrap(js_setter)],
-         ["def", "js-invoker", jswrap(js_invoker)],
-         ["def", "js-function", jswrap(js_function)],
-         ["def", "js-global", jswrap(function(name) { return global[name]; })],
-         ["def", "js-make-object", jswrap(function() { return {}; })],
-         ["def", "js-make-prototype", jswrap(make_prototype)],
-         ["def", "js-new", jswrap(jsnew)],
-         ["def", "type-check", jswrap(type_check)],
+         ["vm-def", "vm-js-wrap", jswrap(jswrap)],
+         ["vm-def", "vm-js-unop", jswrap(js_unop)],
+         ["vm-def", "vm-js-binop", jswrap(js_binop)],
+         ["vm-def", "vm-js-getter", jswrap(js_getter)],
+         ["vm-def", "vm-js-setter", jswrap(js_setter)],
+         ["vm-def", "vm-js-invoker", jswrap(js_invoker)],
+         ["vm-def", "vm-js-function", jswrap(js_function)],
+         ["vm-def", "vm-js-global", jswrap(function(name) { return global[name]; })],
+         ["vm-def", "vm-js-make-object", jswrap(function() { return {}; })],
+         ["vm-def", "vm-js-make-prototype", jswrap(make_prototype)],
+         ["vm-def", "vm-js-new", jswrap(jsnew)],
+         ["vm-def", "vm-apply", wrap(new Apply())],
+         ["vm-def", "vm-type-check", jswrap(type_check)],
          // Utilities
-         ["def", "list-to-array", jswrap(list_to_array)],
-         ["def", "array-to-list", jswrap(array_to_list)],
-         ["def", "list*", jswrap(list_star)],
+         ["vm-def", "vm-list-to-array", jswrap(list_to_array)],
+         ["vm-def", "vm-array-to-list", jswrap(array_to_list)],
+         ["vm-def", "vm-list*", jswrap(list_star)],
          // User-supplied boot code; defines user environment
          user_boot_bytecode
         ];
     var environment = make_env();
-    bind(environment, sym("def"), new Def());
-    bind(environment, sym("begin"), new Begin());
+    bind(environment, sym("vm-def"), new Def());
+    bind(environment, sym("vm-begin"), new Begin());
     var user_environment = evaluate(environment, null, null, parse_bytecode(boot_bytecode));
     if (!(user_environment instanceof Env)) throw "failed to boot Wat";
     /* API */

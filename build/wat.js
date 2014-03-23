@@ -1,5 +1,5 @@
 !function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.wat=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-module.exports.main = ["begin",["def","quote",["vau1",["x"],"ignore","x"]],["def","list",["wrap",["vau1","arglist","ignore","arglist"]]],["def","string",["vau1",["sym"],"ignore",["symbol-name","sym"]]],["def","get-current-environment",["vau1",[],"e","e"]],["def","make-macro-expander",["wrap",["vau1",["expander"],"ignore",["vau1","operands","env",["eval",["eval",["cons","expander","operands"],["make-environment"]],"env"]]]]],["def","vau",["make-macro-expander",["vau1",["params","env-param",".","body"],"ignore",["list","vau1","params","env-param",["cons","begin","body"]]]]],["def","macro",["make-macro-expander",["vau",["params",".","body"],"ignore",["list","make-macro-expander",["list*","vau","params","ignore","body"]]]]],["def","lambda",["macro",["params",".","body"],["list","wrap",["list*","vau","params","ignore","body"]]]],["def","loop",["macro","body",["list","loop1",["list*","begin","body"]]]],["def","catch",["vau",["protected","handler"],"e",["eval",["list","catch*","protected",["eval","handler","e"]],"e"]]],["def","push-prompt",["vau",["prompt",".","body"],"e",["eval",["list","--push-prompt",["eval","prompt","e"],["list*","begin","body"]],"e"]]],["def","take-subcont",["macro",["prompt","k",".","body"],["list","--take-subcont","prompt",["list*","lambda",["list","k"],"body"]]]],["def","push-subcont",["macro",["k",".","body"],["list","--push-subcont","k",["list*","lambda",[],"body"]]]],["def","dlet",["vau",["dv","val",".","body"],"e",["eval",["cons","--dlet",["list",["eval","dv","e"],["eval","val","e"],["list*","begin","body"]]],"e"]]],["def","new","js-new"],["def","array",["lambda","args",["list-to-array","args"]]],["def","define-js-unop",["macro",["op"],["list","def","op",["list","js-unop",["list","string","op"]]]]],["define-js-unop","!"],["define-js-unop","typeof"],["define-js-unop","~"],["def","define-js-binop",["macro",["op"],["list","def","op",["list","js-binop",["list","string","op"]]]]],["define-js-binop","!="],["define-js-binop","!=="],["define-js-binop","%"],["define-js-binop","&"],["define-js-binop","*"],["define-js-binop","+"],["define-js-binop","-"],["define-js-binop","/"],["define-js-binop","<"],["define-js-binop","<<"],["define-js-binop","<="],["define-js-binop","=="],["define-js-binop","==="],["define-js-binop",">"],["define-js-binop",">>"],["define-js-binop",">>>"],["define-js-binop","^"],["define-js-binop","in"],["define-js-binop","instanceof"],["define-js-binop","|"],["def","compose",["lambda",["f","g"],["lambda",["arg"],["f",["g","arg"]]]]],["def","car",["lambda",[["x",".","ignore"]],"x"]],["def","cdr",["lambda",[["ignore",".","x"]],"x"]],["def","caar",["compose","car","car"]],["def","cadr",["compose","car","cdr"]],["def","cdar",["compose","cdr","car"]],["def","cddr",["compose","cdr","cdr"]],["def","define-macro",["macro",[["name",".","params"],".","body"],["list","def","name",["list*","macro","params","body"]]]],["define-macro",["define","lhs",".","rhs"],["if",["cons?","lhs"],["list","def",["car","lhs"],["list*","lambda",["cdr","lhs"],"rhs"]],["list","def","lhs",["car","rhs"]]]],["define",["map-list","f","lst"],["if",["nil?","lst"],[],["cons",["f",["car","lst"]],["map-list","f",["cdr","lst"]]]]],["define-macro",["let","bindings",".","body"],["cons",["list*","lambda",["map-list","car","bindings"],"body"],["map-list","cadr","bindings"]]],["define-macro",["let*","bindings",".","body"],["if",["nil?","bindings"],["list*","let",[],"body"],["list","let",["list",["car","bindings"]],["list*","let*",["cdr","bindings"],"body"]]]],["define-macro",["the","type","obj"],["list","type-check",["symbol-name","type"],"type","obj"]],["def","Arguments",["js-global",["string","Arguments"]]],["def","Array",["js-global",["string","Array"]]],["def","Date",["js-global",["string","Date"]]],["def","Function",["js-global",["string","Function"]]],["def","Number",["js-global",["string","Number"]]],["def","Object",["js-global",["string","Object"]]],["def","RegExp",["js-global",["string","RegExp"]]],["def","String",["js-global",["string","String"]]],["define",["call-with-escape","fun"],["let",[["fresh",["list",null]]],["catch",["fun",["lambda","opt-arg",["throw",["list","fresh","opt-arg"]]]],["lambda",["exc"],["if",["&&",["cons?","exc"],["===","fresh",["car","exc"]]],["let",[["opt-arg",["cadr","exc"]]],["if",["cons?","opt-arg"],["car","opt-arg"],[]]],["throw","exc"]]]]]],["define-macro",["label","name",".","body"],["list","call-with-escape",["list*","lambda",["list","name"],"body"]]],["define",["call-while","test-fun","body-fun"],["label","return",["loop",["if",["test-fun"],["body-fun"],["return",null]]]]],["define-macro",["while","test",".","body"],["list","call-while",["list","lambda",[],"test"],["list*","lambda",[],"body"]]],["define-macro",["when","test",".","body"],["list","if","test",["list*","begin","body"],null]],["define-macro",["unless","test",".","body"],["list*","when",["list","!","test"],"body"]],["define-macro",["&&","a","b"],["list","if","a","b",false]],["define-macro",["||","a","b"],["list","if","a",true,"b"]],["define",["cat",".","objects"],[["js-invoker",["string","join"]],["list-to-array","objects"],["string",""]]],["define",["log",".","objects"],["apply",["js-invoker",["string","log"]],["list*",["js-global",["string","console"]],"objects"]]],["define",["--print-stacktrace-and-throw","err"],["define",["print-frame","k"],[["js-invoker",["string","log"]],["js-global",["string","console"]],[["js-invoker",["string","toString"]],[["js-getter",["string","dbg"]],"k"]],[["js-getter",["string","e"]],"k"]],["if",[["js-getter",["string","next"]],"k"],["print-frame",[["js-getter",["string","next"]],"k"]],null]],["take-subcont","--root-prompt","k",["print-frame","k"],["push-prompt","--root-prompt",["push-subcont","k",["throw","err"]]]]],["define","object",["vau","pairs","e",["let",[["obj",["js-make-object"]]],["map-list",["lambda",["pair"],["let",[["name",["eval",["car","pair"],"e"]],["value",["eval",["cadr","pair"],"e"]]],[["js-setter","name"],"obj","value"]]],"pairs"],"obj"]]],["define-macro",["define-prototype","name","prop-names"],["list","define","name",["list*","js-make-prototype",["symbol-name","name"],["map-list","symbol-name","prop-names"]]]],["define",["--put-method","ctor","name","js-fun"],[["js-setter","name"],[["js-getter",["string","prototype"]],"ctor"],"js-fun"]],["define-macro",["define-method",["name",["self","ctor"],".","args"],".","body"],["list","--put-method","ctor",["symbol-name","name"],["list","js-function",["list*","lambda",["list*","self","args"],"body"]]]],["define-macro",["define-generic",["name",".","ignore"]],["list","define","name",["lambda","args",["apply",["js-invoker",["symbol-name","name"]],"args"]]]],["define",["@","object","key"],[["js-getter","key"],"object"]],["define",["js-callback","fun"],["js-function",["lambda","args",["push-prompt","--root-prompt",["apply","fun","args"]]]]],["define","provide",["vau",["symbols",".","body"],"env",["eval",["list","def","symbols",["list","let",[],["list*","begin","body"],["list*","list","symbols"]]],"env"]]],["define","module",["vau",["exports",".","body"],"e",["let",[["env",["make-environment","e"]]],["eval",["list*","provide","exports","body"],"env"],"env"]]],["define","define-module",["vau",["name","exports",".","body"],"e",["eval",["list","define","name",["list*","module","exports","body"]],"e"]]],["define","import",["vau",["module","imports"],"e",["let*",[["m",["eval","module","e"]],["values",["map-list",["lambda",["import"],["eval","import","m"]],"imports"]]],["eval",["list","def","imports",["list*","list","values"]],"e"]]]],["def","make-mutator",["lambda",["name","denv"],["lambda",["val"],["eval",["list","def","name","val"],"denv"]]]],["def","define-mutable",["vau",["name","mutator-name","init"],"e",["eval",["list","def",["list","name","mutator-name"],["list","list","init",["make-mutator","name","e"]]],"e"]]],["def","let-mutable",["vau",["triplets",".","body"],"e",["eval",["list*","begin",["list*","begin",["map-list",["lambda",[["name","mutator-name","init"]],["list","define-mutable","name","mutator-name","init"]],"triplets"]],"body"],"e"]]],["define",["map-array","f","arr"],["let",[["len",[["js-getter",["string","length"]],"arr"]],["res",["array"]]],["let-mutable",[["i","i=",0]],["while",["<","i","len"],[["js-invoker",["string","push"]],"res",["f",["@","arr","i"]]],["i=",["+","i",1]]],"res"]]],null,["get-current-environment"]]
+module.exports.main = ["vm-begin",null,null,["vm-def","_define","vm-def"],null,["_define","apply","vm-apply"],["_define","array-to-list","vm-array-to-list"],["_define","begin","vm-begin"],["_define","cons","vm-cons"],["_define","cons?","vm-cons?"],["_define","dnew","vm-dnew"],["_define","dref","vm-dref"],["_define","error","vm-error"],["_define","eval","vm-eval"],["_define","if","vm-if"],["_define","list*","vm-list*"],["_define","list-to-array","vm-list-to-array"],["_define","make-environment","vm-make-environment"],["_define","new","vm-js-new"],["_define","nil?","vm-nil?"],["_define","symbol-name","vm-symbol-name"],["_define","throw","vm-throw"],["_define","unwrap","vm-unwrap"],["_define","wrap","vm-wrap"],null,["_define","quote",["vm-vau",["x"],"ignore","x"]],["_define","list",["wrap",["vm-vau","elts","ignore","elts"]]],["_define","string",["vm-vau",["sym"],"ignore",["symbol-name","sym"]]],["_define","get-current-environment",["vm-vau",[],"e","e"]],null,["_define","make-macro-expander",["wrap",["vm-vau",["expander"],"ignore",["vm-vau","operands","env",["eval",["eval",["cons","expander","operands"],["make-environment"]],"env"]]]]],["_define","_vau",["make-macro-expander",["vm-vau",["params","env-param",".","body"],"ignore",["list","vm-vau","params","env-param",["cons","begin","body"]]]]],["_define","macro",["make-macro-expander",["_vau",["params",".","body"],"ignore",["list","make-macro-expander",["list*","_vau","params","ignore","body"]]]]],null,["_define","_lambda",["macro",["params",".","body"],["list","wrap",["list*","_vau","params","ignore","body"]]]],null,["_define","loop",["macro","body",["list","vm-loop",["list*","begin","body"]]]],["_define","catch",["_vau",["protected","handler"],"e",["eval",["list","vm-catch","protected",["eval","handler","e"]],"e"]]],["_define","push-prompt",["_vau",["prompt",".","body"],"e",["eval",["list","vm-push-prompt",["eval","prompt","e"],["list*","begin","body"]],"e"]]],["_define","take-subcont",["macro",["prompt","k",".","body"],["list","vm-take-subcont","prompt",["list*","_lambda",["list","k"],"body"]]]],["_define","push-subcont",["macro",["k",".","body"],["list","vm-push-subcont","k",["list*","_lambda",[],"body"]]]],["_define","dlet",["_vau",["dv","val",".","body"],"e",["eval",["list","vm-dlet",["eval","dv","e"],["eval","val","e"],["list*","begin","body"]],"e"]]],null,["_define","compose",["_lambda",["f","g"],["_lambda",["arg"],["f",["g","arg"]]]]],["_define","car",["_lambda",[["x",".","ignore"]],"x"]],["_define","cdr",["_lambda",[["ignore",".","x"]],"x"]],["_define","caar",["compose","car","car"]],["_define","cadr",["compose","car","cdr"]],["_define","cdar",["compose","cdr","car"]],["_define","cddr",["compose","cdr","cdr"]],null,["_define","define-js-unop",["macro",["op"],["list","_define","op",["list","vm-js-unop",["list","string","op"]]]]],["_define","define-js-binop",["macro",["op"],["list","_define","op",["list","vm-js-binop",["list","string","op"]]]]],["define-js-unop","!"],["define-js-unop","typeof"],["define-js-unop","~"],["define-js-binop","!="],["define-js-binop","!=="],["define-js-binop","%"],["define-js-binop","&"],["define-js-binop","*"],["define-js-binop","+"],["define-js-binop","-"],["define-js-binop","/"],["define-js-binop","<"],["define-js-binop","<<"],["define-js-binop","<="],["define-js-binop","=="],["define-js-binop","==="],["define-js-binop",">"],["define-js-binop",">>"],["define-js-binop",">>>"],["define-js-binop","^"],["define-js-binop","in"],["define-js-binop","instanceof"],["define-js-binop","|"],null,["_define","define-macro",["macro",[["name",".","params"],".","body"],["list","_define","name",["list*","macro","params","body"]]]],["define-macro",["define","lhs",".","rhs"],["if",["cons?","lhs"],["list","_define",["car","lhs"],["list*","_lambda",["cdr","lhs"],"rhs"]],["list","_define","lhs",["car","rhs"]]]],["define",["map-list","f","lst"],["if",["nil?","lst"],[],["cons",["f",["car","lst"]],["map-list","f",["cdr","lst"]]]]],["define-macro",["let","bindings",".","body"],["cons",["list*","_lambda",["map-list","car","bindings"],"body"],["map-list","cadr","bindings"]]],["define-macro",["let*","bindings",".","body"],["if",["nil?","bindings"],["list*","let",[],"body"],["list","let",["list",["car","bindings"]],["list*","let*",["cdr","bindings"],"body"]]]],null,["define-macro",["&&","a","b"],["list","if","a","b",false]],["define-macro",["||","a","b"],["list","if","a",true,"b"]],["define",["call-with-escape","fun"],["let",[["fresh",["list",null]]],["catch",["fun",["_lambda","opt-arg",["throw",["list","fresh","opt-arg"]]]],["_lambda",["exc"],["if",["&&",["cons?","exc"],["===","fresh",["car","exc"]]],["let",[["opt-arg",["cadr","exc"]]],["if",["cons?","opt-arg"],["car","opt-arg"],[]]],["throw","exc"]]]]]],["define-macro",["label","name",".","body"],["list","call-with-escape",["list*","_lambda",["list","name"],"body"]]],["define",["call-while","test-fun","body-fun"],["label","return",["loop",["if",["test-fun"],["body-fun"],["return",null]]]]],["define-macro",["while","test",".","body"],["list","call-while",["list","_lambda",[],"test"],["list*","_lambda",[],"body"]]],["define-macro",["when","test",".","body"],["list","if","test",["list*","begin","body"],null]],["define-macro",["unless","test",".","body"],["list*","when",["list","!","test"],"body"]],null,["define-macro",["define-prototype","name","prop-names"],["list","_define","name",["list*","vm-js-make-prototype",["symbol-name","name"],["map-list","symbol-name","prop-names"]]]],["define",["put-method","ctor","name","js-fun"],[["vm-js-setter","name"],[["vm-js-getter",["string","prototype"]],"ctor"],"js-fun"]],["define-macro",["define-method",["name",["self","ctor"],".","args"],".","body"],["list","put-method","ctor",["symbol-name","name"],["list","vm-js-function",["list*","_lambda",["list*","self","args"],"body"]]]],["define-macro",["define-generic",["name",".","ignore"]],["list","_define","name",["_lambda","args",["apply",["vm-js-invoker",["symbol-name","name"]],"args"]]]],null,["define","provide",["_vau",["symbols",".","body"],"env",["eval",["list","_define","symbols",["list","let",[],["list*","begin","body"],["list*","list","symbols"]]],"env"]]],["define","module",["_vau",["exports",".","body"],"e",["let",[["env",["make-environment","e"]]],["eval",["list*","provide","exports","body"],"env"],"env"]]],["define","define-module",["_vau",["name","exports",".","body"],"e",["eval",["list","_define","name",["list*","module","exports","body"]],"e"]]],["define","import",["_vau",["module","imports"],"e",["let*",[["m",["eval","module","e"]],["values",["map-list",["_lambda",["import"],["eval","import","m"]],"imports"]]],["eval",["list","_define","imports",["list*","list","values"]],"e"]]]],null,["define","object",["_vau","pairs","e",["let",[["obj",["vm-js-make-object"]]],["map-list",["_lambda",["pair"],["let",[["name",["eval",["car","pair"],"e"]],["value",["eval",["cadr","pair"],"e"]]],[["vm-js-setter","name"],"obj","value"]]],"pairs"],"obj"]]],["define",["array",".","args"],["list-to-array","args"]],["define",["@","object","key"],[["vm-js-getter","key"],"object"]],["define",["js-callback","fun"],["vm-js-function",["_lambda","args",["push-prompt","vm-root-prompt",["apply","fun","args"]]]]],["define-macro",["the","type","obj"],["list","vm-type-check",["symbol-name","type"],"type","obj"]],["define","Arguments",["vm-js-global",["string","Arguments"]]],["define","Array",["vm-js-global",["string","Array"]]],["define","Date",["vm-js-global",["string","Date"]]],["define","Function",["vm-js-global",["string","Function"]]],["define","Number",["vm-js-global",["string","Number"]]],["define","Object",["vm-js-global",["string","Object"]]],["define","RegExp",["vm-js-global",["string","RegExp"]]],["define","String",["vm-js-global",["string","String"]]],["define",["cat",".","objects"],[["vm-js-invoker",["string","join"]],["list-to-array","objects"],["string",""]]],["define",["log",".","objects"],["apply",["vm-js-invoker",["string","log"]],["list*",["vm-js-global",["string","console"]],"objects"]]],null,["define",["user-break","err"],["define",["print-frame","k"],["log",[["vm-js-invoker",["string","toString"]],[["vm-js-getter",["string","dbg"]],"k"]],[["vm-js-getter",["string","e"]],"k"]],["if",[["vm-js-getter",["string","next"]],"k"],["print-frame",[["vm-js-getter",["string","next"]],"k"]],null]],["take-subcont","vm-root-prompt","k",["print-frame","k"],["push-prompt","vm-root-prompt",["push-subcont","k",["throw","err"]]]]],["define","lambda","_lambda"],null,["get-current-environment"]]
 
 },{}],2:[function(require,module,exports){
 module.exports = {
@@ -671,7 +671,7 @@ var ps = jsparse.ps; var choice = jsparse.choice; var range = jsparse.range; var
 /* S-expr parser */
 function parse_sexp(s) {
     var res = program_stx(ps(s));
-    if (res.remaining.index === s.length) return ["begin"].concat(res.ast);
+    if (res.remaining.index === s.length) return ["vm-begin"].concat(res.ast);
     else throw("parse error at " + res.remaining.index + " in " + s); }
 var x_stx = function(input) { return x_stx(input); }; // forward decl.
 var id_special_char =
@@ -680,9 +680,9 @@ var id_char = choice(range("a", "z"), range("A", "Z"), range("0", "9"), id_speci
 // Kludge: don't allow single dot as id, so as not to conflict with dotted pair stx.
 var id_stx = action(join_action(butnot(repeat1(id_char), "."), ""), handle_identifier);
 function handle_identifier(str) {
-    if ((str[0] === ".") && (str.length > 1)) { return ["js-getter", ["string", str.substring(1)]]; }
-    else if (str[0] === "#") { return ["js-invoker", ["string", str.substring(1)]]; }
-    else if (str[0] === "$") { return ["js-global", ["string", str.substring(1)]]; }
+    if ((str[0] === ".") && (str.length > 1)) { return ["vm-js-getter", ["string", str.substring(1)]]; }
+    else if (str[0] === "#") { return ["vm-js-invoker", ["string", str.substring(1)]]; }
+    else if (str[0] === "$") { return ["vm-js-global", ["string", str.substring(1)]]; }
     else return str; }
 var escape_char = choice("\"", "\\", "n", "r", "t");
 var escape_sequence = action(sequence("\\", escape_char), function (ast) {
@@ -1056,7 +1056,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
     var ROOT_PROMPT = {};
     function push_root_prompt(x) { return list(new __PushPrompt(), ROOT_PROMPT, x); }
     function error(err) {
-        var print_stacktrace = environment.bindings["--print-stacktrace-and-throw"];
+        var print_stacktrace = environment.bindings["user-break"];
         if (print_stacktrace !== undefined) {
             return combine(environment, null, null, print_stacktrace, list(err));
         } else {
@@ -1154,60 +1154,60 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         else return error("apply: not a combiner: " + to_string(cmb)); }
     /* Bootstrap */
     var boot_bytecode =
-        ["begin",
+        ["vm-begin",
          // Basics
-         ["def", "vau1", new Vau1()],
-         ["def", "eval", wrap(new Eval())],
-         ["def", "make-environment", jswrap(function(env) { return make_env(env); })],
-         ["def", "wrap", jswrap(wrap)],
-         ["def", "unwrap", jswrap(unwrap)],
+         ["vm-def", "vm-vau", new Vau1()],
+         ["vm-def", "vm-eval", wrap(new Eval())],
+         ["vm-def", "vm-make-environment", jswrap(function(env) { return make_env(env); })],
+         ["vm-def", "vm-wrap", jswrap(wrap)],
+         ["vm-def", "vm-unwrap", jswrap(unwrap)],
          // Values
-         ["def", "cons", jswrap(cons)],
-         ["def", "cons?", jswrap(function(obj) { return obj instanceof Cons; })],
-         ["def", "nil?", jswrap(function(obj) { return obj === NIL; })],
-         ["def", "symbol?", jswrap(function(obj) { return obj instanceof Sym; })],
-         ["def", "symbol-name", jswrap(sym_name)],
+         ["vm-def", "vm-cons", jswrap(cons)],
+         ["vm-def", "vm-cons?", jswrap(function(obj) { return obj instanceof Cons; })],
+         ["vm-def", "vm-nil?", jswrap(function(obj) { return obj === NIL; })],
+         ["vm-def", "vm-symbol?", jswrap(function(obj) { return obj instanceof Sym; })],
+         ["vm-def", "vm-symbol-name", jswrap(sym_name)],
          // First-order Control
-         ["def", "if", new If()],
-         ["def", "loop1", new Loop1()],
-         ["def", "throw", jswrap(function(err) { throw err; })],
-         ["def", "catch*", new Catch()],
-         ["def", "finally", new Finally()],
+         ["vm-def", "vm-if", new If()],
+         ["vm-def", "vm-loop", new Loop1()],
+         ["vm-def", "vm-throw", jswrap(function(err) { throw err; })],
+         ["vm-def", "vm-catch", new Catch()],
+         ["vm-def", "vm-finally", new Finally()],
          // Delimited Control
-         ["def", "--push-prompt", new __PushPrompt()],
-         ["def", "--take-subcont", wrap(new __TakeSubcont())],
-         ["def", "--push-subcont", wrap(new __PushSubcont())],
+         ["vm-def", "vm-push-prompt", new __PushPrompt()],
+         ["vm-def", "vm-take-subcont", wrap(new __TakeSubcont())],
+         ["vm-def", "vm-push-subcont", wrap(new __PushSubcont())],
          // Dynamically-scoped Variables
-         ["def", "dnew", wrap(new DNew())],
-         ["def", "--dlet", new __DLet()],
-         ["def", "dref", wrap(new DRef())],
+         ["vm-def", "vm-dnew", wrap(new DNew())],
+         ["vm-def", "vm-dlet", new __DLet()],
+         ["vm-def", "vm-dref", wrap(new DRef())],
          // Errors
-         ["def", "--root-prompt", ROOT_PROMPT],
-         ["def", "error", jswrap(error)],
+         ["vm-def", "vm-root-prompt", ROOT_PROMPT],
+         ["vm-def", "vm-error", jswrap(error)],
          // JS Interface
-         ["def", "apply", wrap(new Apply())],
-         ["def", "js-wrap", jswrap(jswrap)],
-         ["def", "js-unop", jswrap(js_unop)],
-         ["def", "js-binop", jswrap(js_binop)],
-         ["def", "js-getter", jswrap(js_getter)],
-         ["def", "js-setter", jswrap(js_setter)],
-         ["def", "js-invoker", jswrap(js_invoker)],
-         ["def", "js-function", jswrap(js_function)],
-         ["def", "js-global", jswrap(function(name) { return global[name]; })],
-         ["def", "js-make-object", jswrap(function() { return {}; })],
-         ["def", "js-make-prototype", jswrap(make_prototype)],
-         ["def", "js-new", jswrap(jsnew)],
-         ["def", "type-check", jswrap(type_check)],
+         ["vm-def", "vm-js-wrap", jswrap(jswrap)],
+         ["vm-def", "vm-js-unop", jswrap(js_unop)],
+         ["vm-def", "vm-js-binop", jswrap(js_binop)],
+         ["vm-def", "vm-js-getter", jswrap(js_getter)],
+         ["vm-def", "vm-js-setter", jswrap(js_setter)],
+         ["vm-def", "vm-js-invoker", jswrap(js_invoker)],
+         ["vm-def", "vm-js-function", jswrap(js_function)],
+         ["vm-def", "vm-js-global", jswrap(function(name) { return global[name]; })],
+         ["vm-def", "vm-js-make-object", jswrap(function() { return {}; })],
+         ["vm-def", "vm-js-make-prototype", jswrap(make_prototype)],
+         ["vm-def", "vm-js-new", jswrap(jsnew)],
+         ["vm-def", "vm-apply", wrap(new Apply())],
+         ["vm-def", "vm-type-check", jswrap(type_check)],
          // Utilities
-         ["def", "list-to-array", jswrap(list_to_array)],
-         ["def", "array-to-list", jswrap(array_to_list)],
-         ["def", "list*", jswrap(list_star)],
+         ["vm-def", "vm-list-to-array", jswrap(list_to_array)],
+         ["vm-def", "vm-array-to-list", jswrap(array_to_list)],
+         ["vm-def", "vm-list*", jswrap(list_star)],
          // User-supplied boot code; defines user environment
          user_boot_bytecode
         ];
     var environment = make_env();
-    bind(environment, sym("def"), new Def());
-    bind(environment, sym("begin"), new Begin());
+    bind(environment, sym("vm-def"), new Def());
+    bind(environment, sym("vm-begin"), new Begin());
     var user_environment = evaluate(environment, null, null, parse_bytecode(boot_bytecode));
     if (!(user_environment instanceof Env)) throw "failed to boot Wat";
     /* API */

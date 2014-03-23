@@ -1,64 +1,104 @@
-(def quote (vau1 (x) ignore x))
-(def list (wrap (vau1 arglist ignore arglist)))
-(def string (vau1 (sym) ignore (symbol-name sym)))
-(def get-current-environment (vau1 () e e))
+;; ``72. An adequate bootstrap is a contradiction in terms.''
 
-(def make-macro-expander
- (wrap
-  (vau1 (expander) ignore
-   (vau1 operands env
-    (eval (eval (cons expander operands) (make-environment)) env)))))
+;; Rename ur-define
+(vm-def _define vm-def)
 
-(def vau
- (make-macro-expander
-  (vau1 (params env-param . body) ignore
-   (list vau1 params env-param (cons begin body)))))
+;; Rename bindings that will be used as provided by VM
+(_define apply vm-apply)
+(_define array-to-list vm-array-to-list)
+(_define begin vm-begin)
+(_define cons vm-cons)
+(_define cons? vm-cons?)
+(_define dnew vm-dnew)
+(_define dref vm-dref)
+(_define error vm-error)
+(_define eval vm-eval)
+(_define if vm-if)
+(_define list* vm-list*)
+(_define list-to-array vm-list-to-array)
+(_define make-environment vm-make-environment)
+(_define new vm-js-new)
+(_define nil? vm-nil?)
+(_define symbol-name vm-symbol-name)
+(_define throw vm-throw)
+(_define unwrap vm-unwrap)
+(_define wrap vm-wrap)
 
-(def macro
- (make-macro-expander
-  (vau (params . body) ignore
-   (list make-macro-expander (list* vau params ignore body)))))
+;; Important utilities
+(_define quote (vm-vau (x) ignore x))
+(_define list (wrap (vm-vau elts ignore elts)))
+(_define string (vm-vau (sym) ignore (symbol-name sym)))
+(_define get-current-environment (vm-vau () e e))
 
-(def lambda
- (macro (params . body)
-  (list wrap (list* vau params ignore body))))
-(def loop
- (macro body
-  (list loop1 (list* begin body))))
-(def catch
- (vau (protected handler) e
-  (eval (list catch* protected (eval handler e)) e)))
+;; Macro and vau
+(_define make-macro-expander
+  (wrap
+    (vm-vau (expander) ignore
+      (vm-vau operands env
+        (eval (eval (cons expander operands) (make-environment)) env)))))
 
-(def push-prompt
- (vau (prompt . body) e
-  (eval (list --push-prompt (eval prompt e) (list* begin body)) e)))
-(def take-subcont
- (macro (prompt k . body)
-  (list --take-subcont prompt (list* lambda (list k) body))))
-(def push-subcont
- (macro (k . body)
-  (list --push-subcont k (list* lambda () body))))
+(_define _vau
+  (make-macro-expander
+    (vm-vau (params env-param . body) ignore
+      (list vm-vau params env-param (cons begin body)))))
 
-(def dlet
- (vau (dv val . body) e
-  (eval (cons --dlet (list (eval dv e) (eval val e) (list* begin body)))
-   e)))
+(_define macro
+  (make-macro-expander
+    (_vau (params . body) ignore
+      (list make-macro-expander (list* _vau params ignore body)))))
 
-(def new js-new)
+;; Ur-lambda
+(_define _lambda
+  (macro (params . body)
+    (list wrap (list* _vau params ignore body))))
 
-(def array (lambda args (list-to-array args)))
+;; Wrap incomplete VM forms
+(_define loop
+  (macro body
+    (list vm-loop (list* begin body))))
 
-(def define-js-unop
- (macro (op)
-  (list def op (list js-unop (list string op)))))
+(_define catch
+  (_vau (protected handler) e
+    (eval (list vm-catch protected (eval handler e)) e)))
+
+(_define push-prompt
+  (_vau (prompt . body) e
+    (eval (list vm-push-prompt (eval prompt e) (list* begin body)) e)))
+
+(_define take-subcont
+  (macro (prompt k . body)
+    (list vm-take-subcont prompt (list* _lambda (list k) body))))
+
+(_define push-subcont
+  (macro (k . body)
+    (list vm-push-subcont k (list* _lambda () body))))
+
+(_define dlet
+  (_vau (dv val . body) e
+    (eval (list vm-dlet (eval dv e) (eval val e) (list* begin body)) e)))
+
+;; List utilities
+(_define compose (_lambda (f g) (_lambda (arg) (f (g arg)))))
+
+(_define car (_lambda ((x . ignore)) x))
+(_define cdr (_lambda ((ignore . x)) x))
+(_define caar (compose car car))
+(_define cadr (compose car cdr))
+(_define cdar (compose cdr car))
+(_define cddr (compose cdr cdr))
+
+;; JS operators
+(_define define-js-unop
+  (macro (op)
+    (list _define op (list vm-js-unop (list string op)))))
+
+(_define define-js-binop
+  (macro (op)
+    (list _define op (list vm-js-binop (list string op)))))
 
 (define-js-unop !)
 (define-js-unop typeof)
 (define-js-unop ~)
-
-(def define-js-binop
- (macro (op)
-  (list def op (list js-binop (list string op)))))
 
 (define-js-binop !=)
 (define-js-binop !==)
@@ -81,25 +121,15 @@
 (define-js-binop instanceof)
 (define-js-binop |)
 
-
-(def compose
- (lambda (f g) (lambda (arg) (f (g arg)))))
-
-(def car (lambda ((x . ignore)) x))
-(def cdr (lambda ((ignore . x)) x))
-(def caar (compose car car))
-(def cadr (compose car cdr))
-(def cdar (compose cdr car))
-(def cddr (compose cdr cdr))
-
-(def define-macro
- (macro ((name . params) . body)
-  (list def name (list* macro params body))))
+;; Important macros and functions
+(_define define-macro
+  (macro ((name . params) . body)
+    (list _define name (list* macro params body))))
 
 (define-macro (define lhs . rhs)
- (if (cons? lhs)
-  (list def (car lhs) (list* lambda (cdr lhs) rhs))
-  (list def lhs (car rhs))))
+  (if (cons? lhs)
+    (list _define (car lhs) (list* _lambda (cdr lhs) rhs))
+    (list _define lhs (car rhs))))
 
 (define (map-list f lst)
   (if (nil? lst)
@@ -107,166 +137,143 @@
    (cons (f (car lst)) (map-list f (cdr lst)))))
 
 (define-macro (let bindings . body)
- (cons
-  (list* lambda (map-list car bindings) body)
-  (map-list cadr bindings)))
+  (cons
+    (list* _lambda (map-list car bindings) body)
+    (map-list cadr bindings)))
 
 (define-macro (let* bindings . body)
- (if (nil? bindings)
-  (list* let () body)
-  (list let (list (car bindings))
-   (list* let* (cdr bindings) body))))
+  (if (nil? bindings)
+    (list* let () body)
+    (list let (list (car bindings)) (list* let* (cdr bindings) body))))
 
-(define-macro (the type obj)
- (list type-check (symbol-name type) type obj))
+;; Simple control
+(define-macro (&& a b) (list if a b false))
 
-(def Arguments $Arguments)
-(def Array $Array)
-(def Date $Date)
-(def Function $Function)
-(def Number $Number)
-(def Object $Object)
-(def RegExp $RegExp)
-(def String $String)
+(define-macro (|| a b) (list if a true b))
 
 (define (call-with-escape fun)
- (let ((fresh (list null)))
-  (catch (fun (lambda opt-arg (throw (list fresh opt-arg))))
-   (lambda (exc)
-    (if (&& (cons? exc) (=== fresh (car exc)))
-     (let ((opt-arg (cadr exc)))
-      (if (cons? opt-arg) (car opt-arg) ()))
-     (throw exc))))))
+  (let ((fresh (list null)))
+    (catch (fun (_lambda opt-arg (throw (list fresh opt-arg))))
+      (_lambda (exc)
+        (if (&& (cons? exc) (=== fresh (car exc)))
+            (let ((opt-arg (cadr exc)))
+              (if (cons? opt-arg) (car opt-arg) ()))
+            (throw exc))))))
 
 (define-macro (label name . body)
- (list call-with-escape (list* lambda (list name) body)))
+  (list call-with-escape (list* _lambda (list name) body)))
 
 (define (call-while test-fun body-fun)
- (label return
-  (loop
-   (if (test-fun)
-    (body-fun)
-    (return null)))))
+  (label return
+    (loop
+      (if (test-fun)
+        (body-fun)
+        (return null)))))
 
 (define-macro (while test . body)
- (list call-while
-  (list lambda () test)
-  (list* lambda () body)))
+  (list call-while
+    (list _lambda () test)
+    (list* _lambda () body)))
 
 (define-macro (when test . body)
- (list if test (list* begin body) null))
+  (list if test (list* begin body) null))
 
 (define-macro (unless test . body)
- (list* when (list ! test) body))
+  (list* when (list ! test) body))
 
-(define-macro (&& a b)
- (list if a b false))
-
-(define-macro (|| a b)
- (list if a true b))
-
-(define (cat . objects)
- (#join (list-to-array objects) ""))
-
-(define (log . objects)
- (apply #log (list* $console objects)))
-
-(define (--print-stacktrace-and-throw err)
- (define (print-frame k)
-  (#log $console (#toString (.dbg k)) (.e k))
-  (if (.next k)
-   (print-frame (.next k))
-   null))
- (take-subcont --root-prompt k
-  (print-frame k)
-  (push-prompt --root-prompt
-   (push-subcont k
-    (throw err)))))
-
-(define object
- (vau pairs e
-  (let ((obj (js-make-object)))
-   (map-list
-    (lambda (pair)
-     (let ((name (eval (car pair) e))
-     (value (eval (cadr pair) e)))
-      ((js-setter name) obj value)))
-    pairs)
-   obj)))
-
+;; Prototypes
 (define-macro (define-prototype name prop-names)
- (list define name
-  (list* js-make-prototype (symbol-name name)
-   (map-list symbol-name prop-names))))
+  (list _define name
+        (list* vm-js-make-prototype (symbol-name name)
+               (map-list symbol-name prop-names))))
 
-(define (--put-method ctor name js-fun)
- ((js-setter name) (.prototype ctor) js-fun))
+(define (put-method ctor name js-fun)
+  ((vm-js-setter name) (.prototype ctor) js-fun))
 
 (define-macro (define-method (name (self ctor) . args) . body)
-  (list --put-method ctor (symbol-name name)
-   (list js-function (list* lambda (list* self args) body))))
+  (list put-method ctor (symbol-name name)
+        (list vm-js-function (list* _lambda (list* self args) body))))
 
 (define-macro (define-generic (name . ignore))
- (list define name
-  (lambda args
-   (apply (js-invoker (symbol-name name)) args))))
+  (list _define name (_lambda args
+                       (apply (vm-js-invoker (symbol-name name)) args))))
 
-(define (@ object key)
- ((js-getter key) object))
-
-(define (js-callback fun)
- (js-function (lambda args (push-prompt --root-prompt (apply fun args)))))
-
+;; Modules
 (define provide
-  (vau (symbols . body) env
-    (eval (list def symbols
+  (_vau (symbols . body) env
+    (eval (list _define symbols
                 (list let ()
                       (list* begin body)
                       (list* list symbols)))
           env)))
 
 (define module
-  (vau (exports . body) e
+  (_vau (exports . body) e
     (let ((env (make-environment e)))
       (eval (list* provide exports body) env)
       env)))
 
 (define define-module
-  (vau (name exports . body) e
-    (eval (list define name (list* module exports body)) e)))
+  (_vau (name exports . body) e
+    (eval (list _define name (list* module exports body)) e)))
 
 (define import
-  (vau (module imports) e
+  (_vau (module imports) e
     (let* ((m (eval module e))
-  (values (map-list (lambda (import) (eval import m)) imports)))
-      (eval (list def imports (list* list values))
-   e))))
+           (values (map-list (_lambda (import) (eval import m)) imports)))
+      (eval (list _define imports (list* list values)) e))))
 
-(def make-mutator
-  (lambda (name denv)
-    (lambda (val) (eval (list def name val) denv))))
+;; More JS utilities
+(define object
+  (_vau pairs e
+    (let ((obj (vm-js-make-object)))
+      (map-list (_lambda (pair)
+                  (let ((name (eval (car pair) e))
+                        (value (eval (cadr pair) e)))
+                    ((vm-js-setter name) obj value)))
+                pairs)
+      obj)))
 
-(def define-mutable
-  (vau (name mutator-name init) e
-    (eval (list def (list name mutator-name) (list list init (make-mutator name e)))
-          e)))
+(define (array . args) (list-to-array args))
 
-(def let-mutable
-  (vau (triplets . body) e
-     (eval (list* begin
-                  (list* begin (map-list (lambda ((name mutator-name init))
-                                           (list define-mutable name mutator-name init))
-                                         triplets))
-                  body)
-           e)))
+(define (@ object key)
+  ((vm-js-getter key) object))
 
-(define (map-array f arr)
-  (let ((len (.length arr)) (res (array)))
-    (let-mutable ((i i= 0))
-      (while (< i len)
-        (#push res (f (@ arr i)))
-        (i= (+ i 1)))
-      res)))
+(define (js-callback fun)
+  (vm-js-function (_lambda args (push-prompt vm-root-prompt (apply fun args)))))
+
+(define-macro (the type obj)
+  (list vm-type-check (symbol-name type) type obj))
+
+(define Arguments $Arguments)
+(define Array $Array)
+(define Date $Date)
+(define Function $Function)
+(define Number $Number)
+(define Object $Object)
+(define RegExp $RegExp)
+(define String $String)
+
+(define (cat . objects)
+  (#join (list-to-array objects) ""))
+
+(define (log . objects)
+  (apply #log (list* $console objects)))
+
+;; Final events
+(define (user-break err)
+  (define (print-frame k)
+    (log (#toString (.dbg k)) (.e k))
+    (if (.next k)
+        (print-frame (.next k))
+        null))
+  (take-subcont vm-root-prompt k
+    (print-frame k)
+    (push-prompt vm-root-prompt
+      (push-subcont k
+        (throw err)))))
+
+(define lambda _lambda)
 
 ;; Return bindings to VM
 (get-current-environment)

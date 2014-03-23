@@ -75,8 +75,8 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         return evalArgs(e, null, null, cdr(todo), cons(arg, done));
     }
     /* Built-in Combiners */
-    function Vau1() {}; function Def() {}; function Eval() {};
-    Vau1.prototype.wat_combine = function(e, k, f, o) {
+    function Vau() {}; function Def() {}; function Eval() {};
+    Vau.prototype.wat_combine = function(e, k, f, o) {
         return new Opv(elt(o, 0), elt(o, 1), elt(o, 2), e); };
     Def.prototype.wat_combine = function self(e, k, f, o) {
         var lhs = elt(o, 0); if (isCapture(lhs)) return lhs;
@@ -97,7 +97,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         var e = elt(o, 1); if (isCapture(e)) return e;
         return evaluate(e, k, f, x); };
     /* First-order Control */
-    function Begin() {}; function If() {}; function Loop1() {}
+    function Begin() {}; function If() {}; function Loop() {}
     function Catch() {}; function Finally() {}
     Begin.prototype.wat_combine = function(e, k, f, o) {
         if (o === NIL) return null; else return begin(e, k, f, o); };
@@ -126,7 +126,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         }
         return evaluate(e, null, null, test ? elt(o, 1) : elt(o, 2));
     };
-    Loop1.prototype.wat_combine = function self(e, k, f, o) {
+    Loop.prototype.wat_combine = function self(e, k, f, o) {
         var first = true; // only continue once
         while (true) {
             if (first && isContinuation(k)) {
@@ -195,8 +195,8 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         }
     }
     /* Delimited Control */
-    function __PushPrompt() {}; function __TakeSubcont() {}; function __PushSubcont() {}
-    __PushPrompt.prototype.wat_combine = function self(e, k, f, o) {
+    function PushPrompt() {}; function TakeSubcont() {}; function PushSubcont() {}
+    PushPrompt.prototype.wat_combine = function self(e, k, f, o) {
         var prompt = elt(o, 0);
         var x = elt(o, 1);
         if (isContinuation(k)) {
@@ -217,14 +217,14 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
             return res;
         }
     };
-    __TakeSubcont.prototype.wat_combine = function(e, k, f, o) {
+    TakeSubcont.prototype.wat_combine = function(e, k, f, o) {
         var prompt = elt(o, 0);
         var handler = elt(o, 1);
         var cap = new Capture(prompt, handler);
         captureFrame(cap, function(k, thef) { return combine(e, null, null, thef, NIL); }, this, e);
         return cap;
     };
-    __PushSubcont.prototype.wat_combine = function self(e, k, f, o) {
+    PushSubcont.prototype.wat_combine = function self(e, k, f, o) {
         var thek = elt(o, 0);
         var thef = elt(o, 1);
         if (isContinuation(k)) {
@@ -241,10 +241,10 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
     };
     /* Dynamic Variables */
     function DV(val) { this.val = val; }
-    function DNew() {}; function DRef() {}; function __DLet() {}
+    function DNew() {}; function DRef() {}; function DLet() {}
     DNew.prototype.wat_combine = function(e, k, f, o) { return new DV(elt(o, 0)); };
     DRef.prototype.wat_combine = function(e, k, f, o) { return elt(o, 0).val; };
-    __DLet.prototype.wat_combine = function self(e, k, f, o) {
+    DLet.prototype.wat_combine = function self(e, k, f, o) {
         var dv = elt(o, 0);
         var val = elt(o, 1);
         var x = elt(o, 2);
@@ -295,7 +295,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
     Ign.prototype.wat_match = function(e, rhs) {};
     /* Error handling */
     var ROOT_PROMPT = {};
-    function push_root_prompt(x) { return list(new __PushPrompt(), ROOT_PROMPT, x); }
+    function push_root_prompt(x) { return list(new PushPrompt(), ROOT_PROMPT, x); }
     function error(err) {
         var print_stacktrace = environment.bindings["user-break"];
         if (print_stacktrace !== undefined) {
@@ -314,7 +314,6 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         var res = []; while(c !== NIL) { res.push(car(c)); c = cdr(c); } return res; }
     function reverse_list(list) {
         var res = NIL; while(list !== NIL) { res = cons(car(list), res); list = cdr(list); } return res; }
-    /* Type checking */
     var js_types = ["Arguments", "Array", "Date", "Function", "Number", "Object", "RegExp", "String"];
     function is_type(type_name, type_obj, obj) {
         if (js_types.indexOf(type_name) === -1) { return obj instanceof type_obj; }
@@ -351,22 +350,19 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
             var rcv = arguments[0];
             if (!rcv) return error("receiver is null/undefined");
             var method = rcv[method_name];
-            return method.apply(rcv, Array.prototype.slice.call(arguments, 1));
-        }); }
+            return method.apply(rcv, Array.prototype.slice.call(arguments, 1)); }); }
     function js_getter(prop_name) {
         return jswrap(function() {
             if (arguments.length !== 1) return error("getter called with wrong args: " + arguments);
             var rcv = arguments[0];
             if ((rcv !== undefined) && (rcv !== null)) return rcv[prop_name];
-            else return error("can't get " + prop_name + " of " + rcv);
-        }); }
+            else return error("can't get " + prop_name + " of " + rcv); }); }
     function js_setter(prop_name) {
         return jswrap(function() {
             if (arguments.length !== 2) return error("setter called with wrong args: " + arguments);
             var rcv = arguments[0];
             if ((rcv !== undefined) && (rcv !== null)) return rcv[prop_name] = arguments[1];
-            else return error("can't set " + prop_name + " of " + rcv);
-        }); }
+            else return error("can't set " + prop_name + " of " + rcv); }); }
     function make_prototype(name) {
         var prop_names = Array.prototype.slice.call(arguments, 1);
         var param_names = prop_names.join(",");
@@ -379,8 +375,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
     function js_function(cmb) {
         return function() {
             var args = cons(this, array_to_list(Array.prototype.slice.call(arguments)));
-            return combine(null, null, null, cmb, args);
-        } }
+            return combine(null, null, null, cmb, args); } }
     // Apply needs custom implementation to be able to apply JS functions transparently
     function Apply() {};
     Apply.prototype.wat_combine = function(e, k, f, o) {
@@ -405,27 +400,27 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
     Apv.prototype.toString = function() { return "[Apv " + to_string(this.cmb) + "]"; };
     Opv.prototype.toString = function() {
         return "[Opv " + to_string(this.p) + " " + to_string(this.ep) + " " + to_string(this.x) + "]"; };
-    Vau1.prototype.toString = function() { return "vm-vau"; };
+    Vau.prototype.toString = function() { return "vm-vau"; };
     Def.prototype.toString = function() { return "vm-def"; };
     Eval.prototype.toString = function() { return "vm-eval"; };
     Begin.prototype.toString = function() { return "vm-begin"; };
     If.prototype.toString = function() { return "vm-if"; };
-    Loop1.prototype.toString = function() { return "vm-loop"; };
+    Loop.prototype.toString = function() { return "vm-loop"; };
     Catch.prototype.toString = function() { return "vm-catch"; };
     Finally.prototype.toString = function() { return "vm-finally"; };
-    __DLet.prototype.toString = function() { return "vm-dlet"; }
+    DLet.prototype.toString = function() { return "vm-dlet"; }
     DNew.prototype.toString = function() { return "vm-dnew"; }
     DRef.prototype.toString = function() { return "vm-dref"; }
-    __PushPrompt.prototype.toString = function() { return "vm-push-prompt"; }
-    __TakeSubcont.prototype.toString = function() { return "vm-take-subcont"; }
-    __PushSubcont.prototype.toString = function() { return "vm-push-subcont"; }
+    PushPrompt.prototype.toString = function() { return "vm-push-prompt"; }
+    TakeSubcont.prototype.toString = function() { return "vm-take-subcont"; }
+    PushSubcont.prototype.toString = function() { return "vm-push-subcont"; }
     JSFun.prototype.toString = function() { return "[JSFun " + this.jsfun.toString() + "]"; };
     Apply.prototype.toString = function() { return "vm-apply"; };
     /* Bootstrap */
     var boot_bytecode =
         ["vm-begin",
          // Basics
-         ["vm-def", "vm-vau", new Vau1()],
+         ["vm-def", "vm-vau", new Vau()],
          ["vm-def", "vm-eval", wrap(new Eval())],
          ["vm-def", "vm-make-environment", jswrap(function(env) { return make_env(env); })],
          ["vm-def", "vm-wrap", jswrap(wrap)],
@@ -438,17 +433,17 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
          ["vm-def", "vm-symbol-name", jswrap(sym_name)],
          // First-order Control
          ["vm-def", "vm-if", new If()],
-         ["vm-def", "vm-loop", new Loop1()],
+         ["vm-def", "vm-loop", new Loop()],
          ["vm-def", "vm-throw", jswrap(function(err) { throw err; })],
          ["vm-def", "vm-catch", new Catch()],
          ["vm-def", "vm-finally", new Finally()],
          // Delimited Control
-         ["vm-def", "vm-push-prompt", new __PushPrompt()],
-         ["vm-def", "vm-take-subcont", wrap(new __TakeSubcont())],
-         ["vm-def", "vm-push-subcont", wrap(new __PushSubcont())],
+         ["vm-def", "vm-push-prompt", new PushPrompt()],
+         ["vm-def", "vm-take-subcont", wrap(new TakeSubcont())],
+         ["vm-def", "vm-push-subcont", wrap(new PushSubcont())],
          // Dynamically-scoped Variables
          ["vm-def", "vm-dnew", wrap(new DNew())],
-         ["vm-def", "vm-dlet", new __DLet()],
+         ["vm-def", "vm-dlet", new DLet()],
          ["vm-def", "vm-dref", wrap(new DRef())],
          // Errors
          ["vm-def", "vm-root-prompt", ROOT_PROMPT],

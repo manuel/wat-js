@@ -30,7 +30,7 @@
       (#push (.children parent) sec)
       sec))
 
-  (define-macro (section (parent id) title &rest children)
+  (define-macro (section (parent id) title . children)
     (list begin
       (list define id (list make-section (symbol-name id) parent title))
         (list* dlet *current-parent* id

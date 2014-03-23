@@ -11,16 +11,16 @@
 
 (def vau
  (make-macro-expander
-  (--vau (params env-param &rest body) ignore
+  (--vau (params env-param . body) ignore
    (list --vau params env-param (cons begin body)))))
 
 (def macro
  (make-macro-expander
-  (vau (params &rest body) ignore
+  (vau (params . body) ignore
    (list make-macro-expander (list* vau params ignore body)))))
 
 (def lambda
- (macro (params &rest body)
+ (macro (params . body)
   (list wrap (list* vau params ignore body))))
 (def loop
  (macro body
@@ -30,17 +30,17 @@
   (list --catch (list lambda () protected) handler)))
 
 (def push-prompt
- (vau (prompt &rest body) e
+ (vau (prompt . body) e
   (eval (list --push-prompt (eval prompt e) (list* begin body)) e)))
 (def take-subcont
- (macro (prompt k &rest body)
+ (macro (prompt k . body)
   (list --take-subcont prompt (list* lambda (list k) body))))
 (def push-subcont
- (macro (k &rest body)
+ (macro (k . body)
   (list --push-subcont k (list* lambda () body))))
 
 (def dlet
- (vau (dv val &rest body) e
+ (vau (dv val . body) e
   (eval (cons --dlet (list (eval dv e) (eval val e) (list* begin body)))
    e)))
 
@@ -84,18 +84,18 @@
 (def compose
  (lambda (f g) (lambda (arg) (f (g arg)))))
 
-(def car (lambda ((x &rest ignore)) x))
-(def cdr (lambda ((ignore &rest x)) x))
+(def car (lambda ((x . ignore)) x))
+(def cdr (lambda ((ignore . x)) x))
 (def caar (compose car car))
 (def cadr (compose car cdr))
 (def cdar (compose cdr car))
 (def cddr (compose cdr cdr))
 
 (def define-macro
- (macro ((name &rest params) &rest body)
+ (macro ((name . params) . body)
   (list def name (list* macro params body))))
 
-(define-macro (define lhs &rest rhs)
+(define-macro (define lhs . rhs)
  (if (cons? lhs)
   (list def (car lhs) (list* lambda (cdr lhs) rhs))
   (list def lhs (car rhs))))
@@ -105,22 +105,22 @@
    ()
    (cons (f (car lst)) (map-list f (cdr lst)))))
 
-(define-macro (let bindings &rest body)
+(define-macro (let bindings . body)
  (cons
   (list* lambda (map-list car bindings) body)
   (map-list cadr bindings)))
 
-(define-macro (let* bindings &rest body)
+(define-macro (let* bindings . body)
  (if (nil? bindings)
   (list* let () body)
   (list let (list (car bindings))
    (list* let* (cdr bindings) body))))
 
-(define-macro (defun (name &rest params) &rest body)
+(define-macro (defun (name . params) . body)
  (list def name (list* typed-lambda params body)))
 
 (def typed-lambda
- (macro (params &rest body)
+ (macro (params . body)
   (let (((vau-list typed-body) (xform-typed-lambda params body)))
    (list wrap (list* vau vau-list ignore typed-body)))))
 
@@ -145,7 +145,7 @@
       (if (cons? opt-arg) (car opt-arg) ())) ; return null?
      (throw exc))))))
 
-(define-macro (label name &rest body)
+(define-macro (label name . body)
  (list call-with-escape (list* lambda (list name) body)))
 
 (define (call-while test-fun body-fun)
@@ -155,15 +155,15 @@
     (body-fun)
     (return null)))))
 
-(define-macro (while test &rest body)
+(define-macro (while test . body)
  (list call-while
   (list lambda () test)
   (list* lambda () body)))
 
-(define-macro (when test &rest body)
+(define-macro (when test . body)
  (list if test (list* begin body) null))
 
-(define-macro (unless test &rest body)
+(define-macro (unless test . body)
  (list* when (list ! test) body))
 
 (define-macro (&& a b)
@@ -175,10 +175,10 @@
 (define-macro (= name value)
  (list --set! name value))
 
-(define (cat &rest objects)
+(define (cat . objects)
  (#join (list-to-array objects) ""))
 
-(define (log &rest objects)
+(define (log . objects)
  (apply #log (list* $console objects)))
 
 (define (--print-stacktrace-and-throw err)
@@ -212,11 +212,11 @@
 (define (--put-method ctor name js-fun)
  ((js-setter name) (.prototype ctor) js-fun))
 
-(define-macro (define-method (name (self ctor) &rest args) &rest body)
+(define-macro (define-method (name (self ctor) . args) . body)
   (list --put-method ctor (symbol-name name)
    (list js-function (list* typed-lambda (list* self args) body))))
 
-(define-macro (define-generic (name &rest ignore))
+(define-macro (define-generic (name . ignore))
  (list define name
   (lambda args
    (apply (js-invoker (symbol-name name)) args))))
@@ -235,7 +235,7 @@
   res))
 
 (define provide
-  (vau (symbolz &rest body) env
+  (vau (symbolz . body) env
     (eval (list def symbolz
    (list let ()
      (list* begin body)
@@ -243,13 +243,13 @@
  env)))
 
 (define module
-  (vau (exports &rest body) e
+  (vau (exports . body) e
     (let ((env (make-environment e)))
       (eval (list* provide exports body) env)
       env)))
 
 (define define-module
-  (vau (name exports &rest body) e
+  (vau (name exports . body) e
     (eval (list define name (list* module exports body)) e)))
 
 (define import

@@ -1,4 +1,4 @@
-var stdlib = require("./build/stdlib.js");
+var boot = require("./build/boot.js");
 var parser = require("./wat-parser.js");
 // Wat VM by Manuel Simoni (msimoni@gmail.com)
 module.exports.VM = function() {
@@ -353,11 +353,12 @@ module.exports.VM = function() {
     function to_string(obj) {
         if ((obj !== null) && (obj !== undefined)) return obj.toString();
         else return Object.prototype.toString.call(obj); }
-    // Strip &rest from vau list, return (possibly) improper list
+    // Strip . from vau list, return (possibly) improper list
+    var DOT = ".";
     function xform_vau_list(obj) {
         if (obj instanceof Cons) {
             var kar = car(obj);
-            if ((kar instanceof Sym) && (kar.name === "&rest")) { return xform_vau_list(car(cdr(obj))); }
+            if ((kar instanceof Sym) && (kar.name === DOT)) { return xform_vau_list(car(cdr(obj))); }
             else { return cons(xform_vau_list(kar), xform_vau_list(cdr(obj))); }
         } else { return obj; } }
     // Return (untyped-vau-list type-checked-body)
@@ -399,7 +400,7 @@ module.exports.VM = function() {
         case "[object Array]": return parse_bytecode_array(obj);
         default: return obj; } }
     function handle_identifier(str) {
-        if (str[0] === ".") { return list(sym("js-getter"), str.substring(1)); }
+        if ((str[0] === ".") && (str.length > 1)) { return list(sym("js-getter"), str.substring(1)); }
         else if (str[0] === "#") { return list(sym("js-invoker"), str.substring(1)); }
         else if (str[0] === "$") { return list(sym("js-global"), str.substring(1)); }
         else return sym(str); }
@@ -515,7 +516,7 @@ module.exports.VM = function() {
          // Optimization
          ["def", "list*", jswrap(list_star)],
 
-         stdlib.main
+         boot.main
 
         ];
     /* Init */

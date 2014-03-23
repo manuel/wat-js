@@ -85,16 +85,13 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         return evalArgs(e, null, null, cdr(todo), cons(arg, done));
     }
     /* Built-in Combiners */
-    function __Vau() {}; function Def() {}; function Eval() {}; function __Set() {};
+    function __Vau() {}; function Def() {}; function Eval() {};
     __Vau.prototype.toString = function() { return "vau"; };
     Def.prototype.toString = function() { return "def"; };
     Eval.prototype.toString = function() { return "eval"; };
-    __Set.prototype.toString = function() { return "--set!"; };
     __Vau.prototype.wat_combine = function(e, k, f, o) {
         return new Opv(elt(o, 0), elt(o, 1), elt(o, 2), e); };
-    Def.prototype.wat_combine = function self(e, k, f, o) { return def_set(bind, e, k, f, o); };
-    __Set.prototype.wat_combine = function self(e, k, f, o) { return def_set(set, e, k, f, o); };
-    function def_set(binder, e, k, f, o) {
+    Def.prototype.wat_combine = function self(e, k, f, o) {
         var lhs = elt(o, 0); if (isCapture(lhs)) return lhs;
         var rhs = elt(o, 1); if (isCapture(rhs)) return rhs;
         if (isContinuation(k)) {
@@ -103,10 +100,10 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
             var val = evaluate(e, null, null, rhs);
         }
         if (isCapture(val)) {
-            captureFrame(val, function(k, f) { return def_set(binder, e, k, f, o); }, rhs, e);
+            captureFrame(val, function(k, f) { return self(e, k, f, o); }, rhs, e);
             return val;
         }
-        return binder(e, lhs, val);
+        return bind(e, lhs, val);
     }
     Eval.prototype.wat_combine = function(e, k, f, o) {
         var x = elt(o, 0); if (isCapture(x)) return x;
@@ -435,7 +432,6 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
          ["def", "make-environment", jswrap(function(env) { return make_env(env); })],
          ["def", "wrap", jswrap(wrap)],
          ["def", "unwrap", jswrap(unwrap)],
-         ["def", "--set!", new __Set()],
          // Values
          ["def", "cons", jswrap(cons)],
          ["def", "cons?", jswrap(function(obj) { return obj instanceof Cons; })],

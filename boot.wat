@@ -164,9 +164,6 @@
 (define-macro (|| a b)
  (list if a true b))
 
-(define-macro (= name value)
- (list --set! name value))
-
 (define (cat . objects)
  (#join (list-to-array objects) ""))
 

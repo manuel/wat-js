@@ -35,7 +35,7 @@ var number_stx =
                var fractional_digits = ast[2] || "";
                return Number(sign + integral_digits + fractional_digits); });
 function make_constant_stx(string, constant) { return action(string, function(ast) { return constant; }); }
-var ign_stx = make_constant_stx("ignore", "#ignore");
+var ign_stx = make_constant_stx("ignore", "ignore");
 var nil_stx = make_constant_stx("()", []);
 var t_stx = make_constant_stx("true", true);
 var f_stx = make_constant_stx("false", false);

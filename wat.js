@@ -395,7 +395,7 @@ module.exports.VM = function() {
     /* Bytecode parser */
     function parse_bytecode(obj) {
         switch(Object.prototype.toString.call(obj)) {
-        case "[object String]": return obj === "#ignore" ? IGN : handle_identifier(obj);
+        case "[object String]": return obj === "ignore" ? IGN : handle_identifier(obj);
         case "[object Array]": return parse_bytecode_array(obj);
         default: return obj; } }
     function handle_identifier(str) {

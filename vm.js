@@ -473,7 +473,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
          ["vm-def", "vm-array-to-list", jswrap(array_to_list)],
          ["vm-def", "vm-list*", jswrap(list_star)],
          // User-supplied boot code; defines user environment
-         user_boot_bytecode
+         ["vm-begin"].concat(user_boot_bytecode)
         ];
     var environment = make_env();
     bind(environment, sym("vm-def"), new Def());
@@ -484,9 +484,10 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
     this.eval = function(sexp){
         if (!parser) throw "parsing not supported"; return this.exec(parser.parse_sexp(sexp)); }
     this.exec = function(bytecode) {
-        var res = evaluate(user_environment, null, null, push_root_prompt(parse_bytecode(bytecode)));
+        var wrapped = push_root_prompt(parse_bytecode([new Begin()].concat(bytecode)));
+        var res = evaluate(user_environment, null, null, wrapped);
         if (isCapture(res)) throw "prompt not found: " + res.prompt;
         return res; }
     this.call = function(fun_name) {
-        return this.exec(parse_bytecode([fun_name].concat(Array.prototype.slice.call(arguments, 1)))); }
+        return this.exec(parse_bytecode([[fun_name].concat(Array.prototype.slice.call(arguments, 1))])); }
 }

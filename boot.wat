@@ -14,6 +14,9 @@
 (_define error vm-error)
 (_define eval vm-eval)
 (_define if vm-if)
+(_define js-getter vm-js-getter)
+(_define js-global vm-js-global)
+(_define js-invoker vm-js-invoker)
 (_define list* vm-list*)
 (_define list-to-array vm-list-to-array)
 (_define make-environment vm-make-environment)
@@ -146,6 +149,10 @@
     (list* let () body)
     (list let (list (car bindings)) (list* let* (cdr bindings) body))))
 
+;; Use ur-lambda as lambda for now but this will probably be
+;; replaced with a typed lambda soon
+(define lambda _lambda)
+
 ;; Simple control
 (define-macro (&& a b) (list if a b false))
 
@@ -273,7 +280,39 @@
       (push-subcont k
         (throw err)))))
 
-(define lambda _lambda)
+(define let-redirect
+  (_vau (exp bindings . body) env
+    (eval (list* (eval (list* _lambda (map-list car bindings) body)
+                       (eval exp
+                             env))
+                 (map-list cadr bindings))
+          env)))
 
-;; Return bindings to VM
-(get-current-environment)
+(define bindings->environment
+  (_vau bindings denv
+    (eval (list let-redirect
+                (make-environment)
+                bindings
+                (list get-current-environment))
+          denv)))
+
+(define slurp-environment
+  (_vau bindings e
+    (eval (list* bindings->environment (map-list (lambda (b) (list b b)) bindings)) e)))
+
+;; Export bindings to userland
+
+;; User environment is subenvironment of environment containing exported bindings
+;; so exported bindings cannot be modified
+
+(make-environment (slurp-environment list ! != !== % & && * + - / < <<
+<= == === > >> >>> @ Arguments Array Date Function Number Object
+RegExp String ^ _define _lambda _vau apply array array-to-list begin
+caar cadr car cat catch cdar cddr cdr cons cons? define define-generic
+define-macro define-method define-module define-prototype dlet dnew
+dref error eval get-current-environment if import in instanceof
+js-callback js-getter js-global js-invoker label lambda let let* list
+list* list-to-array log loop macro make-environment map-list module
+new nil? object provide push-prompt push-subcont quote string
+symbol-name take-subcont the throw typeof unless unwrap when while
+wrap || ~))

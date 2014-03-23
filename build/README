@@ -1,0 +1,3 @@
+Simply include wat.js in your project.
+
+stdlib.js is not needed, it's already included in wat.js.

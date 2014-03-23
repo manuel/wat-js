@@ -110,11 +110,11 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         var e = elt(o, 1); if (isCapture(e)) return e;
         return evaluate(e, k, f, x); };
     /* First-order Control */
-    function Begin() {}; function If() {}; function __Loop() {}
+    function Begin() {}; function If() {}; function Loop1() {}
     function __Catch() {}; function Finally() {}
     Begin.prototype.toString = function() { return "begin"; };
     If.prototype.toString = function() { return "if"; };
-    __Loop.prototype.toString = function() { return "loop"; };
+    Loop1.prototype.toString = function() { return "loop"; };
     __Catch.prototype.toString = function() { return "catch"; };
     Finally.prototype.toString = function() { return "finally"; };
     Begin.prototype.wat_combine = function(e, k, f, o) {
@@ -144,7 +144,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         }
         return evaluate(e, null, null, test ? elt(o, 1) : elt(o, 2));
     };
-    __Loop.prototype.wat_combine = function self(e, k, f, o) {
+    Loop1.prototype.wat_combine = function self(e, k, f, o) {
         var first = true; // only continue once
         while (true) {
             if (first && isContinuation(k)) {
@@ -440,7 +440,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
          ["def", "symbol-name", jswrap(sym_name)],
          // First-order Control
          ["def", "if", new If()],
-         ["def", "--loop", new __Loop()],
+         ["def", "loop1", new Loop1()],
          ["def", "throw", jswrap(function(err) { throw err; })],
          ["def", "--catch", wrap(new __Catch())],
          ["def", "finally", new Finally()],

@@ -24,7 +24,7 @@
   (list wrap (list* vau params ignore body))))
 (def loop
  (macro body
-  (list --loop (list* begin body))))
+  (list loop1 (list* begin body))))
 (def catch
  (macro (protected handler)
   (list --catch (list lambda () protected) handler)))

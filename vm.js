@@ -325,11 +325,9 @@ module.exports = function WatVM(boot_bytecode, parser) {
     Nil.prototype.wat_match = function(e, rhs) {
         if (rhs !== NIL) return error("NIL expected, but got: " + to_string(rhs)); };
     Ign.prototype.wat_match = function(e, rhs) {};
-    /* Utilities */
-    var ROOT_PROMPT = sym("--root-prompt");
-    function push_root_prompt(x) {
-        // should use --push-prompt
-        return list(sym("push-prompt"), list(sym("quote"), ROOT_PROMPT), x); }
+    /* Error handling */
+    var ROOT_PROMPT = {};
+    function push_root_prompt(x) { return list(sym("--push-prompt"), ROOT_PROMPT, x); }
     function error(err) {
         var print_stacktrace = environment.bindings["--print-stacktrace-and-throw"];
         if (print_stacktrace !== undefined) {
@@ -337,6 +335,7 @@ module.exports = function WatVM(boot_bytecode, parser) {
         } else {
             throw err;
         } }
+    /* Utilities */
     function list() {
         return array_to_list(Array.prototype.slice.call(arguments)); }
     function list_star() {
@@ -352,6 +351,7 @@ module.exports = function WatVM(boot_bytecode, parser) {
     function to_string(obj) {
         if ((obj !== null) && (obj !== undefined)) return obj.toString();
         else return Object.prototype.toString.call(obj); }
+    /* Typed lambdas */
     // Strip . from vau list, return (possibly) improper list
     var DOT = ".";
     function xform_vau_list(obj) {
@@ -490,7 +490,7 @@ module.exports = function WatVM(boot_bytecode, parser) {
          ["def", "--dlet", new __DLet()],
          ["def", "dref", wrap(new DRef())],
          // Errors
-         ["def", "--get-root-prompt", jswrap(function() { return ROOT_PROMPT; })],
+         ["def", "--root-prompt", ROOT_PROMPT],
          ["def", "error", jswrap(error)],
          // JS Interface
          ["def", "js-wrap", jswrap(jswrap)],

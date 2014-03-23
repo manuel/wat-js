@@ -187,9 +187,9 @@
   (if (.next k)
    (print-frame (.next k))
    null))
- (take-subcont (--get-root-prompt) k
+ (take-subcont --root-prompt k
   (print-frame k)
-  (push-prompt (--get-root-prompt)
+  (push-prompt --root-prompt
    (push-subcont k
     (throw err)))))
 
@@ -225,7 +225,7 @@
  ((js-getter key) object))
 
 (define (js-callback fun)
- (js-function (lambda args (push-prompt (--get-root-prompt) (apply fun args)))))
+ (js-function (lambda args (push-prompt --root-prompt (apply fun args)))))
 
 (define (map-array f arr)
  (let* ((i 0) (len (.length arr)) (res (array)))

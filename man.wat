@@ -33,7 +33,7 @@
   (define-macro (section (parent id) title . children)
     (list begin
       (list define id (list make-section (symbol-name id) parent title))
-        (list* dlet *current-parent* id
+        (list* dlet (list (list *current-parent* id))
                children)))
   
   (define (para text)

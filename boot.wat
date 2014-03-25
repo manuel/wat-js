@@ -75,10 +75,6 @@
   (macro (k . body)
     (list vm-push-subcont k (list* _lambda () body))))
 
-(_define dlet
-  (_vau (dv val . body) e
-    (eval (list vm-dlet (eval dv e) (eval val e) (list* begin body)) e)))
-
 ;; List utilities
 (_define compose (_lambda (f g) (_lambda (arg) (f (g arg)))))
 
@@ -102,8 +98,8 @@
 
 (define-macro (let bindings . body)
   (cons
-    (list* _lambda (map-list car bindings) body)
-    (map-list cadr bindings)))
+   (list* _lambda (map-list car bindings) body)
+   (map-list cadr bindings)))
 
 (define-macro (let* bindings . body)
   (if (nil? bindings)
@@ -165,14 +161,27 @@
 
 (define-macro (while test . body)
   (list call-while
-    (list _lambda () test)
-    (list* _lambda () body)))
+        (list _lambda () test)
+        (list* _lambda () body)))
 
 (define-macro (when test . body)
   (list if test (list* begin body) null))
 
 (define-macro (unless test . body)
   (list* when (list ! test) body))
+
+;; Delimited dynamic binding
+
+;; Evaluate right hand sides before binding all dynamic variables at once.
+(define dlet
+  (_vau (bindings . body) e
+     (define (process-bindings bs)
+       (if (nil? bs)
+           (list* begin body)
+           (let* ((((name expr) . rest-bs) bs)
+                  (value (eval expr e)))
+             (list vm-dlet name value (process-bindings rest-bs)))))
+     (eval (process-bindings bindings) e)))
 
 ;; Prototypes
 (define-macro (define-prototype name prop-names)

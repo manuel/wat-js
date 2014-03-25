@@ -112,27 +112,19 @@
 
 (_define lambda
   (_vau (params . body) e
-    (_define ->type-checks
-      (_lambda (typed-params)
-        (if (cons? typed-params)
-            (let ((param (car typed-params)))
-              (if (cons? param)
-                  (let (((name type) param))
-                    (cons (list the type name) (->type-checks (cdr typed-params))))
-                  (->type-checks (cdr typed-params))))
-            ())))
-    (_define ->untyped-params
-      (_lambda (typed-params)
-        (if (cons? typed-params)
-            (let ((param (car typed-params)))
-              (if (cons? param)
-                  (let (((name ignore) param))
-                    (cons name (->untyped-params (cdr typed-params))))
-                  (cons param (->untyped-params (cdr typed-params)))))
-            typed-params)))
-    (let ((type-checks (->type-checks params))
-          (untyped-params (->untyped-params params)))
-      (eval (list* _lambda untyped-params (list* begin type-checks) body) e))))
+    (_define typed-params->names-and-checks
+      (_lambda (ps)
+        (if (cons? ps)
+            (let* (((p . rest-ps) ps)
+                   ((names . checks) (typed-params->names-and-checks rest-ps)))
+              (if (cons? p)
+                  (let* (((name type) p)
+                         (check (list the type name)))
+                    (cons (cons name names) (cons check checks)))
+                  (cons (cons p names) checks)))
+            (cons ps ()))))
+    (let (((untyped-names . type-checks) (typed-params->names-and-checks params)))
+      (eval (list* _lambda untyped-names (list* begin type-checks) body) e))))
 
 (define-macro (define lhs . rhs)
   (if (cons? lhs)

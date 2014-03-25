@@ -1100,7 +1100,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
             return "this." + prop_name + "=" + prop_name + ";"; }).join("");
         return eval("(function " + name + "(" + param_names + "){" + param_inits + "})"); }
     function jsnew(ctor) {
-        var factoryFunction = constructor.bind.apply(ctor, arguments);
+        var factoryFunction = ctor.bind.apply(ctor, arguments);
         return new factoryFunction(); }
     function js_function(cmb) {
         return function() {

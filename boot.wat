@@ -22,6 +22,7 @@
 (_define make-environment vm-make-environment)
 (_define new vm-js-new)
 (_define nil? vm-nil?)
+(_define setter vm-setter)
 (_define symbol-name vm-symbol-name)
 (_define throw vm-throw)
 (_define unwrap vm-unwrap)
@@ -170,6 +171,9 @@
 (define-macro (unless test . body)
   (list* when (list ! test) body))
 
+(define-macro (set! (getter . args) new-val)
+  (list* (list setter getter) new-val args))
+
 ;; Delimited dynamic binding
 
 ;; Evaluate right hand sides before binding all dynamic variables at once.
@@ -184,13 +188,14 @@
      (eval (process-bindings bindings) e)))
 
 ;; Prototypes
-(define-macro (define-prototype name prop-names)
-  (list _define name
-        (list* vm-js-make-prototype (symbol-name name)
-               (map-list symbol-name prop-names))))
+(define define-prototype
+  (_vau (name super prop-names) e
+    (let ((p (apply vm-js-make-prototype (list* (symbol-name name) (map-list symbol-name prop-names)))))
+      (set! (.prototype (.constructor p)) (new (eval super e)))
+      (eval (list _define name p) e))))
 
 (define (put-method ctor name js-fun)
-  ((vm-js-setter name) (.prototype ctor) js-fun))
+  (set! ((js-getter name) (.prototype ctor)) js-fun))
 
 (define-macro (define-method (name (self ctor) . args) . body)
   (list put-method ctor (symbol-name name)
@@ -263,14 +268,17 @@
       (map-list (_lambda (pair)
                   (let ((name (eval (car pair) e))
                         (value (eval (cadr pair) e)))
-                    ((vm-js-setter name) obj value)))
+                    (set! ((js-getter name) obj) value)))
                 pairs)
       obj)))
 
 (define (array . args) (list-to-array args))
 
 (define (@ object key)
-  ((vm-js-getter key) object))
+  ((js-getter key) object))
+
+(set! (setter @) (lambda (new-val object key)
+                   (set! ((js-getter key) object) new-val)))
 
 (define (cat . objects)
   (#join (list-to-array objects) ""))
@@ -343,5 +351,5 @@ define-macro define-method define-module define-prototype dlet dnew
 dref error eval the-environment if import in instanceof js-callback
 js-getter js-global js-invoker label lambda let let* list list*
 list-to-array log loop macro make-environment map-list module new nil?
-object provide push-prompt push-subcont quote symbol-name take-subcont
-the throw typeof unless unwrap when while wrap || ~))
+object provide push-prompt push-subcont quote set! setter symbol-name
+take-subcont the throw typeof unless unwrap when while wrap || ~))

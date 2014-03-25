@@ -4,18 +4,18 @@
 
   (define *current-parent* (dnew null))
   
-  (define-prototype Document
+  (define-prototype Document Object
     (id
      title
      children))
   
-  (define-prototype Section
+  (define-prototype Section Object
     (id
      parent
      title
      children))
   
-  (define-prototype Para
+  (define-prototype Para Object
     (text
      parent))
   

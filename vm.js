@@ -293,6 +293,9 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
     Nil.prototype.wat_match = function(e, rhs) {
         if (rhs !== NIL) return error("NIL expected, but got: " + to_string(rhs)); };
     Ign.prototype.wat_match = function(e, rhs) {};
+    /* Setter - you are not expected to understand this - immediately */
+    var SETTER = jswrap(function setter(obj) { return obj.wat_setter; });
+    SETTER.wat_setter = jswrap(function(new_setter, obj) { obj.wat_setter = new_setter; });
     /* Error handling */
     var ROOT_PROMPT = {};
     function push_root_prompt(x) { return list(new PushPrompt(), ROOT_PROMPT, x); }
@@ -348,16 +351,17 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
             var method = rcv[method_name];
             return method.apply(rcv, Array.prototype.slice.call(arguments, 1)); }); }
     function js_getter(prop_name) {
-        return jswrap(function() {
+        var getter = jswrap(function() {
             if (arguments.length !== 1) return error("getter called with wrong args: " + arguments);
             var rcv = arguments[0];
             if ((rcv !== undefined) && (rcv !== null)) return rcv[prop_name];
-            else return error("can't get " + prop_name + " of " + rcv); }); }
+            else return error("can't get " + prop_name + " of " + rcv); });
+        getter.wat_setter = js_setter(prop_name); return getter; }
     function js_setter(prop_name) {
         return jswrap(function() {
             if (arguments.length !== 2) return error("setter called with wrong args: " + arguments);
-            var rcv = arguments[0];
-            if ((rcv !== undefined) && (rcv !== null)) return rcv[prop_name] = arguments[1];
+            var rcv = arguments[1];
+            if ((rcv !== undefined) && (rcv !== null)) return rcv[prop_name] = arguments[0];
             else return error("can't set " + prop_name + " of " + rcv); }); }
     function make_prototype(name) {
         var prop_names = Array.prototype.slice.call(arguments, 1);
@@ -372,6 +376,8 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         return function() {
             var args = cons(this, array_to_list(Array.prototype.slice.call(arguments)));
             return combine(null, null, null, cmb, args); } }
+    var JS_GLOBAL = jswrap(function(name) { return global[name]; });
+    JS_GLOBAL.wat_setter = jswrap(function(new_val, name) { global[name] = new_val; });
     // Apply needs custom implementation to be able to apply JS functions transparently
     function Apply() {};
     Apply.prototype.wat_combine = function(e, k, f, o) {
@@ -441,6 +447,8 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
          ["vm-def", "vm-dnew", wrap(new DNew())],
          ["vm-def", "vm-dlet", new DLet()],
          ["vm-def", "vm-dref", wrap(new DRef())],
+         // Setters
+         ["vm-def", "vm-setter", SETTER],
          // Errors
          ["vm-def", "vm-root-prompt", ROOT_PROMPT],
          ["vm-def", "vm-error", jswrap(error)],
@@ -452,7 +460,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
          ["vm-def", "vm-js-setter", jswrap(js_setter)],
          ["vm-def", "vm-js-invoker", jswrap(js_invoker)],
          ["vm-def", "vm-js-function", jswrap(js_function)],
-         ["vm-def", "vm-js-global", jswrap(function(name) { return global[name]; })],
+         ["vm-def", "vm-js-global", JS_GLOBAL],
          ["vm-def", "vm-js-make-object", jswrap(function() { return {}; })],
          ["vm-def", "vm-js-make-prototype", jswrap(make_prototype)],
          ["vm-def", "vm-js-new", jswrap(jsnew)],

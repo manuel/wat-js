@@ -114,3 +114,12 @@
 
 (assert-throws (unwrap (_vau () ignore)))
 
+(let ((obj (object ("x" 1))))
+  (set! (.x obj) 2)
+  (assert-equal 2 (.x obj))
+  (set! (@ obj "x") 3)
+  (assert-equal 3 (.x obj)))
+
+(assert-equal $x undefined)
+(set! $x 2)
+(assert-equal $x 2)

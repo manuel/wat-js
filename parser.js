@@ -25,13 +25,11 @@ var escape_sequence = action(sequence("\\", escape_char), function (ast) {
     case "n": return "\n";
     case "r": return "\r";
     case "t": return "\t";
-    default: return ast[1]; }
-});
+    default: return ast[1]; }});
 var line_terminator = choice(ch("\r"), ch("\n"));
-var string_char = choice(escape_sequence, negate("\""), line_terminator);
-var string_stx =
-    action(sequence("\"", join_action(repeat0(string_char), ""), "\""),
-           function (ast) { return ["string", ast[1]]; });
+var string_char = choice(escape_sequence, line_terminator, negate("\""));
+var string_stx = action(sequence("\"", join_action(repeat0(string_char), ""), "\""),
+                        function (ast) { return ["string", ast[1]]; });
 var digits = join_action(repeat1(range("0", "9")), "");
 var number_stx =
     action(sequence(optional(choice("+", "-")), digits, optional(join_action(sequence(".", digits), ""))),

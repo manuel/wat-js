@@ -272,11 +272,20 @@
 (define (@ object key)
   ((vm-js-getter key) object))
 
+(define (cat . objects)
+  (#join (list-to-array objects) ""))
+
+(define (log . objects)
+  (apply #log (list* $console objects)))
+
 (define (js-callback fun)
   (vm-js-function (_lambda args (push-prompt vm-root-prompt (apply fun args)))))
 
+(define-macro (type? obj type)
+  (list vm-type? obj type (symbol-name type)))
+
 (define-macro (the type obj)
-  (list vm-type-check (symbol-name type) type obj))
+  (list if (list type? obj type) obj (list error (list cat obj " is not a: " type))))
 
 (define Arguments $Arguments)
 (define Array $Array)
@@ -286,12 +295,6 @@
 (define Object $Object)
 (define RegExp $RegExp)
 (define String $String)
-
-(define (cat . objects)
-  (#join (list-to-array objects) ""))
-
-(define (log . objects)
-  (apply #log (list* $console objects)))
 
 ;; Final events
 

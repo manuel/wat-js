@@ -315,13 +315,9 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
     function reverse_list(list) {
         var res = NIL; while(list !== NIL) { res = cons(car(list), res); list = cdr(list); } return res; }
     var js_types = ["Arguments", "Array", "Date", "Function", "Number", "Object", "RegExp", "String"];
-    function is_type(type_name, type_obj, obj) {
+    function is_type(obj, type_obj, type_name) {
         if (js_types.indexOf(type_name) === -1) { return obj instanceof type_obj; }
         else { return toString.call(obj) === "[object " + type_name + "]"; } }
-    function type_check(type_name, type_obj, obj) {
-        if (!is_type(type_name, type_obj, obj)) {
-            return error("type error: " + obj + " is not a " + type_name);
-        } else { return obj; } }
     /* Bytecode parser */
     function parse_bytecode(obj) {
         switch(Object.prototype.toString.call(obj)) {
@@ -461,7 +457,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
          ["vm-def", "vm-js-make-prototype", jswrap(make_prototype)],
          ["vm-def", "vm-js-new", jswrap(jsnew)],
          ["vm-def", "vm-apply", wrap(new Apply())],
-         ["vm-def", "vm-type-check", jswrap(type_check)],
+         ["vm-def", "vm-type?", jswrap(is_type)],
          // Utilities
          ["vm-def", "vm-list-to-array", jswrap(list_to_array)],
          ["vm-def", "vm-array-to-list", jswrap(array_to_list)],

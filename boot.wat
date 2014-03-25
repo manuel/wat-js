@@ -260,14 +260,10 @@
 (define object
   (_vau pairs e
     (let ((obj (vm-js-make-object)))
-      (map-list (_lambda (pair)
-                  (let ((name (eval (car pair) e))
-                        (value (eval (cadr pair) e)))
-                    (set! ((js-getter name) obj) value)))
+      (map-list (_lambda ((name value))
+                  (set! ((js-getter (eval name e)) obj) (eval value e)))
                 pairs)
       obj)))
-
-(define (array . args) (list-to-array args))
 
 (define (@ object key)
   ((js-getter key) object))
@@ -275,14 +271,16 @@
 (set! (setter @) (lambda (new-val object key)
                    (set! ((js-getter key) object) new-val)))
 
+(define (array . args) (list-to-array args))
+
+(define (js-callback fun)
+  (vm-js-function (_lambda args (push-prompt vm-root-prompt (apply fun args)))))
+
 (define (cat . objects)
   (#join (list-to-array objects) ""))
 
 (define (log . objects)
   (apply #log (list* $console objects)))
-
-(define (js-callback fun)
-  (vm-js-function (_lambda args (push-prompt vm-root-prompt (apply fun args)))))
 
 (define-macro (type? obj type)
   (list vm-type? obj type (symbol-name type)))
@@ -344,14 +342,12 @@
    begin define define-macro lambda let let* quote symbol-name symbol?
    caar cadr car cdar cddr cdr cons cons? list list* map-list nil?
    define-generic define-prototype define-method new the type?
-   set! setter
-   dlet dnew dref
    catch if label loop throw unless when while error 
+   set! setter
    push-prompt push-subcont take-subcont
+   dlet dnew dref
    define-module import module
    Arguments Array Date Function Number Object RegExp String
-   array array-to-list js-callback js-getter js-global js-invoker list-to-array object 
-   ! != !== % &  * + - / < << <= == === > >> >>> ~ ^ in instanceof typeof
-   @ && ||
-   cat log
+   array array-to-list js-callback js-getter js-global js-invoker list-to-array object cat log
+   @ && || ! != !== % &  * + - / < << <= == === > >> >>> ~ ^ in instanceof typeof
    ))

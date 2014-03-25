@@ -1,3 +1,5 @@
+;; -*- mode: scheme -*-
+
 ;; ``72. An adequate bootstrap is a contradiction in terms.''
 
 ;; Rename ur-define
@@ -24,6 +26,7 @@
 (_define nil? vm-nil?)
 (_define setter vm-setter)
 (_define symbol-name vm-symbol-name)
+(_define symbol? vm-symbol?)
 (_define throw vm-throw)
 (_define unwrap vm-unwrap)
 (_define wrap vm-wrap)
@@ -343,13 +346,20 @@
 ;; User environment is subenvironment of environment containing exported bindings
 ;; so exported bindings cannot be modified
 
-(make-environment (slurp-environment list ! != !== % & && * + - / < <<
-<= == === > >> >>> @ Arguments Array Date Function Number Object
-RegExp String ^ _define _lambda _vau apply array array-to-list begin
-caar cadr car cat catch cdar cddr cdr cons cons? define define-generic
-define-macro define-method define-module define-prototype dlet dnew
-dref error eval the-environment if import in instanceof js-callback
-js-getter js-global js-invoker label lambda let let* list list*
-list-to-array log loop macro make-environment map-list module new nil?
-object provide push-prompt push-subcont quote set! setter symbol-name
-take-subcont the throw typeof unless unwrap when while wrap || ~))
+(make-environment 
+  (slurp-environment 
+   _define _lambda _vau apply eval make-environment the-environment unwrap wrap
+   begin define define-macro lambda let let* quote symbol-name symbol?
+   caar cadr car cdar cddr cdr cons cons? list list* map-list nil?
+   define-generic define-prototype define-method new the type?
+   set! setter
+   dlet dnew dref
+   catch if label loop throw unless when while error 
+   push-prompt push-subcont take-subcont
+   define-module import module
+   Arguments Array Date Function Number Object RegExp String
+   array array-to-list js-callback js-getter js-global js-invoker list-to-array object 
+   ! != !== % &  * + - / < << <= == === > >> >>> ~ ^ in instanceof typeof
+   @ && ||
+   cat log
+   ))

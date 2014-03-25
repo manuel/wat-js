@@ -19,7 +19,7 @@
     (text
      parent))
   
-  (define (make-document id title)
+  (define (make-document (id String) (title String))
     (new Document id title (array)))
   
   (define-macro (document id title)

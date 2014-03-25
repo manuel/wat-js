@@ -94,15 +94,11 @@
   (macro ((name . params) . body)
     (list _define name (list* macro params body))))
 
-(define-macro (define lhs . rhs)
-  (if (cons? lhs)
-    (list _define (car lhs) (list* _lambda (cdr lhs) rhs))
-    (list _define lhs (car rhs))))
-
-(define (map-list f lst)
-  (if (nil? lst)
-   ()
-   (cons (f (car lst)) (map-list f (cdr lst)))))
+(_define map-list
+  (_lambda (f lst)
+    (if (nil? lst)
+      ()
+      (cons (f (car lst)) (map-list f (cdr lst))))))
 
 (define-macro (let bindings . body)
   (cons
@@ -114,9 +110,34 @@
     (list* let () body)
     (list let (list (car bindings)) (list* let* (cdr bindings) body))))
 
-;; Use ur-lambda as lambda for now but this will probably be
-;; replaced with a typed lambda soon
-(define lambda _lambda)
+(_define lambda
+  (_vau (params . body) e
+    (_define ->type-checks
+      (_lambda (typed-params)
+        (if (cons? typed-params)
+            (let ((param (car typed-params)))
+              (if (cons? param)
+                  (let (((name type) param))
+                    (cons (list the type name) (->type-checks (cdr typed-params))))
+                  (->type-checks (cdr typed-params))))
+            ())))
+    (_define ->untyped-params
+      (_lambda (typed-params)
+        (if (cons? typed-params)
+            (let ((param (car typed-params)))
+              (if (cons? param)
+                  (let (((name ignore) param))
+                    (cons name (->untyped-params (cdr typed-params))))
+                  (cons param (->untyped-params (cdr typed-params)))))
+            typed-params)))
+    (let ((type-checks (->type-checks params))
+          (untyped-params (->untyped-params params)))
+      (eval (list* _lambda untyped-params (list* begin type-checks) body) e))))
+
+(define-macro (define lhs . rhs)
+  (if (cons? lhs)
+    (list _define (car lhs) (list* lambda (cdr lhs) rhs))
+    (list _define lhs (car rhs))))
 
 ;; Simple control
 (define-macro (&& a b) (list if a b false))

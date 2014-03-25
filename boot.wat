@@ -185,11 +185,10 @@
 
 (define-macro (define-method (name (self ctor) . args) . body)
   (list put-method ctor (symbol-name name)
-        (list vm-js-function (list* _lambda (list* self args) body))))
+        (list vm-js-function (list* lambda (list* self args) body))))
 
 (define-macro (define-generic (name . ignore))
-  (list _define name (_lambda args
-                       (apply (vm-js-invoker (symbol-name name)) args))))
+  (list _define name (vm-js-invoker (symbol-name name))))
 
 ;; Modules
 (define provide

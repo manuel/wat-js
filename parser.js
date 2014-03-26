@@ -10,7 +10,7 @@ function parse_sexp(s) {
     else throw("parse error at " + res.remaining.index + " in " + s); }
 var x_stx = function(input) { return x_stx(input); }; // forward decl.
 var id_special_char =
-    choice("-", "&", "!", ":", "=", ">", "<", "%", "+", "?", "/", "*", "$", "_", "'", ".", "@", "|", "~", "^");
+    choice("-", "&", "!", "=", ">", "<", "%", "+", "?", "/", "*", "$", "_", "'", ".", "@", "|", "~", "^");
 var id_char = choice(range("a", "z"), range("A", "Z"), range("0", "9"), id_special_char);
 // Kludge: don't allow single dot as id, so as not to conflict with dotted pair stx.
 var id_stx = action(join_action(butnot(repeat1(id_char), "."), ""), handle_identifier);
@@ -46,6 +46,8 @@ var f_stx = make_constant_stx("#f", false);
 var null_stx = make_constant_stx("#null", null);
 var undef_stx = make_constant_stx("#undefined", undefined);
 var dot_stx = action(wsequence(".", x_stx), function (ast) { return ast[1]; });
+var qualified_stx = action(sequence(id_stx, ":", id_stx), function(ast) {
+    return ["eval", ["quote", ast[2]], ast[0]]; });
 var compound_stx = action(wsequence("(", repeat1(x_stx), optional(dot_stx), ")"),
                           function(ast) {
                               var exprs = ast[1];
@@ -55,6 +57,6 @@ var quote_stx = action(sequence("'", x_stx), function(ast) { return ["quote", as
 var cmt_stx = action(sequence(";", repeat0(negate(line_terminator)), optional(line_terminator)), nothing_action);
 var whitespace_stx = action(choice(" ", "\n", "\r", "\t"), nothing_action);
 function nothing_action(ast) { return null; } // HACK!
-var x_stx = whitespace(choice(ign_stx, nil_stx, t_stx, f_stx, null_stx, undef_stx, number_stx,
+var x_stx = whitespace(choice(qualified_stx, ign_stx, nil_stx, t_stx, f_stx, null_stx, undef_stx, number_stx,
                               quote_stx, compound_stx, id_stx, string_stx, cmt_stx));
 var program_stx = whitespace(repeat0(choice(x_stx, whitespace_stx))); // HACK!

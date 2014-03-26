@@ -108,8 +108,8 @@
 
 (define (combine cmb ops) (apply (wrap cmb) ops))
 
-(assert-true (combine && (list (=== 1 1) (=== 2 2))))
-(assert-false (combine && (list (!== 1 1) (=== 2 2))))
+(assert-true (combine and (list (=== 1 1) (=== 2 2))))
+(assert-false (combine and (list (!== 1 1) (=== 2 2))))
 
 (assert-equal 2 (apply (lambda x x) 2))
 

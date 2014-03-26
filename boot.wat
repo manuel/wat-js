@@ -157,25 +157,25 @@
 
 (define else true)
 
-(define &&
+(define and
   (_vau x e
     (cond ((nil? x) true)
           ((nil? (cdr x)) (eval (car x) e))
-          ((eval (car x) e) (apply (wrap &&) (cdr x) e))
+          ((eval (car x) e) (apply (wrap and) (cdr x) e))
           (else false))))
 
-(define ||
+(define or
   (_vau x e
     (cond ((nil? x) false)
           ((nil? (cdr x)) (eval (car x) e))
           ((eval (car x) e) true)
-          (else (apply (wrap ||) (cdr x) e)))))
+          (else (apply (wrap or) (cdr x) e)))))
 
 (define (call-with-escape fun)
   (let ((fresh (list null)))
     (catch (fun (_lambda opt-arg (throw (list fresh opt-arg))))
       (_lambda (exc)
-        (if (&& (cons? exc) (=== fresh (car exc)))
+        (if (and (cons? exc) (=== fresh (car exc)))
             (let ((opt-arg (cadr exc)))
               (if (cons? opt-arg) (car opt-arg) undefined))
             (throw exc))))))
@@ -199,7 +199,7 @@
   (list if test (list* begin body) null))
 
 (define-macro (unless test . body)
-  (list* when (list ! test) body))
+  (list* when (list not test) body))
 
 (define-macro (set! (getter . args) new-val)
   (list* (list setter getter) new-val args))
@@ -261,14 +261,11 @@
 
 ;; JavaScript
 
-(define-macro (define-js-unop op)
-  (list _define op (list vm-js-unop (symbol-name op))))
+(define not (vm-js-unop "!"))
+(define typeof (vm-js-unop "typeof"))
 
 (define-macro (define-js-binop op)
   (list _define op (list vm-js-binop (symbol-name op))))
-
-(define-js-unop !)
-(define-js-unop typeof)
 
 (define-js-binop !=)
 (define-js-binop !==)
@@ -400,6 +397,6 @@
    define-module import module
    Arguments Array Date Function Number Object RegExp String
    array array-to-list js-callback js-getter js-global js-invoker list-to-array object log
-   @ && || ! != !== % * + - / < <= == === > >= in instanceof typeof
+   @ and or not != !== % * + - / < <= == === > >= in instanceof typeof
    bitand bitor bitxor bitnot bitshiftl bitshiftr bitshiftr0
    ))

@@ -15,9 +15,9 @@ var id_char = choice(range("a", "z"), range("A", "Z"), range("0", "9"), id_speci
 // Kludge: don't allow single dot as id, so as not to conflict with dotted pair stx.
 var id_stx = action(join_action(butnot(repeat1(id_char), "."), ""), handle_identifier);
 function handle_identifier(str) {
-    if ((str[0] === ".") && (str.length > 1)) { return ["js-getter", ["string", str.substring(1)]]; }
-    else if (str[0] === "#") { return ["js-invoker", ["string", str.substring(1)]]; }
-    else if (str[0] === "$") { return ["js-global", ["string", str.substring(1)]]; }
+    if ((str[0] === ".") && (str.length > 1)) { return ["js-getter", ["wat-string", str.substring(1)]]; }
+    else if (str[0] === "#") { return ["js-invoker", ["wat-string", str.substring(1)]]; }
+    else if (str[0] === "$") { return ["js-global", ["wat-string", str.substring(1)]]; }
     else return str; }
 var escape_char = choice("\"", "\\", "n", "r", "t");
 var escape_sequence = action(sequence("\\", escape_char), function (ast) {
@@ -29,7 +29,7 @@ var escape_sequence = action(sequence("\\", escape_char), function (ast) {
 var line_terminator = choice(ch("\r"), ch("\n"));
 var string_char = choice(escape_sequence, line_terminator, negate("\""));
 var string_stx = action(sequence("\"", join_action(repeat0(string_char), ""), "\""),
-                        function (ast) { return ["string", ast[1]]; });
+                        function (ast) { return ["wat-string", ast[1]]; });
 var digits = join_action(repeat1(range("0", "9")), "");
 var number_stx =
     action(sequence(optional(choice("+", "-")), digits, optional(join_action(sequence(".", digits), ""))),

@@ -32,31 +32,31 @@
 (_define wrap vm-wrap)
 
 ;; Important utilities
-(_define quote (vm-vau (x) ignore x))
-(_define list (wrap (vm-vau elts ignore elts)))
+(_define quote (vm-vau (x) #ignore x))
+(_define list (wrap (vm-vau elts #ignore elts)))
 (_define the-environment (vm-vau () e e))
 
 ;; Macro and vau
 (_define make-macro-expander
   (wrap
-    (vm-vau (expander) ignore
+    (vm-vau (expander) #ignore
       (vm-vau operands env
         (eval (eval (cons expander operands) (make-environment)) env)))))
 
 (_define _vau
   (make-macro-expander
-    (vm-vau (params env-param . body) ignore
+    (vm-vau (params env-param . body) #ignore
       (list vm-vau params env-param (list* begin body)))))
 
 (_define macro
   (make-macro-expander
-    (_vau (params . body) ignore
-      (list make-macro-expander (list* _vau params ignore body)))))
+    (_vau (params . body) #ignore
+      (list make-macro-expander (list* _vau params #ignore body)))))
 
 ;; Ur-lambda
 (_define _lambda
   (macro (params . body)
-    (list wrap (list* _vau params ignore body))))
+    (list wrap (list* _vau params #ignore body))))
 
 ;; Wrap incomplete VM forms
 (_define loop
@@ -82,8 +82,8 @@
 ;; List utilities
 (_define compose (_lambda (f g) (_lambda (arg) (f (g arg)))))
 
-(_define car (_lambda ((x . ignore)) x))
-(_define cdr (_lambda ((ignore . x)) x))
+(_define car (_lambda ((x . #ignore)) x))
+(_define cdr (_lambda ((#ignore . x)) x))
 (_define caar (compose car car))
 (_define cadr (compose car cdr))
 (_define cdar (compose cdr car))
@@ -139,7 +139,7 @@
 
 (define (apply appv arg . opt)
   (if (instanceof appv $Function)
-      (~apply appv null (list-to-array arg))
+      (~apply appv #null (list-to-array arg))
       (eval (cons (unwrap appv) arg)
             (if (nil? opt)
                 (make-environment)
@@ -149,35 +149,35 @@
 (define cond
   (_vau clauses env
     (if (nil? clauses)
-        undefined
+        #undefined
         (let ((((test . body) . clauses) clauses))
           (if (eval test env)
               (apply (wrap begin) body env)
               (apply (wrap cond) clauses env))))))
 
-(define else true)
+(define else #t)
 
 (define and
   (_vau x e
-    (cond ((nil? x) true)
+    (cond ((nil? x) #t)
           ((nil? (cdr x)) (eval (car x) e))
           ((eval (car x) e) (apply (wrap and) (cdr x) e))
-          (else false))))
+          (else #f))))
 
 (define or
   (_vau x e
-    (cond ((nil? x) false)
+    (cond ((nil? x) #f)
           ((nil? (cdr x)) (eval (car x) e))
-          ((eval (car x) e) true)
+          ((eval (car x) e) #t)
           (else (apply (wrap or) (cdr x) e)))))
 
 (define (call-with-escape fun)
-  (let ((fresh (list null)))
+  (let ((fresh (list #null)))
     (catch (fun (_lambda opt-arg (throw (list fresh opt-arg))))
       (_lambda (exc)
         (if (and (cons? exc) (=== fresh (car exc)))
             (let ((opt-arg (cadr exc)))
-              (if (cons? opt-arg) (car opt-arg) undefined))
+              (if (cons? opt-arg) (car opt-arg) #undefined))
             (throw exc))))))
 
 (define-macro (label name . body)
@@ -196,7 +196,7 @@
         (list* _lambda () body)))
 
 (define-macro (when test . body)
-  (list if test (list* begin body) null))
+  (list if test (list* begin body) #null))
 
 (define-macro (unless test . body)
   (list* when (list not test) body))
@@ -231,7 +231,7 @@
   (list put-method ctor (symbol-name name)
         (list vm-js-function (list* lambda (list* self args) body))))
 
-(define-macro (define-generic (name . ignore))
+(define-macro (define-generic (name . #ignore))
   (list _define name (vm-js-invoker (symbol-name name))))
 
 ;; Modules
@@ -266,9 +266,9 @@
     (define (fun arg1 arg2 . rest)
       (if (binop arg1 arg2)
           (if (nil? rest)
-              true
+              #t
               (apply fun (list* arg2 rest)))
-          false))
+          #f))
     fun))
 
 (define === (relational-js-binop "==="))
@@ -360,7 +360,7 @@
     (log (~toString (.dbg k)) (.e k))
     (if (.next k)
         (print-frame (.next k))
-        null))
+        #undefined))
   (take-subcont vm-root-prompt k
     (print-frame k)
     (push-prompt vm-root-prompt

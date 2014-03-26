@@ -324,7 +324,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
     /* Bytecode parser */
     function parse_bytecode(obj) {
         switch(Object.prototype.toString.call(obj)) {
-        case "[object String]": return obj === "ignore" ? IGN : sym(obj);
+        case "[object String]": return obj === "#ignore" ? IGN : sym(obj);
         case "[object Array]": return parse_bytecode_array(obj);
         default: return obj; } }
     function parse_bytecode_array(arr) {
@@ -384,7 +384,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         else if ((obj !== null) && (obj !== undefined)) return obj.toString();
         else return Object.prototype.toString.call(obj); }
     Nil.prototype.toString = function() { return "()"; };
-    Ign.prototype.toString = function() { return "ignore"; };
+    Ign.prototype.toString = function() { return "#ignore"; };
     Sym.prototype.toString = function() { return this.name; };
     Cons.prototype.toString = function() { return "(" + cons_to_string(this) + ")" };
     function cons_to_string(c) {

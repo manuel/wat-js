@@ -6,12 +6,12 @@
 
 (define assert-true
   (_vau (expr) e
-    (unless (=== true (eval expr e))
+    (unless (=== #t (eval expr e))
       (error (+ "Should be true: " expr)))))
 
 (define assert-false
   (_vau (expr) e
-    (unless (=== false (eval expr e))
+    (unless (=== #f (eval expr e))
       (error (+ "Should be false: " expr)))))
 
 (define assert-equal
@@ -34,7 +34,7 @@
 (assert-throws (def 12))
 (assert-throws (def 12 12))
 
-(assert-equal null (begin))
+(assert-equal #null (begin))
 (assert-equal 1 (begin 1))
 (assert-equal 2 (begin 1 2))
 
@@ -45,7 +45,7 @@
 (define-macro (test-check label expr expected)
   (list assert-equal expr expected))
 
-(define (new-prompt) (list null))
+(define (new-prompt) (list #null))
 
 (define (abortP p e)
   (take-subcont p ignore e))
@@ -94,7 +94,7 @@
 ;; 		      (v1 (abortP p 7)))
 ;; 		 (+ v1 10)))))
 ;;       (prompt-set? p)))
-;;   false)
+;;   #f)
 
 (test-check 'test4
   (let ((p (new-prompt)))
@@ -121,7 +121,7 @@
   (set! (@ obj "x") 3)
   (assert-equal 3 (.x obj)))
 
-(assert-equal $x undefined)
+(assert-equal $x #undefined)
 (set! $x 2)
 (assert-equal $x 2)
 

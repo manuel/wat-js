@@ -22,7 +22,7 @@
 
 (define (sleep (ms Number))
   (take-subcont default-prompt k
-    (define (callback . ignore)
+    (define (callback . #ignore)
       (push-prompt default-prompt
         (push-subcont k)))
     ($setTimeout (js-callback callback) ms)))

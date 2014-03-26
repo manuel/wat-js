@@ -2,7 +2,7 @@
 
 (define-module man (document section para render)
 
-  (define *current-parent* (dnew null))
+  (define *current-parent* (dnew #null))
   
   (define-prototype Document Object
     (id

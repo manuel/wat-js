@@ -10,7 +10,7 @@ function parse_sexp(s) {
     else throw("parse error at " + res.remaining.index + " in " + s); }
 var x_stx = function(input) { return x_stx(input); }; // forward decl.
 var id_special_char =
-    choice("-", "&", "!", ":", "=", ">", "<", "%", "+", "?", "/", "*", "#", "$", "_", "'", ".", "@", "|", "~", "^");
+    choice("-", "&", "!", ":", "=", ">", "<", "%", "+", "?", "/", "*", "$", "_", "'", ".", "@", "|", "~", "^");
 var id_char = choice(range("a", "z"), range("A", "Z"), range("0", "9"), id_special_char);
 // Kludge: don't allow single dot as id, so as not to conflict with dotted pair stx.
 var id_stx = action(join_action(butnot(repeat1(id_char), "."), ""), handle_identifier);
@@ -39,12 +39,12 @@ var number_stx =
                var fractional_digits = ast[2] || "";
                return Number(sign + integral_digits + fractional_digits); });
 function make_constant_stx(string, constant) { return action(string, function(ast) { return constant; }); }
-var ign_stx = make_constant_stx("ignore", "ignore");
 var nil_stx = make_constant_stx("()", []);
-var t_stx = make_constant_stx("true", true);
-var f_stx = make_constant_stx("false", false);
-var null_stx = make_constant_stx("null", null);
-var undef_stx = make_constant_stx("undefined", undefined);
+var ign_stx = make_constant_stx("#ignore", "#ignore");
+var t_stx = make_constant_stx("#t", true);
+var f_stx = make_constant_stx("#f", false);
+var null_stx = make_constant_stx("#null", null);
+var undef_stx = make_constant_stx("#undefined", undefined);
 var dot_stx = action(wsequence(".", x_stx), function (ast) { return ast[1]; });
 var compound_stx = action(wsequence("(", repeat1(x_stx), optional(dot_stx), ")"),
                           function(ast) {

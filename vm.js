@@ -469,6 +469,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
          // Utilities
          ["vm-def", "vm-list-to-array", jswrap(list_to_array)],
          ["vm-def", "vm-array-to-list", jswrap(array_to_list)],
+         ["vm-def", "vm-reverse-list", jswrap(reverse_list)],
          ["vm-def", "vm-list*", jswrap(list_star)],
          // User-supplied boot code; defines user environment
          ["vm-begin"].concat(user_boot_bytecode)

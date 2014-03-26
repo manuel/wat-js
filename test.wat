@@ -136,3 +136,5 @@
 (assert-equal 3 (- 10 5 2))
 (assert-equal (/ 1 5) (/ 5))
 (assert-equal 9 (/ 54 2 3))
+
+(assert-equal (#toString (list 1 2 3)) (#toString (reverse-list (list 3 2 1))))

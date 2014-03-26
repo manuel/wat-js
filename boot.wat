@@ -24,6 +24,7 @@
 (_define make-environment vm-make-environment)
 (_define new vm-js-new)
 (_define nil? vm-nil?)
+(_define reverse-list vm-reverse-list)
 (_define setter vm-setter)
 (_define symbol-name vm-symbol-name)
 (_define symbol? vm-symbol?)
@@ -359,7 +360,7 @@
   (slurp-environment 
    _define _lambda _vau apply eval make-environment the-environment unwrap wrap
    begin define define-macro lambda let let* quote symbol-name symbol?
-   caar cadr car cdar cddr cdr cons cons? fold-list list list* map-list nil?
+   caar cadr car cdar cddr cdr cons cons? fold-list list list* map-list nil? reverse-list
    define-generic define-prototype define-method new the type?
    catch if label loop throw unless when while error 
    set! setter

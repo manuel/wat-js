@@ -36,7 +36,8 @@
 (_define list (wrap (vm-vau elts #ignore elts)))
 (_define the-environment (vm-vau () e e))
 
-;; Macro and vau
+;;;; Macro and vau
+
 (_define make-macro-expander
   (wrap
     (vm-vau (expander) #ignore
@@ -63,7 +64,8 @@
 (define-macro (_lambda params . body)
   (list wrap (list* _vau params #ignore body)))
 
-;; Wrap incomplete VM forms
+;;;; Wrap incomplete VM forms
+
 (define-macro (loop . body)
   (list vm-loop (list* begin body)))
 
@@ -79,7 +81,8 @@
 (define-macro (push-subcont k . body)
   (list vm-push-subcont k (list* _lambda () body)))
 
-;; List utilities
+;;;; List utilities
+
 (_define compose (_lambda (f g) (_lambda (arg) (f (g arg)))))
 
 (_define car (_lambda ((x . #ignore)) x))
@@ -89,7 +92,8 @@
 (_define cdar (compose cdr car))
 (_define cddr (compose cdr cdr))
 
-;; Important macros and functions
+;;;; Important macros and functions
+
 (_define map-list
   (_lambda (f lst)
     (if (nil? lst)
@@ -140,7 +144,8 @@
                 (make-environment)
                 (car opt)))))
 
-;; Simple control
+;;;; Simple control
+
 (define-operative (cond . clauses) env
   (if (nil? clauses)
       #undefined
@@ -196,7 +201,7 @@
 (define-macro (set! (getter . args) new-val)
   (list* (list setter getter) new-val args))
 
-;; Delimited dynamic binding
+;;;; Delimited dynamic binding
 
 ;; Evaluate right hand sides before binding all dynamic variables at once.
 (define-operative (dlet bindings . body) env
@@ -208,7 +213,8 @@
           (list vm-dlet name value (process-bindings rest-bs)))))
   (eval (process-bindings bindings) env))
 
-;; Prototypes
+;;;; Prototypes
+
 (define-operative (define-prototype name super prop-names) env
   (let ((p (apply vm-js-make-prototype (list* (symbol-name name) (map-list symbol-name prop-names)))))
     (set! (.prototype (.constructor p)) (new (eval super env)))
@@ -224,7 +230,8 @@
 (define-macro (define-generic (name . #ignore))
   (list _define name (vm-js-invoker (symbol-name name))))
 
-;; Modules
+;;;; Modules
+
 (define-operative (provide symbols . body) env
   (eval (list _define symbols
               (list let ()
@@ -245,7 +252,7 @@
          (values (map-list (_lambda (import) (eval import m)) imports)))
     (eval (list _define imports (list* list values)) env)))
 
-;; JavaScript
+;;;; JavaScript
 
 (define (relational-js-binop name)
   (let ((binop (vm-js-binop name)))
@@ -337,7 +344,7 @@
   (apply ~log (list* $console x xs))
   x)
 
-;; Error break routine, called by VM to print stacktrace and throw
+;;;; Error break routine, called by VM to print stacktrace and throw
 
 (define (user-break err)
   (define (print-frame k)
@@ -351,7 +358,7 @@
       (push-subcont k
         (throw err)))))
 
-;; Final events
+;;;; Final events
 
 (define-operative (let-redirect exp bindings . body) env
   (eval (list* (eval (list* _lambda (map-list car bindings) body)
@@ -370,7 +377,7 @@
 (define-operative (slurp-environment . bindings) env
   (eval (list* bindings->environment (map-list (lambda (b) (list b b)) bindings)) env))
 
-;; Export bindings to userland
+;;;; Export bindings to userland
 
 ;; User environment is subenvironment of environment containing exported bindings
 ;; so exported bindings cannot be modified

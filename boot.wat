@@ -6,7 +6,6 @@
 (vm-def _define vm-def)
 
 ;; Rename bindings that will be used as provided by VM
-(_define apply vm-apply)
 (_define array-to-list vm-array-to-list)
 (_define begin vm-begin)
 (_define cons vm-cons)
@@ -138,10 +137,39 @@
     (list _define (car lhs) (list* lambda (cdr lhs) rhs))
     (list _define lhs (car rhs))))
 
-;; Simple control
-(define-macro (&& a b) (list if a b false))
+(define (apply appv arg . opt)
+  (if (instanceof appv $Function)
+      (#apply appv null (list-to-array arg))
+      (eval (cons (unwrap appv) arg)
+            (if (nil? opt)
+                (make-environment)
+                (car opt)))))
 
-(define-macro (|| a b) (list if a true b))
+;; Simple control
+(define cond
+  (_vau clauses env
+    (if (nil? clauses)
+        undefined
+        (let ((((test . body) . clauses) clauses))
+          (if (eval test env)
+              (apply (wrap begin) body env)
+              (apply (wrap cond) clauses env))))))
+
+(define else true)
+
+(define &&
+  (_vau x e
+    (cond ((nil? x) true)
+          ((nil? (cdr x)) (eval (car x) e))
+          ((eval (car x) e) (apply (wrap &&) (cdr x) e))
+          (else false))))
+
+(define ||
+  (_vau x e
+    (cond ((nil? x) false)
+          ((nil? (cdr x)) (eval (car x) e))
+          ((eval (car x) e) true)
+          (else (apply (wrap ||) (cdr x) e)))))
 
 (define (call-with-escape fun)
   (let ((fresh (list null)))
@@ -365,7 +393,7 @@
    begin define define-macro lambda let let* quote symbol-name symbol?
    caar cadr car cdar cddr cdr cons cons? fold-list list list* map-list nil? reverse-list
    define-generic define-prototype define-method new the type?
-   catch if label loop throw unless when while error 
+   catch cond else if label loop throw unless when while error 
    set! setter
    push-prompt push-subcont take-subcont
    dlet dnew dref

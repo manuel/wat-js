@@ -378,14 +378,6 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
             return combine(null, null, null, cmb, args); } }
     var JS_GLOBAL = jswrap(function(name) { return global[name]; });
     JS_GLOBAL.wat_setter = jswrap(function(new_val, name) { global[name] = new_val; });
-    // Apply needs custom implementation to be able to apply JS functions transparently
-    function Apply() {};
-    Apply.prototype.wat_combine = function(e, k, f, o) {
-        var cmb = elt(o, 0); if (isCapture(cmb)) return cmb;
-        var args = elt(o, 1); if (isCapture(args)) return args;
-        if (cmb && cmb.wat_combine) return unwrap(cmb).wat_combine(e, k, f, args);
-        else if (cmb instanceof Function) return cmb.apply(null, list_to_array(args));
-        else return error("apply: not a combiner: " + to_string(cmb)); }
     /* Stringification */
     function to_string(obj) {
         if (toString.call(obj) === "[object String]") return JSON.stringify(obj);
@@ -417,7 +409,6 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
     TakeSubcont.prototype.toString = function() { return "vm-take-subcont"; }
     PushSubcont.prototype.toString = function() { return "vm-push-subcont"; }
     JSFun.prototype.toString = function() { return "[JSFun " + this.jsfun.toString() + "]"; };
-    Apply.prototype.toString = function() { return "vm-apply"; };
     /* Bootstrap */
     var boot_bytecode =
         ["vm-begin",
@@ -464,7 +455,6 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
          ["vm-def", "vm-js-make-object", jswrap(function() { return {}; })],
          ["vm-def", "vm-js-make-prototype", jswrap(make_prototype)],
          ["vm-def", "vm-js-new", jswrap(jsnew)],
-         ["vm-def", "vm-apply", wrap(new Apply())],
          ["vm-def", "vm-type?", jswrap(is_type)],
          // Utilities
          ["vm-def", "vm-list-to-array", jswrap(list_to_array)],

@@ -139,7 +139,7 @@
 
 (define (apply appv arg . opt)
   (if (instanceof appv $Function)
-      (#apply appv null (list-to-array arg))
+      (~apply appv null (list-to-array arg))
       (eval (cons (unwrap appv) arg)
             (if (nil? opt)
                 (make-environment)
@@ -350,14 +350,14 @@
 (define String $String)
 
 (define (log x . xs)
-  (apply #log (list* $console x xs))
+  (apply ~log (list* $console x xs))
   x)
 
 ;; Final events
 
 (define (user-break err)
   (define (print-frame k)
-    (log (#toString (.dbg k)) (.e k))
+    (log (~toString (.dbg k)) (.e k))
     (if (.next k)
         (print-frame (.next k))
         null))

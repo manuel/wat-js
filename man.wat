@@ -27,7 +27,7 @@
   
   (define (make-section id parent title)
     (let ((sec (new Section id parent title (array))))
-      (#push (.children parent) sec)
+      (~push (.children parent) sec)
       sec))
 
   (define-macro (section (parent id) title . children)
@@ -39,7 +39,7 @@
   (define (para text)
     (let* ((parent (dref *current-parent*))
            (para (new Para text (the Section parent))))
-      (#push (.children parent) para)
+      (~push (.children parent) para)
       para))
 
   (define-generic (render item))

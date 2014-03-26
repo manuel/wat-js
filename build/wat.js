@@ -681,7 +681,7 @@ var id_char = choice(range("a", "z"), range("A", "Z"), range("0", "9"), id_speci
 var id_stx = action(join_action(butnot(repeat1(id_char), "."), ""), handle_identifier);
 function handle_identifier(str) {
     if ((str[0] === ".") && (str.length > 1)) { return ["js-getter", ["wat-string", str.substring(1)]]; }
-    else if (str[0] === "#") { return ["js-invoker", ["wat-string", str.substring(1)]]; }
+    else if (str[0] === "~") { return ["js-invoker", ["wat-string", str.substring(1)]]; }
     else if (str[0] === "$") { return ["js-global", ["wat-string", str.substring(1)]]; }
     else return str; }
 var escape_char = choice("\"", "\\", "n", "r", "t");
@@ -1206,7 +1206,8 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         if (isCapture(res)) throw "prompt not found: " + res.prompt;
         return res; }
     this.call = function(fun_name) {
-        return this.exec(parse_bytecode([[fun_name].concat(Array.prototype.slice.call(arguments, 1))])); }
+        return this.exec(parse_bytecode([fun_name].concat(Array.prototype.slice.call(arguments, 1)))); }
+    this.get = function(var_name) { return this.exec(parse_bytecode(var_name)); }
 }
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})

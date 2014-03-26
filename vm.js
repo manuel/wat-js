@@ -478,5 +478,6 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         if (isCapture(res)) throw "prompt not found: " + res.prompt;
         return res; }
     this.call = function(fun_name) {
-        return this.exec(parse_bytecode([[fun_name].concat(Array.prototype.slice.call(arguments, 1))])); }
+        return this.exec(parse_bytecode([fun_name].concat(Array.prototype.slice.call(arguments, 1)))); }
+    this.get = function(var_name) { return this.exec(parse_bytecode(var_name)); }
 }

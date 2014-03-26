@@ -467,8 +467,10 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
     var environment = make_env();
     bind(environment, sym("vm-def"), new Def());
     bind(environment, sym("vm-begin"), new Begin());
+    var ms = new Date().getTime();
     var user_environment = evaluate(environment, null, null, parse_bytecode(boot_bytecode));
     if (!(user_environment instanceof Env)) throw "failed to boot Wat";
+    console.log("Wat VM startup time: " + (new Date().getTime() - ms) + "ms");
     /* API */
     this.eval = function(sexp){
         if (!parser) throw "parsing not supported"; return this.exec(parser.parse_sexp(sexp)); }

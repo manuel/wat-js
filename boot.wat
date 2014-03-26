@@ -159,17 +159,17 @@
 
 (define and
   (_vau x e
-    (cond ((nil? x) #t)
-          ((nil? (cdr x)) (eval (car x) e))
+    (cond ((nil? x)         #t)
+          ((nil? (cdr x))   (eval (car x) e))
           ((eval (car x) e) (apply (wrap and) (cdr x) e))
-          (else #f))))
+          (else             #f))))
 
 (define or
   (_vau x e
-    (cond ((nil? x) #f)
-          ((nil? (cdr x)) (eval (car x) e))
+    (cond ((nil? x)         #f)
+          ((nil? (cdr x))   (eval (car x) e))
           ((eval (car x) e) #t)
-          (else (apply (wrap or) (cdr x) e)))))
+          (else             (apply (wrap or) (cdr x) e)))))
 
 (define (call-with-escape fun)
   (let ((fresh (list #null)))

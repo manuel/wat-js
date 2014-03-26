@@ -205,7 +205,7 @@
         (list* begin body)
         (let* ((((name expr) . rest-bs) bs)
                (value (eval expr env)))
-             (list vm-dlet name value (process-bindings rest-bs)))))
+          (list vm-dlet name value (process-bindings rest-bs)))))
   (eval (process-bindings bindings) env))
 
 ;; Prototypes

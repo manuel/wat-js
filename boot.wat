@@ -107,14 +107,14 @@
         (fold-list f (f init (car lst)) (cdr lst)))))
 
 (define-macro (let bindings . body)
-  (cons
-   (list* _lambda (map-list car bindings) body)
-   (map-list cadr bindings)))
+  (list* (list* _lambda (map-list car bindings) body)
+         (map-list cadr bindings)))
 
 (define-macro (let* bindings . body)
   (if (nil? bindings)
       (list* let () body)
-      (list let (list (car bindings)) (list* let* (cdr bindings) body))))
+      (list let (list (car bindings))
+            (list* let* (cdr bindings) body))))
 
 (define-macro (letrec bindings . body)
   (list* let ()

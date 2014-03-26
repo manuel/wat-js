@@ -261,23 +261,25 @@
 
 ;; JavaScript
 
-(define not (vm-js-unop "!"))
-(define typeof (vm-js-unop "typeof"))
+(define (relational-js-binop name)
+  (let ((binop (vm-js-binop name)))
+    (define (fun arg1 arg2 . rest)
+      (if (binop arg1 arg2)
+          (if (nil? rest)
+              true
+              (apply fun (list* arg2 rest)))
+          false))
+    fun))
 
-(define-macro (define-js-binop op)
-  (list _define op (list vm-js-binop (symbol-name op))))
+(define === (relational-js-binop "==="))
+(define == (relational-js-binop "=="))
+(define < (relational-js-binop "<"))
+(define > (relational-js-binop ">"))
+(define <= (relational-js-binop "<="))
+(define >= (relational-js-binop ">="))
 
-(define-js-binop !=)
-(define-js-binop !==)
-(define-js-binop %)
-(define-js-binop <)
-(define-js-binop <=)
-(define-js-binop >)
-(define-js-binop >=)
-(define-js-binop ==)
-(define-js-binop ===)
-(define-js-binop in)
-(define-js-binop instanceof)
+(define (!== . args) (not (apply === args)))
+(define (!= . args) (not (apply == args)))
 
 (define * (let ((vm* (vm-js-binop "*")))
             (lambda args
@@ -298,6 +300,12 @@
 
 (define - (folding-js-op-neg (vm-js-binop "-") 0))
 (define / (folding-js-op-neg (vm-js-binop "/") 1))
+
+(define not (vm-js-unop "!"))
+(define typeof (vm-js-unop "typeof"))
+(define % (vm-js-binop "%"))
+(define in (vm-js-binop "in"))
+(define instanceof (vm-js-binop "instanceof"))
 
 (define bitand (vm-js-binop "&"))
 (define bitor (vm-js-binop "|"))

@@ -140,3 +140,14 @@
 (assert-equal (#toString (list 1 2 3)) (#toString (reverse-list (list 3 2 1))))
 
 (assert-equal "logging" (log "logging" 1 2 3))
+
+(assert-true (and (=== 1 1) (=== 4 4) (=== 5 5)))
+(assert-false (and (=== 1 1) (=== 4 4) (=== 5 10)))
+(assert-true (or (=== 1 1) (=== 4 10) (=== 5 5)))
+(assert-true (or (=== 1 10) (=== 4 10) (=== 5 5)))
+
+(assert-true (=== 4 (+ 2 2) (- 6 2)))
+(assert-true (< 1 2 3 4 5))
+(assert-false (< 1 2 3 4 5 1))
+(assert-true (<= 1 1 2 3 4 5 5))
+(assert-false (< 1 1 2 3 4 5 5))

@@ -53,31 +53,31 @@
     (_vau (params . body) #ignore
       (list make-macro-expander (list* _vau params #ignore body)))))
 
-;; Ur-lambda
-(_define _lambda
-  (macro (params . body)
-    (list wrap (list* _vau params #ignore body))))
+(_define define-macro
+  (macro ((name . params) . body)
+    (list _define name (list* macro params body))))
+
+(define-macro (define-operative (name . params) envparam . body)
+  (list _define name (list* _vau params envparam body)))
+
+(define-macro (_lambda params . body)
+  (list wrap (list* _vau params #ignore body)))
 
 ;; Wrap incomplete VM forms
-(_define loop
-  (macro body
-    (list vm-loop (list* begin body))))
+(define-macro (loop . body)
+  (list vm-loop (list* begin body)))
 
-(_define catch
-  (_vau (protected handler) e
-    (eval (list vm-catch protected (eval handler e)) e)))
+(define-operative (catch protected handler) env
+  (eval (list vm-catch protected (eval handler env)) env))
 
-(_define push-prompt
-  (_vau (prompt . body) e
-    (eval (list vm-push-prompt (eval prompt e) (list* begin body)) e)))
+(define-operative (push-prompt prompt . body) env
+  (eval (list vm-push-prompt (eval prompt env) (list* begin body)) env))
 
-(_define take-subcont
-  (macro (prompt k . body)
-    (list vm-take-subcont prompt (list* _lambda (list k) body))))
+(define-macro (take-subcont prompt k . body)
+  (list vm-take-subcont prompt (list* _lambda (list k) body)))
 
-(_define push-subcont
-  (macro (k . body)
-    (list vm-push-subcont k (list* _lambda () body))))
+(define-macro (push-subcont k . body)
+  (list vm-push-subcont k (list* _lambda () body)))
 
 ;; List utilities
 (_define compose (_lambda (f g) (_lambda (arg) (f (g arg)))))
@@ -90,10 +90,6 @@
 (_define cddr (compose cdr cdr))
 
 ;; Important macros and functions
-(_define define-macro
-  (macro ((name . params) . body)
-    (list _define name (list* macro params body))))
-
 (_define map-list
   (_lambda (f lst)
     (if (nil? lst)
@@ -113,24 +109,23 @@
 
 (define-macro (let* bindings . body)
   (if (nil? bindings)
-    (list* let () body)
-    (list let (list (car bindings)) (list* let* (cdr bindings) body))))
+      (list* let () body)
+      (list let (list (car bindings)) (list* let* (cdr bindings) body))))
 
-(_define lambda
-  (_vau (params . body) e
-    (_define typed-params->names-and-checks
-      (_lambda (ps)
-        (if (cons? ps)
-            (let* (((p . rest-ps) ps)
-                   ((names . checks) (typed-params->names-and-checks rest-ps)))
-              (if (cons? p)
-                  (let* (((name type) p)
-                         (check (list the type name)))
-                    (cons (cons name names) (cons check checks)))
-                  (cons (cons p names) checks)))
-            (cons ps ()))))
-    (let (((untyped-names . type-checks) (typed-params->names-and-checks params)))
-      (eval (list* _lambda untyped-names (list* begin type-checks) body) e))))
+(define-macro (lambda params . body)
+  (_define typed-params->names-and-checks
+    (_lambda (ps)
+      (if (cons? ps)
+          (let* (((p . rest-ps) ps)
+                 ((names . checks) (typed-params->names-and-checks rest-ps)))
+            (if (cons? p)
+                (let* (((name type) p)
+                       (check (list the type name)))
+                  (cons (cons name names) (cons check checks)))
+                (cons (cons p names) checks)))
+          (cons ps ()))))
+  (let (((untyped-names . type-checks) (typed-params->names-and-checks params)))
+    (list* _lambda untyped-names (list* begin type-checks) body)))
 
 (define-macro (define lhs . rhs)
   (if (cons? lhs)
@@ -146,30 +141,27 @@
                 (car opt)))))
 
 ;; Simple control
-(define cond
-  (_vau clauses env
-    (if (nil? clauses)
-        #undefined
-        (let ((((test . body) . clauses) clauses))
-          (if (eval test env)
-              (apply (wrap begin) body env)
-              (apply (wrap cond) clauses env))))))
+(define-operative (cond . clauses) env
+  (if (nil? clauses)
+      #undefined
+      (let ((((test . body) . clauses) clauses))
+        (if (eval test env)
+            (apply (wrap begin) body env)
+            (apply (wrap cond) clauses env)))))
 
 (define else #t)
 
-(define and
-  (_vau x e
-    (cond ((nil? x)         #t)
-          ((nil? (cdr x))   (eval (car x) e))
-          ((eval (car x) e) (apply (wrap and) (cdr x) e))
-          (else             #f))))
+(define-operative (and . x) e
+  (cond ((nil? x)         #t)
+        ((nil? (cdr x))   (eval (car x) e))
+        ((eval (car x) e) (apply (wrap and) (cdr x) e))
+        (else             #f)))
 
-(define or
-  (_vau x e
-    (cond ((nil? x)         #f)
-          ((nil? (cdr x))   (eval (car x) e))
-          ((eval (car x) e) #t)
-          (else             (apply (wrap or) (cdr x) e)))))
+(define-operative (or . x) e
+  (cond ((nil? x)         #f)
+        ((nil? (cdr x))   (eval (car x) e))
+        ((eval (car x) e) #t)
+        (else             (apply (wrap or) (cdr x) e))))
 
 (define (call-with-escape fun)
   (let ((fresh (list #null)))
@@ -207,22 +199,20 @@
 ;; Delimited dynamic binding
 
 ;; Evaluate right hand sides before binding all dynamic variables at once.
-(define dlet
-  (_vau (bindings . body) e
-     (define (process-bindings bs)
-       (if (nil? bs)
-           (list* begin body)
-           (let* ((((name expr) . rest-bs) bs)
-                  (value (eval expr e)))
+(define-operative (dlet bindings . body) env
+  (define (process-bindings bs)
+    (if (nil? bs)
+        (list* begin body)
+        (let* ((((name expr) . rest-bs) bs)
+               (value (eval expr env)))
              (list vm-dlet name value (process-bindings rest-bs)))))
-     (eval (process-bindings bindings) e)))
+  (eval (process-bindings bindings) env))
 
 ;; Prototypes
-(define define-prototype
-  (_vau (name super prop-names) e
-    (let ((p (apply vm-js-make-prototype (list* (symbol-name name) (map-list symbol-name prop-names)))))
-      (set! (.prototype (.constructor p)) (new (eval super e)))
-      (eval (list _define name p) e))))
+(define-operative (define-prototype name super prop-names) env
+  (let ((p (apply vm-js-make-prototype (list* (symbol-name name) (map-list symbol-name prop-names)))))
+    (set! (.prototype (.constructor p)) (new (eval super env)))
+    (eval (list _define name p) env)))
 
 (define (put-method ctor name js-fun)
   (set! ((js-getter name) (.prototype ctor)) js-fun))
@@ -235,29 +225,25 @@
   (list _define name (vm-js-invoker (symbol-name name))))
 
 ;; Modules
-(define provide
-  (_vau (symbols . body) env
-    (eval (list _define symbols
-                (list let ()
-                      (list* begin body)
-                      (list* list symbols)))
-          env)))
+(define-operative (provide symbols . body) env
+  (eval (list _define symbols
+              (list let ()
+                    (list* begin body)
+                    (list* list symbols)))
+        env))
 
-(define module
-  (_vau (exports . body) e
-    (let ((env (make-environment e)))
-      (eval (list* provide exports body) env)
-      (make-environment env))))
+(define-operative (module exports . body) env
+  (let ((menv (make-environment env)))
+    (eval (list* provide exports body) menv)
+    (make-environment menv)))
 
-(define define-module
-  (_vau (name exports . body) e
-    (eval (list _define name (list* module exports body)) e)))
+(define-macro (define-module name exports . body)
+  (list _define name (list* module exports body)))
 
-(define import
-  (_vau (module imports) e
-    (let* ((m (eval module e))
-           (values (map-list (_lambda (import) (eval import m)) imports)))
-      (eval (list _define imports (list* list values)) e))))
+(define-operative (import module imports) env
+  (let* ((m (eval module env))
+         (values (map-list (_lambda (import) (eval import m)) imports)))
+    (eval (list _define imports (list* list values)) env)))
 
 ;; JavaScript
 
@@ -313,13 +299,12 @@
 (define bitshiftr (vm-js-binop ">>"))
 (define bitshiftr0 (vm-js-binop ">>>"))
 
-(define object
-  (_vau pairs e
-    (let ((obj (vm-js-make-object)))
-      (map-list (_lambda ((name value))
-                  (set! ((js-getter (eval name e)) obj) (eval value e)))
-                pairs)
-      obj)))
+(define-operative (object . pairs) env
+  (let ((obj (vm-js-make-object)))
+    (map-list (_lambda ((name value))
+                (set! ((js-getter (eval name env)) obj) (eval value env)))
+              pairs)
+    obj))
 
 (define (@ object key)
   ((js-getter key) object))
@@ -351,7 +336,7 @@
   (apply ~log (list* $console x xs))
   x)
 
-;; Final events
+;; Error break routine, called by VM to print stacktrace and throw
 
 (define (user-break err)
   (define (print-frame k)
@@ -365,25 +350,24 @@
       (push-subcont k
         (throw err)))))
 
-(define let-redirect
-  (_vau (exp bindings . body) env
-    (eval (list* (eval (list* _lambda (map-list car bindings) body)
-                       (eval exp
-                             env))
-                 (map-list cadr bindings))
-          env)))
+;; Final events
 
-(define bindings->environment
-  (_vau bindings denv
-    (eval (list let-redirect
-                (make-environment)
-                bindings
-                (list the-environment))
-          denv)))
+(define-operative (let-redirect exp bindings . body) env
+  (eval (list* (eval (list* _lambda (map-list car bindings) body)
+                     (eval exp
+                           env))
+               (map-list cadr bindings))
+        env))
 
-(define slurp-environment
-  (_vau bindings e
-    (eval (list* bindings->environment (map-list (lambda (b) (list b b)) bindings)) e)))
+(define-operative (bindings->environment . bindings) denv
+  (eval (list let-redirect
+              (make-environment)
+              bindings
+              (list the-environment))
+        denv))
+
+(define-operative (slurp-environment . bindings) env
+  (eval (list* bindings->environment (map-list (lambda (b) (list b b)) bindings)) env))
 
 ;; Export bindings to userland
 
@@ -392,7 +376,7 @@
 
 (make-environment 
   (slurp-environment 
-   _define _lambda _vau apply eval make-environment the-environment unwrap wrap
+   define-operative _define _lambda _vau apply eval make-environment the-environment unwrap wrap
    begin define define-macro lambda let let* quote symbol-name symbol?
    caar cadr car cdar cddr cdr cons cons? fold-list list list* map-list nil? reverse-list
    define-generic define-prototype define-method new the type?

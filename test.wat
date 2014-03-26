@@ -4,28 +4,24 @@
 
 ;;;; Utilities
 
-(define assert-true
-  (_vau (expr) e
-    (unless (= #t (eval expr e))
-      (error (+ "Should be true: " expr)))))
+(define-operative (assert-true expr) env
+  (unless (= #t (eval expr env))
+    (error (+ "Should be true: " expr))))
 
-(define assert-false
-  (_vau (expr) e
-    (unless (= #f (eval expr e))
-      (error (+ "Should be false: " expr)))))
+(define-operative (assert-false expr) env
+  (unless (= #f (eval expr env))
+    (error (+ "Should be false: " expr))))
 
-(define assert-equal
-  (_vau (expected expr2) e
-    (let ((res (eval expr2 e)))
-      (unless (= (eval expected e) res)
-        (error (+ expr2 " should be " expected " but is " res))))))
+(define-operative (assert-equal expected expr2) env
+  (let ((res (eval expr2 env)))
+    (unless (= (eval expected env) res)
+      (error (+ expr2 " should be " expected " but is " res)))))
 
-(define assert-throws
-  (_vau (expr) e
-    (label return
-      (catch (eval expr e)
-        (lambda (exc) (return)))
-      (error (+ "Should throw: " expr)))))
+(define-operative (assert-throws expr) env
+  (label return
+    (catch (eval expr env)
+      (lambda (exc) (return)))
+    (error (+ "Should throw: " expr))))
 
 (assert-throws (lambda))
 ;(assert-throws (lambda 12 12))

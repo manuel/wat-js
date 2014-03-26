@@ -325,6 +325,7 @@
 
 (define Arguments $Arguments)
 (define Array $Array)
+(define Boolean $Boolean)
 (define Date $Date)
 (define Function $Function)
 (define Number $Number)

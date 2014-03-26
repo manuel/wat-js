@@ -317,7 +317,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         var res = []; while(c !== NIL) { res.push(car(c)); c = cdr(c); } return res; }
     function reverse_list(list) {
         var res = NIL; while(list !== NIL) { res = cons(car(list), res); list = cdr(list); } return res; }
-    var js_types = ["Arguments", "Array", "Date", "Function", "Number", "Object", "RegExp", "String"];
+    var js_types = ["Arguments", "Array", "Boolean", "Date", "Function", "Number", "Object", "RegExp", "String"];
     function is_type(obj, type_obj, type_name) {
         if (js_types.indexOf(type_name) === -1) { return obj instanceof type_obj; }
         else { return toString.call(obj) === "[object " + type_name + "]"; } }

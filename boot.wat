@@ -299,9 +299,6 @@
 (define (js-callback fun)
   (vm-js-function (_lambda args (push-prompt vm-root-prompt (apply fun args)))))
 
-(define (log . objects)
-  (apply #log (list* $console objects)))
-
 (define-macro (type? obj type)
   (list vm-type? obj type (symbol-name type)))
 
@@ -316,6 +313,10 @@
 (define Object $Object)
 (define RegExp $RegExp)
 (define String $String)
+
+(define (log x . xs)
+  (apply #log (list* $console x xs))
+  x)
 
 ;; Final events
 

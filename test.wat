@@ -138,3 +138,5 @@
 (assert-equal 9 (/ 54 2 3))
 
 (assert-equal (#toString (list 1 2 3)) (#toString (reverse-list (list 3 2 1))))
+
+(assert-equal "logging" (log "logging" 1 2 3))

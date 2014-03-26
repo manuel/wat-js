@@ -359,7 +359,7 @@
   (slurp-environment 
    _define _lambda _vau apply eval make-environment the-environment unwrap wrap
    begin define define-macro lambda let let* quote symbol-name symbol?
-   caar cadr car cdar cddr cdr cons cons? list list* map-list nil?
+   caar cadr car cdar cddr cdr cons cons? fold-list list list* map-list nil?
    define-generic define-prototype define-method new the type?
    catch if label loop throw unless when while error 
    set! setter

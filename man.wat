@@ -45,14 +45,14 @@
   (define-generic (render item))
   
   (define-method (render (doc Document))
-    (apply cat (list* (cat "<h1>" (.title doc) "</h1>\n")
-                      (map-list render (array-to-list (.children doc))))))
+    (apply + (list* (+ "<h1>" (.title doc) "</h1>\n")
+                    (map-list render (array-to-list (.children doc))))))
   
   (define-method (render (sec Section))
-    (apply cat (list* (cat "<h2>" (.title sec) "</h2>\n")
-                      (map-list render (array-to-list (.children sec))))))
+    (apply + (list* (+ "<h2>" (.title sec) "</h2>\n")
+                    (map-list render (array-to-list (.children sec))))))
   
   (define-method (render (para Para))
-    (cat "<p>" (.text para) "</p>\n"))
+    (+ "<p>" (.text para) "</p>\n"))
   
   )

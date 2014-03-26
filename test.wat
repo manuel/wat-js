@@ -15,9 +15,10 @@
       (error (+ "Should be false: " expr)))))
 
 (define assert-equal
-  (_vau (expr1 expr2) e
-    (unless (=== (eval expr1 e) (eval expr2 e))
-      (error (cat "Should be equal: " expr1 " and " expr2)))))
+  (_vau (expected expr2) e
+    (let ((res (eval expr2 e)))
+      (unless (=== (eval expected e) res)
+        (error (+ expr2 " should be " expected " but is " res))))))
 
 (define assert-throws
   (_vau (expr) e
@@ -123,3 +124,15 @@
 (assert-equal $x undefined)
 (set! $x 2)
 (assert-equal $x 2)
+
+(assert-equal 24 (* 1 2 3 4))
+(assert-equal 1 (*))
+(assert-equal 3 (* 3))
+(assert-equal 10 (+ 1 2 3 4))
+(assert-equal 0 (+))
+(assert-equal 1 (+ 1))
+
+(assert-equal -5 (- 5))
+(assert-equal 3 (- 10 5 2))
+(assert-equal (/ 1 5) (/ 5))
+(assert-equal 9 (/ 54 2 3))

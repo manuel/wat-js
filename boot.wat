@@ -97,8 +97,14 @@
 (_define map-list
   (_lambda (f lst)
     (if (nil? lst)
-      ()
-      (cons (f (car lst)) (map-list f (cdr lst))))))
+        ()
+        (cons (f (car lst)) (map-list f (cdr lst))))))
+
+(_define fold-list
+  (_lambda (f init lst)
+    (if (nil? lst)
+        init
+        (fold-list f (f init (car lst)) (cdr lst)))))
 
 (define-macro (let bindings . body)
   (cons
@@ -212,7 +218,7 @@
   (_vau (exports . body) e
     (let ((env (make-environment e)))
       (eval (list* provide exports body) env)
-      env)))
+      (make-environment env))))
 
 (define define-module
   (_vau (name exports . body) e
@@ -240,10 +246,6 @@
 (define-js-binop !==)
 (define-js-binop %)
 (define-js-binop &)
-(define-js-binop *)
-(define-js-binop +)
-(define-js-binop -)
-(define-js-binop /)
 (define-js-binop <)
 (define-js-binop <<)
 (define-js-binop <=)
@@ -256,6 +258,26 @@
 (define-js-binop in)
 (define-js-binop instanceof)
 (define-js-binop |)
+
+(define * (let ((vm* (vm-js-binop "*")))
+            (lambda args
+              (fold-list vm* 1 args))))
+
+;; Can't simply use 0 as unit or it won't work with strings
+(define + (let ((vm+ (vm-js-binop "+")))
+            (lambda args
+              (if (nil? args)
+                  0
+                  (fold-list vm+ (car args) (cdr args))))))
+
+(define (folding-js-op-neg binop unit)
+  (lambda (arg1 . rest)
+    (if (nil? rest)
+        (binop unit arg1)
+        (fold-list binop arg1 rest))))
+
+(define - (folding-js-op-neg (vm-js-binop "-") 0))
+(define / (folding-js-op-neg (vm-js-binop "/") 1))
 
 (define object
   (_vau pairs e
@@ -276,9 +298,6 @@
 (define (js-callback fun)
   (vm-js-function (_lambda args (push-prompt vm-root-prompt (apply fun args)))))
 
-(define (cat . objects)
-  (#join (list-to-array objects) ""))
-
 (define (log . objects)
   (apply #log (list* $console objects)))
 
@@ -286,7 +305,7 @@
   (list vm-type? obj type (symbol-name type)))
 
 (define-macro (the type obj)
-  (list if (list type? obj type) obj (list error (list cat obj " is not a: " type))))
+  (list if (list type? obj type) obj (list error (list + obj " is not a: " type))))
 
 (define Arguments $Arguments)
 (define Array $Array)
@@ -348,6 +367,6 @@
    dlet dnew dref
    define-module import module
    Arguments Array Date Function Number Object RegExp String
-   array array-to-list js-callback js-getter js-global js-invoker list-to-array object cat log
+   array array-to-list js-callback js-getter js-global js-invoker list-to-array object log
    @ && || ! != !== % &  * + - / < << <= == === > >> >>> ~ ^ in instanceof typeof
    ))

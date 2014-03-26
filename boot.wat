@@ -175,7 +175,7 @@
   (let ((fresh (list #null)))
     (catch (fun (_lambda opt-arg (throw (list fresh opt-arg))))
       (_lambda (exc)
-        (if (and (cons? exc) (=== fresh (car exc)))
+        (if (and (cons? exc) (= fresh (car exc)))
             (let ((opt-arg (cadr exc)))
               (if (cons? opt-arg) (car opt-arg) #undefined))
             (throw exc))))))
@@ -271,15 +271,13 @@
           #f))
     fun))
 
-(define === (relational-js-binop "==="))
-(define == (relational-js-binop "=="))
+(define = (relational-js-binop "==="))
 (define < (relational-js-binop "<"))
 (define > (relational-js-binop ">"))
 (define <= (relational-js-binop "<="))
 (define >= (relational-js-binop ">="))
 
-(define (!== . args) (not (apply === args)))
-(define (!= . args) (not (apply == args)))
+(define (!= . args) (not (apply = args)))
 
 (define * (let ((vm* (vm-js-binop "*")))
             (lambda args
@@ -405,6 +403,6 @@
    define-module import module
    Arguments Array Date Function Number Object RegExp String
    array array-to-list js-callback js-getter js-global js-invoker list-to-array object log
-   @ and or not != !== % * + - / < <= == === > >= in instanceof typeof
+   @ and or not != % * + - / < <= = > >= in instanceof typeof
    bitand bitor bitxor bitnot bitshiftl bitshiftr bitshiftr0
    ))

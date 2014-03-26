@@ -6,18 +6,18 @@
 
 (define assert-true
   (_vau (expr) e
-    (unless (=== #t (eval expr e))
+    (unless (= #t (eval expr e))
       (error (+ "Should be true: " expr)))))
 
 (define assert-false
   (_vau (expr) e
-    (unless (=== #f (eval expr e))
+    (unless (= #f (eval expr e))
       (error (+ "Should be false: " expr)))))
 
 (define assert-equal
   (_vau (expected expr2) e
     (let ((res (eval expr2 e)))
-      (unless (=== (eval expected e) res)
+      (unless (= (eval expected e) res)
         (error (+ expr2 " should be " expected " but is " res))))))
 
 (define assert-throws
@@ -108,8 +108,8 @@
 
 (define (combine cmb ops) (apply (wrap cmb) ops))
 
-(assert-true (combine and (list (=== 1 1) (=== 2 2))))
-(assert-false (combine and (list (!== 1 1) (=== 2 2))))
+(assert-true (combine and (list (= 1 1) (= 2 2))))
+(assert-false (combine and (list (!= 1 1) (= 2 2))))
 
 (assert-equal 2 (apply (lambda x x) 2))
 
@@ -141,12 +141,12 @@
 
 (assert-equal "logging" (log "logging" 1 2 3))
 
-(assert-true (and (=== 1 1) (=== 4 4) (=== 5 5)))
-(assert-false (and (=== 1 1) (=== 4 4) (=== 5 10)))
-(assert-true (or (=== 1 1) (=== 4 10) (=== 5 5)))
-(assert-true (or (=== 1 10) (=== 4 10) (=== 5 5)))
+(assert-true (and (= 1 1) (= 4 4) (= 5 5)))
+(assert-false (and (= 1 1) (= 4 4) (= 5 10)))
+(assert-true (or (= 1 1) (= 4 10) (= 5 5)))
+(assert-true (or (= 1 10) (= 4 10) (= 5 5)))
 
-(assert-true (=== 4 (+ 2 2) (- 6 2)))
+(assert-true (= 4 (+ 2 2) (- 6 2)))
 (assert-true (< 1 2 3 4 5))
 (assert-false (< 1 2 3 4 5 1))
 (assert-true (<= 1 1 2 3 4 5 5))

@@ -116,20 +116,27 @@
       (list* let () body)
       (list let (list (car bindings)) (list* let* (cdr bindings) body))))
 
+(define-macro (letrec bindings . body)
+  (list* let ()
+         (list _define
+               (map-list car bindings)
+               (list* list (map-list cadr bindings)))
+         body))
+
 (define-macro (lambda params . body)
-  (_define typed-params->names-and-checks
-    (_lambda (ps)
-      (if (cons? ps)
-          (let* (((p . rest-ps) ps)
-                 ((names . checks) (typed-params->names-and-checks rest-ps)))
-            (if (cons? p)
-                (let* (((name type) p)
-                       (check (list the type name)))
-                  (cons (cons name names) (cons check checks)))
-                (cons (cons p names) checks)))
-          (cons ps ()))))
-  (let (((untyped-names . type-checks) (typed-params->names-and-checks params)))
-    (list* _lambda untyped-names (list* begin type-checks) body)))
+  (letrec ((typed-params->names-and-checks
+            (_lambda (ps)
+              (if (cons? ps)
+                  (let* (((p . rest-ps) ps)
+                         ((names . checks) (typed-params->names-and-checks rest-ps)))
+                    (if (cons? p)
+                        (let* (((name type) p)
+                               (check (list the type name)))
+                          (cons (cons name names) (cons check checks)))
+                        (cons (cons p names) checks)))
+                  (cons ps ())))))
+    (let (((untyped-names . type-checks) (typed-params->names-and-checks params)))
+      (list* _lambda untyped-names (list* begin type-checks) body))))
 
 (define-macro (define lhs . rhs)
   (if (cons? lhs)
@@ -205,13 +212,14 @@
 
 ;; Evaluate right hand sides before binding all dynamic variables at once.
 (define-operative (dlet bindings . body) env
-  (define (process-bindings bs)
-    (if (nil? bs)
-        (list* begin body)
-        (let* ((((name expr) . rest-bs) bs)
-               (value (eval expr env)))
-          (list vm-dlet name value (process-bindings rest-bs)))))
-  (eval (process-bindings bindings) env))
+  (letrec ((process-bindings
+            (lambda (bs)
+              (if (nil? bs)
+                  (list* begin body)
+                  (let* ((((name expr) . rest-bs) bs)
+                         (value (eval expr env)))
+                    (list vm-dlet name value (process-bindings rest-bs)))))))
+    (eval (process-bindings bindings) env)))
 
 ;;;; Prototypes
 

@@ -241,24 +241,18 @@
 
 (define-js-unop !)
 (define-js-unop typeof)
-(define-js-unop ~)
 
 (define-js-binop !=)
 (define-js-binop !==)
 (define-js-binop %)
-(define-js-binop &)
 (define-js-binop <)
-(define-js-binop <<)
 (define-js-binop <=)
+(define-js-binop >)
+(define-js-binop >=)
 (define-js-binop ==)
 (define-js-binop ===)
-(define-js-binop >)
-(define-js-binop >>)
-(define-js-binop >>>)
-(define-js-binop ^)
 (define-js-binop in)
 (define-js-binop instanceof)
-(define-js-binop |)
 
 (define * (let ((vm* (vm-js-binop "*")))
             (lambda args
@@ -279,6 +273,14 @@
 
 (define - (folding-js-op-neg (vm-js-binop "-") 0))
 (define / (folding-js-op-neg (vm-js-binop "/") 1))
+
+(define bitand (vm-js-binop "&"))
+(define bitor (vm-js-binop "|"))
+(define bitxor (vm-js-binop "^"))
+(define bitnot (vm-js-unop "~"))
+(define bitshiftl (vm-js-binop "<<"))
+(define bitshiftr (vm-js-binop ">>"))
+(define bitshiftr0 (vm-js-binop ">>>"))
 
 (define object
   (_vau pairs e
@@ -370,5 +372,6 @@
    define-module import module
    Arguments Array Date Function Number Object RegExp String
    array array-to-list js-callback js-getter js-global js-invoker list-to-array object log
-   @ && || ! != !== % &  * + - / < << <= == === > >> >>> ~ ^ in instanceof typeof
+   @ && || ! != !== % * + - / < <= == === > >= in instanceof typeof
+   bitand bitor bitxor bitnot bitshiftl bitshiftr bitshiftr0
    ))

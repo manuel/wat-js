@@ -212,7 +212,7 @@
 (defmacro (unless test . body)
   (list* when (list not test) body))
 
-(defmacro (set! (getter . args) new-val)
+(defmacro (set (getter . args) new-val)
   (list* (list setter getter) new-val args))
 
 ;;;; Delimited dynamic binding
@@ -231,11 +231,11 @@
 
 (defoperative (defprototype name super prop-names) env
   (let ((p (apply vm-js-make-prototype (list* (symbol-name name) (map-list symbol-name prop-names)))))
-    (set! (.prototype (.constructor p)) (new (eval super env)))
+    (set (.prototype (.constructor p)) (new (eval super env)))
     (eval (list _def name p) env)))
 
 (def (put-method ctor name js-fun)
-  (set! ((js-getter name) (.prototype ctor)) js-fun))
+  (set ((js-getter name) (.prototype ctor)) js-fun))
 
 (defmacro (defmethod (name (self ctor) . args) . body)
   (list put-method ctor (symbol-name name)
@@ -323,15 +323,15 @@
 (defoperative (object . pairs) env
   (let ((obj (vm-js-make-object)))
     (map-list (_lambda ((name value))
-                (set! ((js-getter (eval name env)) obj) (eval value env)))
+                (set ((js-getter (eval name env)) obj) (eval value env)))
               pairs)
     obj))
 
 (def (@ object key)
   ((js-getter key) object))
 
-(set! (setter @) (lambda (new-val object key)
-                   (set! ((js-getter key) object) new-val)))
+(set (setter @) (lambda (new-val object key)
+                  (set ((js-getter key) object) new-val)))
 
 (def (array . args) (list-to-array args))
 
@@ -403,7 +403,7 @@
    caar cadr car cdar cddr cdr cons cons? fold-list list list* map-list nil? reverse-list
    defgeneric defprototype defmethod new the type?
    catch cond else if label loop throw unless when while error 
-   set! setter
+   set setter
    push-prompt push-subcont take-subcont
    dlet dnew dref
    defmodule import module

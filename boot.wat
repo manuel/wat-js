@@ -106,9 +106,16 @@
         init
         (fold-list f (f init (car lst)) (cdr lst)))))
 
-(defmacro (let bindings . body)
-  (list* (list* _lambda (map-list car bindings) body)
-         (map-list cadr bindings)))
+(defmacro (let x . rest)
+  (if (symbol? x)
+      (list* let-loop x rest)
+      (list* (list* _lambda (map-list car x) rest)
+             (map-list cadr x))))
+
+(defmacro (let-loop name bindings . body)
+  (list letrec (list (list name (list* lambda (map-list car bindings)
+                                       body)))
+        (list* name (map-list cadr bindings))))
 
 (defmacro (let* bindings . body)
   (if (nil? bindings)
@@ -212,14 +219,13 @@
 
 ;; Evaluate right hand sides before binding all dynamic variables at once.
 (defoperative (dlet bindings . body) env
-  (letrec ((process-bindings
-            (lambda (bs)
-              (if (nil? bs)
-                  (list* begin body)
-                  (let* ((((name expr) . rest-bs) bs)
-                         (value (eval expr env)))
-                    (list vm-dlet name value (process-bindings rest-bs)))))))
-    (eval (process-bindings bindings) env)))
+  (eval (let process-bindings ((bs bindings))
+          (if (nil? bs)
+              (list* begin body)
+              (let* ((((name expr) . rest-bs) bs)
+                     (value (eval expr env)))
+                (list vm-dlet name value (process-bindings rest-bs)))))
+        env))
 
 ;;;; Prototypes
 

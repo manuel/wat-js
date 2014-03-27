@@ -1,4 +1,4 @@
-;; -*- mode: scheme -*-
+;; -*- mode: lisp -*-
 
 ;; ``72. An adequate bootstrap is a contradiction in terms.''
 

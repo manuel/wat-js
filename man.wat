@@ -1,4 +1,4 @@
-;; -*- mode: scheme -*-
+;; -*- mode: lisp -*-
 
 (defmodule man (document section para render)
 

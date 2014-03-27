@@ -1,3 +1,5 @@
+;; -*- mode: lisp -*-
+
 (defmodule wat-manual ()
 
   (man:document top "Wat Reference Manual")

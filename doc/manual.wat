@@ -1,4 +1,4 @@
-(define-module wat-manual ()
+(defmodule wat-manual ()
 
   (man:document top "Wat Reference Manual")
 

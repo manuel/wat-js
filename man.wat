@@ -1,58 +1,58 @@
 ;; -*- mode: scheme -*-
 
-(define-module man (document section para render)
+(defmodule man (document section para render)
 
-  (define *current-parent* (dnew #null))
+  (def *current-parent* (dnew #null))
   
-  (define-prototype Document Object
+  (defprototype Document Object
     (id
      title
      children))
   
-  (define-prototype Section Object
+  (defprototype Section Object
     (id
      parent
      title
      children))
   
-  (define-prototype Para Object
+  (defprototype Para Object
     (text
      parent))
   
-  (define (make-document (id String) (title String))
+  (def (make-document (id String) (title String))
     (new Document id title (array)))
   
-  (define-macro (document id title)
-    (list define id (list make-document (symbol-name id) title)))
+  (defmacro (document id title)
+    (list def id (list make-document (symbol-name id) title)))
   
-  (define (make-section id parent title)
+  (def (make-section id parent title)
     (let ((sec (new Section id parent title (array))))
       (~push (.children parent) sec)
       sec))
 
-  (define-macro (section (parent id) title . children)
+  (defmacro (section (parent id) title . children)
     (list begin
-      (list define id (list make-section (symbol-name id) parent title))
+      (list def id (list make-section (symbol-name id) parent title))
         (list* dlet (list (list *current-parent* id))
                children)))
   
-  (define (para text)
+  (def (para text)
     (let* ((parent (dref *current-parent*))
            (para (new Para text (the Section parent))))
       (~push (.children parent) para)
       para))
 
-  (define-generic (render item))
+  (defgeneric (render item))
   
-  (define-method (render (doc Document))
+  (defmethod (render (doc Document))
     (apply + (list* (+ "<h1>" (.title doc) "</h1>\n")
                     (map-list render (array-to-list (.children doc))))))
   
-  (define-method (render (sec Section))
+  (defmethod (render (sec Section))
     (apply + (list* (+ "<h2>" (.title sec) "</h2>\n")
                     (map-list render (array-to-list (.children sec))))))
   
-  (define-method (render (para Para))
+  (defmethod (render (para Para))
     (+ "<p>" (.text para) "</p>\n"))
   
   )

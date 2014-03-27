@@ -4,20 +4,20 @@
 
 ;;;; Utilities
 
-(define-operative (assert-true expr) env
+(defoperative (assert-true expr) env
   (unless (= #t (eval expr env))
     (error (+ "Should be true: " expr))))
 
-(define-operative (assert-false expr) env
+(defoperative (assert-false expr) env
   (unless (= #f (eval expr env))
     (error (+ "Should be false: " expr))))
 
-(define-operative (assert-equal expected expr2) env
+(defoperative (assert-equal expected expr2) env
   (let ((res (eval expr2 env)))
     (unless (= (eval expected env) res)
       (error (+ expr2 " should be " expected " but is " res)))))
 
-(define-operative (assert-throws expr) env
+(defoperative (assert-throws expr) env
   (label return
     (catch (eval expr env)
       (lambda (exc) (return)))
@@ -38,12 +38,12 @@
 
 ;; adapted from 
 
-(define-macro (test-check label expr expected)
+(defmacro (test-check label expr expected)
   (list assert-equal expr expected))
 
-(define (new-prompt) (list #null))
+(def (new-prompt) (list #null))
 
-(define (abortP p e)
+(def (abortP p e)
   (take-subcont p ignore e))
 
 (test-check 'test2
@@ -102,7 +102,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (combine cmb ops) (apply (wrap cmb) ops))
+(def (combine cmb ops) (apply (wrap cmb) ops))
 
 (assert-true (combine and (list (= 1 1) (= 2 2))))
 (assert-false (combine and (list (!= 1 1) (= 2 2))))

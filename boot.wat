@@ -262,47 +262,47 @@
 
 ;;;; JavaScript
 
-(def (relational-js-binop name)
+(def (relational-op name)
   (let ((binop (vm-js-binop name)))
-    (def (fun arg1 arg2 . rest)
-      (if (binop arg1 arg2)
-          (if (nil? rest)
-              #t
-              (apply fun (list* arg2 rest)))
-          #f))
-    fun))
+    (letrec ((op (lambda (arg1 arg2 . rest)
+                   (if (binop arg1 arg2)
+                       (if (nil? rest)
+                           #t
+                           (apply op (list* arg2 rest)))
+                       #f))))
+      op)))
 
-(def = (relational-js-binop "==="))
-(def < (relational-js-binop "<"))
-(def > (relational-js-binop ">"))
-(def <= (relational-js-binop "<="))
-(def >= (relational-js-binop ">="))
+(def = (relational-op "==="))
+(def < (relational-op "<"))
+(def > (relational-op ">"))
+(def <= (relational-op "<="))
+(def >= (relational-op ">="))
 
 (def (!= . args) (not (apply = args)))
 
 (def * (let ((vm* (vm-js-binop "*")))
-            (lambda args
-              (fold-list vm* 1 args))))
+         (lambda args
+           (fold-list vm* 1 args))))
 
 ;; Can't simply use 0 as unit or it won't work with strings
 (def + (let ((vm+ (vm-js-binop "+")))
-            (lambda args
-              (if (nil? args)
-                  0
-                  (fold-list vm+ (car args) (cdr args))))))
+         (lambda args
+           (if (nil? args)
+               0
+               (fold-list vm+ (car args) (cdr args))))))
 
-(def (folding-js-op-neg binop unit)
+(def (negative-op binop unit)
   (lambda (arg1 . rest)
     (if (nil? rest)
         (binop unit arg1)
         (fold-list binop arg1 rest))))
 
-(def - (folding-js-op-neg (vm-js-binop "-") 0))
-(def / (folding-js-op-neg (vm-js-binop "/") 1))
+(def - (negative-op (vm-js-binop "-") 0))
+(def / (negative-op (vm-js-binop "/") 1))
 
+(def % (vm-js-binop "%"))
 (def not (vm-js-unop "!"))
 (def typeof (vm-js-unop "typeof"))
-(def % (vm-js-binop "%"))
 (def in (vm-js-binop "in"))
 (def instanceof (vm-js-binop "instanceof"))
 

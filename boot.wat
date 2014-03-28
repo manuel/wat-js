@@ -58,11 +58,11 @@
   (macro ((name . params) . body)
     (list _def name (list* macro params body))))
 
-(defmacro (defoperative (name . params) envparam . body)
-  (list _def name (list* _vau params envparam body)))
-
 (defmacro (_lambda params . body)
   (list wrap (list* _vau params #ignore body)))
+
+(defmacro (defoperative (name . params) envparam . body)
+  (list _def name (list* _vau params envparam body)))
 
 ;;;; Wrap incomplete VM forms
 

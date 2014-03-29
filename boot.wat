@@ -360,7 +360,7 @@
 
 ;;;; Error break routine, called by VM to print stacktrace and throw
 
-(def (user-break err)
+(def (print-stacktrace)
   (def (print-frame k)
     (log (~toString (.dbg k)) (.e k))
     (if (.next k)
@@ -369,8 +369,11 @@
   (take-subcont vm-root-prompt k
     (print-frame k)
     (push-prompt vm-root-prompt
-      (push-subcont k
-        (throw err)))))
+      (push-subcont k))))
+
+(def (user-break err)
+  (print-stacktrace)
+  (throw err))
 
 ;;;; Final events
 
@@ -411,4 +414,5 @@
    array array-to-list js-callback js-getter js-global js-invoker list-to-array object log
    @ and or not != % * + - / < <= = > >= in instanceof typeof
    bitand bitor bitxor bitnot bitshiftl bitshiftr bitshiftr0
+   print-stacktrace
    ))

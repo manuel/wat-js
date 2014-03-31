@@ -357,6 +357,18 @@
   (apply ~log (list* $console x xs))
   x)
 
+;;;; Cells
+
+(defprototype Cell Object (value))
+(def (cell value) (new Cell value))
+(def (ref (c Cell)) (.value c))
+(set (setter ref) (lambda (new-val (c Cell)) (set (.value c) new-val)))
+
+(defmacro (++ place)
+  (list set place (list + place 1)))
+(defmacro (-- place)
+  (list set place (list - place 1)))
+
 ;;;; Error break routine, called by VM to print stacktrace and throw
 
 (def (print-stacktrace)
@@ -413,5 +425,5 @@
    array array-to-list js-callback js-getter js-global js-invoker list-to-array object log
    @ and or not != % * + - / < <= = > >= in instanceof typeof
    bitand bitor bitxor bitnot bitshiftl bitshiftr bitshiftr0
-   print-stacktrace
+   print-stacktrace cell ref Cell ++ --
    ))

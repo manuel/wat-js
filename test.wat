@@ -147,3 +147,8 @@
 (assert-false (< 1 2 3 4 5 1))
 (assert-true (<= 1 1 2 3 4 5 5))
 (assert-false (< 1 1 2 3 4 5 5))
+
+(let ((x (cell 0)))
+  (while (< (ref x) 10)
+    (++ (ref x)))
+  (assert-equal 10 (ref x)))

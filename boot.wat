@@ -401,7 +401,7 @@
 (make-environment 
   (slurp-environment 
    defoperative _def _lambda _vau apply eval make-environment the-environment unwrap wrap
-   begin def defmacro lambda let let* quote symbol-name symbol?
+   begin def defmacro lambda let let* letrec quote symbol-name symbol?
    caar cadr car cdar cddr cdr cons cons? fold-list list list* map-list nil? reverse-list
    defgeneric defprototype defmethod new the type?
    catch cond else if label loop throw unless when while error 

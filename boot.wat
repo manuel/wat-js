@@ -81,6 +81,9 @@
 (defmacro (push-subcont k . body)
   (list vm-push-subcont k (list* _lambda () body)))
 
+(defmacro (push-prompt-subcont p k . body)
+  (list vm-push-prompt-subcont p k (list* _lambda () body)))
+
 ;;;; List utilities
 
 (_def compose (_lambda (f g) (_lambda (arg) (f (g arg)))))
@@ -407,7 +410,7 @@
    defgeneric defprototype defmethod new the type?
    catch cond else if label loop throw unless when while error 
    set setter
-   push-prompt push-subcont take-subcont
+   push-prompt push-subcont take-subcont push-prompt-subcont
    dlet dnew dref
    defmodule import module
    Arguments Array Date Function Number Object RegExp String

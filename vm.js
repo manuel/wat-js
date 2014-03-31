@@ -195,7 +195,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         }
     }
     /* Delimited Control */
-    function PushPrompt() {}; function TakeSubcont() {}; function PushSubcont() {}
+    function PushPrompt() {}; function TakeSubcont() {}; function PushSubcont() {}; function PushPromptSubcont() {}
     PushPrompt.prototype.wat_combine = function self(e, k, f, o) {
         var prompt = elt(o, 0);
         var x = elt(o, 1);
@@ -235,6 +235,28 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         if (isCapture(res)) {
             captureFrame(res, function(k, f) { return self(e, k, f, o); }, thef, e);
             return res;
+        } else {
+            return res;
+        }
+    };
+    PushPromptSubcont.prototype.wat_combine = function self(e, k, f, o) {
+        var prompt = elt(o, 0);
+        var thek = elt(o, 1);
+        var thef = elt(o, 2);
+        if (isContinuation(k)) {
+            var res = continueFrame(k, f);
+        } else {
+            var res = continueFrame(thek, thef);
+        }
+        if (isCapture(res)) {
+            if (res.prompt === prompt) {
+                var continuation = res.k;
+                var handler = res.handler;
+                return combine(e, null, null, handler, cons(continuation, NIL));
+            } else {
+                captureFrame(res, function(k, f) { return self(e, k, f, o); }, thef, e);
+                return res;
+            }
         } else {
             return res;
         }
@@ -408,6 +430,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
     PushPrompt.prototype.toString = function() { return "vm-push-prompt"; }
     TakeSubcont.prototype.toString = function() { return "vm-take-subcont"; }
     PushSubcont.prototype.toString = function() { return "vm-push-subcont"; }
+    PushPromptSubcont.prototype.toString = function() { return "vm-push-prompt-subcont"; }
     JSFun.prototype.toString = function() { return "[JSFun " + this.jsfun.toString() + "]"; };
     /* Bootstrap */
     var boot_bytecode =
@@ -434,6 +457,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
          ["vm-def", "vm-push-prompt", new PushPrompt()],
          ["vm-def", "vm-take-subcont", wrap(new TakeSubcont())],
          ["vm-def", "vm-push-subcont", wrap(new PushSubcont())],
+         ["vm-def", "vm-push-prompt-subcont", wrap(new PushPromptSubcont())],
          // Dynamically-scoped Variables
          ["vm-def", "vm-dnew", wrap(new DNew())],
          ["vm-def", "vm-dlet", new DLet()],

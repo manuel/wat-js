@@ -23,8 +23,7 @@
 (def (sleep (ms Number))
   (take-subcont default-prompt k
     (def (callback . #ignore)
-      (push-prompt default-prompt
-        (push-subcont k)))
+      (push-prompt-subcont default-prompt k))
     ($setTimeout (js-callback callback) ms)))
 
 (spawn-thread "thread-1")

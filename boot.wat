@@ -197,17 +197,13 @@
 (defmacro (label name . body)
   (list call-with-escape (list* _lambda (list name) body)))
 
-(def (call-while test-fun body-fun)
-  (label return
-    (loop
-      (if (test-fun)
-        (body-fun)
-        (return)))))
-
-(defmacro (while test . body)
-  (list call-while
-        (list _lambda () test)
-        (list* _lambda () body)))
+(defoperative (while test . body) env
+  (let ((body (list* begin body)))
+    (label return
+      (loop
+        (if (eval test env)
+          (eval body env)
+          (return))))))
 
 (defmacro (when test . body)
   (list if test (list* begin body) #null))

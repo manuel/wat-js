@@ -343,7 +343,6 @@
 (defmacro (the type obj)
   (list if (list type? obj type) obj (list error (list + obj " is not a: " type))))
 
-(def Arguments $Arguments)
 (def Array $Array)
 (def Boolean $Boolean)
 (def Date $Date)
@@ -421,9 +420,9 @@
    push-prompt push-subcont take-subcont push-prompt-subcont
    dlet dnew dref
    defmodule import module
-   Arguments Array Date Function Number Object RegExp String
+   Array Date Function Number Object RegExp String
    array array-to-list js-callback js-getter js-global js-invoker list-to-array object log
    @ and or not != % * + - / < <= = > >= in instanceof typeof
    bitand bitor bitxor bitnot bitshiftl bitshiftr bitshiftr0
-   print-stacktrace cell ref Cell ++ --
+   print-stacktrace 
    ))

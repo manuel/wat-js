@@ -1,3 +1,5 @@
+- Global handling when running in Node is sort of broken
+
 - $setTimeout is undefined in Node, probably because we get passed the
   wrong global object by browserify
 

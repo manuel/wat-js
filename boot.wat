@@ -155,7 +155,7 @@
 
 (def (apply appv arg . opt)
   (if (instanceof appv $Function)
-      (~apply appv #null (list-to-array arg))
+      (@apply appv #null (list-to-array arg))
       (eval (cons (unwrap appv) arg)
             (if (nil? opt)
                 (make-environment)
@@ -326,11 +326,11 @@
               pairs)
     obj))
 
-(def (@ object key)
+(def (elt object key)
   ((js-getter key) object))
 
-(set (setter @) (lambda (new-val object key)
-                  (set ((js-getter key) object) new-val)))
+(set (setter elt) (lambda (new-val object key)
+                    (set ((js-getter key) object) new-val)))
 
 (def (array . args) (list-to-array args))
 
@@ -353,7 +353,7 @@
 (def String $String)
 
 (def (log x . xs)
-  (apply ~log (list* $console x xs))
+  (apply @log (list* $console x xs))
   x)
 
 ;;;; Cells
@@ -372,7 +372,7 @@
 
 (def (print-stacktrace)
   (def (print-frame k)
-    (log (~toString (.dbg k)) (.e k))
+    (log (@toString (.dbg k)) (.e k))
     (if (.next k)
         (print-frame (.next k))
         #undefined))
@@ -422,7 +422,7 @@
    defmodule import module
    Array Date Function Number Object RegExp String
    array array-to-list js-callback js-getter js-global js-invoker list-to-array object log
-   @ and or not != % * + - / < <= = > >= in instanceof typeof
+   elt and or not != % * + - / < <= = > >= in instanceof typeof
    bitand bitor bitxor bitnot bitshiftl bitshiftr bitshiftr0
    print-stacktrace 
    ))

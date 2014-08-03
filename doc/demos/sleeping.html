@@ -16,8 +16,8 @@
 
 (def (run-thread (id String))
   (loop
-    (~appendChild (.body $document)
-                  (~createTextNode $document (+ "Active thread: " id " ")))
+    (@appendChild (.body $document)
+                  (@createTextNode $document (+ "Active thread: " id " ")))
     (sleep 250)))
 
 (def (sleep (ms Number))

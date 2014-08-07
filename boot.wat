@@ -103,6 +103,14 @@
         ()
         (cons (f (car lst)) (map-list f (cdr lst))))))
 
+(_define list-keep
+  (_lambda (p lst)
+    (if (nil? lst)
+        ()
+        (if (p (car lst))
+            (cons (car lst) (list-keep p (cdr lst)))
+            (list-keep p (cdr lst))))))
+
 (_define fold-list
   (_lambda (f init lst)
     (if (nil? lst)
@@ -376,6 +384,9 @@
 (define (map-array fun (arr Array))
   (list-to-array (map-list fun (array-to-list arr))))
 
+(define (array-keep pred (arr Array))
+  (list-to-array (list-keep pred (array-to-list arr))))
+
 ;;;; Error break routine, called by VM to print stacktrace and throw
 
 (define (print-stacktrace)
@@ -421,7 +432,7 @@
   (slurp-environment 
    define-operative _define _lambda _vau apply eval make-environment the-environment unwrap wrap
    begin define define-macro lambda let let* letrec quote symbol-name symbol?
-   caar cadr car cdar cddr cdr cons cons? fold-list list list* map-list nil? reverse-list
+   caar cadr car cdar cddr cdr cons cons? fold-list list list* map-list list-keep nil? reverse-list
    define-generic define-prototype define-method new the type?
    catch cond else if label loop throw unless when while error 
    set setter
@@ -429,7 +440,8 @@
    dlet dnew dref
    define-module import module provide
    Array Date Function Number Object RegExp String
-   array array-to-list map-array js-callback js-getter js-global js-invoker list-to-array object log
+   array array-to-list map-array array-keep
+   js-callback js-getter js-global js-invoker list-to-array object log
    elt and or not != % * + - / < <= = > >= in instanceof typeof
    bitand bitor bitxor bitnot bitshiftl bitshiftr bitshiftr0
    print-stacktrace 

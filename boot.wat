@@ -1,4 +1,4 @@
-;; -*- mode: lisp -*-
+;; -*- mode: Scheme -*-
 
 ;; ``72. An adequate bootstrap is a contradiction in terms.''
 
@@ -445,4 +445,5 @@
    elt and or not != % * + - / < <= = > >= in instanceof typeof
    bitand bitor bitxor bitnot bitshiftl bitshiftr bitshiftr0
    print-stacktrace 
+   cell ref ++ --
    ))

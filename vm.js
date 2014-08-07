@@ -371,6 +371,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
             var rcv = arguments[0];
             if (!rcv) return error("receiver is null/undefined");
             var method = rcv[method_name];
+            if (!method) return error("method not found: " + method_name + " in: " + to_string(rcv));
             return method.apply(rcv, Array.prototype.slice.call(arguments, 1)); }); }
     function js_getter(prop_name) {
         var getter = jswrap(function() {

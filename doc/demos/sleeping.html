@@ -8,21 +8,21 @@
 
 <script type="text/wat" id="sleeping">
 
-(def default-prompt 'default-prompt)
+(define default-prompt 'default-prompt)
 
-(def (spawn-thread (id String))
+(define (spawn-thread (id String))
   (push-prompt default-prompt
     (run-thread id)))
 
-(def (run-thread (id String))
+(define (run-thread (id String))
   (loop
     (@appendChild (.body $document)
                   (@createTextNode $document (+ "Active thread: " id " ")))
     (sleep 250)))
 
-(def (sleep (ms Number))
+(define (sleep (ms Number))
   (take-subcont default-prompt k
-    (def (callback . #ignore)
+    (define (callback . #ignore)
       (push-prompt-subcont default-prompt k))
     ($setTimeout (js-callback callback) ms)))
 

@@ -370,6 +370,12 @@
 (define-macro (-- place)
   (list set place (list - place 1)))
 
+;;;; Utilities
+
+;; ugh
+(define (map-array fun (arr Array))
+  (list-to-array (map-list fun (array-to-list arr))))
+
 ;;;; Error break routine, called by VM to print stacktrace and throw
 
 (define (print-stacktrace)
@@ -423,7 +429,7 @@
    dlet dnew dref
    define-module import module provide
    Array Date Function Number Object RegExp String
-   array array-to-list js-callback js-getter js-global js-invoker list-to-array object log
+   array array-to-list map-array js-callback js-getter js-global js-invoker list-to-array object log
    elt and or not != % * + - / < <= = > >= in instanceof typeof
    bitand bitor bitxor bitnot bitshiftl bitshiftr bitshiftr0
    print-stacktrace 

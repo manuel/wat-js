@@ -387,6 +387,12 @@
 (define (array-keep pred (arr Array))
   (list-to-array (list-keep pred (array-to-list arr))))
 
+(define-operative (time expr) env
+  (let ((n (@getTime (new Date)))
+        (result (eval expr env)))
+    (log (+ "time " expr ": " (- (@getTime (new Date)) n) "ms"))
+    result))
+
 ;;;; Error break routine, called by VM to print stacktrace and throw
 
 (define (print-stacktrace)
@@ -446,4 +452,5 @@
    bitand bitor bitxor bitnot bitshiftl bitshiftr bitshiftr0
    print-stacktrace 
    cell ref ++ --
+   time
    ))

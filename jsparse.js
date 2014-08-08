@@ -1,3 +1,7 @@
+module.exports = {
+    ps: ps, choice: choice, range: range, action: action, sequence: sequence, join_action: join_action, negate: negate, repeat0: repeat0, optional: optional, repeat1: repeat1, wsequence: wsequence, whitespace: whitespace, ch: ch, butnot: butnot
+} /* browserify adaptation for wat, rest of code below unchanged */
+
 // Copyright (C) 2007 Chris Double.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -653,5 +657,3 @@ function not(p) {
         return cached;
     }
 }
-
-

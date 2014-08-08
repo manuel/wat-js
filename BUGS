@@ -1,0 +1,12 @@
+- Global handling when running in Node is sort of broken
+
+- $setTimeout is undefined in Node, probably because we get passed the
+  wrong global object by browserify
+
+- comments aren't properly parsed and evaluate to null
+
+- wat:
+(define x 1)
+(define exports (list x))
+(log (eval (list* module (list* list x) exports) (get-current-environment)))
+gives prompt not found

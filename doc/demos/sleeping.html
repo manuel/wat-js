@@ -1,41 +1,41 @@
 <html>
 <head>
   <title>Wat Sleeping Demo</title>
-  <script type="text/javascript" src="../../wat.js"></script>
+  <script type="text/javascript" src="../../build/wat.js"></script>
 </head>
 <body>
 <h1><a href="https://github.com/manuel/wat-js">Wat</a></h1>
+
 <script type="text/wat" id="sleeping">
 
-(define default-prompt (quote default-prompt))
+(define default-prompt 'default-prompt)
 
-(define (spawn-thread id)
+(define (spawn-thread (id String))
   (push-prompt default-prompt
     (run-thread id)))
 
-(define (run-thread id)
+(define (run-thread (id String))
   (loop
-    (#appendChild (.body @document)
-                  (#createTextNode @document (+ "Active thread: " id)))
+    (@appendChild (.body $document)
+                  (@createTextNode $document (+ "Active thread: " id " ")))
     (sleep 250)))
 
-(define (sleep ms)
+(define (sleep (ms Number))
   (take-subcont default-prompt k
-    (define (callback . ignore)
-      (push-prompt default-prompt
-        (push-subcont k)))
-    (@setTimeout (js-callback callback) ms)))
+    (define (callback . #ignore)
+      (push-prompt-subcont default-prompt k))
+    ($setTimeout (js-callback callback) ms)))
 
-(spawn-thread 1)
-(spawn-thread 2)
-(spawn-thread 3)
-(spawn-thread 4)
-(spawn-thread 5)
+(spawn-thread "thread-1")
+(spawn-thread "thread-2")
+(spawn-thread "thread-3")
+(spawn-thread "thread-4")
+(spawn-thread "thread-5")
 
 </script>
 
 <script type="text/javascript">
-new wat.VM().eval(document.getElementById("sleeping").textContent);
+wat.vm().eval(document.getElementById("sleeping").textContent);
 </script>
 </body>
 </html>

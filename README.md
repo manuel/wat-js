@@ -15,7 +15,7 @@ features for embedding in JavaScript programs.
 
 * Interop with JavaScript objects, functions, and callbacks
 
-* JSON-based syntax for embedding Wat code in JavaScript
+* JSON-based bytecode for embedding Wat code in JavaScript
 
 Wat is developed by Manuel Simoni (msimoni@gmail.com).
 
@@ -25,21 +25,20 @@ Wat is developed by Manuel Simoni (msimoni@gmail.com).
 
     <html>
     <head>
-      <script type="text/javascript" src="wat.js"></script>
+      <script type="text/javascript" src="./build/wat.js"></script>
     </head>
     <body>
       <script type="text/javascript">
-        var vm = new wat.VM();
-        console.log(vm.run(["+", 1, 2]));
+        var vm = wat.vm();
+        console.log(vm.eval("(+ 1 2)"));
       </script>
     </body>
     </html>
 
 #### Node.js
 
-    > var wat = require("./wat");
-    > var vm = new wat.VM();
-    > vm.run(["+", 1, 2]);
+    > var vm = require("./build/wat").vm();
+    > vm.eval("(+ 1 2)");
     3
 
 ### More documentation upcoming!

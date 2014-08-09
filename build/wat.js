@@ -1071,6 +1071,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         var res = NIL; while(list !== NIL) { res = cons(car(list), res); list = cdr(list); } return res; }
     var js_types = ["Array", "Boolean", "Date", "Function", "Number", "Object", "RegExp", "String"];
     function is_type(obj, type_obj, type_name) {
+        if (!type_obj) return error("type is undefined");
         if (js_types.indexOf(type_name) === -1) { return obj instanceof type_obj; }
         else { return toString.call(obj) === "[object " + type_name + "]"; } }
     /* Bytecode parser */

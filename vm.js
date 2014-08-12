@@ -376,7 +376,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
             return method.apply(rcv, Array.prototype.slice.call(arguments, 1)); }); }
     function js_getter(prop_name) {
         var getter = jswrap(function() {
-            if (arguments.length !== 1) return error("getter called with wrong args: " + arguments);
+            if (arguments.length !== 1) return error(prop_name + " getter called with wrong args");
             var rcv = arguments[0];
             if ((rcv !== undefined) && (rcv !== null)) return rcv[prop_name];
             else return error("can't get " + prop_name + " of " + rcv); });

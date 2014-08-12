@@ -393,6 +393,39 @@
     (log (+ "time " expr ": " (- (@getTime (new Date)) n) "ms"))
     result))
 
+(define-operative (assert expr) env
+  (unless (= #t (eval expr env))
+    (error (+ "Should be true: " expr))))
+
+(define-operative (assert-false expr) env
+  (unless (= #f (eval expr env))
+     (error (+ "Should be false: " expr))))
+
+(define-operative (assert-equal expected expr2) env
+  (let ((res (eval expr2 env))
+        (exp (eval expected env)))
+    (unless (= exp res)
+      (error (+ expr2 " should be " exp " but is " res)))))
+
+(define-operative (assert-throws expr) env
+  (label return
+    (catch (eval expr env)
+      (lambda (exc) (return)))
+    (error (+ "Should throw: " expr))))
+
+;;;; Options
+
+(define-prototype Option Object ())
+(define-prototype Some Option (value))
+(define-prototype None Option ())
+(define (some value) (new Some value))
+(define none (new None))
+(define-operative (if-option (option-name option-expr) then else) env
+  (let ((option (the Option (eval option-expr env))))
+    (if (type? option Some)
+        (eval (list (list lambda (list option-name) then) (.value option)) env)
+        (eval else env))))
+
 ;;;; Error break routine, called by VM to print stacktrace and throw
 
 (define (print-stacktrace)
@@ -453,4 +486,6 @@
    print-stacktrace 
    cell ref ++ --
    time
+   assert assert-false assert-equal assert-throws
+   Option if-option some none
    ))

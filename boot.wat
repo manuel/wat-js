@@ -124,7 +124,7 @@
              (map-list cadr x))))
 
 (define-macro (let-loop name bindings . body)
-  (list letrec (list (list name (list* lambda (map-list car bindings)
+  (list letrec (list (list name (list* _lambda (map-list car bindings)
                                        body)))
         (list* name (map-list cadr bindings))))
 

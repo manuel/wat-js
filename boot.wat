@@ -6,7 +6,7 @@
 (vm-def _define vm-def)
 
 ;; Rename bindings that will be used as provided by VM
-(_define array-to-list vm-array-to-list)
+(_define array->list vm-array-to-list)
 (_define begin vm-begin)
 (_define cons vm-cons)
 (_define cons? vm-cons?)
@@ -19,7 +19,7 @@
 (_define js-global vm-js-global)
 (_define js-invoker vm-js-invoker)
 (_define list* vm-list*)
-(_define list-to-array vm-list-to-array)
+(_define list->array vm-list-to-array)
 (_define make-environment vm-make-environment)
 (_define new vm-js-new)
 (_define nil? vm-nil?)
@@ -163,7 +163,7 @@
 
 (define (apply appv arg . opt)
   (if (instanceof appv $Function)
-      (@apply appv #null (list-to-array arg))
+      (@apply appv #null (list->array arg))
       (eval (cons (unwrap appv) arg)
             (if (nil? opt)
                 (make-environment)
@@ -197,7 +197,7 @@
   (let ((fresh (list #null)))
     (catch (fun (_lambda opt-arg (throw (list fresh opt-arg))))
       (_lambda (exc)
-        (if (and (cons? exc) (= fresh (car exc)))
+        (if (and (cons? exc) (=== fresh (car exc)))
             (let ((opt-arg (cadr exc)))
               (if (cons? opt-arg) (car opt-arg) #undefined))
             (throw exc))))))
@@ -287,13 +287,15 @@
                        #f))))
       op)))
 
-(define = (relational-op "==="))
+(define == (relational-op "=="))
+(define === (relational-op "==="))
 (define < (relational-op "<"))
 (define > (relational-op ">"))
 (define <= (relational-op "<="))
 (define >= (relational-op ">="))
 
-(define (!= . args) (not (apply = args)))
+(define (!= . args) (not (apply == args)))
+(define (!== . args) (not (apply === args)))
 
 (define * (let ((vm* (vm-js-binop "*")))
             (lambda args
@@ -342,7 +344,7 @@
 (set (setter elt) (lambda (new-val object key)
                     (set ((js-getter key) object) new-val)))
 
-(define (array . args) (list-to-array args))
+(define (array . args) (list->array args))
 
 (define (js-callback fun)
   (vm-js-function (_lambda args (push-prompt vm-root-prompt (apply fun args)))))
@@ -382,10 +384,10 @@
 
 ;; ugh
 (define (map-array fun (arr Array))
-  (list-to-array (map-list fun (array-to-list arr))))
+  (list->array (map-list fun (array->list arr))))
 
 (define (array-keep pred (arr Array))
-  (list-to-array (list-keep pred (array-to-list arr))))
+  (list->array (list-keep pred (array->list arr))))
 
 (define-operative (time expr) env
   (let ((n (@getTime (new Date)))
@@ -394,17 +396,23 @@
     result))
 
 (define-operative (assert expr) env
-  (unless (= #t (eval expr env))
+  (unless (=== #t (eval expr env))
     (error (+ "Should be true: " expr))))
 
 (define-operative (assert-false expr) env
-  (unless (= #f (eval expr env))
+  (unless (=== #f (eval expr env))
      (error (+ "Should be false: " expr))))
 
-(define-operative (assert-equal expected expr2) env
+(define-operative (assert-=== expected expr2) env
   (let ((res (eval expr2 env))
         (exp (eval expected env)))
-    (unless (= exp res)
+    (unless (=== exp res)
+      (error (+ expr2 " should be " exp " but is " res)))))
+
+(define-operative (assert-== expected expr2) env
+  (let ((res (eval expr2 env))
+        (exp (eval expected env)))
+    (unless (== exp res)
       (error (+ expr2 " should be " exp " but is " res)))))
 
 (define-operative (assert-throws expr) env
@@ -479,13 +487,13 @@
    dlet dnew dref
    define-module import module provide
    Array Date Function Number Object RegExp String
-   array array-to-list map-array array-keep
-   js-callback js-getter js-global js-invoker list-to-array object log
-   elt and or not != % * + - / < <= = > >= in instanceof typeof
+   array array->list map-array array-keep
+   js-callback js-getter js-global js-invoker list->array object log
+   elt and or not != !== % * + - / < <= == === > >= in instanceof typeof
    bitand bitor bitxor bitnot bitshiftl bitshiftr bitshiftr0
    print-stacktrace 
    cell ref ++ --
    time
-   assert assert-false assert-equal assert-throws
+   assert assert-false assert-=== assert-== assert-throws
    Option if-option some none
    ))

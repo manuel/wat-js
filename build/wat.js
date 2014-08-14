@@ -684,12 +684,13 @@ function handle_identifier(str) {
     else if (str[0] === "@") { return ["js-invoker", ["wat-string", str.substring(1)]]; }
     else if (str[0] === "$") { return ["js-global", ["wat-string", str.substring(1)]]; }
     else return str; }
-var escape_char = choice("\"", "\\", "n", "r", "t");
+var escape_char = choice("\"", "\\", "n", "r", "t", "0");
 var escape_sequence = action(sequence("\\", escape_char), function (ast) {
     switch(ast[1]) {
     case "n": return "\n";
     case "r": return "\r";
     case "t": return "\t";
+    case "0": return "\0";
     default: return ast[1]; }});
 var line_terminator = choice(ch("\r"), ch("\n"));
 var string_char = choice(escape_sequence, line_terminator, negate("\""));

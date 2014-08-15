@@ -237,20 +237,23 @@
 ;;;; Prototypes
 
 (define-operative (define-prototype name super-name prop-names) env
+  (eval (list _define name (make-prototype name super-name prop-names env)) env))
+
+(define (make-prototype name super-name prop-names env)
   (let ((p (apply vm-js-make-prototype (list* (symbol-name name) (map-list symbol-name prop-names))))
         (super (eval super-name env)))
     (set (.prototype p) (@create $Object (.prototype super)))
     (set (.constructor (.prototype p)) super)
-    (eval (list _define name p) env)))
+    p))
 
-(define (put-method ctor name fun)
-  (set ((js-getter name) (.prototype ctor)) fun))
+(define-macro (define-generic (name . #ignore))
+  (list _define name (lambda args (apply ((js-getter name) (car args)) args))))
 
 (define-macro (define-method (name (self ctor) . args) . body)
   (list put-method ctor (symbol-name name) (list* lambda (list* self args) body)))
 
-(define-macro (define-generic (name . #ignore))
-  (list _define name (lambda args (apply ((js-getter name) (car args)) args))))
+(define (put-method ctor name fun)
+  (set ((js-getter name) (.prototype ctor)) fun))
 
 ;;;; Modules
 
@@ -479,7 +482,7 @@
    define-operative _define _lambda _vau apply eval make-environment the-environment unwrap wrap
    begin define define-macro lambda let let* letrec quote symbol-name symbol?
    caar cadr car cdar cddr cdr cons cons? fold-list list list* map-list list-keep nil? reverse-list
-   define-generic define-prototype define-method new the type?
+   define-generic define-prototype define-method make-prototype new the type?
    catch cond else if label loop throw unless when while error 
    set setter
    push-prompt push-subcont take-subcont push-prompt-subcont

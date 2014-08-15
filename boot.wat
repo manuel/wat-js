@@ -243,15 +243,14 @@
     (set (.constructor (.prototype p)) super)
     (eval (list _define name p) env)))
 
-(define (put-method ctor name js-fun)
-  (set ((js-getter name) (.prototype ctor)) js-fun))
+(define (put-method ctor name fun)
+  (set ((js-getter name) (.prototype ctor)) fun))
 
 (define-macro (define-method (name (self ctor) . args) . body)
-  (list put-method ctor (symbol-name name)
-        (list vm-js-function (list* lambda (list* self args) body))))
+  (list put-method ctor (symbol-name name) (list* lambda (list* self args) body)))
 
 (define-macro (define-generic (name . #ignore))
-  (list _define name (vm-js-invoker (symbol-name name))))
+  (list _define name (lambda args (apply ((js-getter name) (car args)) args))))
 
 ;;;; Modules
 

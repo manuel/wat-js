@@ -103,6 +103,12 @@
         ()
         (cons (f (car lst)) (map-list f (cdr lst))))))
 
+(_define list-for-each
+  (_lambda (f lst)
+    (if (nil? lst)
+        ()
+        (begin (f (car lst)) (list-for-each f (cdr lst))))))
+
 (_define list-keep
   (_lambda (p lst)
     (if (nil? lst)
@@ -481,7 +487,8 @@
   (slurp-environment 
    define-operative _define _lambda _vau apply eval make-environment the-environment unwrap wrap
    begin define define-macro lambda let let* letrec quote symbol-name symbol?
-   caar cadr car cdar cddr cdr cons cons? fold-list list list* map-list list-keep nil? reverse-list
+   caar cadr car cdar cddr cdr cons cons? fold-list list list* map-list list-for-each 
+   list-keep nil? reverse-list
    define-generic define-prototype define-method make-prototype new the type?
    catch cond else if label loop throw unless when while error 
    set setter

@@ -25,6 +25,7 @@
 (_define nil? vm-nil?)
 (_define reverse-list vm-reverse-list)
 (_define setter vm-setter)
+(_define string->symbol vm-string-to-symbol)
 (_define symbol-name vm-symbol-name)
 (_define symbol? vm-symbol?)
 (_define throw vm-throw)
@@ -357,6 +358,9 @@
 (define (js-callback fun)
   (vm-js-function (_lambda args (push-prompt vm-root-prompt (apply fun args)))))
 
+(define-macro (js-lambda params . body)
+  (list js-callback (list* lambda params body)))
+
 (define-macro (type? obj type)
   (list vm-type? obj type (symbol-name type)))
 
@@ -486,7 +490,7 @@
 (make-environment 
   (slurp-environment 
    define-operative _define _lambda _vau apply eval make-environment the-environment unwrap wrap
-   begin define define-macro lambda let let* letrec quote symbol-name symbol?
+   begin define define-macro lambda let let* letrec quote symbol-name symbol? string->symbol
    caar cadr car cdar cddr cdr cons cons? fold-list list list* map-list list-for-each 
    list-keep nil? reverse-list
    define-generic define-prototype define-method make-prototype new the type?
@@ -497,7 +501,7 @@
    define-module import module provide
    Array Date Function Number Object RegExp String
    array array->list map-array array-keep
-   js-callback js-getter js-global js-invoker list->array object log
+   js-callback js-lambda js-getter js-global js-invoker list->array object log
    elt and or not != !== % * + - / < <= == === > >= in instanceof typeof
    bitand bitor bitxor bitnot bitshiftl bitshiftr bitshiftr0
    print-stacktrace 

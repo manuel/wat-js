@@ -447,6 +447,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
          ["vm-def", "vm-cons", jswrap(cons)],
          ["vm-def", "vm-cons?", jswrap(function(obj) { return obj instanceof Cons; })],
          ["vm-def", "vm-nil?", jswrap(function(obj) { return obj === NIL; })],
+         ["vm-def", "vm-string-to-symbol", jswrap(sym)],
          ["vm-def", "vm-symbol?", jswrap(function(obj) { return obj instanceof Sym; })],
          ["vm-def", "vm-symbol-name", jswrap(sym_name)],
          // First-order Control

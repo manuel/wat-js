@@ -1,0 +1,90 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Wat Balls Demo</title>
+  <script type="text/javascript" src="../../build/wat.js"></script>
+  <script type="text/javascript" src="setImmediate.js"></script>
+</head>
+<body>
+<h1><a href="https://github.com/manuel/wat-js">Wat</a></h1>
+
+<script type="text/wat" id="main">
+
+(define default-prompt 'default-prompt)
+
+(define (spawn-thread (id Number))
+  (push-prompt default-prompt
+    (run-thread id))
+  (if (=== id 0)
+      ()
+      (spawn-thread (- id 1))))
+
+(define (run-thread (id Number))
+  (let ((ball (object 
+                ("x" (+ 300 ($random_offset 200)))
+                ("y" (+ 240 ($random_offset 100)))
+                ("radius" 5)
+                ("color" "#ff0000")
+                ("dx" ($random_offset 5))
+                ("dy" ($random_offset 5))
+                ("id" id))))
+    (@push $BALLS ball)
+    (loop
+      ($move_ball ball)
+      (sleep))))
+
+(define (sleep)
+  (take-subcont default-prompt k
+    (define (callback . #ignore)
+      (push-prompt-subcont default-prompt k))
+    ($setImmediate (js-callback callback))))
+
+(spawn-thread 150)
+
+</script>
+
+    <canvas id="canvas" width="600" height="480"></canvas>
+    <script>
+      function move_ball(ball) {
+        ball.x = ball.x + ball.dx;
+        ball.y = ball.y + ball.dy;
+        if (ball.x > 600) ball.dx=ball.dx*-1;
+        if (ball.y > 480) ball.dy=ball.dy*-1;;
+        if (ball.x < 0) ball.dx=ball.dx*-1;
+        if (ball.y < 0) ball.dy=ball.dy*-1;;
+      }
+
+      function random_offset(n) {
+        var num = Math.floor(Math.random()*n) + 1; // this will get a number between 1 and N;
+        num *= Math.floor(Math.random()*2) == 1 ? 1 : -1; // this will add minus sign in 50% of cases
+        return num;
+      }
+
+      window.requestAnimFrame = (function(callback) {
+        return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+        function(callback) {
+          window.setTimeout(callback, 1000 / 60);
+        };
+      })();
+      var BALLS = [];
+      function animate(canvas) {
+        var context = canvas.getContext("2d");
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        for(var n = 0; n < BALLS.length; n++) {
+          var ball = BALLS[n];
+          context.beginPath();
+          context.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI, false);
+          context.fillStyle = ball.color;
+          context.fill();
+        }
+        requestAnimFrame(function() {
+          animate(canvas);
+        });
+      }
+      var canvas = document.getElementById("canvas");
+      animate(canvas);
+
+      wat.vm().eval(document.getElementById("main").textContent);
+    </script>
+  </body>
+</html>

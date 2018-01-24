@@ -6,7 +6,7 @@
 (vm-def _define vm-def)
 
 ;; Rename bindings that will be used as provided by VM
-(_define array-to-list vm-array-to-list)
+(_define array->list vm-array-to-list)
 (_define begin vm-begin)
 (_define cons vm-cons)
 (_define cons? vm-cons?)
@@ -19,12 +19,13 @@
 (_define js-global vm-js-global)
 (_define js-invoker vm-js-invoker)
 (_define list* vm-list*)
-(_define list-to-array vm-list-to-array)
+(_define list->array vm-list-to-array)
 (_define make-environment vm-make-environment)
 (_define new vm-js-new)
 (_define nil? vm-nil?)
 (_define reverse-list vm-reverse-list)
 (_define setter vm-setter)
+(_define string->symbol vm-string-to-symbol)
 (_define symbol-name vm-symbol-name)
 (_define symbol? vm-symbol?)
 (_define throw vm-throw)
@@ -103,6 +104,12 @@
         ()
         (cons (f (car lst)) (map-list f (cdr lst))))))
 
+(_define list-for-each
+  (_lambda (f lst)
+    (if (nil? lst)
+        ()
+        (begin (f (car lst)) (list-for-each f (cdr lst))))))
+
 (_define list-keep
   (_lambda (p lst)
     (if (nil? lst)
@@ -124,7 +131,7 @@
              (map-list cadr x))))
 
 (define-macro (let-loop name bindings . body)
-  (list letrec (list (list name (list* lambda (map-list car bindings)
+  (list letrec (list (list name (list* _lambda (map-list car bindings)
                                        body)))
         (list* name (map-list cadr bindings))))
 
@@ -163,7 +170,7 @@
 
 (define (apply appv arg . opt)
   (if (instanceof appv $Function)
-      (@apply appv #null (list-to-array arg))
+      (@apply appv #null (list->array arg))
       (eval (cons (unwrap appv) arg)
             (if (nil? opt)
                 (make-environment)
@@ -197,7 +204,7 @@
   (let ((fresh (list #null)))
     (catch (fun (_lambda opt-arg (throw (list fresh opt-arg))))
       (_lambda (exc)
-        (if (and (cons? exc) (= fresh (car exc)))
+        (if (and (cons? exc) (=== fresh (car exc)))
             (let ((opt-arg (cadr exc)))
               (if (cons? opt-arg) (car opt-arg) #undefined))
             (throw exc))))))
@@ -237,21 +244,23 @@
 ;;;; Prototypes
 
 (define-operative (define-prototype name super-name prop-names) env
+  (eval (list _define name (make-prototype name super-name prop-names env)) env))
+
+(define (make-prototype name super-name prop-names env)
   (let ((p (apply vm-js-make-prototype (list* (symbol-name name) (map-list symbol-name prop-names))))
         (super (eval super-name env)))
     (set (.prototype p) (@create $Object (.prototype super)))
     (set (.constructor (.prototype p)) super)
-    (eval (list _define name p) env)))
-
-(define (put-method ctor name js-fun)
-  (set ((js-getter name) (.prototype ctor)) js-fun))
-
-(define-macro (define-method (name (self ctor) . args) . body)
-  (list put-method ctor (symbol-name name)
-        (list vm-js-function (list* lambda (list* self args) body))))
+    p))
 
 (define-macro (define-generic (name . #ignore))
-  (list _define name (vm-js-invoker (symbol-name name))))
+  (list _define name (lambda args (apply ((js-getter name) (car args)) args))))
+
+(define-macro (define-method (name (self ctor) . args) . body)
+  (list put-method ctor (symbol-name name) (list* lambda (list* self args) body)))
+
+(define (put-method ctor name fun)
+  (set ((js-getter name) (.prototype ctor)) fun))
 
 ;;;; Modules
 
@@ -287,13 +296,15 @@
                        #f))))
       op)))
 
-(define = (relational-op "==="))
+(define == (relational-op "=="))
+(define === (relational-op "==="))
 (define < (relational-op "<"))
 (define > (relational-op ">"))
 (define <= (relational-op "<="))
 (define >= (relational-op ">="))
 
-(define (!= . args) (not (apply = args)))
+(define (!= . args) (not (apply == args)))
+(define (!== . args) (not (apply === args)))
 
 (define * (let ((vm* (vm-js-binop "*")))
             (lambda args
@@ -342,10 +353,13 @@
 (set (setter elt) (lambda (new-val object key)
                     (set ((js-getter key) object) new-val)))
 
-(define (array . args) (list-to-array args))
+(define (array . args) (list->array args))
 
 (define (js-callback fun)
   (vm-js-function (_lambda args (push-prompt vm-root-prompt (apply fun args)))))
+
+(define-macro (js-lambda params . body)
+  (list js-callback (list* lambda params body)))
 
 (define-macro (type? obj type)
   (list vm-type? obj type (symbol-name type)))
@@ -382,16 +396,55 @@
 
 ;; ugh
 (define (map-array fun (arr Array))
-  (list-to-array (map-list fun (array-to-list arr))))
+  (list->array (map-list fun (array->list arr))))
 
 (define (array-keep pred (arr Array))
-  (list-to-array (list-keep pred (array-to-list arr))))
+  (list->array (list-keep pred (array->list arr))))
 
 (define-operative (time expr) env
   (let ((n (@getTime (new Date)))
         (result (eval expr env)))
     (log (+ "time " expr ": " (- (@getTime (new Date)) n) "ms"))
     result))
+
+(define-operative (assert expr) env
+  (unless (=== #t (eval expr env))
+    (error (+ "Should be true: " expr))))
+
+(define-operative (assert-false expr) env
+  (unless (=== #f (eval expr env))
+     (error (+ "Should be false: " expr))))
+
+(define-operative (assert-=== expected expr2) env
+  (let ((res (eval expr2 env))
+        (exp (eval expected env)))
+    (unless (=== exp res)
+      (error (+ expr2 " should be " exp " but is " res)))))
+
+(define-operative (assert-== expected expr2) env
+  (let ((res (eval expr2 env))
+        (exp (eval expected env)))
+    (unless (== exp res)
+      (error (+ expr2 " should be " exp " but is " res)))))
+
+(define-operative (assert-throws expr) env
+  (label return
+    (catch (eval expr env)
+      (lambda (exc) (return)))
+    (error (+ "Should throw: " expr))))
+
+;;;; Options
+
+(define-prototype Option Object ())
+(define-prototype Some Option (value))
+(define-prototype None Option ())
+(define (some value) (new Some value))
+(define none (new None))
+(define-operative (if-option (option-name option-expr) then else) env
+  (let ((option (the Option (eval option-expr env))))
+    (if (type? option Some)
+        (eval (list (list lambda (list option-name) then) (.value option)) env)
+        (eval else env))))
 
 ;;;; Error break routine, called by VM to print stacktrace and throw
 
@@ -437,20 +490,23 @@
 (make-environment 
   (slurp-environment 
    define-operative _define _lambda _vau apply eval make-environment the-environment unwrap wrap
-   begin define define-macro lambda let let* letrec quote symbol-name symbol?
-   caar cadr car cdar cddr cdr cons cons? fold-list list list* map-list list-keep nil? reverse-list
-   define-generic define-prototype define-method new the type?
+   begin define define-macro lambda let let* letrec quote symbol-name symbol? string->symbol
+   caar cadr car cdar cddr cdr cons cons? fold-list list list* map-list list-for-each 
+   list-keep nil? reverse-list
+   define-generic define-prototype define-method make-prototype new the type?
    catch cond else if label loop throw unless when while error 
    set setter
    push-prompt push-subcont take-subcont push-prompt-subcont
    dlet dnew dref
    define-module import module provide
    Array Date Function Number Object RegExp String
-   array array-to-list map-array array-keep
-   js-callback js-getter js-global js-invoker list-to-array object log
-   elt and or not != % * + - / < <= = > >= in instanceof typeof
+   array array->list map-array array-keep
+   js-callback js-lambda js-getter js-global js-invoker list->array object log
+   elt and or not != !== % * + - / < <= == === > >= in instanceof typeof
    bitand bitor bitxor bitnot bitshiftl bitshiftr bitshiftr0
    print-stacktrace 
    cell ref ++ --
    time
+   assert assert-false assert-=== assert-== assert-throws
+   Option if-option some none
    ))

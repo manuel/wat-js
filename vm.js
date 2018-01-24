@@ -11,6 +11,18 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         capture.k = new Continuation(fun, capture.k, dbg, e); }
     function continueFrame(k, f) {
         return k.fun(k.next, f); }
+    function monadic(k, f, a, b) {
+        if (isContinuation(k)) {
+            var res = continueFrame(k, f);
+        } else {
+            var res = a();
+        }
+        if (isCapture(res)) {
+            captureFrame(res, function(k, f) { return monadic(k, f, a, b); });
+            return res;
+        }
+        return b(res);
+    }
     /* Evaluation Core */
     function evaluate(e, k, f, x) {
         if (x && x.wat_eval) return x.wat_eval(e, k, f); else return x; }
@@ -18,18 +30,10 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
     function sym(name) { return new Sym(name); }
     Sym.prototype.wat_eval = function(e, k, f) { return lookup(e, this.name); };
     function Cons(car, cdr) { this.car = car; this.cdr = cdr; }
-    Cons.prototype.wat_eval = function(e, k, f) {
-        if (isContinuation(k)) {
-            var op = continueFrame(k, f);
-        } else {
-            var op = evaluate(e, null, null, car(this));
-        }
-        if (isCapture(op)) {
-            var that = this;
-            captureFrame(op, function(k, f) { return that.wat_eval(e, k, f); }, this, e);
-            return op;
-        }
-        return combine(e, null, null, op, cdr(this));
+    Cons.prototype.wat_eval = function(e, k, f) { var that = this;
+        return monadic(k, f, 
+                       function() { return evaluate(e, null, null, car(that)); },
+                       function(op) { return combine(e, null, null, op, cdr(that)); });
     };
     /* Operative & Applicative Combiners */
     function combine(e, k, f, cmb, o) {
@@ -49,30 +53,18 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         return evaluate(xe, k, f, this.x);
     };
     Apv.prototype.wat_combine = function(e, k, f, o) {
-        if (isContinuation(k)) {
-            var args = continueFrame(k, f);
-        } else {
-            var args = evalArgs(e, null, null, o, NIL);
-        }
-        if (isCapture(args)) {
-            var that = this;
-            captureFrame(args, function(k, f) { return that.wat_combine(e, k, f, o); }, cons(this, o), e);
-            return args;
-        }
-        return this.cmb.wat_combine(e, null, null, args);
+        var that = this;
+        return monadic(k, f,
+                       function() { return evalArgs(e, null, null, o, NIL); },
+                       function(args) { return that.cmb.wat_combine(e, null, null, args); });
     };
     function evalArgs(e, k, f, todo, done) {
         if (todo === NIL) { return reverse_list(done); }
-        if (isContinuation(k)) {
-            var arg = continueFrame(k, f);
-        } else {
-            var arg = evaluate(e, null, null, car(todo));
-        }
-        if (isCapture(arg)) {
-            captureFrame(arg, function(k, f) { return evalArgs(e, k, f, todo, done); }, car(todo), e);
-            return arg;
-        }
-        return evalArgs(e, null, null, cdr(todo), cons(arg, done));
+        return monadic(k, f, 
+                       function() { return evaluate(e, null, null, car(todo)); },
+                       function(arg) {
+                           return evalArgs(e, null, null, cdr(todo), cons(arg, done));
+                       });
     }
     /* Built-in Combiners */
     function Vau() {}; function Def() {}; function Eval() {};
@@ -81,16 +73,9 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
     Def.prototype.wat_combine = function self(e, k, f, o) {
         var lhs = elt(o, 0); if (isCapture(lhs)) return lhs;
         var rhs = elt(o, 1); if (isCapture(rhs)) return rhs;
-        if (isContinuation(k)) {
-            var val = continueFrame(k, f);
-        } else {
-            var val = evaluate(e, null, null, rhs);
-        }
-        if (isCapture(val)) {
-            captureFrame(val, function(k, f) { return self(e, k, f, o); }, rhs, e);
-            return val;
-        }
-        return bind(e, lhs, val);
+        return monadic(k, f,
+                       function() { return evaluate(e, null, null, rhs); },
+                       function(val) { return bind(e, lhs, val); });
     }
     Eval.prototype.wat_combine = function(e, k, f, o) {
         var x = elt(o, 0); if (isCapture(x)) return x;
@@ -102,29 +87,19 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
     Begin.prototype.wat_combine = function(e, k, f, o) {
         if (o === NIL) return null; else return begin(e, k, f, o); };
     function begin(e, k, f, xs) {
-        if (isContinuation(k)) {
-            var res = continueFrame(k, f);
-        } else {
-            var res = evaluate(e, null, null, car(xs));
-        }
-        if (isCapture(res)) {
-            captureFrame(res, function(k, f) { return begin(e, k, f, xs); }, car(xs), e);
-            return res;
-        }
-        var kdr = cdr(xs);
-        if (kdr === NIL) return res; else return begin(e, null, null, kdr);
+        return monadic(k, f,
+                       function() { return evaluate(e, null, null, car(xs)); },
+                       function(res) {
+                           var kdr = cdr(xs);
+                           if (kdr === NIL) return res; else return begin(e, null, null, kdr);
+                       });
     }
     If.prototype.wat_combine = function self(e, k, f, o) {
-        if (isContinuation(k)) {
-            var test = continueFrame(k, f);
-        } else {
-            var test = evaluate(e, null, null, elt(o, 0));
-        }
-        if (isCapture(test)) {
-            captureFrame(test, function(k, f) { return self(e, k, f, o); }, elt(o, 0), e);
-            return test;
-        }
-        return evaluate(e, null, null, test ? elt(o, 1) : elt(o, 2));
+        return monadic(k, f, 
+                       function() { return evaluate(e, null, null, elt(o, 0)); },
+                       function(test) {
+                           return evaluate(e, null, null, test ? elt(o, 1) : elt(o, 2));
+                       });
     };
     Loop.prototype.wat_combine = function self(e, k, f, o) {
         var first = true; // only continue once
@@ -341,6 +316,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         var res = NIL; while(list !== NIL) { res = cons(car(list), res); list = cdr(list); } return res; }
     var js_types = ["Array", "Boolean", "Date", "Function", "Number", "Object", "RegExp", "String"];
     function is_type(obj, type_obj, type_name) {
+        if (!type_obj) return error("type is undefined");
         if (js_types.indexOf(type_name) === -1) { return obj instanceof type_obj; }
         else { return toString.call(obj) === "[object " + type_name + "]"; } }
     /* Bytecode parser */
@@ -375,7 +351,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
             return method.apply(rcv, Array.prototype.slice.call(arguments, 1)); }); }
     function js_getter(prop_name) {
         var getter = jswrap(function() {
-            if (arguments.length !== 1) return error("getter called with wrong args: " + arguments);
+            if (arguments.length !== 1) return error(prop_name + " getter called with wrong args");
             var rcv = arguments[0];
             if ((rcv !== undefined) && (rcv !== null)) return rcv[prop_name];
             else return error("can't get " + prop_name + " of " + rcv); });
@@ -446,6 +422,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
          ["vm-def", "vm-cons", jswrap(cons)],
          ["vm-def", "vm-cons?", jswrap(function(obj) { return obj instanceof Cons; })],
          ["vm-def", "vm-nil?", jswrap(function(obj) { return obj === NIL; })],
+         ["vm-def", "vm-string-to-symbol", jswrap(sym)],
          ["vm-def", "vm-symbol?", jswrap(function(obj) { return obj instanceof Sym; })],
          ["vm-def", "vm-symbol-name", jswrap(sym_name)],
          // First-order Control

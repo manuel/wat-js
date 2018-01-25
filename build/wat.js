@@ -773,15 +773,17 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         else return error("not a combiner: " + to_string(cmb)); }
     function Opv(p, ep, x, e) { this.p = p; this.ep = ep; this.x = x; this.e = e; }
     function Apv(cmb) { this.cmb = cmb; }
-    function wrap(cmb) { return new Apv(cmb); };
-    function unwrap(apv) { return apv instanceof Apv ? apv.cmb : error("cannot unwrap: " + apv); }
-    Opv.prototype.wat_combine = function(e, k, f, o) {
-        var xe = make_env(this.e); 
-        var pCap = bind(xe, this.p, o);
-        if (isCapture(pCap)) return pCap;
-        var epCap = bind(xe, this.ep, e);
-        if (isCapture(epCap)) return epCap;
-        return evaluate(xe, k, f, this.x);
+    function wrap(cmb) { return new Apv(cmb); }; // type check
+    function unwrap(apv) { // type check
+        return apv instanceof Apv ? apv.cmb : error("cannot unwrap: " + apv); }
+    Opv.prototype.wat_combine = function(e, k, f, o) { var that = this;
+        var xe = make_env(that.e);
+        return monadic(k, f,
+                       function() { return bind(xe, null, null, that.p, o); },
+                       function() {
+                           return monadic(k, f,
+                                          function() { return bind(xe, null, null, that.ep, e); },
+                                          function() { return evaluate(xe, null, null, that.x); }); });
     };
     Apv.prototype.wat_combine = function(e, k, f, o) {
         var that = this;
@@ -801,14 +803,14 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
     function Vau() {}; function Def() {}; function Eval() {};
     Vau.prototype.wat_combine = function(e, k, f, o) {
         return new Opv(elt(o, 0), elt(o, 1), elt(o, 2), e); };
-    Def.prototype.wat_combine = function self(e, k, f, o) {
+    Def.prototype.wat_combine = function self(e, k, f, o) { // error handling
         var lhs = elt(o, 0); if (isCapture(lhs)) return lhs;
         var rhs = elt(o, 1); if (isCapture(rhs)) return rhs;
         return monadic(k, f,
                        function() { return evaluate(e, null, null, rhs); },
-                       function(val) { return bind(e, lhs, val); });
+                       function(val) { return bind(e, null, null, lhs, val); });
     }
-    Eval.prototype.wat_combine = function(e, k, f, o) {
+    Eval.prototype.wat_combine = function(e, k, f, o) { // error handling
         var x = elt(o, 0); if (isCapture(x)) return x;
         var e = elt(o, 1); if (isCapture(e)) return e;
         return evaluate(e, k, f, x); };
@@ -994,33 +996,33 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
             dv.val = oldVal;
         }
     };
-    /* Objects */
+    /* Forms */
     function Nil() {}; var NIL = new Nil();
     function Ign() {}; var IGN = new Ign();
     function cons(car, cdr) { return new Cons(car, cdr); }
-    function car(cons) {
+    function car(cons) { // tc
         if (cons instanceof Cons) return cons.car; else return error("not a cons: " + to_string(cons)); }
-    function cdr(cons) {
+    function cdr(cons) { // tc
         if (cons instanceof Cons) return cons.cdr; else return error("not a cons: " + to_string(cons)); }
     function elt(cons, i) { return (i === 0) ? car(cons) : elt(cdr(cons), i - 1); }
     function sym_name(sym) { return sym.name; }
+    /* Environment */
     function Env(parent) { this.bindings = Object.create(parent ? parent.bindings : null); this.parent = parent; }
     function make_env(parent) { return new Env(parent); }
     function lookup(e, name) {
         if (name in e.bindings) return e.bindings[name];
         else return error("unbound: " + name); }
-    function bind(e, lhs, rhs) { 
-        if (lhs.wat_match) return lhs.wat_match(e, rhs); else return error("cannot match against: " + lhs); }
-    Sym.prototype.wat_match = function(e, rhs) {
+    function bind(e, k, f, lhs, rhs) { 
+        if (lhs.wat_match) return lhs.wat_match(e, k, f, rhs); else return error("cannot match against: " + lhs); }
+    Sym.prototype.wat_match = function(e, k, f, rhs) {
         return e.bindings[this.name] = rhs; }
-    Cons.prototype.wat_match = function(e, rhs) {
-        var carCap = car(this).wat_match(e, car(rhs));
-        if (isCapture(carCap)) return carCap;
-        var cdrCap = cdr(this).wat_match(e, cdr(rhs));
-        if (isCapture(cdrCap)) return cdrCap; };
-    Nil.prototype.wat_match = function(e, rhs) {
+    Cons.prototype.wat_match = function(e, k, f, rhs) { var that = this;
+        return monadic(k, f,
+                       function() { return car(that).wat_match(e, null, null, car(rhs)); },
+                       function() { return cdr(that).wat_match(e, null, null, cdr(rhs)); }); }
+    Nil.prototype.wat_match = function(e, k, f, rhs) {
         if (rhs !== NIL) return error("NIL expected, but got: " + to_string(rhs)); };
-    Ign.prototype.wat_match = function(e, rhs) {};
+    Ign.prototype.wat_match = function(e, k, f, rhs) {};
     /* Setter - you are not expected to understand this - immediately */
     var SETTER = jswrap(function setter(obj) { return obj.wat_setter; });
     SETTER.wat_setter = jswrap(function(new_setter, obj) { obj.wat_setter = new_setter; });
@@ -1045,11 +1047,6 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         var res = []; while(c !== NIL) { res.push(car(c)); c = cdr(c); } return res; }
     function reverse_list(list) {
         var res = NIL; while(list !== NIL) { res = cons(car(list), res); list = cdr(list); } return res; }
-    var js_types = ["Array", "Boolean", "Date", "Function", "Number", "Object", "RegExp", "String"];
-    function is_type(obj, type_obj, type_name) {
-        if (!type_obj) return error("type is undefined");
-        if (js_types.indexOf(type_name) === -1) { return obj instanceof type_obj; }
-        else { return toString.call(obj) === "[object " + type_name + "]"; } }
     /* Bytecode parser */
     function parse_bytecode(obj) {
         switch(Object.prototype.toString.call(obj)) {
@@ -1063,6 +1060,11 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         else { var front = arr.slice(0, i);
                return array_to_list(front.map(parse_bytecode), parse_bytecode(arr[i + 1])); } }
     /* JSNI */
+    var js_types = ["Array", "Boolean", "Date", "Function", "Number", "Object", "RegExp", "String"];
+    function is_type(obj, type_obj, type_name) {
+        if (!type_obj) return error("type is undefined");
+        if (js_types.indexOf(type_name) === -1) { return obj instanceof type_obj; }
+        else { return toString.call(obj) === "[object " + type_name + "]"; } }
     function JSFun(jsfun) {
         if (Object.prototype.toString.call(jsfun) !== "[object Function]") return error("no fun");
         this.jsfun = jsfun; }
@@ -1198,8 +1200,8 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
          ["vm-begin"].concat(user_boot_bytecode)
         ];
     var environment = make_env();
-    bind(environment, sym("vm-def"), new Def());
-    bind(environment, sym("vm-begin"), new Begin());
+    bind(environment, null, null, sym("vm-def"), new Def());
+    bind(environment, null, null, sym("vm-begin"), new Begin());
     var ms = new Date().getTime();
     var user_environment = evaluate(environment, null, null, parse_bytecode(boot_bytecode));
     if (!(user_environment instanceof Env)) throw "failed to boot Wat";

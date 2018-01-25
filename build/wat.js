@@ -730,7 +730,7 @@ var program_stx = whitespace(repeat0(choice(x_stx, whitespace_stx))); // HACK!
 },{"./jsparse.js":2}],4:[function(require,module,exports){
 (function (global){
 // Wat VM by Manuel Simoni (msimoni@gmail.com)
-module.exports = function WatVM(user_boot_bytecode, parser) {
+module.exports = function WatVM(parser) {
     /* Continuations */
     function Resumption(k, f) { this.k = k; this.f = f; }
     function StackFrame(fun, next, dbg, e) {
@@ -1144,7 +1144,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
     PushPromptSubcont.prototype.toString = function() { return "vm-push-prompt-subcont"; }
     JSFun.prototype.toString = function() { return "[JSFun " + this.jsfun.toString() + "]"; };
     /* Bootstrap */
-    var boot_bytecode =
+    var builtin_bytecode =
         ["vm-begin",
          // Basics
          ["vm-def", "vm-vau", new Vau()],
@@ -1196,19 +1196,15 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
          ["vm-def", "vm-list-to-array", jswrap(list_to_array)],
          ["vm-def", "vm-array-to-list", jswrap(array_to_list)],
          ["vm-def", "vm-reverse-list", jswrap(reverse_list)],
-         ["vm-def", "vm-list*", jswrap(list_star)],
-         // User-supplied boot code; defines user environment
-         ["vm-begin"].concat(user_boot_bytecode)
+         ["vm-def", "vm-list*", jswrap(list_star)]
         ];
     var environment = make_env();
     bind(environment, sym("vm-def"), new Def());
     bind(environment, sym("vm-begin"), new Begin());
-    var ms = new Date().getTime();
-    var user_environment = evaluate(null, environment, parse_bytecode(boot_bytecode));
-    if (!(user_environment instanceof Env)) throw "failed to boot Wat";
-    console.log("Wat VM startup time: " + (new Date().getTime() - ms) + "ms");
+    evaluate(null, environment, parse_bytecode(builtin_bytecode));
+    var user_environment = make_env(environment);
     /* API */
-    this.eval = function(sexp){
+    this.eval = function(sexp) {
         if (!parser) throw "parsing not supported"; return this.exec(parser.parse_sexp(sexp)); }
     this.exec = function(bytecode) {
         var wrapped = push_root_prompt(parse_bytecode([new Begin()].concat(bytecode)));
@@ -1223,9 +1219,12 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],5:[function(require,module,exports){
 var vm = require("./vm.js");
-var boot = require("./build/boot.js");
+var boot_bytecode = require("./build/boot.js");
 var parser = require("./parser.js");
-module.exports.vm = function() { return new vm(boot.main, parser); }
+var vm = new vm(parser);
+vm.exec(boot_bytecode.main);
+
+module.exports.vm = function() { return vm; };
 
 },{"./build/boot.js":1,"./parser.js":3,"./vm.js":4}]},{},[5])(5)
 });

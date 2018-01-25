@@ -1,4 +1,7 @@
 var vm = require("./vm.js");
-var boot = require("./build/boot.js");
+var boot_bytecode = require("./build/boot.js").main;
 var parser = require("./parser.js");
-module.exports.vm = function() { return new vm(boot.main, parser); }
+var vm = new vm(parser);
+vm.exec(boot_bytecode);
+
+module.exports.vm = function() { return vm; };

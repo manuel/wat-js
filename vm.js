@@ -1,5 +1,5 @@
-// Wat VM by Manuel Simoni (msimoni@gmail.com)
-module.exports = function WatVM() {
+// Qua VM by Manuel Simoni (msimoni@gmail.com)
+module.exports = function Qua() {
     /* Continuations */
     function Resumption(k, f) { this.k = k; this.f = f; }
     function StackFrame(fun, next, dbg, e) {
@@ -300,9 +300,9 @@ module.exports = function WatVM() {
     var ROOT_PROMPT = {};
     function push_root_prompt(x) { return list(new PushPrompt(), ROOT_PROMPT, x); }
     function error(err) {
-        var print_stacktrace = environment.bindings["user-break"];
+        var print_stacktrace = the_environment.bindings["user-break"];
         if (print_stacktrace !== undefined) {
-            return combine(null, environment, print_stacktrace, list(err));
+            return combine(null, the_environment, print_stacktrace, list(err));
         } else { throw err; } }
     /* Utilities */
     function list() {
@@ -467,15 +467,14 @@ module.exports = function WatVM() {
          ["vm-def", "vm-reverse-list", jswrap(reverse_list)],
          ["vm-def", "vm-list*", jswrap(list_star)]
         ];
-    var environment = make_env();
-    bind(environment, sym("vm-def"), new Def());
-    bind(environment, sym("vm-begin"), new Begin());
-    evaluate(null, environment, parse_bytecode(builtin_bytecode));
-    var user_environment = make_env(environment);
+    var the_environment = make_env();
+    bind(the_environment, sym("vm-def"), new Def());
+    bind(the_environment, sym("vm-begin"), new Begin());
+    evaluate(null, the_environment, parse_bytecode(builtin_bytecode));
     /* API */
     this.exec = function(bytecode) {
         var wrapped = push_root_prompt(parse_bytecode([new Begin()].concat(bytecode)));
-        var res = evaluate(null, user_environment, wrapped);
+        var res = evaluate(null, the_environment, wrapped);
         if (isSuspension(res)) throw "prompt not found: " + res.prompt;
         return res; }
     this.call = function(fun_name) {

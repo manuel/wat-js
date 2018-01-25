@@ -1,5 +1,5 @@
 // Wat VM by Manuel Simoni (msimoni@gmail.com)
-module.exports = function WatVM(parser) {
+module.exports = function WatVM() {
     /* Continuations */
     function Resumption(k, f) { this.k = k; this.f = f; }
     function StackFrame(fun, next, dbg, e) {
@@ -473,8 +473,6 @@ module.exports = function WatVM(parser) {
     evaluate(null, environment, parse_bytecode(builtin_bytecode));
     var user_environment = make_env(environment);
     /* API */
-    this.eval = function(sexp) {
-        if (!parser) throw "parsing not supported"; return this.exec(parser.parse_sexp(sexp)); }
     this.exec = function(bytecode) {
         var wrapped = push_root_prompt(parse_bytecode([new Begin()].concat(bytecode)));
         var res = evaluate(null, user_environment, wrapped);

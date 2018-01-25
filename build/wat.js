@@ -730,7 +730,7 @@ var program_stx = whitespace(repeat0(choice(x_stx, whitespace_stx))); // HACK!
 },{"./jsparse.js":2}],4:[function(require,module,exports){
 (function (global){
 // Wat VM by Manuel Simoni (msimoni@gmail.com)
-module.exports = function WatVM(parser) {
+module.exports = function WatVM() {
     /* Continuations */
     function Resumption(k, f) { this.k = k; this.f = f; }
     function StackFrame(fun, next, dbg, e) {
@@ -1204,8 +1204,6 @@ module.exports = function WatVM(parser) {
     evaluate(null, environment, parse_bytecode(builtin_bytecode));
     var user_environment = make_env(environment);
     /* API */
-    this.eval = function(sexp) {
-        if (!parser) throw "parsing not supported"; return this.exec(parser.parse_sexp(sexp)); }
     this.exec = function(bytecode) {
         var wrapped = push_root_prompt(parse_bytecode([new Begin()].concat(bytecode)));
         var res = evaluate(null, user_environment, wrapped);
@@ -1218,13 +1216,17 @@ module.exports = function WatVM(parser) {
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],5:[function(require,module,exports){
-var vm = require("./vm.js");
-var boot_bytecode = require("./build/boot.js");
+var VM = require("./vm.js");
+var boot_bytecode = require("./build/boot.js").main;
 var parser = require("./parser.js");
-var vm = new vm(parser);
-vm.exec(boot_bytecode.main);
+var vm = new VM();
+vm.exec(boot_bytecode);
 
-module.exports.vm = function() { return vm; };
+module.exports.vm = function() {
+    return {
+        "eval": function(sexp) { return vm.exec(parser.parse_sexp(sexp)); }
+    };
+};
 
 },{"./build/boot.js":1,"./parser.js":3,"./vm.js":4}]},{},[5])(5)
 });

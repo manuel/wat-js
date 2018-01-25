@@ -805,15 +805,15 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
     Vau.prototype.wat_combine = function(m, e, o) {
         return new Opv(elt(o, 0), elt(o, 1), elt(o, 2), e); };
     Def.prototype.wat_combine = function self(m, e, o) { // error handling
-        var lhs = elt(o, 0); if (isCapture(lhs)) return lhs;
-        var rhs = elt(o, 1); if (isCapture(rhs)) return rhs;
+        var lhs = elt(o, 0);
+        var rhs = elt(o, 1);
         return monadic(m,
                        function() { return evaluate(null, e, rhs); },
                        function(val) { return bind(e, lhs, val); });
     }
     Eval.prototype.wat_combine = function(m, e, o) { // error handling
-        var x = elt(o, 0); if (isCapture(x)) return x;
-        var e = elt(o, 1); if (isCapture(e)) return e;
+        var x = elt(o, 0);
+        var e = elt(o, 1);
         return evaluate(m, e, x); };
     /* First-order Control */
     function Begin() {}; function If() {}; function Loop() {}

@@ -732,25 +732,25 @@ var program_stx = whitespace(repeat0(choice(x_stx, whitespace_stx))); // HACK!
 // Wat VM by Manuel Simoni (msimoni@gmail.com)
 module.exports = function WatVM(user_boot_bytecode, parser) {
     /* Continuations */
-    function State(k, f) { this.k = k; this.f = f; }
-    function Continuation(fun, next, dbg, e) {
+    function Resumption(k, f) { this.k = k; this.f = f; }
+    function StackFrame(fun, next, dbg, e) {
         this.fun = fun; this.next = next; this.dbg = dbg; this.e = e; }
-    function isContinuation(m) { return m instanceof State; }
-    function Capture(prompt, handler) {
+    function isResumption(m) { return m instanceof Resumption; }
+    function Suspension(prompt, handler) {
         this.prompt = prompt; this.handler = handler; this.k = null; }
-    function isCapture(x) { return x instanceof Capture; }
-    function captureFrame(capture, fun, dbg, e) {
-        capture.k = new Continuation(fun, capture.k, dbg, e); }
-    function continueFrame(m) {
-        return m.k.fun(new State(m.k.next, m.f)); }
+    function isSuspension(x) { return x instanceof Suspension; }
+    function suspendFrame(suspension, fun, dbg, e) {
+        suspension.k = new StackFrame(fun, suspension.k, dbg, e); }
+    function resumeFrame(m) {
+        return m.k.fun(new Resumption(m.k.next, m.f)); }
     function monadic(m, a, b) {
-        if (isContinuation(m)) {
-            var res = continueFrame(m);
+        if (isResumption(m)) {
+            var res = resumeFrame(m);
         } else {
             var res = a();
         }
-        if (isCapture(res)) {
-            captureFrame(res, function(m) { return monadic(m, a, b); });
+        if (isSuspension(res)) {
+            suspendFrame(res, function(m) { return monadic(m, a, b); });
             return res;
         }
         return b(res);
@@ -836,16 +836,16 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
                        });
     };
     Loop.prototype.wat_combine = function self(m, e, o) {
-        var first = true; // only continue once
+        var first = true; // only resume once
         while (true) {
-            if (first && isContinuation(m)) {
-                var res = continueFrame(m);
+            if (first && isResumption(m)) {
+                var res = resumeFrame(m);
             } else {
                 var res = evaluate(null, e, elt(o, 0));
             }
             first = false;
-            if (isCapture(res)) {
-                captureFrame(res, function(m) { return self(m, e, o); }, elt(o, 0), e);
+            if (isSuspension(res)) {
+                suspendFrame(res, function(m) { return self(m, e, o); }, elt(o, 0), e);
                 return res;
             }
         }
@@ -854,8 +854,8 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         var x = elt(o, 0);
         var handler = elt(o, 1);
         try {
-            if (isContinuation(m)) {
-                var res = continueFrame(m);
+            if (isResumption(m)) {
+                var res = resumeFrame(m);
             } else {
                 var res = evaluate(null, e, x);
             }
@@ -863,8 +863,8 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
             // unwrap handler to prevent eval if exc is sym or cons
             var res = combine(null, e, unwrap(handler), list(exc));
         }
-        if (isCapture(res)) {
-            captureFrame(res, function(m) { return self(m, e, o); }, x, e);
+        if (isSuspension(res)) {
+            suspendFrame(res, function(m) { return self(m, e, o); }, x, e);
             return res;
         } else {
             return res;
@@ -874,16 +874,16 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         var prot = elt(o, 0);
         var cleanup = elt(o, 1);
         try {
-            if (isContinuation(m)) {
-                var res = continueFrame(m);
+            if (isResumption(m)) {
+                var res = resumeFrame(m);
             } else {
                 var res = evaluate(null, e, prot);
             }
-            if (isCapture(res)) {
-                captureFrame(res, function(m) { return self(m, e, o); }, prot, e);
+            if (isSuspension(res)) {
+                suspendFrame(res, function(m) { return self(m, e, o); }, prot, e);
             }
         } finally {
-            if (isCapture(res)) {
+            if (isSuspension(res)) {
                 return res;
             } else {
                 return doCleanup(null, e, cleanup, res);
@@ -891,13 +891,13 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         }
     };
     function doCleanup(m, e, cleanup, res) {
-        if (isContinuation(m)) {
-            var fres = continueFrame(m);
+        if (isResumption(m)) {
+            var fres = resumeFrame(m);
         } else {
             var fres = evaluate(null, e, cleanup);
         }
-        if (isCapture(fres)) {
-            captureFrame(fres, function(m) { return doCleanup(m, e, cleanup, res); }, cleanup, e);
+        if (isSuspension(fres)) {
+            suspendFrame(fres, function(m) { return doCleanup(m, e, cleanup, res); }, cleanup, e);
             return fres;
         } else {
             return res;
@@ -908,18 +908,18 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
     PushPrompt.prototype.wat_combine = function self(m, e, o) {
         var prompt = elt(o, 0);
         var x = elt(o, 1);
-        if (isContinuation(m)) {
-            var res = continueFrame(m);
+        if (isResumption(m)) {
+            var res = resumeFrame(m);
         } else {
             var res = evaluate(null, e, x);
         }
-        if (isCapture(res)) {
+        if (isSuspension(res)) {
             if (res.prompt === prompt) {
                 var continuation = res.k;
                 var handler = res.handler;
                 return combine(null, e, handler, cons(continuation, NIL));
             } else {
-                captureFrame(res, function(m) { return self(m, e, o); }, x, e);
+                suspendFrame(res, function(m) { return self(m, e, o); }, x, e);
                 return res;
             }
         } else {
@@ -929,20 +929,20 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
     TakeSubcont.prototype.wat_combine = function(m, e, o) {
         var prompt = elt(o, 0);
         var handler = elt(o, 1);
-        var cap = new Capture(prompt, handler);
-        captureFrame(cap, function(m) { return combine(null, e, m.f, NIL); }, this, e);
+        var cap = new Suspension(prompt, handler);
+        suspendFrame(cap, function(m) { return combine(null, e, m.f, NIL); }, this, e);
         return cap;
     };
     PushSubcont.prototype.wat_combine = function self(m, e, o) {
         var thek = elt(o, 0);
         var thef = elt(o, 1);
-        if (isContinuation(m)) {
-            var res = continueFrame(m);
+        if (isResumption(m)) {
+            var res = resumeFrame(m);
         } else {
-            var res = continueFrame(new State(thek, thef));
+            var res = resumeFrame(new Resumption(thek, thef));
         }
-        if (isCapture(res)) {
-            captureFrame(res, function(m) { return self(m, e, o); }, thef, e);
+        if (isSuspension(res)) {
+            suspendFrame(res, function(m) { return self(m, e, o); }, thef, e);
             return res;
         } else {
             return res;
@@ -952,18 +952,18 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         var prompt = elt(o, 0);
         var thek = elt(o, 1);
         var thef = elt(o, 2);
-        if (isContinuation(m)) {
-            var res = continueFrame(m);
+        if (isResumption(m)) {
+            var res = resumeFrame(m);
         } else {
-            var res = continueFrame(new State(thek, thef));
+            var res = resumeFrame(new Resumption(thek, thef));
         }
-        if (isCapture(res)) {
+        if (isSuspension(res)) {
             if (res.prompt === prompt) {
                 var continuation = res.k;
                 var handler = res.handler;
                 return combine(null, e, handler, cons(continuation, NIL));
             } else {
-                captureFrame(res, function(m) { return self(m, e, o); }, thef, e);
+                suspendFrame(res, function(m) { return self(m, e, o); }, thef, e);
                 return res;
             }
         } else {
@@ -982,13 +982,13 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
         var oldVal = dv.val;
         dv.val = val;
         try {
-            if (isContinuation(m)) {
-                var res = continueFrame(m);
+            if (isResumption(m)) {
+                var res = resumeFrame(m);
             } else {
                 var res = evaluate(null, e, x);
             }
-            if (isCapture(res)) {
-                captureFrame(res, function(m) { return self(m, e, o); }, x, e);
+            if (isSuspension(res)) {
+                suspendFrame(res, function(m) { return self(m, e, o); }, x, e);
                 return res;
             } else {
                 return res;
@@ -1213,7 +1213,7 @@ module.exports = function WatVM(user_boot_bytecode, parser) {
     this.exec = function(bytecode) {
         var wrapped = push_root_prompt(parse_bytecode([new Begin()].concat(bytecode)));
         var res = evaluate(null, user_environment, wrapped);
-        if (isCapture(res)) throw "prompt not found: " + res.prompt;
+        if (isSuspension(res)) throw "prompt not found: " + res.prompt;
         return res; }
     this.call = function(fun_name) {
         return this.exec(parse_bytecode([fun_name].concat(Array.prototype.slice.call(arguments, 1)))); }

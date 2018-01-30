@@ -763,7 +763,7 @@ module.exports = function Qua() {
     Sym.prototype.wat_eval = function(m, e) { return lookup(e, this.name); };
     function Cons(car, cdr) { this.car = car; this.cdr = cdr; }
     Cons.prototype.wat_eval = function(m, e) { var that = this;
-        return monadic(m, 
+        return monadic(null, 
                        function() { return evaluate(null, e, car(that)); },
                        function(op) { return combine(null, e, op, cdr(that)); });
     };
@@ -779,22 +779,22 @@ module.exports = function Qua() {
         return apv instanceof Apv ? apv.cmb : error("cannot unwrap: " + apv); }
     Opv.prototype.wat_combine = function(m, e, o) { var that = this;
         var xe = make_env(that.e);
-        return monadic(m,
+        return monadic(null,
                        function() { return bind(xe, that.p, o); },
                        function() {
-                           return monadic(m,
+                           return monadic(null,
                                           function() { return bind(xe, that.ep, e); },
                                           function() { return evaluate(null, xe, that.x); }); });
     };
     Apv.prototype.wat_combine = function(m, e, o) {
         var that = this;
-        return monadic(m,
+        return monadic(null,
                        function() { return evalArgs(null, e, o, NIL); },
                        function(args) { return that.cmb.wat_combine(null, e, args); });
     };
     function evalArgs(m, e, todo, done) {
         if (todo === NIL) { return reverse_list(done); }
-        return monadic(m, 
+        return monadic(null, 
                        function() { return evaluate(null, e, car(todo)); },
                        function(arg) {
                            return evalArgs(null, e, cdr(todo), cons(arg, done));
@@ -807,7 +807,7 @@ module.exports = function Qua() {
     Def.prototype.wat_combine = function self(m, e, o) { // error handling
         var lhs = elt(o, 0);
         var rhs = elt(o, 1);
-        return monadic(m,
+        return monadic(null,
                        function() { return evaluate(null, e, rhs); },
                        function(val) { return bind(e, lhs, val); });
     }
@@ -821,7 +821,7 @@ module.exports = function Qua() {
     Begin.prototype.wat_combine = function(m, e, o) {
         if (o === NIL) return null; else return begin(m, e, o); };
     function begin(m, e, xs) {
-        return monadic(m,
+        return monadic(null,
                        function() { return evaluate(null, e, car(xs)); },
                        function(res) {
                            var kdr = cdr(xs);
@@ -829,7 +829,7 @@ module.exports = function Qua() {
                        });
     }
     If.prototype.wat_combine = function self(m, e, o) {
-        return monadic(m, 
+        return monadic(null,  
                        function() { return evaluate(null, e, elt(o, 0)); },
                        function(test) {
                            return evaluate(null, e, test ? elt(o, 1) : elt(o, 2));
